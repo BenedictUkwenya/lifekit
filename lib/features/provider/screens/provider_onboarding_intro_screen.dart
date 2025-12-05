@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
-import 'my_services_list_screen.dart'; // Next screen
-import '../../../core/widgets/lifekit_loader.dart';
+import 'my_services_list_screen.dart';
 
 class ProviderOnboardingIntroScreen extends StatefulWidget {
   const ProviderOnboardingIntroScreen({super.key});
@@ -23,6 +22,7 @@ class _ProviderOnboardingIntroScreenState
     try {
       await _apiService.onboardAsProvider();
       if (mounted) {
+        // Navigate to the Provider Dashboard
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const MyServicesListScreen()),
@@ -60,7 +60,7 @@ class _ProviderOnboardingIntroScreenState
         centerTitle: true,
         actions: [
           TextButton(
-            onPressed: _upgradeAccount,
+            onPressed: isLoading ? null : _upgradeAccount,
             child: Text(
               "Next",
               style: GoogleFonts.poppins(
@@ -76,7 +76,6 @@ class _ProviderOnboardingIntroScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Illustration (Mock Icon)
             Icon(
               Icons.storefront_outlined,
               size: 100,
@@ -84,7 +83,7 @@ class _ProviderOnboardingIntroScreenState
             ),
             const SizedBox(height: 40),
             Text(
-              "Changing account setup allows that you're about to migrate your account info, groups, and settings from your current account to a business account. You can't undo this change.",
+              "Changing account setup allows that you're about to migrate your account info, groups, and settings from your current account to a business account.",
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
                 color: Colors.grey,
@@ -93,7 +92,8 @@ class _ProviderOnboardingIntroScreenState
               ),
             ),
             const SizedBox(height: 20),
-            if (isLoading) const LifeKitLoader(),
+            if (isLoading)
+              const CircularProgressIndicator(color: AppColors.primary),
           ],
         ),
       ),

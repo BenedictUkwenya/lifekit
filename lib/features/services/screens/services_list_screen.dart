@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lifekit_frontend/features/services/screens/category_items_screen.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
-import 'category_items_screen.dart'; // We will create this next
+import 'sub_category_selection_screen.dart'; // Ensure this file exists from the previous step
 
 class ServicesListScreen extends StatefulWidget {
   const ServicesListScreen({super.key});
@@ -16,7 +17,7 @@ class _ServicesListScreenState extends State<ServicesListScreen> {
   List<dynamic> categories = [];
   bool isLoading = true;
 
-  // Animation State
+  // Animation State for the Floating Button
   bool isFabExpanded = false;
 
   @override
@@ -24,7 +25,7 @@ class _ServicesListScreenState extends State<ServicesListScreen> {
     super.initState();
     _fetchCategories();
 
-    // Auto-expand animation on load (optional, based on your description)
+    // Auto-expand animation on load
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) setState(() => isFabExpanded = true);
     });
@@ -32,6 +33,7 @@ class _ServicesListScreenState extends State<ServicesListScreen> {
 
   Future<void> _fetchCategories() async {
     try {
+      // This calls GET /home/categories which returns ONLY Parent Categories
       final data = await _apiService.getCategories();
       if (mounted) {
         setState(() {
@@ -41,6 +43,7 @@ class _ServicesListScreenState extends State<ServicesListScreen> {
       }
     } catch (e) {
       if (mounted) setState(() => isLoading = false);
+      print("Error fetching categories: $e");
     }
   }
 
@@ -72,7 +75,7 @@ class _ServicesListScreenState extends State<ServicesListScreen> {
         children: [
           Column(
             children: [
-              // Search Bar
+              // 1. Search Bar
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -98,12 +101,19 @@ class _ServicesListScreenState extends State<ServicesListScreen> {
                 ),
               ),
 
-              // List
+              // 2. Category List
               Expanded(
                 child: isLoading
                     ? const Center(
                         child: CircularProgressIndicator(
                           color: AppColors.primary,
+                        ),
+                      )
+                    : categories.isEmpty
+                    ? Center(
+                        child: Text(
+                          "No categories found",
+                          style: GoogleFonts.poppins(color: Colors.grey),
                         ),
                       )
                     : ListView.builder(
@@ -121,14 +131,14 @@ class _ServicesListScreenState extends State<ServicesListScreen> {
             ],
           ),
 
-          // ANIMATED FLOATING BUTTON (Bottom Right)
+          // 3. ANIMATED FLOATING BUTTON (Skill Swap)
           Positioned(
             bottom: 30,
             right: 20,
             child: GestureDetector(
               onTap: () {
                 setState(() => isFabExpanded = !isFabExpanded);
-                // Navigate to Skill Swap if needed
+                // Add navigation to Skill Swap screen here if needed
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
@@ -176,11 +186,14 @@ class _ServicesListScreenState extends State<ServicesListScreen> {
   }
 
   Widget _buildCategoryTile(dynamic category) {
-    // Randomize mock data for visual fidelity if API data is sparse
+    // Note: 'min. $12' is currently static/mock data as per design.
+    // In a real app, you might fetch "lowest price" from backend.
     String price = "min. \$12";
 
     return GestureDetector(
       onTap: () {
+        // DIRECT NAVIGATION TO PROVIDER LIST
+        // (Skipping the sub-category screen completely)
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -208,25 +221,24 @@ class _ServicesListScreenState extends State<ServicesListScreen> {
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                color:
-                    Colors.blue[50], // You can map this color from DB ideally
+                color: Colors.blue[50], // Light blue bg
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
-                Icons.grid_view_rounded,
+                Icons.grid_view_rounded, // Generic category icon
                 color: Colors.blue,
                 size: 30,
               ),
             ),
             const SizedBox(width: 16),
 
-            // Text
+            // Text Info
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    category['name'],
+                    category['name'], // e.g., "Hair & Beauty"
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
@@ -245,45 +257,8 @@ class _ServicesListScreenState extends State<ServicesListScreen> {
               ),
             ),
 
-            // Avatar Stack (Mock for visual)
-            SizedBox(
-              width: 60,
-              height: 30,
-              child: Stack(
-                children: [
-                  const Positioned(
-                    left: 0,
-                    child: CircleAvatar(
-                      radius: 14,
-                      backgroundImage: AssetImage(
-                        'assets/images/onboarding1.png',
-                      ),
-                    ),
-                  ),
-                  const Positioned(
-                    left: 15,
-                    child: CircleAvatar(
-                      radius: 14,
-                      backgroundImage: AssetImage(
-                        'assets/images/onboarding2.png',
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: 30,
-                    child: CircleAvatar(
-                      radius: 14,
-                      backgroundColor: Colors.grey[200],
-                      child: const Icon(
-                        Icons.arrow_forward_ios,
-                        size: 10,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // Arrow
+            const Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey),
           ],
         ),
       ),

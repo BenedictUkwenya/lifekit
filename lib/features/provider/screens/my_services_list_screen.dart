@@ -3,9 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
-import 'select_main_category_screen.dart'; // Next screen
-import 'edit_service_screen.dart'; // Edit screen
-import '../../../core/widgets/lifekit_loader.dart';
+import 'select_main_category_screen.dart';
+import 'edit_service_screen.dart';
 
 class MyServicesListScreen extends StatefulWidget {
   const MyServicesListScreen({super.key});
@@ -57,12 +56,14 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
         ),
       ),
       body: isLoading
-          ? const Center(child: const LifeKitLoader())
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  // Banner
+                  // Create Button Banner
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -71,11 +72,10 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                     ),
                     child: Column(
                       children: [
-                        // Placeholder for the 3 cards illustration
                         const Icon(Icons.layers, size: 60, color: Colors.blue),
                         const SizedBox(height: 16),
                         Text(
-                          "Reach a wider demand varied at your Skill Expertise and know how.",
+                          "Reach a wider demand varied at your Skill Expertise.",
                           textAlign: TextAlign.center,
                           style: GoogleFonts.poppins(
                             fontSize: 12,
@@ -116,7 +116,15 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // List of Services
+                  if (myServices.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 40),
+                      child: Text(
+                        "No services created yet.",
+                        style: GoogleFonts.poppins(color: Colors.grey),
+                      ),
+                    ),
+
                   ...myServices.map((service) => _buildServiceItem(service)),
                 ],
               ),
@@ -125,15 +133,41 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
   }
 
   Widget _buildServiceItem(dynamic service) {
-    String imgUrl =
-        (service['image_urls'] != null &&
-            (service['image_urls'] as List).isNotEmpty)
-        ? service['image_urls'][0].toString()
-        : "https://via.placeholder.com/150";
+    // IMAGE LOGIC
+    String imgUrl = "https://via.placeholder.com/150";
+    if (service['image_urls'] != null &&
+        service['image_urls'] is List &&
+        (service['image_urls'] as List).isNotEmpty) {
+      var first = (service['image_urls'] as List)[0];
+      if (first is String)
+        imgUrl = first;
+      else if (first is List && first.isNotEmpty)
+        imgUrl = first[0];
+    }
+
+    // STATUS BADGE LOGIC
+    String status = service['status'] ?? 'draft';
+    bool isDraft = service['price'] == 0;
+
+    Color badgeColor = Colors.grey;
+    String badgeText = status;
+
+    if (isDraft) {
+      badgeColor = Colors.orange;
+      badgeText = "Draft";
+    } else if (status == 'pending') {
+      badgeColor = Colors.blue;
+      badgeText = "In Review";
+    } else if (status == 'rejected') {
+      badgeColor = Colors.red;
+      badgeText = "Rejected";
+    } else if (status == 'active') {
+      badgeColor = Colors.green;
+      badgeText = "Active";
+    }
 
     return GestureDetector(
       onTap: () {
-        // If it's a draft (price 0), go to edit directly? Or always go to edit?
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -168,40 +202,38 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                     service['title'],
                     style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
                   ),
-                  Text(
-                    service['description'] ?? "No description",
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: Colors.grey,
+                  if (service['price'] != 0)
+                    Text(
+                      "USD ${service['price']}",
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                  Text(
-                    "USD ${service['price']}",
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
                 ],
               ),
             ),
-            if (service['status'] == 'pending' || service['price'] == 0)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.orange[50],
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  "Draft",
-                  style: GoogleFonts.poppins(
-                    fontSize: 10,
-                    color: Colors.orange,
-                  ),
+
+            // STATUS BADGE UI
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: badgeColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: badgeColor.withOpacity(0.3)),
+              ),
+              child: Text(
+                badgeText,
+                style: GoogleFonts.poppins(
+                  fontSize: 10,
+                  color: badgeColor,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
+            ),
+
+            const SizedBox(width: 8),
+            const Icon(Icons.edit, size: 16, color: Colors.grey),
           ],
         ),
       ),

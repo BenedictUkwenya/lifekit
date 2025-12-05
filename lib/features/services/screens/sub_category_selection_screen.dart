@@ -3,29 +3,31 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
-import 'my_services_list_screen.dart';
-import 'edit_service_screen.dart'; // Import Edit Screen for direct navigation
+import 'category_items_screen.dart'; // Navigate here on "Next"
 
-class SelectSubCategoryScreen extends StatefulWidget {
+class SubCategorySelectionScreen extends StatefulWidget {
   final String parentId;
   final String parentName;
 
-  const SelectSubCategoryScreen({
+  const SubCategorySelectionScreen({
     super.key,
     required this.parentId,
     required this.parentName,
   });
 
   @override
-  State<SelectSubCategoryScreen> createState() =>
-      _SelectSubCategoryScreenState();
+  State<SubCategorySelectionScreen> createState() =>
+      _SubCategorySelectionScreenState();
 }
 
-class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
+class _SubCategorySelectionScreenState
+    extends State<SubCategorySelectionScreen> {
   final ApiService _apiService = ApiService();
-  List<dynamic> subCategories = [];
-  final Set<String> _selectedIds = {};
   bool isLoading = true;
+  List<dynamic> subCategories = [];
+
+  // State for Selection
+  Set<String> selectedIds = {};
 
   @override
   void initState() {
@@ -35,12 +37,12 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
 
   Future<void> _fetchSubCategories() async {
     try {
-      // Calls backend to get children of the selected parent
+      // Calls: GET /home/categories/:parentId
       final data = await _apiService.getSubCategories(widget.parentId);
       if (mounted) {
         setState(() {
           subCategories = data;
-          // Sort alphabetically by name
+          // Sort alphabetically
           subCategories.sort(
             (a, b) => (a['name'] as String).compareTo(b['name'] as String),
           );
@@ -52,48 +54,7 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
     }
   }
 
-  Future<void> _createServices() async {
-    if (_selectedIds.isEmpty) return;
-
-    setState(() => isLoading = true);
-    try {
-      // 1. Call Backend to create drafts
-      final response = await _apiService.createDraftServices(
-        _selectedIds.toList(),
-      );
-
-      if (!mounted) return;
-
-      // 2. Check how many services were created
-      // The backend returns { message: "...", services: [...] }
-      final List createdServices = response['services'] ?? [];
-
-      if (createdServices.length == 1) {
-        // CASE A: Only 1 service created -> Go straight to Edit Screen
-        // This is better UX for "Box Braids" -> Rename to "Box Braids Small"
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => EditServiceScreen(service: createdServices[0]),
-          ),
-        );
-      } else {
-        // CASE B: Multiple services -> Go to List
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const MyServicesListScreen()),
-          (route) => route.isFirst,
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
-      );
-      setState(() => isLoading = false);
-    }
-  }
-
-  // Helper: Group list by first letter for the UI
+  // Group list by first letter
   Map<String, List<dynamic>> _groupCategories() {
     Map<String, List<dynamic>> groups = {};
     for (var cat in subCategories) {
@@ -114,7 +75,7 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
     final sortedKeys = groupedData.keys.toList()..sort();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F9F9), // Light grey background
+      backgroundColor: const Color(0xFFF9F9F9), // Light grey bg like design
       appBar: AppBar(
         backgroundColor: const Color(0xFFF9F9F9),
         elevation: 0,
@@ -154,7 +115,7 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
                     ),
                     child: TextField(
                       decoration: InputDecoration(
-                        hintText: "Search services..",
+                        hintText: "Search service..",
                         hintStyle: GoogleFonts.poppins(
                           color: Colors.grey[400],
                           fontSize: 14,
@@ -169,7 +130,7 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
                   ),
                 ),
 
-                // 2. Deselect All Button
+                // 2. "Deselect All" Text
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
@@ -179,7 +140,7 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       GestureDetector(
-                        onTap: () => setState(() => _selectedIds.clear()),
+                        onTap: () => setState(() => selectedIds.clear()),
                         child: Text(
                           "Deselect all",
                           style: GoogleFonts.poppins(
@@ -221,7 +182,8 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
                               ),
                             ),
                           ),
-                          // Card Container for items
+
+                          // White Card Container for the Group
                           Container(
                             margin: const EdgeInsets.only(bottom: 24),
                             decoration: BoxDecoration(
@@ -249,7 +211,7 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
                   ),
                 ),
 
-                // 4. Bottom Action Button
+                // 4. Bottom Button
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: const BoxDecoration(
@@ -262,23 +224,33 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton(
-                      onPressed: _selectedIds.isEmpty ? null : _createServices,
+                      onPressed: () {
+                        // Navigate to Providers, passing the selected sub-categories (or just the parent if none selected)
+                        // For now, defaulting to standard view
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CategoryItemsScreen(
+                              categoryId: widget.parentId,
+                              categoryName: widget.parentName,
+                            ),
+                          ),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF89273B), // Maroon
+                        backgroundColor: const Color(0xFF89273B), // Your Maroon
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      child: isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : Text(
-                              "Next",
-                              style: GoogleFonts.poppins(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                      child: Text(
+                        "Next",
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -288,16 +260,16 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
   }
 
   Widget _buildCheckItem(dynamic item, bool isLast) {
-    bool isSelected = _selectedIds.contains(item['id']);
+    bool isSelected = selectedIds.contains(item['id']);
     String imgUrl = item['image_url'] ?? "https://via.placeholder.com/50";
 
     return InkWell(
       onTap: () {
         setState(() {
           if (isSelected)
-            _selectedIds.remove(item['id']);
+            selectedIds.remove(item['id']);
           else
-            _selectedIds.add(item['id']);
+            selectedIds.add(item['id']);
         });
       },
       child: Column(
@@ -306,7 +278,7 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Row(
               children: [
-                // Icon/Image
+                // Image
                 CircleAvatar(
                   radius: 20,
                   backgroundColor: Colors.grey[100],
@@ -326,7 +298,7 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
                   ),
                 ),
 
-                // Custom Checkbox UI
+                // Checkbox (Custom UI)
                 Container(
                   width: 24,
                   height: 24,
@@ -349,7 +321,6 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
               ],
             ),
           ),
-          // Divider if not last item
           if (!isLast)
             const Divider(
               height: 1,

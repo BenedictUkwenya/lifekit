@@ -2,14 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
-import '../../../core/widgets/lifekit_loader.dart';
 
 class EditServiceScreen extends StatefulWidget {
-  final dynamic service; // The draft service object
+  final dynamic service;
 
   const EditServiceScreen({super.key, required this.service});
 
@@ -21,26 +18,30 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
   final ApiService _apiService = ApiService();
 
   // Controllers
+  final TextEditingController _titleController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
 
-  // State
   File? _imageFile;
-  String _serviceType = "Default (Home Service)";
+  String _serviceLocation = "Home Service (HS)"; // Matches Catalog
+  String _pricingType = "fixed"; // 'fixed' or 'hourly'
   bool _isVisible = true;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    // Pre-fill data if editing an existing service
+    // Pre-fill existing data
+    _titleController.text = widget.service['title'] ?? "";
     if (widget.service['price'] != null && widget.service['price'] != 0) {
       _priceController.text = widget.service['price'].toString();
     }
     _descController.text = widget.service['description'] ?? "";
-  }
 
-  // --- ACTIONS ---
+    // Load saved types if they exist
+    _pricingType = widget.service['pricing_type'] ?? 'fixed';
+    _serviceLocation = widget.service['service_type'] ?? "Home Service (HS)";
+  }
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
@@ -50,7 +51,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
     }
   }
 
-  void _showServiceTypeModal() {
+  void _showServiceLocationModal() {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
@@ -62,28 +63,19 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
           padding: const EdgeInsets.all(20.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Service type",
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
+              Text(
+                "Service Location",
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 10),
-              _buildRadioOption("Default (Home Service)"),
-              _buildRadioOption("Default (Outdoor Service)"),
-              _buildRadioOption("Both (Home & Outdoor)"),
+              // SPECIFIC OPTIONS FOR CATALOG
+              _buildRadioOption("Home Service (HS)"),
+              _buildRadioOption("Out Service / Studio (OS)"),
+              _buildRadioOption("Hybrid (Both Available)"),
             ],
           ),
         );
@@ -95,17 +87,22 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
     return RadioListTile(
       title: Text(value, style: GoogleFonts.poppins(fontSize: 14)),
       value: value,
-      groupValue: _serviceType,
+      groupValue: _serviceLocation,
       activeColor: AppColors.primary,
-      contentPadding: EdgeInsets.zero,
       onChanged: (val) {
-        setState(() => _serviceType = val.toString());
+        setState(() => _serviceLocation = val.toString());
         Navigator.pop(context);
       },
     );
   }
 
   Future<void> _saveService() async {
+    if (_titleController.text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please enter a title")));
+      return;
+    }
     if (_priceController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
@@ -118,50 +115,41 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
     try {
       List<String> imageUrls = [];
 
-      // 1. Upload Image if selected
+      // Handle Image Upload
       if (_imageFile != null) {
         String url = await _apiService.uploadServiceImage(_imageFile!);
         imageUrls.add(url);
       } else {
-        // Keep existing images if no new one picked
+        // Keep existing images if no new one selected
         if (widget.service['image_urls'] != null) {
-          imageUrls = List<String>.from(widget.service['image_urls']);
+          for (var img in widget.service['image_urls']) {
+            if (img is String)
+              imageUrls.add(img);
+            else if (img is List && img.isNotEmpty)
+              imageUrls.add(img[0]);
+          }
         }
       }
 
-      // 2. Update Service Data via API
-      // We use a direct HTTP PUT here since ApiService needs a specific update method
-      // Or add 'updateService' to ApiService. For now, I'll simulate the logic here.
+      // Update Service via API
+      await _apiService.updateService(widget.service['id'], {
+        "title": _titleController.text,
+        "description": _descController.text,
+        "price": double.parse(_priceController.text),
+        "service_type": _serviceLocation, // Saves "Home Service (HS)" etc.
+        "pricing_type": _pricingType, // Saves "hourly" or "fixed"
+        "image_urls": imageUrls,
+        "status": _isVisible ? "active" : "draft",
+      });
 
-      String? token = await _apiService.storage.read(key: 'jwt_token');
-      final response = await http.put(
-        Uri.parse('${_apiService.baseUrl}/services/${widget.service['id']}'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          "title": widget.service['title'], // Keep original title
-          "description": _descController.text,
-          "price": double.parse(_priceController.text),
-          "service_type": _serviceType,
-          "image_urls": imageUrls,
-          "status": _isVisible ? "active" : "draft", // Publish if visible
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Service Saved!"),
-              backgroundColor: Colors.green,
-            ),
-          );
-          Navigator.pop(context); // Go back to list
-        }
-      } else {
-        throw Exception("Failed to update");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Service Saved Successfully!"),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context);
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -187,7 +175,6 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        centerTitle: true,
         actions: [
           TextButton(
             onPressed: _isLoading ? null : _saveService,
@@ -202,13 +189,15 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: const LifeKitLoader())
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 1. IMAGE PICKER
+                  // Image Picker
                   GestureDetector(
                     onTap: _pickImage,
                     child: Container(
@@ -248,66 +237,46 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
 
                   const SizedBox(height: 24),
 
-                  // 2. SERVICE TITLE (Read Only)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      widget.service['title'],
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
+                  // Title
+                  _buildLabel("Service Title"),
+                  _buildTextField(_titleController, "e.g. Luxury Hair Cut"),
+
+                  const SizedBox(height: 16),
+
+                  // Pricing Model Toggle (Fixed vs Hourly)
+                  _buildLabel("Pricing Model"),
+                  Row(
+                    children: [
+                      _buildPricingChip("Fixed Price", "fixed"),
+                      const SizedBox(width: 10),
+                      _buildPricingChip("Hourly Rate", "hourly"),
+                    ],
                   ),
 
                   const SizedBox(height: 16),
 
-                  // 3. PRICE INPUTS
-                  _buildLabel("Fixed price"),
-                  _buildTextField(
-                    _priceController,
-                    "Price (per hour)",
-                    isNumber: true,
+                  // Price Input
+                  _buildLabel(
+                    _pricingType == 'fixed' ? "Total Amount" : "Rate per Hour",
                   ),
+                  _buildTextField(_priceController, "0.00", isNumber: true),
 
                   const SizedBox(height: 16),
 
-                  // 4. DESCRIPTION
+                  // Description
                   _buildLabel("Description"),
-                  Container(
-                    height: 120,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: TextField(
-                      controller: _descController,
-                      maxLines: 5,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: "Describe your service...",
-                        hintStyle: GoogleFonts.poppins(
-                          color: Colors.grey[400],
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
+                  _buildTextField(
+                    _descController,
+                    "Describe your service...",
+                    maxLines: 5,
                   ),
 
                   const SizedBox(height: 16),
 
-                  // 5. SERVICE TYPE
+                  // Service Location (HS / OS)
+                  _buildLabel("Service Location"),
                   GestureDetector(
-                    onTap: _showServiceTypeModal,
+                    onTap: _showServiceLocationModal,
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -317,25 +286,8 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            "Service type",
-                            style: GoogleFonts.poppins(color: Colors.black54),
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                _serviceType.split(' ')[0],
-                                style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Icon(
-                                Icons.chevron_right,
-                                color: Colors.grey,
-                              ),
-                            ],
-                          ),
+                          Text(_serviceLocation, style: GoogleFonts.poppins()),
+                          const Icon(Icons.chevron_right, color: Colors.grey),
                         ],
                       ),
                     ),
@@ -343,53 +295,62 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
 
                   const SizedBox(height: 24),
 
-                  // 6. VISIBILITY TOGGLE
+                  // Visibility Toggle
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
+                    padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: SwitchListTile(
                       title: Text(
-                        "Not visible to public",
+                        "Submit for Public Review",
                         style: GoogleFonts.poppins(fontSize: 14),
                       ),
                       subtitle: Text(
-                        "When you hide an item, customers won't see it in your catalog.",
+                        "Turn this on to publish.",
                         style: GoogleFonts.poppins(
                           fontSize: 10,
                           color: Colors.grey,
                         ),
                       ),
-                      value: !_isVisible, // Logic inverted based on UI text
+                      value: _isVisible,
                       activeColor: AppColors.primary,
                       onChanged: (val) {
-                        setState(() => _isVisible = !val);
+                        setState(() => _isVisible = val);
                       },
                     ),
                   ),
 
                   const SizedBox(height: 40),
-
-                  // DELETE BUTTON (Optional)
-                  Center(
-                    child: TextButton(
-                      onPressed: () {
-                        // Handle delete logic
-                      },
-                      child: Text(
-                        "Delete Service",
-                        style: GoogleFonts.poppins(color: Colors.red),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
+    );
+  }
+
+  Widget _buildPricingChip(String label, String value) {
+    bool isSelected = _pricingType == value;
+    return GestureDetector(
+      onTap: () => setState(() => _pricingType = value),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : Colors.grey[300]!,
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.poppins(
+            color: isSelected ? Colors.white : Colors.black,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
     );
   }
 
@@ -407,18 +368,21 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
     TextEditingController controller,
     String hint, {
     bool isNumber = false,
+    int maxLines = 1,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: maxLines > 1 ? 8 : 0,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextField(
         controller: controller,
-        keyboardType: isNumber
-            ? const TextInputType.numberWithOptions(decimal: true)
-            : TextInputType.text,
+        keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+        maxLines: maxLines,
         decoration: InputDecoration(
           border: InputBorder.none,
           hintText: hint,

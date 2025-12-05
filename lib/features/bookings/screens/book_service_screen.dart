@@ -7,9 +7,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/providers/cart_provider.dart';
 import '../../../core/services/api_service.dart';
-import '../../services/screens/services_list_screen.dart';
-import '../../services/screens/service_booking_detail_screen.dart';
-import 'cart_screen.dart'; // IMPORT CART SCREEN
+import 'cart_screen.dart';
 
 class BookServiceScreen extends StatefulWidget {
   final dynamic service;
@@ -42,12 +40,6 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
   List<dynamic> _relatedServices = [];
   bool _isLoadingRelated = true;
 
-  // Mock Unavailable Dates
-  final List<DateTime> _bookedDates = [
-    DateTime.now().add(const Duration(days: 2)),
-    DateTime.now().add(const Duration(days: 5)),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -74,7 +66,6 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
     }
   }
 
-  // --- HELPER TO GET SAFE IMAGE ---
   String _getSafeImage(dynamic serviceData) {
     var rawImages = serviceData['image_urls'];
     if (rawImages != null && rawImages is List) {
@@ -206,16 +197,25 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
     final cart = Provider.of<CartProvider>(context, listen: false);
     String imgUrl = _getSafeImage(widget.service);
 
+    // --- NEW LOGIC: PRICING TYPE CHECK ---
+    String pricingType = widget.service['pricing_type'] ?? 'fixed';
     double basePrice =
         double.tryParse(widget.service['price'].toString()) ?? 0.0;
-    double totalPrice = basePrice * _durationHours;
+
+    // Calculate total based on type
+    double finalPrice = (pricingType == 'hourly')
+        ? basePrice * _durationHours
+        : basePrice;
 
     cart.addToCart(
       CartItem(
-        id: "${widget.service['id']}_${DateTime.now().millisecondsSinceEpoch}", // Unique ID per add
+        id: "${widget.service['id']}_${DateTime.now().millisecondsSinceEpoch}",
         serviceId: widget.service['id'],
-        title: "${widget.service['title']} ($_durationHours hrs)",
-        price: totalPrice,
+        // Add hours to title if hourly so user knows
+        title: pricingType == 'hourly'
+            ? "${widget.service['title']} ($_durationHours hrs)"
+            : widget.service['title'],
+        price: finalPrice,
         imageUrl: imgUrl,
         providerId: widget.service['provider_id'],
         date: _selectedDay!,
@@ -225,7 +225,6 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
       ),
     );
 
-    // --- FIX: NAVIGATE TO CART SCREEN ---
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const CartScreen()),
@@ -235,9 +234,14 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
   @override
   Widget build(BuildContext context) {
     String imgUrl = _getSafeImage(widget.service);
+
+    // --- DISPLAY LOGIC ---
+    String pricingType = widget.service['pricing_type'] ?? 'fixed';
+    bool isHourly = pricingType == 'hourly';
+
     double basePrice =
         double.tryParse(widget.service['price'].toString()) ?? 0.0;
-    double totalPrice = basePrice * _durationHours;
+    double displayTotal = isHourly ? basePrice * _durationHours : basePrice;
 
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
@@ -381,7 +385,10 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                           ),
                         ),
                         Text(
-                          "\$$basePrice/hr  •  Total: \$$totalPrice",
+                          // Dynamic display based on hourly vs fixed
+                          isHourly
+                              ? "\$$basePrice/hr  •  Total: \$$displayTotal"
+                              : "Fixed Price  •  Total: \$$displayTotal",
                           style: GoogleFonts.poppins(
                             color: AppColors.primary,
                             fontSize: 12,
@@ -391,35 +398,57 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                       ],
                     ),
                   ),
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: _decrementDuration,
-                        child: _buildQtyBtn(Icons.remove),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Text(
-                          "$_durationHours hrs",
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
+
+                  // LOGIC: Show Counter only if Hourly
+                  if (isHourly)
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: _decrementDuration,
+                          child: _buildQtyBtn(Icons.remove),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Text(
+                            "$_durationHours hrs",
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
+                        GestureDetector(
+                          onTap: _incrementDuration,
+                          child: _buildQtyBtn(Icons.add, isRed: true),
+                        ),
+                      ],
+                    )
+                  else
+                    // Just a static label for Fixed
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
                       ),
-                      GestureDetector(
-                        onTap: _incrementDuration,
-                        child: _buildQtyBtn(Icons.add, isRed: true),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                    ],
-                  ),
+                      child: Text(
+                        "Fixed",
+                        style: GoogleFonts.poppins(
+                          fontSize: 10,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
 
             const SizedBox(height: 24),
 
-            // 3. PICK YOUR SERVICE
+            // 3. RELATED SERVICES (Restored)
             if (!_isLoadingRelated && _relatedServices.isNotEmpty) ...[
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -452,7 +481,46 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
               const SizedBox(height: 24),
             ],
 
-            // 4. SERVICE TIME
+            // 4. SERVICE TYPE (Restored)
+            GestureDetector(
+              onTap: _showServiceTypeModal,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Service Type",
+                      style: GoogleFonts.poppins(color: Colors.black54),
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          _serviceType,
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 14,
+                          color: Colors.black54,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // 5. SERVICE TIME
             GestureDetector(
               onTap: _showTimePickerModal,
               child: Container(
@@ -491,7 +559,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
 
             const SizedBox(height: 16),
 
-            // 5. COMMENT
+            // 6. COMMENT
             Container(
               height: 80,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -569,7 +637,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
   Widget _buildRelatedCard(dynamic service) {
     String imgUrl = _getSafeImage(service);
     String title = service['title'];
-    String price = "\$${service['price']}/hr";
+    String price = "\$${service['price']}";
 
     return GestureDetector(
       onTap: () {

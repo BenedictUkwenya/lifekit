@@ -7,8 +7,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
   // CHANGE THIS TO YOUR IP IF USING PHYSICAL DEVICE (e.g., "http://192.168.1.5:3000")
-  //final String baseUrl = "http://10.0.2.2:3000";
-  final String baseUrl = "https://lifekit-api.onrender.com";
+  final String baseUrl = "http://10.0.2.2:3000";
+  //final String baseUrl = "https://lifekit-api.onrender.com";
 
   final storage = const FlutterSecureStorage();
 
@@ -235,7 +235,9 @@ class ApiService {
     return data['services'] ?? [];
   }
 
-  Future<void> createDraftServices(List<String> categoryIds) async {
+  Future<Map<String, dynamic>> createDraftServices(
+    List<String> categoryIds,
+  ) async {
     String? token = await storage.read(key: 'jwt_token');
     final response = await http.post(
       Uri.parse('$baseUrl/services'),
@@ -245,7 +247,7 @@ class ApiService {
       },
       body: jsonEncode({"category_ids": categoryIds, "currency": "USD"}),
     );
-    _processResponse(response);
+    return _processResponse(response);
   }
 
   Future<String> uploadServiceImage(File imageFile) async {
@@ -471,6 +473,112 @@ class ApiService {
     );
     final data = _processResponse(response);
     return data['messages'] ?? [];
+  }
+
+  // 17. Get My Services (Provider Dashboard)
+
+  // 18. Bulk Create Draft Services
+
+  // 19. Get Sub-Categories (For selection screen)
+
+  // 20. Update Service (Edit Draft)
+  Future<void> updateService(
+    String serviceId,
+    Map<String, dynamic> data,
+  ) async {
+    String? token = await storage.read(key: 'jwt_token');
+    final response = await http.put(
+      Uri.parse('$baseUrl/services/$serviceId'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(data),
+    );
+    _processResponse(response);
+  }
+
+  // ... inside ApiService class
+
+  // Fetch Social Feeds
+  Future<List<dynamic>> getFeeds() async {
+    final response = await http.get(Uri.parse('$baseUrl/feeds/posts'));
+    final data = _processResponse(response);
+    return data is List ? data : [];
+  }
+
+  // Fetch Events
+  Future<List<dynamic>> getEvents() async {
+    final response = await http.get(Uri.parse('$baseUrl/feeds/events'));
+    final data = _processResponse(response);
+    return data is List ? data : [];
+  }
+
+  // Buy Event Ticket
+  // Buy Event Ticket
+  Future<Map<String, dynamic>> buyEventTicket({
+    required String eventId,
+    required int quantity,
+    required double totalPrice,
+  }) async {
+    String? token = await storage.read(key: 'jwt_token');
+
+    final response = await http.post(
+      // --- FIX: REMOVE '/admin' FROM THE URL ---
+      Uri.parse('$baseUrl/events/buy-ticket'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        "event_id": eventId,
+        "quantity": quantity,
+        "total_price": totalPrice,
+      }),
+    );
+    return _processResponse(response);
+  }
+
+  // Toggle Like
+  Future<void> toggleLike(String postId) async {
+    String? token = await storage.read(key: 'jwt_token');
+    await http.post(
+      Uri.parse('$baseUrl/feeds/posts/$postId/like'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+  }
+
+  // Get Comments
+  Future<List<dynamic>> getComments(String postId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/feeds/posts/$postId/comments'),
+    );
+    final data = _processResponse(response);
+    return data is List ? data : [];
+  }
+
+  // Post Comment
+  Future<dynamic> postComment(String postId, String content) async {
+    String? token = await storage.read(key: 'jwt_token');
+    final response = await http.post(
+      Uri.parse('$baseUrl/feeds/posts/$postId/comments'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({"content": content}),
+    );
+    return _processResponse(response);
+  }
+
+  // Mark Notification as Read
+  Future<void> markNotificationRead(String id) async {
+    String? token = await storage.read(key: 'jwt_token');
+    // Note: We are firing and forgetting (void), no need to wait for response in UI
+    await http.put(
+      Uri.parse('$baseUrl/users/notifications/$id/read'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
   }
 
   // ... existing sendMessage and getConversations remain similar

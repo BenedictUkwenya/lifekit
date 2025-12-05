@@ -57,7 +57,7 @@ class CartScreen extends StatelessWidget {
 
           return Column(
             children: [
-              // Header Row
+              // Header Row: Count & Add More
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -85,7 +85,7 @@ class CartScreen extends StatelessWidget {
                 ),
               ),
 
-              // Hint Text
+              // The Tip Box (Restored)
               Container(
                 padding: const EdgeInsets.all(10),
                 margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -233,13 +233,15 @@ class CartScreen extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        "\$${item.price}/hr",
+                        // Just show the rate here
+                        "\$${item.price} Total",
                         style: GoogleFonts.poppins(
                           fontSize: 11,
                           color: Colors.grey,
                         ),
                       ),
                       Text(
+                        // Total
                         "\$${(item.price * item.quantity).toStringAsFixed(2)}",
                         style: GoogleFonts.poppins(
                           color: AppColors.primary,
@@ -254,7 +256,6 @@ class CartScreen extends StatelessWidget {
                 Row(
                   children: [
                     _qtyBtn(Icons.remove, () {
-                      // NEW LOGIC: Remove if quantity is 1
                       if (item.quantity > 1) {
                         cart.decreaseQuantity(item.id);
                       } else {

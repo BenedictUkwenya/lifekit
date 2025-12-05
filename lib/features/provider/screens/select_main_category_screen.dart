@@ -22,9 +22,8 @@ class _SelectMainCategoryScreenState extends State<SelectMainCategoryScreen> {
   }
 
   Future<void> _fetchCategories() async {
-    // We fetch root categories (where parent_id is null, but your API might return all)
-    // Assuming your /home/categories returns top-level ones.
     try {
+      // API now returns only PARENT categories
       final data = await _apiService.getCategories();
       if (mounted) setState(() => categories = data);
     } catch (e) {
@@ -42,7 +41,7 @@ class _SelectMainCategoryScreenState extends State<SelectMainCategoryScreen> {
         centerTitle: true,
         leading: const BackButton(color: Colors.black),
         title: Text(
-          "Choose Service",
+          "Choose Category",
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
