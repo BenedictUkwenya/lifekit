@@ -7,8 +7,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
   // CHANGE THIS TO YOUR IP IF USING PHYSICAL DEVICE (e.g., "http://192.168.1.5:3000")
-  final String baseUrl = "http://10.0.2.2:3000";
-  //final String baseUrl = "https://lifekit-api.onrender.com";
+  // final String baseUrl = "http://10.0.2.2:3000";
+  final String baseUrl = "https://lifekit-api.onrender.com";
 
   final storage = const FlutterSecureStorage();
 
