@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -5,7 +6,6 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/providers/cart_provider.dart';
 import '../../../core/services/api_service.dart';
 import '../../home/screens/home_screen.dart';
-// 1. IMPORT THE ADD MONEY SCREEN
 import '../../wallet/screens/add_money_screen.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 
@@ -44,11 +44,20 @@ class _PaymentScreenState extends State<PaymentScreen> {
     }
   }
 
+  double _calculateTotal() {
+    double subtotal = widget.itemsToBook.fold(
+      0,
+      (sum, item) => sum + (item.price * item.quantity),
+    );
+    return subtotal + transactionFee;
+  }
+
+  // --- UPDATED PROCESS PAYMENT LOGIC ---
   Future<void> _processPayment() async {
     double total = _calculateTotal();
 
     if (walletBalance < total) {
-      _showInsufficientFundsDialog();
+      _showInsufficientFundsDialog(total);
       return;
     }
 
@@ -56,11 +65,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
     try {
       for (var item in widget.itemsToBook) {
+        // Now passing real data from the CartItem to the API
         await _apiService.createBooking(
           serviceId: item.serviceId,
           scheduledTime: item.date.toIso8601String(),
-          locationDetails: "User Home Address",
+          locationDetails: item.location ?? "Address via Chat",
           totalPrice: item.price * item.quantity,
+          serviceType: item.serviceType, // REAL DATA
+          comments: item.comments, // REAL DATA
         );
       }
 
@@ -77,12 +89,190 @@ class _PaymentScreenState extends State<PaymentScreen> {
     }
   }
 
-  double _calculateTotal() {
-    double subtotal = widget.itemsToBook.fold(
-      0,
-      (sum, item) => sum + (item.price * item.quantity),
+  // --- MODERN INSUFFICIENT FUNDS POPUP ---
+  void _showInsufficientFundsDialog(double requiredTotal) {
+    double missingAmount = requiredTotal - walletBalance;
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        backgroundColor: Colors.white,
+        elevation: 10,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                height: 70,
+                width: 70,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFDE8E8),
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.account_balance_wallet_outlined,
+                    size: 32,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                "Insufficient Balance",
+                style: GoogleFonts.poppins(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                    height: 1.5,
+                  ),
+                  children: [
+                    const TextSpan(text: "You are missing "),
+                    TextSpan(
+                      text: "\$${missingAmount.toStringAsFixed(2)}",
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const TextSpan(text: " to complete this booking."),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    final bool? result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const AddMoneyScreen()),
+                    );
+                    if (result == true) {
+                      setState(() => isLoading = true);
+                      _fetchWallet();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    "Top Up Wallet",
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Text(
+                  "Cancel",
+                  style: GoogleFonts.poppins(
+                    color: Colors.grey[500],
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
-    return subtotal + transactionFee;
+  }
+
+  // --- SUCCESS DIALOG ---
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        backgroundColor: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                height: 70,
+                width: 70,
+                decoration: BoxDecoration(
+                  color: Colors.green[50],
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: Icon(Icons.check, size: 32, color: Colors.green),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                "Booking Confirmed!",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "Your service has been booked successfully.",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey),
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const HomeScreen()),
+                    (route) => false,
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    "Go Home",
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -97,7 +287,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         leading: const BackButton(color: Colors.black),
         centerTitle: true,
         title: Text(
-          "Book Service",
+          "Payment",
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -105,38 +295,48 @@ class _PaymentScreenState extends State<PaymentScreen> {
         ),
       ),
       body: isLoading
-          ? const Center(child: const LifeKitLoader())
+          ? const Center(child: LifeKitLoader())
           : Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  // 1. Date Info
                   Container(
+                    width: double.infinity,
                     padding: const EdgeInsets.symmetric(
-                      vertical: 16,
-                      horizontal: 16,
+                      vertical: 20,
+                      horizontal: 20,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(12),
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF89273B), Color(0xFFA03348)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.chevron_left),
                         Text(
-                          "September, 2025",
+                          "Total to Pay",
                           style: GoogleFonts.poppins(
+                            color: Colors.white70,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "\$${totalAmount.toStringAsFixed(2)}",
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 28,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const Icon(Icons.chevron_right),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
-
-                  // 2. Receipt Card
+                  const SizedBox(height: 24),
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -161,7 +361,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                   child: Text(
                                     "${item.title} (x${item.quantity})",
                                     style: GoogleFonts.poppins(
-                                      color: Colors.grey,
+                                      color: Colors.grey[700],
+                                      fontSize: 13,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -170,20 +371,19 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                   "\$${(item.price * item.quantity).toStringAsFixed(2)}",
                                   style: GoogleFonts.poppins(
                                     fontWeight: FontWeight.bold,
+                                    fontSize: 13,
                                   ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-
-                        const Divider(),
-
+                        const Divider(height: 24),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Transaction Fee",
+                              "Service Fee",
                               style: GoogleFonts.poppins(color: Colors.grey),
                             ),
                             Text(
@@ -194,91 +394,65 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             ),
                           ],
                         ),
-
-                        const SizedBox(height: 20),
-
-                        // Date Summary
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF9F9F9),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Date",
-                                style: GoogleFonts.poppins(color: Colors.grey),
-                              ),
-                              Text(
-                                "Jan 06, 2025",
-                                style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 20),
-
-                  // 3. Wallet Payment Selection
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.shade200),
                     ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Wallet",
-                              style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              "Balance: \$${walletBalance.toStringAsFixed(2)}",
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.account_balance_wallet,
+                            color: AppColors.primary,
+                            size: 20,
+                          ),
                         ),
-                        const Icon(Icons.expand_more),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "LifeKit Wallet",
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              Text(
+                                "Balance: \$${walletBalance.toStringAsFixed(2)}",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: walletBalance < totalAmount
+                                      ? Colors.red
+                                      : Colors.green,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Radio(
+                          value: true,
+                          groupValue: true,
+                          onChanged: (v) {},
+                          activeColor: AppColors.primary,
+                        ),
                       ],
                     ),
                   ),
-
                   const Spacer(),
-
-                  // 4. Pay Button
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Sum Total",
-                        style: GoogleFonts.poppins(color: Colors.grey),
-                      ),
-                      Text(
-                        "\$${totalAmount.toStringAsFixed(2)}",
-                        style: GoogleFonts.poppins(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
                     height: 56,
@@ -289,9 +463,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
+                        elevation: 5,
+                        shadowColor: AppColors.primary.withOpacity(0.4),
                       ),
                       child: Text(
-                        "Pay",
+                        "Confirm Payment",
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -303,96 +479,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 ],
               ),
             ),
-    );
-  }
-
-  void _showInsufficientFundsDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Insufficient Funds"),
-        content: const Text("You do not have enough money in your wallet."),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel", style: TextStyle(color: Colors.black)),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context); // Close dialog first
-
-              // 2. NAVIGATE TO ADD MONEY & WAIT FOR RESULT
-              final bool? result = await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AddMoneyScreen()),
-              );
-
-              // 3. REFRESH WALLET IF FUNDING WAS SUCCESSFUL
-              if (result == true) {
-                setState(() => isLoading = true);
-                _fetchWallet();
-              }
-            },
-            child: const Text(
-              "Fund Wallet",
-              style: TextStyle(color: AppColors.primary),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 20),
-            const Icon(Icons.check_circle, color: Colors.green, size: 60),
-            const SizedBox(height: 20),
-            Text(
-              "Booking Confirmed!",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              "Your service has been booked successfully.",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (_) => const HomeScreen()),
-                  (route) => false,
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  "Go Home",
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

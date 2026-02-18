@@ -1,13 +1,20 @@
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+
 import '../../../core/constants/app_colors.dart';
 import '../../../core/providers/cart_provider.dart';
 import '../../../core/services/api_service.dart';
 import 'cart_screen.dart';
+
+// PREMIUM POLISHED VERSION
+// Features: Enhanced styling, better spacing, professional touches
 
 class BookServiceScreen extends StatefulWidget {
   final dynamic service;
@@ -26,27 +33,42 @@ class BookServiceScreen extends StatefulWidget {
 class _BookServiceScreenState extends State<BookServiceScreen> {
   final ApiService _apiService = ApiService();
 
-  // Calendar State
+  // --- UI STATE ---
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-
-  // Booking Details State
   TimeOfDay _selectedTime = const TimeOfDay(hour: 9, minute: 0);
   String _serviceType = "Default";
   final TextEditingController _commentController = TextEditingController();
-
-  // Logic State
   int _durationHours = 1;
+
+  // --- NEW: STANDALONE OPTIONS STATE ---
+  List<dynamic> _selectedOptions = [];
+
+  // --- DATA / LOGIC STATE ---
   List<dynamic> _relatedServices = [];
   bool _isLoadingRelated = true;
+
+  // Availability Data
+  List<dynamic> _weeklySchedule = [];
+  List<Map<String, dynamic>> _existingBookings = [];
+
+  bool _isLoadingAvailability = true;
 
   @override
   void initState() {
     super.initState();
     _selectedDay = DateTime.now();
     _fetchRelatedServices();
+    _fetchAvailability();
   }
 
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  // 1. Fetch Related Services
   Future<void> _fetchRelatedServices() async {
     try {
       final providerId = widget.service['provider_id'];
@@ -66,24 +88,437 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
     }
   }
 
-  String _getSafeImage(dynamic serviceData) {
-    var rawImages = serviceData['image_urls'];
-    if (rawImages != null && rawImages is List) {
-      for (var item in rawImages) {
-        if (item is String) return item;
-        if (item is List && item.isNotEmpty && item[0] is String)
-          return item[0];
+  // 2. Fetch Availability
+  Future<void> _fetchAvailability() async {
+    try {
+      final providerId = widget.service['provider_id'];
+      final token = await _apiService.storage.read(key: 'jwt_token');
+
+      final results = await Future.wait([
+        http.get(
+          Uri.parse('${_apiService.baseUrl}/users/schedule/$providerId'),
+          headers: {'Authorization': 'Bearer $token'},
+        ),
+        http.get(
+          Uri.parse(
+            '${_apiService.baseUrl}/bookings/provider-schedule/$providerId',
+          ),
+          headers: {'Authorization': 'Bearer $token'},
+        ),
+      ]);
+
+      if (mounted) {
+        setState(() {
+          _weeklySchedule = jsonDecode(results[0].body)['schedule'] ?? [];
+          List rawBookings = jsonDecode(results[1].body)['bookings'] ?? [];
+          _existingBookings = List<Map<String, dynamic>>.from(rawBookings);
+
+          _isLoadingAvailability = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoadingAvailability = false);
+    }
+  }
+
+  // --- VALIDATION ---
+  bool _isDayAvailable(DateTime day) {
+    String dayName = DateFormat('EEEE').format(day);
+    var scheduleDay = _weeklySchedule.firstWhere(
+      (d) => d['day_of_week'] == dayName,
+      orElse: () => null,
+    );
+
+    debugPrint("Schedule for $dayName: $scheduleDay");
+
+    if (scheduleDay == null || scheduleDay['is_active'] == false) {
+      return false;
+    }
+
+    return true;
+  }
+
+  String? _validateSelection() {
+    if (_selectedDay == null) return "Please select a date";
+
+    String dayName = DateFormat('EEEE').format(_selectedDay!);
+    var scheduleDay = _weeklySchedule.firstWhere(
+      (d) => d['day_of_week'] == dayName,
+      orElse: () => null,
+    );
+
+    if (scheduleDay != null) {
+      if (scheduleDay['is_active'] == false)
+        return "Provider does not work on $dayName";
+
+      String startStr = scheduleDay['start_time'] ?? "09:00";
+      String endStr = scheduleDay['end_time'] ?? "17:00";
+
+      int startH = int.parse(startStr.split(":")[0]);
+      int endH = int.parse(endStr.split(":")[0]);
+
+      debugPrint("Validating scheduleDay: $scheduleDay");
+
+      if (_selectedTime.hour < startH || _selectedTime.hour >= endH) {
+        return "Available hours: $startStr - $endStr";
       }
     }
-    return "https://via.placeholder.com/150";
+
+    bool isConflict = _existingBookings.any((booking) {
+      if (booking['day'] == DateFormat('yyyy-MM-dd').format(_selectedDay!)) {
+        if (booking['blocked'] == true) {
+          return true;
+        } else {
+          int startH = int.parse(booking['start_time'].split(":")[0]);
+          int endH = int.parse(booking['end_time'].split(":")[0]);
+          return _selectedTime.hour >= startH && _selectedTime.hour < endH;
+        }
+      }
+      return false;
+    });
+
+    if (isConflict) return "This time slot is already booked.";
+
+    return null;
+  }
+
+  // --- HELPERS ---
+  String _getSafeImage(dynamic serviceData) {
+    var rawImages = serviceData['image_urls'];
+    if (rawImages != null && rawImages is List && rawImages.isNotEmpty) {
+      var first = rawImages.first;
+      if (first is String && first.startsWith("http")) return first;
+    }
+    // Return empty string to trigger error widget instead of unreachable placeholder
+    return "";
   }
 
   // --- ACTIONS ---
-
   void _incrementDuration() => setState(() => _durationHours++);
 
   void _decrementDuration() {
     if (_durationHours > 1) setState(() => _durationHours--);
+  }
+
+  void _saveComment() {
+    FocusScope.of(context).unfocus();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Colors.white, size: 20),
+            const SizedBox(width: 12),
+            Text(
+              "Comment saved!",
+              style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF43A047),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  // ADD TO CART
+  void _addToCart() {
+    String? error = _validateSelection();
+    if (error != null) {
+      _showModernAlert(error, true);
+      return;
+    }
+
+    bool hasOptions =
+        widget.service['service_options'] != null &&
+        (widget.service['service_options'] as List).isNotEmpty;
+
+    if (hasOptions && _selectedOptions.isEmpty) {
+      _showModernAlert("Please select at least one service option.", true);
+      return;
+    }
+
+    final cart = Provider.of<CartProvider>(context, listen: false);
+
+    double finalPrice = 0.0;
+    String finalTitle = widget.service['title'];
+
+    if (hasOptions) {
+      for (var opt in _selectedOptions) {
+        finalPrice += (double.tryParse(opt['price'].toString()) ?? 0.0);
+      }
+      List<String> names = _selectedOptions
+          .map((e) => e['name'].toString())
+          .toList();
+      finalTitle = "${widget.service['title']} (${names.join(', ')})";
+    } else {
+      String pType = widget.service['pricing_type'] ?? 'fixed';
+      double base = double.tryParse(widget.service['price'].toString()) ?? 0.0;
+      finalPrice = (pType == 'hourly') ? base * _durationHours : base;
+      if (pType == 'hourly') finalTitle = "$finalTitle ($_durationHours hrs)";
+    }
+
+    cart.addToCart(
+      CartItem(
+        id: "${widget.service['id']}_${DateTime.now().millisecondsSinceEpoch}",
+        serviceId: widget.service['id'],
+        title: finalTitle,
+        price: finalPrice,
+        imageUrl: _getSafeImage(widget.service),
+        providerId: widget.service['provider_id'],
+        date: _selectedDay!,
+        time: _selectedTime,
+        serviceType: _serviceType,
+        comments: _commentController.text,
+        quantity: 1,
+      ),
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const CartScreen()),
+    );
+  }
+
+  // --- MODALS ---
+  void _showIOSTimePicker() {
+    int tempHour = _selectedTime.hour;
+    int tempMinute = _selectedTime.minute;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          height: 320,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        "Cancel",
+                        style: GoogleFonts.poppins(
+                          color: Colors.black54,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      "Select Time",
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // Validate time
+                        String dayName = DateFormat(
+                          'EEEE',
+                        ).format(_selectedDay!);
+                        var scheduleDay = _weeklySchedule.firstWhere(
+                          (d) => d['day_of_week'] == dayName,
+                          orElse: () => null,
+                        );
+
+                        if (scheduleDay != null) {
+                          int startH = int.parse(
+                            scheduleDay['start_time'].split(":")[0],
+                          );
+                          int endH = int.parse(
+                            scheduleDay['end_time'].split(":")[0],
+                          );
+
+                          if (tempHour < startH || tempHour >= endH) {
+                            Navigator.pop(context);
+                            _showModernAlert(
+                              "Available hours: ${scheduleDay['start_time']} - ${scheduleDay['end_time']}",
+                              true,
+                            );
+                            return;
+                          }
+                        }
+
+                        setState(() {
+                          _selectedTime = TimeOfDay(
+                            hour: tempHour,
+                            minute: tempMinute,
+                          );
+                        });
+                        Navigator.pop(context);
+                      },
+                      child: Text(
+                        "Done",
+                        style: GoogleFonts.poppins(
+                          color: AppColors.primary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              // iOS-style Time Picker
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Hours
+                    Expanded(
+                      child: CupertinoPicker(
+                        scrollController: FixedExtentScrollController(
+                          initialItem: tempHour,
+                        ),
+                        itemExtent: 40,
+                        onSelectedItemChanged: (index) {
+                          tempHour = index;
+                        },
+                        children: List.generate(24, (index) {
+                          return Center(
+                            child: Text(
+                              index.toString().padLeft(2, '0'),
+                              style: GoogleFonts.poppins(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+                    // Separator
+                    Text(
+                      ":",
+                      style: GoogleFonts.poppins(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    // Minutes
+                    Expanded(
+                      child: CupertinoPicker(
+                        scrollController: FixedExtentScrollController(
+                          initialItem: tempMinute,
+                        ),
+                        itemExtent: 40,
+                        onSelectedItemChanged: (index) {
+                          tempMinute = index;
+                        },
+                        children: List.generate(60, (index) {
+                          return Center(
+                            child: Text(
+                              index.toString().padLeft(2, '0'),
+                              style: GoogleFonts.poppins(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showModernAlert(String message, bool isError) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        margin: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(28),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: (isError ? Colors.red : Colors.green).withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                isError
+                    ? Icons.warning_amber_rounded
+                    : Icons.check_circle_rounded,
+                color: isError ? Colors.red : Colors.green,
+                size: 48,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              isError ? "Hold on" : "Success",
+              style: GoogleFonts.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                color: Colors.grey[600],
+                fontSize: 14,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 28),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isError ? Colors.black87 : AppColors.primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  "Got it",
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showServiceTypeModal() {
@@ -99,23 +534,82 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 40, height: 4, color: Colors.grey[300]),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
             const SizedBox(height: 20),
             Text(
-              "Service type",
+              "Service Type",
               style: GoogleFonts.poppins(
                 fontSize: 18,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w700,
+                color: Colors.black87,
               ),
             ),
             const SizedBox(height: 24),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildTypeOption("Default", Icons.fingerprint),
-                _buildTypeOption("Home", Icons.storefront),
-                _buildTypeOption("Outdoor", Icons.watch),
+                _buildTypeOption("Default", Icons.settings),
+                _buildTypeOption("Home", Icons.home_rounded),
+                _buildTypeOption("Outdoor", Icons.wb_sunny_rounded),
               ],
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTypeOption(String label, IconData icon) {
+    bool isSelected = _serviceType == label;
+    return GestureDetector(
+      onTap: () {
+        setState(() => _serviceType = label);
+        Navigator.pop(context);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: 95,
+        padding: const EdgeInsets.symmetric(vertical: 18),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : const Color(0xFFF8F9FA),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : Colors.grey.shade300,
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [],
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? Colors.white : Colors.black54,
+              size: 28,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              label,
+              style: GoogleFonts.poppins(
+                color: isSelected ? Colors.white : Colors.black87,
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              ),
             ),
           ],
         ),
@@ -123,139 +617,46 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
     );
   }
 
-  void _showTimePickerModal() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      builder: (context) {
-        return SizedBox(
-          height: 300,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text(
-                        "Cancel",
-                        style: TextStyle(color: Colors.black),
-                      ),
-                    ),
-                    Text(
-                      "Select Time",
-                      style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text(
-                        "Done",
-                        style: TextStyle(color: AppColors.primary),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.time,
-                  initialDateTime: DateTime(
-                    2023,
-                    1,
-                    1,
-                    _selectedTime.hour,
-                    _selectedTime.minute,
-                  ),
-                  onDateTimeChanged: (DateTime newTime) {
-                    setState(
-                      () => _selectedTime = TimeOfDay.fromDateTime(newTime),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  void _saveComment() {
-    FocusScope.of(context).unfocus();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Comment saved!"),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 1),
-      ),
-    );
-  }
-
-  void _addMainServiceToCartAndNavigate() {
-    final cart = Provider.of<CartProvider>(context, listen: false);
-    String imgUrl = _getSafeImage(widget.service);
-
-    // --- NEW LOGIC: PRICING TYPE CHECK ---
-    String pricingType = widget.service['pricing_type'] ?? 'fixed';
-    double basePrice =
-        double.tryParse(widget.service['price'].toString()) ?? 0.0;
-
-    // Calculate total based on type
-    double finalPrice = (pricingType == 'hourly')
-        ? basePrice * _durationHours
-        : basePrice;
-
-    cart.addToCart(
-      CartItem(
-        id: "${widget.service['id']}_${DateTime.now().millisecondsSinceEpoch}",
-        serviceId: widget.service['id'],
-        // Add hours to title if hourly so user knows
-        title: pricingType == 'hourly'
-            ? "${widget.service['title']} ($_durationHours hrs)"
-            : widget.service['title'],
-        price: finalPrice,
-        imageUrl: imgUrl,
-        providerId: widget.service['provider_id'],
-        date: _selectedDay!,
-        time: _selectedTime,
-        serviceType: _serviceType,
-        quantity: 1,
-      ),
-    );
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const CartScreen()),
-    );
-  }
-
+  // --- UI BUILD ---
   @override
   Widget build(BuildContext context) {
     String imgUrl = _getSafeImage(widget.service);
-
-    // --- DISPLAY LOGIC ---
     String pricingType = widget.service['pricing_type'] ?? 'fixed';
     bool isHourly = pricingType == 'hourly';
-
     double basePrice =
         double.tryParse(widget.service['price'].toString()) ?? 0.0;
-    double displayTotal = isHourly ? basePrice * _durationHours : basePrice;
+
+    bool hasOptions =
+        widget.service['service_options'] != null &&
+        (widget.service['service_options'] as List).isNotEmpty;
+
+    double standardDisplayTotal = isHourly
+        ? basePrice * _durationHours
+        : basePrice;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: const BackButton(color: Colors.black),
+        backgroundColor: Colors.white,
+        elevation: 0.5,
+        shadowColor: Colors.black.withOpacity(0.05),
+        surfaceTintColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.black87,
+            size: 20,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
         centerTitle: true,
         title: Text(
           "Book Service",
           style: GoogleFonts.poppins(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
+            color: Colors.black87,
+            fontWeight: FontWeight.w600,
+            fontSize: 17,
+            letterSpacing: -0.3,
           ),
         ),
         actions: [
@@ -264,7 +665,8 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
               IconButton(
                 icon: const Icon(
                   Icons.shopping_cart_outlined,
-                  color: Colors.black,
+                  color: Colors.black87,
+                  size: 24,
                 ),
                 onPressed: () => Navigator.push(
                   context,
@@ -277,16 +679,24 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                 child: Consumer<CartProvider>(
                   builder: (context, cart, child) => cart.items.isNotEmpty
                       ? Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
+                          padding: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
                             color: AppColors.primary,
                             shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primary.withOpacity(0.3),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
                           child: Text(
                             "${cart.items.length}",
-                            style: const TextStyle(
+                            style: GoogleFonts.poppins(
                               color: Colors.white,
                               fontSize: 10,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         )
@@ -297,323 +707,609 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 1. CALENDAR
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              padding: const EdgeInsets.only(bottom: 10),
-              child: TableCalendar(
-                firstDay: DateTime.now(),
-                lastDay: DateTime.now().add(const Duration(days: 365)),
-                focusedDay: _focusedDay,
-                currentDay: _selectedDay,
-                calendarFormat: CalendarFormat.month,
-                startingDayOfWeek: StartingDayOfWeek.sunday,
-                headerStyle: HeaderStyle(
-                  titleCentered: true,
-                  formatButtonVisible: false,
-                  titleTextStyle: GoogleFonts.poppins(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                  leftChevronIcon: const Icon(
-                    Icons.chevron_left,
-                    color: Colors.black,
-                  ),
-                  rightChevronIcon: const Icon(
-                    Icons.chevron_right,
-                    color: Colors.black,
-                  ),
-                ),
-                calendarStyle: const CalendarStyle(
-                  todayDecoration: BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  selectedDecoration: BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  todayTextStyle: TextStyle(color: Colors.white),
-                ),
-                onDaySelected: (selectedDay, focusedDay) {
-                  setState(() {
-                    _selectedDay = selectedDay;
-                    _focusedDay = focusedDay;
-                  });
-                },
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // 2. SELECTED SERVICE CARD
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
+      body: _isLoadingAvailability
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: CachedNetworkImage(
-                      imageUrl: imgUrl,
-                      height: 60,
-                      width: 60,
-                      fit: BoxFit.cover,
-                      errorWidget: (c, u, e) => const Icon(Icons.error),
-                    ),
+                  const CircularProgressIndicator(
+                    color: AppColors.primary,
+                    strokeWidth: 3,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.service['title'],
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          // Dynamic display based on hourly vs fixed
-                          isHourly
-                              ? "\$$basePrice/hr  •  Total: \$$displayTotal"
-                              : "Fixed Price  •  Total: \$$displayTotal",
-                          style: GoogleFonts.poppins(
-                            color: AppColors.primary,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // LOGIC: Show Counter only if Hourly
-                  if (isHourly)
-                    Row(
-                      children: [
-                        GestureDetector(
-                          onTap: _decrementDuration,
-                          child: _buildQtyBtn(Icons.remove),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Text(
-                            "$_durationHours hrs",
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: _incrementDuration,
-                          child: _buildQtyBtn(Icons.add, isRed: true),
-                        ),
-                      ],
-                    )
-                  else
-                    // Just a static label for Fixed
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        "Fixed",
-                        style: GoogleFonts.poppins(
-                          fontSize: 10,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // 3. RELATED SERVICES (Restored)
-            if (!_isLoadingRelated && _relatedServices.isNotEmpty) ...[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
+                  const SizedBox(height: 16),
                   Text(
-                    "Pick your service",
+                    "Loading availability...",
                     style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.bold,
+                      color: Colors.black54,
                       fontSize: 14,
                     ),
                   ),
-                  Text(
-                    "See all",
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
-                  ),
                 ],
               ),
-              const SizedBox(height: 12),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: _relatedServices.map((service) {
-                    return _buildRelatedCard(service);
-                  }).toList(),
-                ),
-              ),
-              const SizedBox(height: 24),
-            ],
-
-            // 4. SERVICE TYPE (Restored)
-            GestureDetector(
-              onTap: _showServiceTypeModal,
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Service Type",
-                      style: GoogleFonts.poppins(color: Colors.black54),
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          _serviceType,
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 14,
-                          color: Colors.black54,
+            )
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1. CALENDAR
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // 5. SERVICE TIME
-            GestureDetector(
-              onTap: _showTimePickerModal,
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Service Time",
-                      style: GoogleFonts.poppins(color: Colors.black54),
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          _selectedTime.format(context),
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.bold,
-                          ),
+                    padding: const EdgeInsets.all(16),
+                    child: TableCalendar(
+                      firstDay: DateTime.now(),
+                      lastDay: DateTime.now().add(const Duration(days: 365)),
+                      focusedDay: _focusedDay,
+                      currentDay: _selectedDay,
+                      calendarFormat: CalendarFormat.month,
+                      startingDayOfWeek: StartingDayOfWeek.sunday,
+                      enabledDayPredicate: _isDayAvailable,
+                      availableGestures: AvailableGestures.horizontalSwipe,
+                      headerStyle: HeaderStyle(
+                        titleCentered: true,
+                        formatButtonVisible: false,
+                        titleTextStyle: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          color: Colors.black87,
                         ),
-                        const SizedBox(width: 8),
-                        const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 14,
+                        leftChevronIcon: Icon(
+                          Icons.chevron_left_rounded,
+                          color: Colors.black87,
+                          size: 28,
+                        ),
+                        rightChevronIcon: Icon(
+                          Icons.chevron_right_rounded,
+                          color: Colors.black87,
+                          size: 28,
+                        ),
+                      ),
+                      daysOfWeekStyle: DaysOfWeekStyle(
+                        weekdayStyle: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
                           color: Colors.black54,
+                        ),
+                        weekendStyle: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black54,
+                        ),
+                      ),
+                      calendarStyle: CalendarStyle(
+                        todayDecoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        todayTextStyle: GoogleFonts.poppins(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        selectedDecoration: const BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        selectedTextStyle: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        defaultTextStyle: GoogleFonts.poppins(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        weekendTextStyle: GoogleFonts.poppins(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        disabledTextStyle: GoogleFonts.poppins(
+                          color: Colors.grey.shade400,
+                        ),
+                        outsideTextStyle: GoogleFonts.poppins(
+                          color: Colors.grey.shade300,
+                        ),
+                      ),
+                      onDaySelected: (selectedDay, focusedDay) {
+                        setState(() {
+                          _selectedDay = selectedDay;
+                          _focusedDay = focusedDay;
+                        });
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // 2. SELECTED SERVICE CARD
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-            ),
+                    child: Column(
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(14),
+                              child: imgUrl.isEmpty
+                                  ? Container(
+                                      height: 70,
+                                      width: 70,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary.withOpacity(
+                                          0.1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      child: Icon(
+                                        Icons.image_outlined,
+                                        size: 32,
+                                        color: AppColors.primary.withOpacity(
+                                          0.5,
+                                        ),
+                                      ),
+                                    )
+                                  : CachedNetworkImage(
+                                      imageUrl: imgUrl,
+                                      height: 70,
+                                      width: 70,
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) => Container(
+                                        color: Colors.grey.shade200,
+                                        child: const Center(
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: AppColors.primary,
+                                          ),
+                                        ),
+                                      ),
+                                      errorWidget: (c, u, e) => Container(
+                                        color: AppColors.primary.withOpacity(
+                                          0.1,
+                                        ),
+                                        child: Icon(
+                                          Icons.image_outlined,
+                                          size: 32,
+                                          color: AppColors.primary.withOpacity(
+                                            0.5,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.service['title'],
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 15,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  if (!hasOptions)
+                                    Text(
+                                      isHourly
+                                          ? "\$$basePrice/hr  •  Total: \$$standardDisplayTotal"
+                                          : "Fixed  •  \$$standardDisplayTotal",
+                                      style: GoogleFonts.poppins(
+                                        color: AppColors.primary,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            if (!hasOptions) ...[
+                              if (isHourly)
+                                Row(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: _decrementDuration,
+                                      child: _buildQtyBtn(Icons.remove),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                      ),
+                                      child: Text(
+                                        "$_durationHours",
+                                        style: GoogleFonts.poppins(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: _incrementDuration,
+                                      child: _buildQtyBtn(
+                                        Icons.add,
+                                        isRed: true,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              else
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    "Fixed",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 11,
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ],
+                        ),
 
-            const SizedBox(height: 16),
-
-            // 6. COMMENT
-            Container(
-              height: 80,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: TextField(
-                controller: _commentController,
-                maxLines: 2,
-                decoration: InputDecoration(
-                  hintText: "Additional comment...",
-                  hintStyle: GoogleFonts.poppins(
-                    color: Colors.grey[400],
-                    fontSize: 13,
-                  ),
-                  border: InputBorder.none,
-                  suffixIcon: IconButton(
-                    icon: const Icon(
-                      Icons.check_circle,
-                      color: AppColors.primary,
+                        if (hasOptions) ...[
+                          const SizedBox(height: 16),
+                          Divider(height: 1, color: Colors.grey.shade200),
+                          const SizedBox(height: 12),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              "Select Service Options",
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          ...(widget.service['service_options'] as List).map((
+                            opt,
+                          ) {
+                            bool isSelected = _selectedOptions.any(
+                              (e) => e['name'] == opt['name'],
+                            );
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? AppColors.primary.withOpacity(0.05)
+                                    : const Color(0xFFF8F9FA),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? AppColors.primary.withOpacity(0.3)
+                                      : Colors.grey.shade300,
+                                ),
+                              ),
+                              child: CheckboxListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 4,
+                                ),
+                                visualDensity: VisualDensity.compact,
+                                title: Text(
+                                  opt['name'],
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  "\$${opt['price']}",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                activeColor: AppColors.primary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                value: isSelected,
+                                onChanged: (val) {
+                                  setState(() {
+                                    if (val == true) {
+                                      _selectedOptions.add(opt);
+                                    } else {
+                                      _selectedOptions.removeWhere(
+                                        (e) => e['name'] == opt['name'],
+                                      );
+                                    }
+                                  });
+                                },
+                              ),
+                            );
+                          }).toList(),
+                        ],
+                      ],
                     ),
-                    onPressed: _saveComment,
                   ),
-                ),
+
+                  const SizedBox(height: 24),
+
+                  // 3. RELATED SERVICES
+                  if (!_isLoadingRelated && _relatedServices.isNotEmpty) ...[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "More Services",
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        Text(
+                          "See all",
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: _relatedServices.map((service) {
+                          return _buildRelatedCard(service);
+                        }).toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+
+                  // 4. SERVICE TYPE
+                  GestureDetector(
+                    onTap: _showServiceTypeModal,
+                    child: Container(
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.settings_outlined,
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                "Service Type",
+                                style: GoogleFonts.poppins(
+                                  color: Colors.black87,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                _serviceType,
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Icon(
+                                Icons.chevron_right_rounded,
+                                size: 20,
+                                color: Colors.grey.shade400,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // 5. SERVICE TIME
+                  GestureDetector(
+                    onTap: () => _showIOSTimePicker(),
+                    child: Container(
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.access_time_rounded,
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                "Service Time",
+                                style: GoogleFonts.poppins(
+                                  color: Colors.black87,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                _selectedTime.format(context),
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Icon(
+                                Icons.chevron_right_rounded,
+                                size: 20,
+                                color: Colors.grey.shade400,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // 6. COMMENT
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.comment_outlined,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextField(
+                            controller: _commentController,
+                            maxLines: 2,
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: "Add special instructions...",
+                              hintStyle: GoogleFonts.poppins(
+                                color: Colors.grey[400],
+                                fontSize: 14,
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.check_circle_rounded,
+                            color: AppColors.primary,
+                            size: 24,
+                          ),
+                          onPressed: _saveComment,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 100),
+                ],
               ),
             ),
-            const SizedBox(height: 100),
-          ],
-        ),
-      ),
-
       bottomSheet: Container(
-        color: Colors.transparent,
-        padding: const EdgeInsets.all(20),
-        child: SizedBox(
-          width: double.infinity,
-          height: 56,
-          child: Consumer<CartProvider>(
-            builder: (context, cart, _) => ElevatedButton(
-              onPressed: _addMainServiceToCartAndNavigate,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+        color: const Color(0xFFF8F9FA),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+        child: SafeArea(
+          child: SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: Consumer<CartProvider>(
+              builder: (context, cart, _) => ElevatedButton(
+                onPressed: _addToCart,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                  shadowColor: AppColors.primary.withOpacity(0.3),
                 ),
-                elevation: 5,
-              ),
-              child: Text(
-                "View cart (${cart.items.length + 1})",
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.shopping_cart_outlined, size: 20),
+                    const SizedBox(width: 10),
+                    Text(
+                      "Add to Cart (${cart.items.length + 1})",
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -625,12 +1321,15 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
 
   Widget _buildQtyBtn(IconData icon, {bool isRed = false}) {
     return Container(
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: isRed ? AppColors.primary : Colors.grey[100],
+        color: isRed ? AppColors.primary : const Color(0xFFF8F9FA),
         shape: BoxShape.circle,
+        border: Border.all(
+          color: isRed ? AppColors.primary : Colors.grey.shade300,
+        ),
       ),
-      child: Icon(icon, size: 12, color: isRed ? Colors.white : Colors.black),
+      child: Icon(icon, size: 14, color: isRed ? Colors.white : Colors.black87),
     );
   }
 
@@ -652,77 +1351,74 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
         );
       },
       child: Container(
-        width: 140,
-        margin: const EdgeInsets.only(right: 12),
-        padding: const EdgeInsets.all(10),
+        width: 150,
+        margin: const EdgeInsets.only(right: 14),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: CachedNetworkImage(
-                imageUrl: imgUrl,
-                height: 80,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorWidget: (c, u, e) => const Icon(Icons.error),
-              ),
+              child: imgUrl.isEmpty
+                  ? Container(
+                      height: 90,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.image_outlined,
+                        size: 36,
+                        color: AppColors.primary.withOpacity(0.5),
+                      ),
+                    )
+                  : CachedNetworkImage(
+                      imageUrl: imgUrl,
+                      height: 90,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) =>
+                          Container(color: Colors.grey.shade200),
+                      errorWidget: (c, u, e) => Container(
+                        color: AppColors.primary.withOpacity(0.1),
+                        child: Icon(
+                          Icons.image_outlined,
+                          size: 36,
+                          color: AppColors.primary.withOpacity(0.5),
+                        ),
+                      ),
+                    ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Text(
               title,
               style: GoogleFonts.poppins(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
                 fontSize: 13,
+                color: Colors.black87,
               ),
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
+            const SizedBox(height: 4),
             Text(
               price,
               style: GoogleFonts.poppins(
                 color: AppColors.primary,
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTypeOption(String label, IconData icon) {
-    bool isSelected = _serviceType == label;
-    return GestureDetector(
-      onTap: () {
-        setState(() => _serviceType = label);
-        Navigator.pop(context);
-      },
-      child: Container(
-        width: 90,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : const Color(0xFFF9F9F9),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.transparent,
-          ),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: isSelected ? Colors.white : Colors.black54),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: GoogleFonts.poppins(
-                color: isSelected ? Colors.white : Colors.black,
                 fontSize: 12,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],

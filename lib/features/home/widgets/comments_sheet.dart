@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 
@@ -15,7 +14,7 @@ class CommentsSheet extends StatefulWidget {
 
 class _CommentsSheetState extends State<CommentsSheet> {
   final ApiService _apiService = ApiService();
-  final TextEditingController _controller = TextEditingController();
+  final TextEditingController _commentController = TextEditingController();
   List<dynamic> comments = [];
   bool isLoading = true;
   bool isPosting = false;
@@ -41,48 +40,62 @@ class _CommentsSheetState extends State<CommentsSheet> {
   }
 
   Future<void> _postComment() async {
-    if (_controller.text.isEmpty) return;
+    if (_commentController.text.trim().isEmpty) return;
     setState(() => isPosting = true);
+
     try {
-      final newComment = await _apiService.postComment(
+      await _apiService.postComment(
         widget.postId,
-        _controller.text,
+        _commentController.text.trim(),
       );
-      if (mounted) {
-        setState(() {
-          comments.add(newComment); // Add locally
-          _controller.clear();
-          isPosting = false;
-        });
-      }
+      _commentController.clear();
+      // Refresh list
+      _fetchComments();
     } catch (e) {
-      setState(() => isPosting = false);
+      // Handle error
+    } finally {
+      if (mounted) setState(() => isPosting = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // 1. Get Keyboard Height
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
     return Container(
-      height: MediaQuery.of(context).size.height * 0.75, // 75% height
-      padding: const EdgeInsets.all(16),
+      height: MediaQuery.of(context).size.height * 0.85, // 85% Height
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
+      // 2. Wrap content in padding that respects keyboard
+      padding: EdgeInsets.only(bottom: bottomInset),
       child: Column(
         children: [
-          Container(width: 40, height: 4, color: Colors.grey[300]),
-          const SizedBox(height: 16),
-          Text(
-            "Comments",
-            style: GoogleFonts.poppins(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
+          // Header
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Comments",
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
+          const Divider(height: 1),
 
-          // Comments List
+          // List
           Expanded(
             child: isLoading
                 ? const Center(
@@ -91,48 +104,49 @@ class _CommentsSheetState extends State<CommentsSheet> {
                 : comments.isEmpty
                 ? Center(
                     child: Text(
-                      "No comments yet",
+                      "No comments yet. Be the first!",
                       style: GoogleFonts.poppins(color: Colors.grey),
                     ),
                   )
                 : ListView.builder(
+                    padding: const EdgeInsets.all(16),
                     itemCount: comments.length,
                     itemBuilder: (context, index) {
                       final c = comments[index];
-                      final profile = c['profiles'] ?? {};
-                      final date = DateTime.parse(c['created_at']);
-                      return ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage:
-                              profile['profile_picture_url'] != null
-                              ? CachedNetworkImageProvider(
-                                  profile['profile_picture_url'],
-                                )
-                              : const AssetImage(
-                                      'assets/images/onboarding1.png',
-                                    )
-                                    as ImageProvider,
-                        ),
-                        title: Text(
-                          profile['full_name'] ?? 'User',
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                        subtitle: Column(
+                      final user = c['profiles'];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              c['content'],
-                              style: GoogleFonts.poppins(fontSize: 13),
+                            CircleAvatar(
+                              radius: 16,
+                              backgroundImage: CachedNetworkImageProvider(
+                                user?['profile_picture_url'] ??
+                                    'https://via.placeholder.com/50',
+                              ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              DateFormat('MMM d, h:mm a').format(date),
-                              style: GoogleFonts.poppins(
-                                fontSize: 10,
-                                color: Colors.grey,
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    user?['full_name'] ?? 'User',
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    c['content'],
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 13,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -142,31 +156,44 @@ class _CommentsSheetState extends State<CommentsSheet> {
                   ),
           ),
 
-          // Input Field
-          const Divider(),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _controller,
-                  decoration: InputDecoration(
-                    hintText: "Add a comment...",
-                    hintStyle: GoogleFonts.poppins(fontSize: 13),
-                    border: InputBorder.none,
+          // Input Area
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(top: BorderSide(color: Colors.grey.shade200)),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF5F5F5),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: TextField(
+                      controller: _commentController,
+                      decoration: const InputDecoration(
+                        hintText: "Add a comment...",
+                        border: InputBorder.none,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-              IconButton(
-                onPressed: isPosting ? null : _postComment,
-                icon: isPosting
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.send, color: AppColors.primary),
-              ),
-            ],
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: isPosting ? null : _postComment,
+                  icon: isPosting
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.send, color: AppColors.primary),
+                ),
+              ],
+            ),
           ),
         ],
       ),

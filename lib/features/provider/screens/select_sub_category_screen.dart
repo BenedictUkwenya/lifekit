@@ -4,7 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import 'my_services_list_screen.dart';
-import 'edit_service_screen.dart'; // Import Edit Screen for direct navigation
+import 'edit_service_screen.dart';
 
 class SelectSubCategoryScreen extends StatefulWidget {
   final String parentId;
@@ -23,7 +23,10 @@ class SelectSubCategoryScreen extends StatefulWidget {
 
 class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
   final ApiService _apiService = ApiService();
+  final TextEditingController _searchController = TextEditingController();
+
   List<dynamic> subCategories = [];
+  List<dynamic> filteredCategories = [];
   final Set<String> _selectedIds = {};
   bool isLoading = true;
 
@@ -35,15 +38,14 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
 
   Future<void> _fetchSubCategories() async {
     try {
-      // Calls backend to get children of the selected parent
       final data = await _apiService.getSubCategories(widget.parentId);
       if (mounted) {
         setState(() {
           subCategories = data;
-          // Sort alphabetically by name
           subCategories.sort(
             (a, b) => (a['name'] as String).compareTo(b['name'] as String),
           );
+          filteredCategories = subCategories; // Init filtered list
           isLoading = false;
         });
       }
@@ -52,25 +54,32 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
     }
   }
 
+  void _onSearch(String query) {
+    setState(() {
+      filteredCategories = subCategories
+          .where(
+            (c) => c['name'].toString().toLowerCase().contains(
+              query.toLowerCase(),
+            ),
+          )
+          .toList();
+    });
+  }
+
   Future<void> _createServices() async {
     if (_selectedIds.isEmpty) return;
 
     setState(() => isLoading = true);
     try {
-      // 1. Call Backend to create drafts
       final response = await _apiService.createDraftServices(
         _selectedIds.toList(),
       );
 
       if (!mounted) return;
 
-      // 2. Check how many services were created
-      // The backend returns { message: "...", services: [...] }
       final List createdServices = response['services'] ?? [];
 
       if (createdServices.length == 1) {
-        // CASE A: Only 1 service created -> Go straight to Edit Screen
-        // This is better UX for "Box Braids" -> Rename to "Box Braids Small"
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -78,7 +87,6 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
           ),
         );
       } else {
-        // CASE B: Multiple services -> Go to List
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const MyServicesListScreen()),
@@ -93,10 +101,60 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
     }
   }
 
-  // Helper: Group list by first letter for the UI
+  // --- SMART ICON HELPER ---
+  String _getSubCategoryIcon(String name) {
+    name = name.toLowerCase();
+
+    // Fitness
+    if (name.contains('gym') || name.contains('fitness'))
+      return 'https://cdn-icons-png.flaticon.com/512/2964/2964514.png';
+    if (name.contains('run'))
+      return 'https://cdn-icons-png.flaticon.com/512/553/553979.png';
+    if (name.contains('tennis') || name.contains('sport'))
+      return 'https://cdn-icons-png.flaticon.com/512/1165/1165187.png';
+
+    // Plumbing
+    if (name.contains('sink') || name.contains('faucet'))
+      return 'https://cdn-icons-png.flaticon.com/512/3050/3050239.png';
+    if (name.contains('leak') || name.contains('drain'))
+      return 'https://cdn-icons-png.flaticon.com/512/3143/3143636.png';
+    if (name.contains('toilet') || name.contains('shower'))
+      return 'https://cdn-icons-png.flaticon.com/512/2200/2200326.png';
+
+    // Beauty
+    if (name.contains('braid') || name.contains('cornrow'))
+      return 'https://cdn-icons-png.flaticon.com/512/3712/3712169.png';
+    if (name.contains('wig') || name.contains('hair'))
+      return 'https://cdn-icons-png.flaticon.com/512/3050/3050257.png';
+    if (name.contains('nail') || name.contains('manicure'))
+      return 'https://cdn-icons-png.flaticon.com/512/1940/1940922.png';
+    if (name.contains('makeup'))
+      return 'https://cdn-icons-png.flaticon.com/512/3050/3050215.png';
+
+    // Education
+    if (name.contains('tutor') || name.contains('assignment'))
+      return 'https://cdn-icons-png.flaticon.com/512/2232/2232688.png';
+    if (name.contains('research') || name.contains('thesis'))
+      return 'https://cdn-icons-png.flaticon.com/512/2921/2921222.png';
+
+    // Electrical
+    if (name.contains('light') ||
+        name.contains('wire') ||
+        name.contains('socket'))
+      return 'https://cdn-icons-png.flaticon.com/512/2919/2919600.png';
+
+    // Cleaning
+    if (name.contains('clean'))
+      return 'https://cdn-icons-png.flaticon.com/512/995/995016.png';
+
+    // Default
+    return 'https://cdn-icons-png.flaticon.com/512/1055/1055685.png';
+  }
+
+  // Helper: Group list by first letter
   Map<String, List<dynamic>> _groupCategories() {
     Map<String, List<dynamic>> groups = {};
-    for (var cat in subCategories) {
+    for (var cat in filteredCategories) {
       String name = cat['name'] ?? '';
       if (name.isEmpty) continue;
       String firstLetter = name[0].toUpperCase();
@@ -114,9 +172,9 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
     final sortedKeys = groupedData.keys.toList()..sort();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F9F9), // Light grey background
+      backgroundColor: const Color(0xFFF9F9FB),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF9F9F9),
+        backgroundColor: const Color(0xFFF9F9FB),
         elevation: 0,
         leading: const BackButton(color: Colors.black),
         centerTitle: true,
@@ -150,9 +208,17 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(30),
-                      border: Border.all(color: Colors.grey.shade200),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: TextField(
+                      controller: _searchController,
+                      onChanged: _onSearch,
                       decoration: InputDecoration(
                         hintText: "Search services..",
                         hintStyle: GoogleFonts.poppins(
@@ -164,43 +230,28 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
                         contentPadding: const EdgeInsets.symmetric(
                           vertical: 14,
                         ),
+                        suffixIcon: _selectedIds.isNotEmpty
+                            ? TextButton(
+                                onPressed: () =>
+                                    setState(() => _selectedIds.clear()),
+                                child: Text(
+                                  "Deselect all",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              )
+                            : null,
                       ),
                     ),
                   ),
                 ),
 
-                // 2. Deselect All Button
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 0,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      GestureDetector(
-                        onTap: () => setState(() => _selectedIds.clear()),
-                        child: Text(
-                          "Deselect all",
-                          style: GoogleFonts.poppins(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                // 3. Grouped List
+                // 2. Grouped List
                 Expanded(
                   child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     itemCount: sortedKeys.length,
                     itemBuilder: (context, index) {
                       String letter = sortedKeys[index];
@@ -209,21 +260,23 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Letter Header (A, B, C...)
                           Padding(
-                            padding: const EdgeInsets.only(bottom: 8, left: 4),
+                            padding: const EdgeInsets.only(
+                              bottom: 8,
+                              left: 4,
+                              top: 10,
+                            ),
                             child: Text(
                               letter,
                               style: GoogleFonts.poppins(
-                                color: Colors.grey,
+                                color: Colors.grey[600],
                                 fontSize: 14,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
-                          // Card Container for items
                           Container(
-                            margin: const EdgeInsets.only(bottom: 24),
+                            margin: const EdgeInsets.only(bottom: 16),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(20),
@@ -249,7 +302,7 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
                   ),
                 ),
 
-                // 4. Bottom Action Button
+                // 3. Bottom Action Button
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: const BoxDecoration(
@@ -257,6 +310,13 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
                     borderRadius: BorderRadius.vertical(
                       top: Radius.circular(20),
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 10,
+                        offset: Offset(0, -4),
+                      ),
+                    ],
                   ),
                   child: SizedBox(
                     width: double.infinity,
@@ -264,21 +324,20 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
                     child: ElevatedButton(
                       onPressed: _selectedIds.isEmpty ? null : _createServices,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF89273B), // Maroon
+                        backgroundColor: const Color(0xFF89273B),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
+                        elevation: 0,
                       ),
-                      child: isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : Text(
-                              "Next",
-                              style: GoogleFonts.poppins(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                      child: Text(
+                        "Next (${_selectedIds.length})",
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -289,7 +348,8 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
 
   Widget _buildCheckItem(dynamic item, bool isLast) {
     bool isSelected = _selectedIds.contains(item['id']);
-    String imgUrl = item['image_url'] ?? "https://via.placeholder.com/50";
+    // Use smart icon helper here
+    String imgUrl = _getSubCategoryIcon(item['name']);
 
     return InkWell(
       onTap: () {
@@ -306,15 +366,24 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Row(
               children: [
-                // Icon/Image
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Colors.grey[100],
-                  backgroundImage: CachedNetworkImageProvider(imgUrl),
+                // Icon Container
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5F7FA),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: CachedNetworkImage(
+                    imageUrl: imgUrl,
+                    width: 24,
+                    height: 24,
+                    fit: BoxFit.contain,
+                    placeholder: (c, u) =>
+                        const Icon(Icons.circle, size: 24, color: Colors.grey),
+                  ),
                 ),
                 const SizedBox(width: 16),
 
-                // Name
                 Expanded(
                   child: Text(
                     item['name'],
@@ -326,8 +395,9 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
                   ),
                 ),
 
-                // Custom Checkbox UI
-                Container(
+                // Custom Checkbox
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
                   width: 24,
                   height: 24,
                   decoration: BoxDecoration(
@@ -349,13 +419,12 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
               ],
             ),
           ),
-          // Divider if not last item
           if (!isLast)
             const Divider(
               height: 1,
               indent: 70,
               endIndent: 20,
-              color: Color(0xFFF0F0F0),
+              color: Color(0xFFF5F7FA),
             ),
         ],
       ),

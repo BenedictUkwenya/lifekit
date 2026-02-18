@@ -6,6 +6,9 @@ import '../../../core/services/api_service.dart';
 import 'select_main_category_screen.dart';
 import 'edit_service_screen.dart';
 
+// PREMIUM POLISHED VERSION
+// Features: Enhanced design, better image handling, modern cards
+
 class MyServicesListScreen extends StatefulWidget {
   const MyServicesListScreen({super.key});
 
@@ -38,112 +41,281 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
     }
   }
 
+  String _getSafeImage(dynamic service) {
+    if (service['image_urls'] != null &&
+        service['image_urls'] is List &&
+        (service['image_urls'] as List).isNotEmpty) {
+      var first = (service['image_urls'] as List)[0];
+      if (first is String && first.startsWith('http')) return first;
+      if (first is List && first.isNotEmpty) {
+        var nested = first[0];
+        if (nested is String && nested.startsWith('http')) return nested;
+      }
+    }
+    return ""; // Return empty to trigger placeholder
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 0,
+        elevation: 0.5,
+        shadowColor: Colors.black.withOpacity(0.05),
+        surfaceTintColor: Colors.white,
         centerTitle: true,
-        leading: const BackButton(color: Colors.black),
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.black87,
+            size: 20,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: Text(
-          "Service Lists",
+          "My Services",
           style: GoogleFonts.poppins(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+            fontWeight: FontWeight.w600,
+            fontSize: 17,
+            letterSpacing: -0.3,
           ),
         ),
       ),
       body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            )
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+          ? Center(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Create Button Banner
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      children: [
-                        const Icon(Icons.layers, size: 60, color: Colors.blue),
-                        const SizedBox(height: 16),
-                        Text(
-                          "Reach a wider demand varied at your Skill Expertise.",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 50,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      const SelectMainCategoryScreen(),
-                                ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: Text(
-                              "Create a new service",
-                              style: GoogleFonts.poppins(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                  const CircularProgressIndicator(
+                    color: AppColors.primary,
+                    strokeWidth: 3,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Loading your services...",
+                    style: GoogleFonts.poppins(
+                      color: Colors.black54,
+                      fontSize: 14,
                     ),
                   ),
-                  const SizedBox(height: 24),
-
-                  if (myServices.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 40),
-                      child: Text(
-                        "No services created yet.",
-                        style: GoogleFonts.poppins(color: Colors.grey),
-                      ),
-                    ),
-
-                  ...myServices.map((service) => _buildServiceItem(service)),
                 ],
+              ),
+            )
+          : RefreshIndicator(
+              color: AppColors.primary,
+              onRefresh: _fetchMyServices,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Create Service Banner
+                    _buildCreateServiceBanner(),
+
+                    const SizedBox(height: 28),
+
+                    // Services Header
+                    if (myServices.isNotEmpty) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Your Services",
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              "${myServices.length} ${myServices.length == 1 ? 'Service' : 'Services'}",
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+
+                    // Services List or Empty State
+                    if (myServices.isEmpty)
+                      _buildEmptyState()
+                    else
+                      ...myServices.map(
+                        (service) => _buildServiceItem(service),
+                      ),
+                  ],
+                ),
               ),
             ),
     );
   }
 
+  Widget _buildCreateServiceBanner() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.primary.withOpacity(0.05), Colors.white],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.primary.withOpacity(0.1), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.add_business_rounded,
+              size: 48,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            "Expand Your Reach",
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "Create new services to showcase your skills and connect with more customers",
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              fontSize: 13,
+              color: Colors.black54,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const SelectMainCategoryScreen(),
+                  ),
+                );
+                if (result == true) {
+                  _fetchMyServices();
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shadowColor: AppColors.primary.withOpacity(0.3),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.add_circle_outline, size: 20),
+                  const SizedBox(width: 10),
+                  Text(
+                    "Create New Service",
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      margin: const EdgeInsets.only(top: 40),
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.inventory_2_outlined,
+              size: 56,
+              color: Colors.grey.shade400,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            "No Services Yet",
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "Get started by creating your first service above",
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(fontSize: 14, color: Colors.black54),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildServiceItem(dynamic service) {
-    // IMAGE LOGIC
-    String imgUrl = "https://via.placeholder.com/150";
-    if (service['image_urls'] != null &&
-        service['image_urls'] is List &&
-        (service['image_urls'] as List).isNotEmpty) {
-      var first = (service['image_urls'] as List)[0];
-      if (first is String)
-        imgUrl = first;
-      else if (first is List && first.isNotEmpty)
-        imgUrl = first[0];
-    }
+    String imgUrl = _getSafeImage(service);
 
     // STATUS BADGE LOGIC
     String status = service['status'] ?? 'draft';
@@ -151,89 +323,195 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
 
     Color badgeColor = Colors.grey;
     String badgeText = status;
+    IconData badgeIcon = Icons.circle;
 
     if (isDraft) {
-      badgeColor = Colors.orange;
+      badgeColor = const Color(0xFFF59E0B);
       badgeText = "Draft";
+      badgeIcon = Icons.edit_note_rounded;
     } else if (status == 'pending') {
-      badgeColor = Colors.blue;
+      badgeColor = const Color(0xFF3B82F6);
       badgeText = "In Review";
+      badgeIcon = Icons.schedule_rounded;
     } else if (status == 'rejected') {
-      badgeColor = Colors.red;
+      badgeColor = const Color(0xFFEF4444);
       badgeText = "Rejected";
+      badgeIcon = Icons.cancel_rounded;
     } else if (status == 'active') {
-      badgeColor = Colors.green;
+      badgeColor = const Color(0xFF10B981);
       badgeText = "Active";
+      badgeIcon = Icons.check_circle_rounded;
     }
 
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        final result = await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => EditServiceScreen(service: service),
           ),
         );
+        if (result == true) {
+          _fetchMyServices();
+        }
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade200, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           children: [
+            // Service Image
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: CachedNetworkImage(
-                imageUrl: imgUrl,
-                height: 60,
-                width: 60,
-                fit: BoxFit.cover,
-              ),
+              borderRadius: BorderRadius.circular(12),
+              child: imgUrl.isEmpty
+                  ? Container(
+                      height: 70,
+                      width: 70,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.image_outlined,
+                        size: 32,
+                        color: AppColors.primary.withOpacity(0.5),
+                      ),
+                    )
+                  : CachedNetworkImage(
+                      imageUrl: imgUrl,
+                      height: 70,
+                      width: 70,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: Colors.grey.shade200,
+                        child: const Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                      errorWidget: (c, u, e) => Container(
+                        color: AppColors.primary.withOpacity(0.1),
+                        child: Icon(
+                          Icons.image_outlined,
+                          size: 32,
+                          color: AppColors.primary.withOpacity(0.5),
+                        ),
+                      ),
+                    ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 14),
+
+            // Service Details
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    service['title'],
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                    service['title'] ?? 'Untitled Service',
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                      color: Colors.black87,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  if (service['price'] != 0)
+                  const SizedBox(height: 6),
+                  if (service['price'] != null && service['price'] != 0)
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.attach_money_rounded,
+                          size: 14,
+                          color: AppColors.primary,
+                        ),
+                        Text(
+                          "${service['price']} USD",
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    )
+                  else
                     Text(
-                      "USD ${service['price']}",
+                      "Price not set",
                       style: GoogleFonts.poppins(
                         fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade500,
+                        fontStyle: FontStyle.italic,
                       ),
                     ),
                 ],
               ),
             ),
 
-            // STATUS BADGE UI
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: badgeColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: badgeColor.withOpacity(0.3)),
-              ),
-              child: Text(
-                badgeText,
-                style: GoogleFonts.poppins(
-                  fontSize: 10,
-                  color: badgeColor,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
+            const SizedBox(width: 12),
 
-            const SizedBox(width: 8),
-            const Icon(Icons.edit, size: 16, color: Colors.grey),
+            // Status Badge
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: badgeColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: badgeColor.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(badgeIcon, size: 12, color: badgeColor),
+                      const SizedBox(width: 4),
+                      Text(
+                        badgeText,
+                        style: GoogleFonts.poppins(
+                          fontSize: 11,
+                          color: badgeColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.edit_outlined,
+                    size: 16,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),

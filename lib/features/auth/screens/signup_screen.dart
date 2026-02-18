@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:flutter/gestures.dart'; // Added for TapGestureRecognizer
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -25,6 +25,7 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
   String fullName = "";
   String email = "";
   String password = "";
+  String confirmPassword = ""; // 1. Added this variable
   File? _imageFile;
   bool isLoading = false;
 
@@ -46,8 +47,11 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
 
   void showError(String message) {
     if (!mounted) return;
+    // 2. CLEAN THE ERROR MESSAGE (Remove "Exception: ")
+    String cleanMessage = message.replaceAll("Exception: ", "");
+
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
+      SnackBar(content: Text(cleanMessage), backgroundColor: Colors.red),
     );
   }
 
@@ -62,7 +66,6 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
   Future<void> submitDetailsAndPass() async {
     setState(() => isLoading = true);
     try {
-      // Calling signup triggers the OTP email
       await _apiService.signup(fullName, email, password);
       if (mounted) {
         setState(() => isLoading = false);
@@ -76,11 +79,10 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
     }
   }
 
-  // 2. Resend OTP (Re-triggers signup logic for unverified users)
+  // 2. Resend OTP
   Future<void> resendOtp() async {
     setState(() => isLoading = true);
     try {
-      // In Supabase, calling signup again for an unverified user resends the mail
       await _apiService.signup(fullName, email, password);
       if (mounted) {
         setState(() => isLoading = false);
@@ -89,7 +91,6 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
     } catch (e) {
       if (mounted) {
         setState(() => isLoading = false);
-        // If error says "User already registered", it might mean they are verified
         showError("Could not resend code. Please try again.");
       }
     }
@@ -121,21 +122,17 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
       }
 
       showSuccess("Account Created! Redirecting...");
-
-      // --- ADD THIS DELAY SO USER SEES THE SUCCESS MESSAGE ---
       await Future.delayed(const Duration(seconds: 1));
 
-      // --- NAVIGATE TO HOME AND CLEAR BACK STACK ---
       if (mounted) {
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const HomeScreen()),
-          (route) => false, // This prevents going back to signup
+          (route) => false,
         );
       }
     } catch (e) {
       showError("Profile setup failed, but account is active.");
-      // Even if image fails, we should probably still let them in:
       if (mounted) {
         Navigator.pushAndRemoveUntil(
           context,
@@ -152,22 +149,14 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      resizeToAvoidBottomInset: true, // Responsiveness fix
+      resizeToAvoidBottomInset: true,
       body: PageView(
         controller: _pageController,
-        physics:
-            const NeverScrollableScrollPhysics(), // Prevent swiping manually
+        physics: const NeverScrollableScrollPhysics(),
         children: [
-          // Screen 1: Details (Name & Email)
           _buildDetailsScreen(),
-
-          // Screen 2: Password
           _buildPasswordScreen(),
-
-          // Screen 3: OTP
           _buildOtpScreen(),
-
-          // Screen 4: Profile Pic
           _buildProfileScreen(),
         ],
       ),
@@ -180,18 +169,17 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
       title: "Hi, Welcome to LifeKit",
       subtitle:
           "Please complete all information to create your LifeKit account",
-      // No back button here (it's the first screen), or navigate back to Splash
       onBack: () => Navigator.of(context).pop(),
       children: [
         _CustomTextField(
           label: "Full Name",
-          initialValue: fullName, // Keep value if they come back
+          initialValue: fullName,
           onChanged: (val) => fullName = val,
         ),
         const SizedBox(height: 16),
         _CustomTextField(
           label: "Email Address",
-          initialValue: email, // Keep value if they come back
+          initialValue: email,
           onChanged: (val) => email = val,
           keyboardType: TextInputType.emailAddress,
         ),
@@ -214,10 +202,7 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
         _SocialButton(icon: Icons.g_mobiledata, text: "Continue with Google"),
         const SizedBox(height: 16),
         _SocialButton(icon: Icons.apple, text: "Continue with Apple"),
-
         const Spacer(),
-
-        // --- UPDATED: Clickable Text using RichText ---
         Center(
           child: RichText(
             text: TextSpan(
@@ -232,7 +217,6 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
                   ),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
-                      // Uses pushReplacement so we don't stack pages forever
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -253,7 +237,7 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
     return _BaseAuthLayout(
       title: "Choose a password",
       subtitle: "Input your preferred password to access your account",
-      onBack: previousPage, // Standard Back Action
+      onBack: previousPage,
       children: [
         _CustomTextField(
           label: "Enter password",
@@ -265,7 +249,8 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
         _CustomTextField(
           label: "Confirm your password",
           isPassword: true,
-          onChanged: (val) {}, // Basic validation can be added here
+          // 3. STORE CONFIRM PASSWORD
+          onChanged: (val) => confirmPassword = val,
         ),
         const SizedBox(height: 30),
         isLoading
@@ -273,6 +258,12 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
             : _PrimaryButton(
                 text: "Submit",
                 onTap: () {
+                  // 4. VALIDATE PASSWORDS MATCH
+                  if (password != confirmPassword) {
+                    showError("Passwords do not match");
+                    return;
+                  }
+
                   if (password.length > 6) {
                     submitDetailsAndPass();
                   } else {
@@ -290,13 +281,12 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
     return _BaseAuthLayout(
       title: "Verify Email",
       subtitle: "Code has been sent to $email",
-      // FIXED: Enabled Back button so you can fix email if wrong
       onBack: previousPage,
       children: [
         const SizedBox(height: 40),
         Center(
           child: Pinput(
-            length: 6, // Supabase usually sends 6 digits
+            length: 6,
             defaultPinTheme: PinTheme(
               width: 50,
               height: 50,
@@ -316,7 +306,6 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
         const SizedBox(height: 30),
         Center(
           child: TextButton(
-            // FIXED: Added Resend Logic
             onPressed: isLoading ? null : resendOtp,
             child: Text(
               isLoading ? "Sending..." : "Didn't get OTP Code? Resend Code",
@@ -338,7 +327,6 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
     return _BaseAuthLayout(
       title: "Profile Setup",
       subtitle: "Please enter your name and an optional profile picture",
-      // Back button disabled here because account is already created
       onBack: null,
       children: [
         const SizedBox(height: 40),
@@ -488,7 +476,9 @@ class _BaseAuthLayout extends StatelessWidget {
   }
 }
 
-class _CustomTextField extends StatelessWidget {
+// --- THE FIXED CUSTOM TEXT FIELD ---
+// Keeps the stateful logic so the eye icon works
+class _CustomTextField extends StatefulWidget {
   final String label;
   final Function(String) onChanged;
   final bool isPassword;
@@ -504,6 +494,19 @@ class _CustomTextField extends StatelessWidget {
   });
 
   @override
+  State<_CustomTextField> createState() => _CustomTextFieldState();
+}
+
+class _CustomTextFieldState extends State<_CustomTextField> {
+  late bool _obscureText;
+
+  @override
+  void initState() {
+    super.initState();
+    _obscureText = widget.isPassword;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
@@ -511,20 +514,32 @@ class _CustomTextField extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextFormField(
-        initialValue: initialValue,
-        obscureText: isPassword,
-        keyboardType: keyboardType,
-        onChanged: onChanged,
+        initialValue: widget.initialValue,
+        obscureText: _obscureText,
+        keyboardType: widget.keyboardType,
+        onChanged: widget.onChanged,
         decoration: InputDecoration(
-          hintText: label,
+          hintText: widget.label,
           hintStyle: GoogleFonts.poppins(color: Colors.grey[400], fontSize: 14),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 16,
           ),
-          suffixIcon: isPassword
-              ? const Icon(Icons.visibility_off_outlined, color: Colors.grey)
+          suffixIcon: widget.isPassword
+              ? IconButton(
+                  icon: Icon(
+                    _obscureText
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    color: Colors.grey,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureText = !_obscureText;
+                    });
+                  },
+                )
               : null,
         ),
       ),

@@ -4,8 +4,11 @@ import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
-import 'booking_receipt_screen.dart';
 import '../../../core/widgets/lifekit_loader.dart';
+
+// IMPORT THE TRACKING & CHAT SCREENS
+import 'booking_tracking_screen.dart';
+import '../../home/screens/chat_detail_screen.dart';
 
 class BookingsScreen extends StatefulWidget {
   const BookingsScreen({super.key});
@@ -19,7 +22,6 @@ class _BookingsScreenState extends State<BookingsScreen>
   final ApiService _apiService = ApiService();
   late TabController _tabController;
 
-  // Data State
   List<dynamic> clientBookings = [];
   List<dynamic> providerRequests = [];
   bool isLoading = true;
@@ -27,13 +29,10 @@ class _BookingsScreenState extends State<BookingsScreen>
   @override
   void initState() {
     super.initState();
-    // Tab 0: My Bookings (Client Mode)
-    // Tab 1: Client Requests (Provider Mode)
     _tabController = TabController(length: 2, vsync: this);
     _fetchData();
   }
 
-  // --- FETCH DATA (With Sorting) ---
   Future<void> _fetchData() async {
     try {
       final cBookings = await _apiService.getClientBookings();
@@ -41,18 +40,15 @@ class _BookingsScreenState extends State<BookingsScreen>
 
       if (mounted) {
         setState(() {
-          // 1. Sort Client Bookings: Closest Upcoming Date first
           cBookings.sort((a, b) {
             final dateA = DateTime.parse(a['scheduled_time']);
             final dateB = DateTime.parse(b['scheduled_time']);
-            return dateB.compareTo(dateA); // Newest/Future first
+            return dateB.compareTo(dateA);
           });
 
-          // 2. Sort Provider Requests: 'Pending' requests go to the top
           pRequests.sort((a, b) {
             if (a['status'] == 'pending' && b['status'] != 'pending') return -1;
             if (a['status'] != 'pending' && b['status'] == 'pending') return 1;
-            // Then sort by date
             return DateTime.parse(
               b['scheduled_time'],
             ).compareTo(DateTime.parse(a['scheduled_time']));
@@ -69,16 +65,42 @@ class _BookingsScreenState extends State<BookingsScreen>
     }
   }
 
-  // --- PROVIDER ACTION: Accept or Reject ---
+  void _goToTracking(dynamic booking, bool isClient) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            BookingTrackingScreen(booking: booking, isClient: isClient),
+      ),
+    );
+    _fetchData();
+  }
+
+  void _goToChat(dynamic booking, bool isClient) {
+    final otherUser = booking['profiles'];
+    final otherId = isClient ? booking['provider_id'] : booking['client_id'];
+
+    if (otherUser != null) {
+      final chatUserObj = {
+        'id': otherId,
+        'full_name': otherUser['full_name'],
+        'profile_picture_url': otherUser['profile_picture_url'],
+      };
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>
+              ChatDetailScreen(otherUser: chatUserObj, bookings: [booking]),
+        ),
+      );
+    }
+  }
+
   Future<void> _handleProviderAction(String id, String status) async {
     try {
-      // Show loading indicator temporarily
       setState(() => isLoading = true);
-
-      // Call Backend
       await _apiService.updateBookingStatus(id, status);
-
-      // Refresh Data to update UI
       await _fetchData();
 
       if (mounted) {
@@ -86,8 +108,8 @@ class _BookingsScreenState extends State<BookingsScreen>
           SnackBar(
             content: Text(
               status == 'confirmed'
-                  ? "Booking Accepted! Client notified."
-                  : "Booking Rejected. Funds refunded.",
+                  ? "Request Accepted! Client notified."
+                  : "Request Rejected.",
             ),
             backgroundColor: status == 'confirmed' ? Colors.green : Colors.red,
           ),
@@ -130,22 +152,15 @@ class _BookingsScreenState extends State<BookingsScreen>
         ),
       ),
       body: isLoading
-          ? const Center(child: const LifeKitLoader())
+          ? const Center(child: LifeKitLoader())
           : TabBarView(
               controller: _tabController,
-              children: [
-                _buildClientView(), // TAB 1
-                _buildProviderView(), // TAB 2
-              ],
+              children: [_buildClientView(), _buildProviderView()],
             ),
     );
   }
 
-  // =========================================================
-  // 1. CLIENT VIEW (My Bookings)
-  // =========================================================
   Widget _buildClientView() {
-    // PULL TO REFRESH WRAPPER
     return RefreshIndicator(
       onRefresh: _fetchData,
       color: AppColors.primary,
@@ -153,17 +168,12 @@ class _BookingsScreenState extends State<BookingsScreen>
           ? _buildEmptyState("No service booked yet.")
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
-              physics:
-                  const AlwaysScrollableScrollPhysics(), // Ensures pull-to-refresh works even if list is short
+              physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 1. HERO CARD (Top Most Booking)
                   _buildHeroBookingCard(clientBookings.first, isClient: true),
-
                   const SizedBox(height: 24),
-
-                  // 2. FILTER BAR (Visual)
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -171,33 +181,16 @@ class _BookingsScreenState extends State<BookingsScreen>
                         _buildFilterChip("Ongoing", true),
                         _buildFilterChip("Completed", false),
                         _buildFilterChip("Upcoming", false),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.tune,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                        ),
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 16),
-
-                  // 3. REMAINING LIST
                   if (clientBookings.length > 1)
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: clientBookings.length - 1,
                       itemBuilder: (context, index) {
-                        // Start from index 1 since 0 is the Hero Card
                         final booking = clientBookings[index + 1];
                         return _buildStandardBookingCard(
                           booking,
@@ -211,16 +204,12 @@ class _BookingsScreenState extends State<BookingsScreen>
     );
   }
 
-  // =========================================================
-  // 2. PROVIDER VIEW (Requests)
-  // =========================================================
   Widget _buildProviderView() {
-    // PULL TO REFRESH WRAPPER
     return RefreshIndicator(
       onRefresh: _fetchData,
       color: AppColors.primary,
       child: providerRequests.isEmpty
-          ? _buildEmptyState("No booking requests received yet.")
+          ? _buildEmptyState("No requests received yet.")
           : ListView.builder(
               padding: const EdgeInsets.all(20),
               physics: const AlwaysScrollableScrollPhysics(),
@@ -228,18 +217,13 @@ class _BookingsScreenState extends State<BookingsScreen>
               itemBuilder: (context, index) {
                 return _buildStandardBookingCard(
                   providerRequests[index],
-                  isClient: false, // Important flag for logic
+                  isClient: false,
                 );
               },
             ),
     );
   }
 
-  // =========================================================
-  // SHARED WIDGETS & CARDS
-  // =========================================================
-
-  // Empty State that supports Pull-To-Refresh
   Widget _buildEmptyState(String message) {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -266,14 +250,6 @@ class _BookingsScreenState extends State<BookingsScreen>
                 message,
                 style: GoogleFonts.poppins(color: Colors.grey, fontSize: 14),
               ),
-              const SizedBox(height: 8),
-              Text(
-                "Pull down to refresh",
-                style: GoogleFonts.poppins(
-                  color: Colors.grey[400],
-                  fontSize: 10,
-                ),
-              ),
             ],
           ),
         ),
@@ -281,15 +257,20 @@ class _BookingsScreenState extends State<BookingsScreen>
     );
   }
 
-  // THE BIG CARD AT THE TOP (Figma Style)
   Widget _buildHeroBookingCard(dynamic booking, {required bool isClient}) {
     final dateObj = DateTime.parse(booking['scheduled_time']);
-    final dateStr = DateFormat('dd MMM').format(dateObj); // 13 May
-    final price = booking['total_price'];
+    final dateStr = DateFormat('dd MMM').format(dateObj);
+    final num price = booking['total_price'] ?? 0;
     final serviceName = booking['services']['title'];
     final status = booking['status'];
 
-    // Who is the other person?
+    final String locationInfo = booking['location_details'] ?? "";
+    final bool isPrivateLocation =
+        locationInfo.isEmpty ||
+        locationInfo.toLowerCase() == "user home address";
+
+    final bool isSwap = (price == 0);
+
     final otherName = isClient
         ? (booking['profiles']?['full_name'] ?? "Provider")
         : (booking['profiles']?['full_name'] ?? "Client");
@@ -301,151 +282,251 @@ class _BookingsScreenState extends State<BookingsScreen>
     if (status == 'pending') {
       statusText = "Waiting Approval";
       statusColor = Colors.orange;
+    } else if (status == 'completed') {
+      statusText = "Completed";
+      statusColor = Colors.green;
+    } else if (status == 'cancelled') {
+      statusText = "Cancelled";
+      statusColor = Colors.red;
     }
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Colors.grey[200],
-                    backgroundImage: otherPic != null
-                        ? CachedNetworkImageProvider(otherPic)
-                        : const AssetImage('assets/images/onboarding1.png')
-                              as ImageProvider,
-                  ),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+      onTap: () => _goToTracking(booking, isClient),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.08),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Row(
                     children: [
-                      Text(
-                        statusText,
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: statusColor,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Colors.grey[200],
+                        backgroundImage: otherPic != null
+                            ? CachedNetworkImageProvider(otherPic)
+                            : const AssetImage('assets/images/onboarding1.png')
+                                  as ImageProvider,
                       ),
-                      Text(
-                        otherName,
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              statusText,
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                color: statusColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              otherName,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
                 ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFDE8E8), // Light Red background
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
+                Row(
                   children: [
-                    const Icon(
-                      Icons.calendar_today,
-                      size: 14,
+                    IconButton(
+                      icon: const Icon(
+                        Icons.chat_bubble_outline,
+                        color: Colors.blue,
+                        size: 22,
+                      ),
+                      onPressed: () => _goToChat(booking, isClient),
+                      constraints: const BoxConstraints(),
+                      padding: const EdgeInsets.only(right: 8),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFDE8E8),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        dateStr,
+                        style: GoogleFonts.poppins(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // ── Hero center content ──
+            isSwap
+                ? Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF7B2FF7), Color(0xFFE040FB)],
+                      ),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.swap_horiz_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          "Skill Swap",
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : Text(
+                    "\$${price.toStringAsFixed(2)}",
+                    style: GoogleFonts.poppins(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w800,
                       color: AppColors.primary,
                     ),
-                    const SizedBox(width: 6),
+                  ),
+
+            const SizedBox(height: 8),
+            Text(
+              "Service: $serviceName",
+              style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+            ),
+            if (isPrivateLocation)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.lock_outline,
+                      size: 14,
+                      color: Colors.orange,
+                    ),
+                    const SizedBox(width: 4),
                     Text(
-                      dateStr,
+                      "Message provider for details",
                       style: GoogleFonts.poppins(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
+                        fontSize: 11,
+                        color: Colors.orange[800],
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else if (locationInfo.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.location_on_outlined,
+                      size: 14,
+                      color: Colors.grey,
+                    ),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        locationInfo,
+                        style: GoogleFonts.poppins(
+                          fontSize: 11,
+                          color: Colors.grey[700],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Text(
-            "\$$price",
-            style: GoogleFonts.poppins(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            "Service Type: $serviceName",
-            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
-          ),
-          const SizedBox(height: 24),
 
-          // BUTTON: View Receipt (Escrow Logic)
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BookingReceiptScreen(
-                      booking: booking,
-                      isClient: isClient,
-                    ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () => _goToTracking(booking, isClient),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  elevation: 0,
                 ),
-                elevation: 0,
-              ),
-              child: Text(
-                "View Receipt",
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
+                child: Text(
+                  "Track Status",
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  // STANDARD LIST CARD
   Widget _buildStandardBookingCard(dynamic booking, {required bool isClient}) {
     final serviceName = booking['services']['title'];
-    final price = booking['total_price'];
+    final num price = booking['total_price'] ?? 0;
     final dateObj = DateTime.parse(booking['scheduled_time']);
     final dateStr = DateFormat('MMM dd, hh:mm a').format(dateObj);
     final status = booking['status'];
+
+    final String type = booking['service_type'] ?? "Default";
+    final String? note = booking['comments'];
+
+    final String locationInfo = booking['location_details'] ?? "";
+    final bool isPrivateLocation =
+        locationInfo.isEmpty ||
+        locationInfo.toLowerCase() == "user home address";
+
+    final bool isSwap = (price == 0);
 
     final otherName = isClient
         ? (booking['profiles']?['full_name'] ?? "Provider")
@@ -453,141 +534,292 @@ class _BookingsScreenState extends State<BookingsScreen>
 
     final otherPic = booking['profiles']?['profile_picture_url'];
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: otherPic != null
-                    ? CachedNetworkImage(
-                        imageUrl: otherPic,
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                      )
-                    : Image.asset(
-                        'assets/images/onboarding1.png',
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                      ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      serviceName,
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      "$otherName",
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    Text(
-                      dateStr,
-                      style: GoogleFonts.poppins(
-                        fontSize: 11,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    "\$$price",
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  if (isClient || status != 'pending')
-                    _buildStatusBadge(status),
-                ],
-              ),
-            ],
-          ),
-
-          // PROVIDER ACTIONS (Only for Provider View + Pending Status)
-          if (!isClient && status == 'pending') ...[
-            const SizedBox(height: 16),
-            const Divider(),
-            const SizedBox(height: 8),
+    return GestureDetector(
+      onTap: () => _goToTracking(booking, isClient),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.withOpacity(0.1)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Row(
               children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () =>
-                        _handleProviderAction(booking['id'], 'cancelled'),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.red),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: Text(
-                      "Reject",
-                      style: GoogleFonts.poppins(
-                        color: Colors.red,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: otherPic != null
+                      ? CachedNetworkImage(
+                          imageUrl: otherPic,
+                          width: 50,
+                          height: 50,
+                          fit: BoxFit.cover,
+                        )
+                      : Image.asset(
+                          'assets/images/onboarding1.png',
+                          width: 50,
+                          height: 50,
+                          fit: BoxFit.cover,
+                        ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed: () =>
-                        _handleProviderAction(booking['id'], 'confirmed'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        serviceName,
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      const SizedBox(height: 2),
+                      Text(
+                        otherName,
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // ── Price or Skill Swap badge ──
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    isSwap
+                        ? Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF7B2FF7), Color(0xFFE040FB)],
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.swap_horiz_rounded,
+                                  color: Colors.white,
+                                  size: 13,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  "Skill Swap",
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : Text(
+                            "\$${price.toStringAsFixed(2)}",
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.chat_bubble_outline,
+                        color: Colors.blue,
+                        size: 20,
+                      ),
+                      onPressed: () => _goToChat(booking, isClient),
+                      constraints: const BoxConstraints(),
+                      padding: const EdgeInsets.symmetric(vertical: 4),
                     ),
-                    child: Text(
-                      "Accept",
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    if (isClient || status != 'pending')
+                      _buildStatusBadge(status),
+                  ],
+                ),
+              ],
+            ),
+
+            const Divider(height: 24),
+
+            // ── Time & service type ──
+            Row(
+              children: [
+                const Icon(
+                  Icons.access_time_rounded,
+                  size: 14,
+                  color: Colors.grey,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  dateStr,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[50],
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    type,
+                    style: GoogleFonts.poppins(
+                      fontSize: 10,
+                      color: Colors.blue[800],
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ],
             ),
+
+            // ── Client note ──
+            if (note != null && note.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey[200]!),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Client Note:",
+                      style: GoogleFonts.poppins(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black54,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      note,
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
+            // ── Location ──
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Row(
+                children: [
+                  Icon(
+                    isPrivateLocation
+                        ? Icons.lock_outline
+                        : Icons.location_on_outlined,
+                    size: 14,
+                    color: isPrivateLocation ? Colors.orange : Colors.grey,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      isPrivateLocation
+                          ? "Message provider for details"
+                          : (isSwap ? "Swap: $locationInfo" : locationInfo),
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: isPrivateLocation
+                            ? Colors.orange[800]
+                            : Colors.grey[700],
+                        fontStyle: isPrivateLocation
+                            ? FontStyle.italic
+                            : FontStyle.normal,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Provider accept/reject actions ──
+            if (!isClient && status == 'pending') ...[
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () =>
+                          _handleProviderAction(booking['id'], 'cancelled'),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.red),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: Text(
+                        "Reject",
+                        style: GoogleFonts.poppins(
+                          color: Colors.red,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () =>
+                          _handleProviderAction(booking['id'], 'confirmed'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: Text(
+                        "Accept",
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

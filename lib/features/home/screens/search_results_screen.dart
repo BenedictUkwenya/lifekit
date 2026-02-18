@@ -3,61 +3,43 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
-import 'service_booking_detail_screen.dart';
-import '../../../core/widgets/lifekit_loader.dart';
+import '../../services/screens/service_booking_detail_screen.dart';
 
-class CategoryItemsScreen extends StatefulWidget {
-  final String categoryId;
-  final String categoryName;
-
-  const CategoryItemsScreen({
-    super.key,
-    required this.categoryId,
-    required this.categoryName,
-  });
+class SearchResultsScreen extends StatefulWidget {
+  final String query;
+  const SearchResultsScreen({super.key, required this.query});
 
   @override
-  State<CategoryItemsScreen> createState() => _CategoryItemsScreenState();
+  State<SearchResultsScreen> createState() => _SearchResultsScreenState();
 }
 
-class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
+class _SearchResultsScreenState extends State<SearchResultsScreen> {
   final ApiService _apiService = ApiService();
-  final TextEditingController _searchController = TextEditingController();
-
-  List<dynamic> allServices = [];
-  List<dynamic> filteredServices = [];
-  List<dynamic> subCategories = [];
-
   bool isLoading = true;
-  String? selectedFilterId;
-
-  // NEW: Variable to store the logged-in user's ID
+  List<dynamic> services = [];
+  List<dynamic> providers = [];
   String? currentUserId;
 
   @override
   void initState() {
     super.initState();
-    _fetchData();
+    _performSearch();
   }
 
-  Future<void> _fetchData() async {
+  Future<void> _performSearch() async {
     try {
-      // 1. Fetch Current User Profile to get ID
+      // 1. Fetch User ID (for "Me" check)
       final profileData = await _apiService.getUserProfile();
       final myId = profileData['profile']['id'];
 
-      // 2. Fetch Category Data
-      final subsData = await _apiService.getSubCategories(widget.categoryId);
-      final servicesData = await _apiService.getServicesByCategory(
-        widget.categoryId,
-      );
+      // 2. Perform Search
+      final data = await _apiService.search(widget.query);
 
       if (mounted) {
         setState(() {
-          currentUserId = myId; // Store the ID
-          subCategories = subsData;
-          allServices = servicesData;
-          filteredServices = allServices;
+          currentUserId = myId;
+          services = data['services'] ?? [];
+          providers = data['providers'] ?? [];
           isLoading = false;
         });
       }
@@ -66,245 +48,119 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
     }
   }
 
-  // --- ACTIONS ---
-  void _onSearchChanged(String query) {
-    setState(() {
-      filteredServices = allServices.where((s) {
-        final title = s['title']?.toString().toLowerCase() ?? '';
-        final provider =
-            s['profiles']?['full_name']?.toString().toLowerCase() ?? '';
-        return title.contains(query.toLowerCase()) ||
-            provider.contains(query.toLowerCase());
-      }).toList();
-    });
-  }
-
-  void _onFilterTap(String subId) {
-    setState(() {
-      if (selectedFilterId == subId) {
-        selectedFilterId = null;
-        filteredServices = allServices;
-      } else {
-        selectedFilterId = subId;
-        filteredServices = allServices
-            .where((s) => s['category_id'] == subId)
-            .toList();
-      }
-    });
-  }
-
-  void _showSortMenu() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              "Sort Results",
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 10),
-            ListTile(
-              leading: const Icon(Icons.star),
-              title: const Text("Top Rated"),
-              onTap: () {
-                setState(
-                  () => filteredServices.sort(
-                    (a, b) => (b['average_rating'] ?? 0).compareTo(
-                      a['average_rating'] ?? 0,
-                    ),
-                  ),
-                );
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.arrow_upward),
-              title: const Text("Price: Low to High"),
-              onTap: () {
-                setState(
-                  () => filteredServices.sort(
-                    (a, b) => (a['price'] ?? 0).compareTo(b['price'] ?? 0),
-                  ),
-                );
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFAFAFA),
+        backgroundColor: Colors.white,
         elevation: 0,
-        centerTitle: true,
         leading: const BackButton(color: Colors.black),
+        centerTitle: true,
         title: Text(
-          widget.categoryName,
+          'Results for "${widget.query}"',
           style: GoogleFonts.poppins(
             color: Colors.black,
-            fontWeight: FontWeight.bold,
             fontSize: 16,
+            fontWeight: FontWeight.bold,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              child: const Icon(Icons.tune, size: 20, color: Colors.black),
-            ),
-            onPressed: _showSortMenu,
-          ),
-          const SizedBox(width: 10),
-        ],
       ),
       body: isLoading
-          ? const Center(child: LifeKitLoader())
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
+          : services.isEmpty && providers.isEmpty
+          ? _buildEmptyState()
+          : ListView(
+              padding: const EdgeInsets.all(20),
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
-                  ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(30),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: TextField(
-                      controller: _searchController,
-                      onChanged: _onSearchChanged,
-                      decoration: InputDecoration(
-                        hintText: "Search ${widget.categoryName}...",
-                        hintStyle: GoogleFonts.poppins(
-                          color: Colors.grey[400],
-                          fontSize: 14,
-                        ),
-                        prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 14,
-                        ),
+                if (services.isNotEmpty) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Text(
+                      "Services",
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
                       ),
                     ),
                   ),
-                ),
+                  ...services.map((s) => _buildBeautifulServiceCard(s)),
+                  const SizedBox(height: 20),
+                ],
 
-                if (subCategories.isNotEmpty)
-                  SizedBox(
-                    height: 50,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      itemCount: subCategories.length,
-                      itemBuilder: (context, index) {
-                        final sub = subCategories[index];
-                        final isSelected = selectedFilterId == sub['id'];
-                        return GestureDetector(
-                          onTap: () => _onFilterTap(sub['id']),
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 10),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSelected ? Colors.black : Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: Colors.grey.shade200),
-                            ),
-                            child: Center(
-                              child: Text(
-                                sub['name'],
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: isSelected
-                                      ? Colors.white
-                                      : Colors.black,
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
+                // Show Providers
+                if (providers.isNotEmpty) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Text(
+                      "Providers",
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
-
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-                  child: Text(
-                    "Showing ${filteredServices.length} results",
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-
-                Expanded(
-                  child: filteredServices.isEmpty
-                      ? const Center(child: Text("No services found."))
-                      : ListView.builder(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 10,
-                          ),
-                          itemCount: filteredServices.length,
-                          itemBuilder: (context, index) =>
-                              _buildProviderCard(filteredServices[index]),
-                        ),
-                ),
+                  ...providers.map((p) => _buildSimpleProviderTile(p)),
+                ],
               ],
             ),
     );
   }
 
-  Widget _buildProviderCard(dynamic service) {
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.search_off, size: 60, color: Colors.grey),
+          const SizedBox(height: 16),
+          Text(
+            "No results found.",
+            style: GoogleFonts.poppins(color: Colors.grey),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- MODIFIED CARD WITH SUB-OPTION CHECK ---
+  Widget _buildBeautifulServiceCard(dynamic service) {
     final Map<String, dynamic> provider = service['profiles'] ?? {};
-    final String providerName = provider['full_name'] ?? "Unknown Provider";
+    final String providerName = provider['full_name'] ?? "Unknown";
     final String? providerPic = provider['profile_picture_url'];
+
+    // Real Data Logic
     final String location = service['location_text'] ?? "Online/Remote";
-    final price = service['price'] ?? 0;
-
-    // --- CHECK IF ME ---
-    final bool isMe = (service['provider_id'] == currentUserId);
-
-    // REAL DATA: Ratings
+    final double price = double.tryParse(service['price'].toString()) ?? 0.0;
+    final String currency = service['currency'] == 'NGN' ? '₦' : '\$';
     final double avgRating = (service['average_rating'] is int)
         ? (service['average_rating'] as int).toDouble()
         : (service['average_rating'] ?? 0.0);
 
-    // Image Logic
+    // Checks
+    final bool isMe = (service['provider_id'] == currentUserId);
+
+    // Image
     String? coverImage;
     var rawImages = service['image_urls'];
     if (rawImages != null && rawImages is List && rawImages.isNotEmpty) {
       coverImage = (rawImages[0] is String) ? rawImages[0] : null;
     }
 
+    // --- NEW: Check Sub-Options for Match ---
+    final List options = service['service_options'] ?? [];
+    bool matchesOption = options.any(
+      (opt) => opt['name'].toString().toLowerCase().contains(
+        widget.query.toLowerCase(),
+      ),
+    );
+
     return GestureDetector(
-      // --- NEW LOGIC: PREVENT SELF-BOOKING ---
       onTap: () {
-        if (service['provider_id'] == currentUserId) {
+        // Prevent Self-Booking
+        if (isMe) {
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
@@ -327,10 +183,9 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
               ],
             ),
           );
-          return; // Stop here, don't navigate
+          return;
         }
 
-        // Navigate normally if IDs don't match
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -349,7 +204,6 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          // Highlight border if Me
           border: isMe
               ? Border.all(
                   color: AppColors.primary.withOpacity(0.5),
@@ -366,6 +220,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
         ),
         child: Column(
           children: [
+            // Image Section
             SizedBox(
               height: 150,
               child: Stack(
@@ -387,7 +242,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
                     ),
                   ),
 
-                  // Location Badge
+                  // Location
                   Positioned(
                     top: 12,
                     left: 12,
@@ -420,7 +275,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
                     ),
                   ),
 
-                  // "YOUR LISTING" Badge
+                  // Me Badge
                   if (isMe)
                     Positioned(
                       top: 12,
@@ -445,6 +300,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
                       ),
                     ),
 
+                  // Avatar
                   Positioned(
                     bottom: 0,
                     left: 20,
@@ -467,6 +323,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
               ),
             ),
 
+            // Details Section
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
               child: Column(
@@ -478,7 +335,6 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
                       Padding(
                         padding: const EdgeInsets.only(left: 60),
                         child: Text(
-                          // Highlight Name if Me
                           isMe ? "$providerName (Me)" : providerName,
                           style: GoogleFonts.poppins(
                             fontWeight: FontWeight.bold,
@@ -487,12 +343,11 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
                           ),
                         ),
                       ),
-                      // REAL RATING DISPLAY
                       Row(
                         children: [
                           const Icon(Icons.star, size: 16, color: Colors.amber),
                           Text(
-                            avgRating == 0 ? " New" : " $avgRating",
+                            " ${avgRating == 0 ? 'New' : avgRating}",
                             style: GoogleFonts.poppins(
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
@@ -503,6 +358,29 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
+
+                  // --- NEW: MATCH BADGE ---
+                  if (matchesOption)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.blue[50],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        "Offers '${widget.query}'",
+                        style: GoogleFonts.poppins(
+                          fontSize: 10,
+                          color: Colors.blue[800],
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+
                   Row(
                     children: [
                       Container(
@@ -521,7 +399,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
                       ),
                       const Spacer(),
                       Text(
-                        "\$$price",
+                        "$currency$price",
                         style: GoogleFonts.poppins(
                           fontWeight: FontWeight.bold,
                           color: AppColors.primary,
@@ -536,6 +414,26 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  // Simple tile for direct provider matches (if any)
+  Widget _buildSimpleProviderTile(dynamic provider) {
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundImage: CachedNetworkImageProvider(
+          provider['profile_picture_url'] ?? '',
+        ),
+        backgroundColor: Colors.grey[200],
+      ),
+      title: Text(
+        provider['full_name'],
+        style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+      ),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () {
+        // Navigate to provider profile if needed
+      },
     );
   }
 }

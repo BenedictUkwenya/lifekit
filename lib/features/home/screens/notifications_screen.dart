@@ -8,7 +8,6 @@ import '../../../core/widgets/lifekit_loader.dart';
 // Navigation Targets
 import '../../bookings/screens/bookings_screen.dart';
 import 'chats_list_screen.dart';
-// import 'event_receipt_screen.dart'; // If you want to deep link to tickets later
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -44,38 +43,62 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   // --- ACTIONS ---
 
+  Future<void> _markAllRead() async {
+    // 1. Optimistic UI Update
+    setState(() {
+      for (var n in notifications) {
+        n['is_read'] = true;
+      }
+    });
+
+    // 2. Call API
+    try {
+      await _apiService.markAllNotificationsRead();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("All marked as read"),
+          duration: Duration(seconds: 1),
+        ),
+      );
+    } catch (e) {
+      // Handle error if needed
+    }
+  }
+
+  Future<void> _deleteNotification(int index, String id) async {
+    // 1. Remove from list immediately
+    setState(() {
+      notifications.removeAt(index);
+    });
+
+    // 2. Call API
+    try {
+      await _apiService.deleteNotification(id);
+    } catch (e) {
+      // Ideally revert UI change here if fail, but for delete it's rare
+      print("Delete failed: $e");
+    }
+  }
+
   Future<void> _handleTap(dynamic notif) async {
-    // 1. Mark as Read (Optimistic UI update)
     if (notif['is_read'] == false) {
       setState(() {
-        notif['is_read'] = true;
+        final index = notifications.indexOf(notif);
+        if (index != -1) notifications[index]['is_read'] = true;
       });
-      // Call API silently
       _apiService.markNotificationRead(notif['id']);
     }
 
-    // 2. Navigate based on Type
     final type = notif['type'];
-    // final refId = notif['reference_id']; // Use this if you want to fetch specific details
-
     if (type == 'chat_message') {
-      // Go to Chats List (Deep linking to specific chat requires fetching the booking object first)
       Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const ChatsListScreen()),
       );
-    } else if (type.toString().startsWith('booking_')) {
-      // Go to Bookings Tab
+    } else if (type.toString().startsWith('booking')) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const BookingsScreen()),
-      );
-    } else if (type == 'event_ticket') {
-      // Stay here or show snackbar, or go to wallet/history if you have one
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("View ticket in your email or transactions."),
-        ),
       );
     }
   }
@@ -96,6 +119,21 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          // MARK ALL READ BUTTON
+          if (notifications.isNotEmpty)
+            TextButton(
+              onPressed: _markAllRead,
+              child: Text(
+                "Mark all read",
+                style: GoogleFonts.poppins(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+        ],
       ),
       body: isLoading
           ? const Center(child: LifeKitLoader())
@@ -105,9 +143,32 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               padding: const EdgeInsets.all(20),
               itemCount: notifications.length,
               itemBuilder: (context, index) {
-                return _buildNotificationItem(notifications[index]);
+                final notif = notifications[index];
+                return _buildDismissibleItem(notif, index);
               },
             ),
+    );
+  }
+
+  // Wraps item in Dismissible to allow Swipe-to-Delete
+  Widget _buildDismissibleItem(dynamic notif, int index) {
+    return Dismissible(
+      key: Key(notif['id']),
+      direction: DismissDirection.endToStart, // Swipe left to delete
+      background: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.only(right: 20),
+        alignment: Alignment.centerRight,
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Icon(Icons.delete_outline, color: Colors.white),
+      ),
+      onDismissed: (direction) {
+        _deleteNotification(index, notif['id']);
+      },
+      child: _buildNotificationItem(notif),
     );
   }
 
@@ -143,9 +204,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isRead
-              ? Colors.white
-              : const Color(0xFFFFF9FA), // Light pink tint for unread
+          color: isRead ? Colors.white : const Color(0xFFFFF9FA),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isRead
@@ -165,12 +224,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ICON BASED ON TYPE
             _buildIcon(type),
-
             const SizedBox(width: 16),
-
-            // CONTENT
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,9 +290,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     } else if (type == 'event_ticket') {
       icon = Icons.confirmation_number_outlined;
       color = Colors.green;
-    } else if (type == 'service_review') {
-      icon = Icons.verified_outlined;
-      color = Colors.purple;
     } else {
       icon = Icons.notifications_outlined;
       color = Colors.grey;

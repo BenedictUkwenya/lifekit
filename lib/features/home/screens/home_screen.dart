@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-// --- CORE IMPORTS ---
+// --- CORE ---
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 
-// --- SCREEN IMPORTS ---
-import '../../services/screens/services_list_screen.dart'; // Full List
-import '../../services/screens/category_items_screen.dart'; // <--- DIRECT PROVIDER LIST
+// --- SCREENS ---
+import '../../services/screens/services_list_screen.dart';
+import '../../services/screens/category_items_screen.dart';
 import '../../services/screens/service_booking_detail_screen.dart';
 import '../../provider/screens/provider_onboarding_intro_screen.dart';
 import 'feeds_screen.dart';
@@ -19,6 +19,11 @@ import '../../bookings/screens/bookings_screen.dart';
 import 'chats_list_screen.dart';
 import 'notifications_screen.dart';
 import '../../profile/screens/profile_screen.dart';
+import 'search_results_screen.dart';
+
+// --- PLACES IMPORTS (ADDED) ---
+import '../../places/screens/places_list_screen.dart';
+import '../../places/screens/place_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -29,48 +34,95 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ApiService _apiService = ApiService();
+  final TextEditingController _searchController = TextEditingController();
 
-  // --- DATA STATE ---
   Map<String, dynamic>? userProfile;
   List<dynamic> offers = [];
   List<dynamic> categories = [];
-  List<dynamic> recentSearches = [];
+  List<String> recentSearches = [];
   List<dynamic> popularServices = [];
+  List<dynamic> nearbyPlaces = []; // NEW: Places Data
   bool isLoading = true;
 
-  // --- UI STATE ---
   int _currentNavIndex = 0;
   int _currentBannerIndex = 0;
+
+  // Badge Counts
+  int unreadNotifications = 0;
+  int unreadChats = 0;
 
   @override
   void initState() {
     super.initState();
+    _loadLocalRecents();
     _fetchAllData();
+    _fetchCounts();
+  }
+
+  Future<void> _fetchCounts() async {
+    try {
+      final data = await _apiService.getUnreadCounts();
+      if (mounted) {
+        setState(() {
+          unreadNotifications = data['notifications'] ?? 0;
+          unreadChats = data['chats'] ?? 0;
+        });
+      }
+    } catch (e) {
+      print("Error fetching counts: $e");
+    }
+  }
+
+  Future<void> _loadLocalRecents() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      recentSearches = prefs.getStringList('recent_searches') ?? [];
+      if (recentSearches.isEmpty) {
+        recentSearches = ["House Cleaning", "Plumber", "Barber"];
+      }
+    });
+  }
+
+  void _onSearch(String query) async {
+    if (query.trim().isEmpty) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    if (!recentSearches.contains(query)) {
+      recentSearches.insert(0, query);
+      if (recentSearches.length > 5) recentSearches.removeLast();
+      await prefs.setStringList('recent_searches', recentSearches);
+      setState(() {});
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => SearchResultsScreen(query: query)),
+    );
   }
 
   Future<void> _fetchAllData() async {
     try {
+      // 1. Load CRITICAL Data (Profile, Categories, Services)
       final results = await Future.wait([
         _apiService.getUserProfile(),
         _apiService.getOffers(),
         _apiService.getCategories(),
-        _apiService.getRecentSearches(),
         _apiService.getPopularServices(),
       ]);
 
       final profileData = results[0] as Map<String, dynamic>;
       var offersData = results[1] as List<dynamic>;
       final catsData = results[2] as List<dynamic>;
-      final recentsData = results[3] as List<dynamic>;
-      final popData = results[4] as List<dynamic>;
+      final popData = results[3] as List<dynamic>;
 
+      // Mock Offer if empty
       if (offersData.isEmpty) {
         offersData = [
           {
-            'title': 'Explore Soars Of\nDelfa Oceans',
+            'title': 'Get 20% off your\nfirst booking!',
             'image_url':
                 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
-            'description': 'Over 20,000 km',
+            'description': 'Valid until Oct 30',
           },
         ];
       }
@@ -80,15 +132,69 @@ class _HomeScreenState extends State<HomeScreen> {
           userProfile = profileData['profile'];
           offers = offersData;
           categories = catsData;
-          recentSearches = recentsData;
           popularServices = popData;
           isLoading = false;
         });
       }
+
+      // 2. Load OPTIONAL Data (Places - External API)
+      try {
+        final placesData = await _apiService.getNearbyPlaces(6.5244, 3.3792);
+        if (mounted) {
+          setState(() {
+            nearbyPlaces = placesData;
+          });
+        }
+      } catch (e) {
+        print("Places failed to load (ignoring): $e");
+      }
     } catch (e) {
       if (mounted) setState(() => isLoading = false);
-      print("Error fetching home data: $e");
+      print("Critical Home Fetch Error: $e");
     }
+  }
+
+  // --- ICONS HELPERS ---
+
+  String _getCategoryIcon(String name) {
+    name = name.toLowerCase();
+    if (name.contains('health') || name.contains('wellness'))
+      return 'https://cdn-icons-png.flaticon.com/512/2966/2966334.png';
+    if (name.contains('laundry'))
+      return 'https://cdn-icons-png.flaticon.com/512/2954/2954888.png';
+    if (name.contains('hair') || name.contains('beauty'))
+      return 'https://cdn-icons-png.flaticon.com/512/3050/3050257.png';
+    if (name.contains('family') || name.contains('care'))
+      return 'https://cdn-icons-png.flaticon.com/512/3050/3050226.png';
+    if (name.contains('plumb') || name.contains('maint'))
+      return 'https://cdn-icons-png.flaticon.com/512/3050/3050239.png';
+    if (name.contains('home'))
+      return 'https://cdn-icons-png.flaticon.com/512/619/619153.png';
+    if (name.contains('tech'))
+      return 'https://cdn-icons-png.flaticon.com/512/1055/1055687.png';
+    if (name.contains('clean'))
+      return 'https://cdn-icons-png.flaticon.com/512/995/995016.png';
+    if (name.contains('edu') || name.contains('tutor'))
+      return 'https://cdn-icons-png.flaticon.com/512/2232/2232688.png';
+    if (name.contains('lang') || name.contains('comm'))
+      return 'https://cdn-icons-png.flaticon.com/512/3898/3898082.png';
+    if (name.contains('event'))
+      return 'https://cdn-icons-png.flaticon.com/512/3132/3132084.png';
+    return 'https://cdn-icons-png.flaticon.com/512/1055/1055685.png';
+  }
+
+  Color _getCategoryColor(String name) {
+    name = name.toLowerCase();
+    if (name.contains('health')) return const Color(0xFFE3F2FD);
+    if (name.contains('laundry')) return const Color(0xFFE8F5E9);
+    if (name.contains('hair')) return const Color(0xFFF3E5F5);
+    if (name.contains('care') || name.contains('family'))
+      return const Color(0xFFFFEBEE);
+    if (name.contains('clean')) return const Color(0xFFE0F7FA);
+    if (name.contains('edu')) return const Color(0xFFFFF3E0);
+    if (name.contains('tech')) return const Color(0xFFECEFF1);
+    if (name.contains('event')) return const Color(0xFFFCE4EC);
+    return Colors.grey[100]!;
   }
 
   @override
@@ -111,37 +217,39 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: BottomNavigationBar(
           currentIndex: _currentNavIndex,
-          onTap: (index) => setState(() => _currentNavIndex = index),
+          onTap: (index) {
+            setState(() => _currentNavIndex = index);
+            _fetchCounts();
+          },
           type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.white,
           selectedItemColor: AppColors.primary,
           unselectedItemColor: Colors.grey,
           showSelectedLabels: true,
-          showUnselectedLabels: true,
           selectedLabelStyle: GoogleFonts.poppins(
             fontSize: 10,
             fontWeight: FontWeight.w600,
           ),
           unselectedLabelStyle: GoogleFonts.poppins(fontSize: 10),
           elevation: 0,
-          items: const [
-            BottomNavigationBarItem(
+          items: [
+            const BottomNavigationBarItem(
               icon: Icon(Icons.home_filled),
               label: "Home",
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.calendar_today_outlined),
               label: "Bookings",
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.grid_view_outlined),
               label: "Feeds",
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_outline),
+              icon: _buildBadgeIcon(Icons.chat_bubble_outline, unreadChats),
               label: "Chats",
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),
               label: "Profile",
             ),
@@ -151,7 +259,37 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // --- TAB 0 CONTENT ---
+  Widget _buildBadgeIcon(IconData icon, int count) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Icon(icon),
+        if (count > 0)
+          Positioned(
+            right: -2,
+            top: -2,
+            child: Container(
+              padding: const EdgeInsets.all(3),
+              decoration: const BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+              ),
+              constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+              child: Text(
+                '$count',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 8,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _buildHomeContent() {
     return Stack(
       children: [
@@ -165,7 +303,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-
         isLoading
             ? const Center(child: LifeKitLoader())
             : SafeArea(
@@ -195,31 +332,35 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       }),
                       const SizedBox(height: 12),
-                      // --- ROW WITH SCROLL FIX ---
                       _buildServicesRow(),
-
                       const SizedBox(height: 24),
 
-                      _buildSectionHeader(
-                        "Recent searches",
-                        null,
-                        showSeeAll: false,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildRecentSearchesList(),
+                      if (recentSearches.isNotEmpty) ...[
+                        _buildSectionHeader(
+                          "Recent searches",
+                          null,
+                          showSeeAll: false,
+                        ),
+                        const SizedBox(height: 12),
+                        _buildRecentSearchesList(),
+                        const SizedBox(height: 24),
+                      ],
 
-                      const SizedBox(height: 24),
-
+                      // --- PLACES SECTION ---
                       _buildSectionHeader("Places", () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const ServicesListScreen(),
+                            builder: (_) => const PlacesListScreen(),
                           ),
                         );
                       }),
                       const SizedBox(height: 16),
+
+                      // --- HORIZONTAL PLACES ROW ---
                       _buildPlacesList(),
+
+                      const SizedBox(height: 40),
                     ],
                   ),
                 ),
@@ -228,13 +369,141 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // --- WIDGETS ---
+  // --- PLACES: HORIZONTAL SCROLL ROW ---
+  Widget _buildPlacesList() {
+    if (nearbyPlaces.isEmpty) {
+      return Center(
+        child: Text(
+          "No places nearby.",
+          style: GoogleFonts.poppins(color: Colors.grey),
+        ),
+      );
+    }
+
+    // Show up to 6 cards horizontally
+    final displayPlaces = nearbyPlaces.length > 6
+        ? nearbyPlaces.sublist(0, 6)
+        : nearbyPlaces;
+
+    return SizedBox(
+      height: 220, // Fixed height for the horizontal row
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: displayPlaces.length,
+        itemBuilder: (context, index) {
+          final place = displayPlaces[index];
+          final imgUrl = (place['image_urls'] as List).isNotEmpty
+              ? place['image_urls'][0]
+              : "https://via.placeholder.com/400";
+
+          return GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => PlaceDetailScreen(place: place),
+              ),
+            ),
+            child: Container(
+              width: 180, // Fixed card width
+              margin: EdgeInsets.only(
+                right: index == displayPlaces.length - 1 ? 0 : 16,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.08),
+                    blurRadius: 15,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Image
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
+                    child: CachedNetworkImage(
+                      imageUrl: imgUrl,
+                      height: 120,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  // Info
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          place['name'],
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.star,
+                              size: 12,
+                              color: Colors.amber,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              "${place['rating']}",
+                              style: GoogleFonts.poppins(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            const Icon(
+                              Icons.circle,
+                              size: 3,
+                              color: Colors.grey,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                place['city'] ?? '',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  color: Colors.grey,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // --- EXISTING WIDGETS ---
 
   Widget _buildHeader() {
     String name = userProfile?['full_name'] ?? 'User';
     String firstName = name.split(' ')[0];
     String? profilePic = userProfile?['profile_picture_url'];
-
     return Row(
       children: [
         CircleAvatar(
@@ -258,61 +527,26 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.black,
                 ),
               ),
-              Row(
-                children: [
-                  Flexible(
-                    child: Text(
-                      "Explore the soars of delfa oceans",
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: Colors.black87,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  const Text("🌊", style: TextStyle(fontSize: 12)),
-                ],
+              Text(
+                "Explore the soars of delfa oceans",
+                style: GoogleFonts.poppins(fontSize: 12, color: Colors.black87),
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
         ),
         const SizedBox(width: 8),
         GestureDetector(
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const NotificationsScreen()),
-          ),
-          child: const _HeaderIconBtn(
+          onTap: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+            );
+            _fetchCounts();
+          },
+          child: _HeaderIconBtn(
             icon: Icons.notifications_outlined,
-            hasBadge: true,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Container(
-          width: 40,
-          height: 40,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 8,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          alignment: Alignment.center,
-          child: ClipOval(
-            child: Image.network(
-              "https://flagcdn.com/w40/ng.png",
-              width: 22,
-              height: 22,
-              fit: BoxFit.cover,
-              errorBuilder: (c, e, s) =>
-                  const Icon(Icons.flag, color: Colors.green, size: 20),
-            ),
+            hasBadge: unreadNotifications > 0,
           ),
         ),
       ],
@@ -333,6 +567,9 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       child: TextField(
+        controller: _searchController,
+        onSubmitted: _onSearch,
+        textInputAction: TextInputAction.search,
         decoration: InputDecoration(
           hintText: "Search...",
           hintStyle: GoogleFonts.poppins(color: Colors.grey[400]),
@@ -344,11 +581,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // --- UPDATED: SCROLLABLE SERVICES ROW (Fixes Overflow) ---
   Widget _buildServicesRow() {
     List<Widget> rowItems = [];
-
-    // 1. CREATE SERVICE (Fixed)
     rowItems.add(
       Padding(
         padding: const EdgeInsets.only(right: 15),
@@ -366,32 +600,17 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-
-    // 2. DYNAMIC CATEGORIES (First 3)
     int count = 0;
     for (var cat in categories) {
-      if (count >= 3) break;
-
-      Color bg = count == 0
-          ? const Color(0xFFE3F2FD)
-          : (count == 1 ? const Color(0xFFFFF3E0) : const Color(0xFFF9FBE7));
-      Color iconColor = count == 0
-          ? Colors.blue
-          : (count == 1 ? Colors.orange : Colors.lime);
-      IconData icon = count == 0
-          ? Icons.spa
-          : (count == 1 ? Icons.content_cut : Icons.clean_hands);
-
+      if (count >= 4) break;
       rowItems.add(
         Padding(
           padding: const EdgeInsets.only(right: 15),
           child: _ServiceItem(
-            color: bg,
-            iconColor: iconColor,
-            icon: icon,
+            color: _getCategoryColor(cat['name']),
+            imageUrl: _getCategoryIcon(cat['name']),
             label: cat['name'],
             onTap: () {
-              // --- NAVIGATION FIX: Direct to Provider List ---
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -407,16 +626,14 @@ class _HomeScreenState extends State<HomeScreen> {
       );
       count++;
     }
-
-    // 3. MORE SERVICES (Fixed)
     rowItems.add(
       Padding(
         padding: const EdgeInsets.only(right: 5),
         child: _ServiceItem(
           color: const Color(0xFFF3E5F5),
-          iconColor: Colors.purple,
           icon: Icons.grid_view_rounded,
           label: "More\nServices",
+          iconColor: Colors.purple,
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const ServicesListScreen()),
@@ -424,7 +641,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20),
       decoration: BoxDecoration(
@@ -438,7 +654,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      // FIX: Use SingleChildScrollView for Horizontal Scroll
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -446,6 +661,47 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: rowItems,
         ),
+      ),
+    );
+  }
+
+  Widget _buildRecentSearchesList() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: recentSearches.map((term) {
+          return GestureDetector(
+            onTap: () => _onSearch(term),
+            child: Container(
+              margin: const EdgeInsets.only(right: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.05),
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.history, size: 16, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  Text(
+                    term,
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
@@ -550,198 +806,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildRecentSearchesList() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: recentSearches.map((item) {
-          return Container(
-            width: 200,
-            margin: const EdgeInsets.only(right: 12),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.05),
-                  blurRadius: 5,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.search,
-                    size: 18,
-                    color: Colors.black54,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item['search_term'] ?? 'Search',
-                        style: GoogleFonts.poppins(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        'Just now',
-                        style: GoogleFonts.poppins(
-                          fontSize: 11,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildPlacesList() {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: popularServices.length,
-      itemBuilder: (context, index) {
-        final service = popularServices[index];
-        final imgUrl =
-            (service['image_urls'] is List &&
-                (service['image_urls'] as List).isNotEmpty)
-            ? service['image_urls'][0]
-            : null;
-        final providerName = service['profiles']?['full_name'] ?? "Unknown";
-
-        return GestureDetector(
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ServiceBookingDetailScreen(
-                serviceId: service['id'],
-                providerId: service['provider_id'],
-                providerName: providerName,
-                providerPic: service['profiles']?['profile_picture_url'],
-                serviceTitle: service['title'],
-              ),
-            ),
-          ),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(20),
-                  ),
-                  child: imgUrl != null
-                      ? CachedNetworkImage(
-                          imageUrl: imgUrl,
-                          height: 160,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        )
-                      : Container(
-                          height: 160,
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.image, color: Colors.grey),
-                        ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              service['title'],
-                              style: GoogleFonts.poppins(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Text(
-                              service['location_text'] ?? "Unknown",
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            "5 km",
-                            style: GoogleFonts.poppins(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.star,
-                                color: Colors.amber,
-                                size: 14,
-                              ),
-                              Text(
-                                " 4.5",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildSectionHeader(
     String title,
     VoidCallback? onTap, {
@@ -821,14 +885,16 @@ class _HeaderIconBtn extends StatelessWidget {
 
 class _ServiceItem extends StatelessWidget {
   final Color color;
-  final IconData icon;
+  final IconData? icon;
+  final String? imageUrl;
   final String label;
   final VoidCallback onTap;
   final bool isIconWhite;
   final Color? iconColor;
   const _ServiceItem({
     required this.color,
-    required this.icon,
+    this.icon,
+    this.imageUrl,
     required this.label,
     required this.onTap,
     this.isIconWhite = false,
@@ -843,18 +909,20 @@ class _ServiceItem extends StatelessWidget {
           Container(
             width: 56,
             height: 56,
+            padding: imageUrl != null ? const EdgeInsets.all(12) : null,
             decoration: BoxDecoration(
               color: isIconWhite ? color : color.withOpacity(0.5),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              icon,
-              color: isIconWhite ? Colors.white : iconColor,
-              size: 26,
-            ),
+            child: imageUrl != null
+                ? CachedNetworkImage(imageUrl: imageUrl!, fit: BoxFit.contain)
+                : Icon(
+                    icon,
+                    color: isIconWhite ? Colors.white : iconColor,
+                    size: 26,
+                  ),
           ),
           const SizedBox(height: 8),
-          // Text Constraint to prevent Overflow
           SizedBox(
             width: 70,
             child: Text(

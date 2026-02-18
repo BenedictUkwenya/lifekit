@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// 1. CART ITEM MODEL (Now with JSON conversion support)
+// 1. CART ITEM MODEL (Updated with 'comments')
 class CartItem {
   final String id;
   final String serviceId;
@@ -12,7 +12,9 @@ class CartItem {
   final String providerId;
   DateTime date;
   TimeOfDay time;
-  String serviceType;
+  String serviceType; // <--- Add this
+  final String? location; // <--- Add this
+  final String? comments; // <--- 1. Added Field
   int quantity;
 
   CartItem({
@@ -24,7 +26,9 @@ class CartItem {
     required this.providerId,
     required this.date,
     required this.time,
-    this.serviceType = 'Default',
+    required this.serviceType, // <--- Add this
+    this.location, // <--- Add this
+    this.comments = '', // <--- 2. Added to Constructor (Default empty)
     this.quantity = 1,
   });
 
@@ -41,6 +45,7 @@ class CartItem {
       'time_hour': time.hour,
       'time_minute': time.minute,
       'serviceType': serviceType,
+      'comments': comments, // <--- 3. Added to JSON export
       'quantity': quantity,
     };
   }
@@ -51,12 +56,15 @@ class CartItem {
       id: json['id'],
       serviceId: json['serviceId'],
       title: json['title'],
-      price: json['price'],
+      price: (json['price'] as num).toDouble(), // Safe cast for double
       imageUrl: json['imageUrl'],
       providerId: json['providerId'],
       date: DateTime.parse(json['date']),
       time: TimeOfDay(hour: json['time_hour'], minute: json['time_minute']),
-      serviceType: json['serviceType'],
+      serviceType: json['serviceType'] ?? 'Default',
+      comments:
+          json['comments'] ??
+          '', // <--- 4. Added to JSON import (with safety check)
       quantity: json['quantity'],
     );
   }
@@ -88,9 +96,15 @@ class CartProvider extends ChangeNotifier {
     if (prefs.containsKey('user_cart')) {
       final String? encodedData = prefs.getString('user_cart');
       if (encodedData != null) {
-        final List<dynamic> decodedList = jsonDecode(encodedData);
-        _items = decodedList.map((item) => CartItem.fromJson(item)).toList();
-        notifyListeners();
+        try {
+          final List<dynamic> decodedList = jsonDecode(encodedData);
+          _items = decodedList.map((item) => CartItem.fromJson(item)).toList();
+          notifyListeners();
+        } catch (e) {
+          print("Error loading cart: $e");
+          // Optional: clear corrupted data
+          // prefs.remove('user_cart');
+        }
       }
     }
   }
@@ -98,9 +112,13 @@ class CartProvider extends ChangeNotifier {
   // --- CART ACTIONS ---
 
   void addToCart(CartItem item) {
-    // Check if exact item exists to just increase quantity instead of duplicating
+    // Check if exact item exists (Same Service + Same Date + Same Options)
+    // We strictly compare comments too, because "No Onions" vs "Extra Onions" are different items.
     int index = _items.indexWhere(
-      (i) => i.serviceId == item.serviceId && i.date == item.date,
+      (i) =>
+          i.serviceId == item.serviceId &&
+          i.date == item.date &&
+          i.comments == item.comments,
     );
 
     if (index != -1) {

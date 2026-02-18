@@ -2,13 +2,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
-import '../../../core/widgets/lifekit_loader.dart';
 
 class ChatDetailScreen extends StatefulWidget {
-  final Map<String, dynamic> otherUser;
-  final List<dynamic> bookings;
+  final dynamic otherUser;
+  final List
+  bookings; // Passed to contextually switch, though usually 1-on-1 per booking now
 
   const ChatDetailScreen({
     super.key,
@@ -22,85 +23,88 @@ class ChatDetailScreen extends StatefulWidget {
 
 class _ChatDetailScreenState extends State<ChatDetailScreen> {
   final ApiService _apiService = ApiService();
-  final TextEditingController _controller = TextEditingController();
+  final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
   List<dynamic> messages = [];
   bool isLoading = true;
-  Timer? _timer;
-  String? myUserId;
+  bool isSending = false;
 
-  // Determines which booking we are currently sending messages about
-  late dynamic activeBooking;
+  // Current Booking Context
+  late dynamic currentBooking;
+  bool isChatLocked = false;
 
   @override
   void initState() {
     super.initState();
-    // Default to the most recent booking (first in list)
-    activeBooking = widget.bookings.first;
+    // Default to the first booking passed
+    if (widget.bookings.isNotEmpty) {
+      _selectBooking(widget.bookings[0]);
+    }
+    // Start Polling (Real-time simulation)
+    _startPolling();
+  }
 
-    _getId();
+  void _selectBooking(dynamic booking) {
+    setState(() {
+      currentBooking = booking;
+      // Check Status for Locking
+      String status = booking['status'] ?? 'pending';
+      isChatLocked = (status == 'completed' || status == 'cancelled');
+    });
     _fetchMessages();
-    _timer = Timer.periodic(
-      const Duration(seconds: 5),
-      (timer) => _fetchMessages(),
-    );
   }
 
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
+  void _startPolling() {
+    Future.delayed(const Duration(seconds: 5), () {
+      if (mounted) {
+        _fetchMessages(isPolling: true);
+        _startPolling();
+      }
+    });
   }
 
-  Future<void> _getId() async {
-    final profile = await _apiService.getUserProfile();
-    if (mounted) setState(() => myUserId = profile['profile']['id']);
-  }
-
-  Future<void> _fetchMessages() async {
+  Future<void> _fetchMessages({bool isPolling = false}) async {
     try {
-      // Extract all IDs
-      List<String> ids = widget.bookings
-          .map((b) => b['id'].toString())
-          .toList();
-      final data = await _apiService.getChatHistory(ids);
+      final data = await _apiService.getMessages(currentBooking['id']);
       if (mounted) {
         setState(() {
           messages = data;
-          isLoading = false;
+          if (!isPolling) isLoading = false;
         });
+        if (!isPolling) _scrollToBottom();
       }
     } catch (e) {
-      print(e);
+      if (!isPolling) setState(() => isLoading = false);
     }
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   Future<void> _sendMessage() async {
-    if (_controller.text.trim().isEmpty) return;
-    final text = _controller.text;
-    _controller.clear();
+    if (_messageController.text.trim().isEmpty || isChatLocked) return;
+
+    final content = _messageController.text;
+    _messageController.clear();
+    setState(() => isSending = true);
 
     try {
-      // Send to the ACTIVE booking ID
-      await _apiService.sendMessage(activeBooking['id'], text);
-      _fetchMessages();
+      await _apiService.sendMessage(currentBooking['id'], content);
+      setState(() => isSending = false);
+      _fetchMessages(isPolling: true);
+      _scrollToBottom();
     } catch (e) {
-      print("Error sending: $e");
-    }
-  }
-
-  // --- PROVIDER ACTIONS ---
-  Future<void> _updateStatus(String status) async {
-    try {
-      await _apiService.updateBookingStatus(activeBooking['id'], status);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Booking $status")));
-
-      // Update local state to reflect change visually immediately
-      setState(() {
-        activeBooking['status'] = status;
-      });
-    } catch (e) {
+      setState(() => isSending = false);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Error: $e")));
@@ -109,207 +113,355 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final pic = widget.otherUser['profile_picture_url'];
-    final name = widget.otherUser['full_name'] ?? 'User';
-
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: const BackButton(color: Colors.black),
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundImage: pic != null
-                  ? CachedNetworkImageProvider(pic)
-                  : null,
-              child: pic == null
-                  ? Text(name[0], style: const TextStyle(color: Colors.black))
-                  : null,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                name,
-                style: GoogleFonts.poppins(
-                  color: Colors.black,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-      ),
+      backgroundColor: const Color(0xFFF5F7FA), // Light grey background
+      appBar: _buildModernAppBar(),
       body: Column(
         children: [
-          // --- BOOKING INFO CARD (Scrollable if multiple) ---
-          Container(
-            height: 130, // Fixed height for card
-            color: Colors.grey[50],
-            child: PageView.builder(
-              itemCount: widget.bookings.length,
-              onPageChanged: (index) {
-                setState(() => activeBooking = widget.bookings[index]);
-              },
-              itemBuilder: (context, index) {
-                return _buildBookingCard(widget.bookings[index]);
-              },
-            ),
-          ),
+          // 1. UNIQUE: Service Context Ticket
+          _buildServiceTicket(),
 
-          if (widget.bookings.length > 1)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Text(
-                "${widget.bookings.length} Bookings - Swipe to switch context",
-                style: TextStyle(fontSize: 10, color: Colors.grey),
-              ),
-            ),
-
-          const Divider(height: 1),
-
-          // --- CHAT AREA ---
+          // 2. Chat Area
           Expanded(
             child: isLoading
-                ? const Center(child: const LifeKitLoader())
+                ? const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  )
+                : messages.isEmpty
+                ? _buildEmptyState()
                 : ListView.builder(
-                    padding: const EdgeInsets.all(20),
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 20,
+                    ),
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
                       final msg = messages[index];
-                      final isMe = msg['sender_id'] == myUserId;
-                      return _buildMessageBubble(
-                        msg['content'],
-                        isMe,
-                        msg['created_at'],
-                      );
+                      // Identify sender. If sender_id matches OtherUser ID, it's incoming.
+                      bool isMe = msg['sender_id'] != widget.otherUser['id'];
+                      return _buildMessageBubble(msg, isMe);
                     },
                   ),
           ),
 
-          // --- INPUT AREA ---
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(top: BorderSide(color: Colors.grey.shade200)),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    decoration: InputDecoration(
-                      hintText:
-                          "Message about: ${activeBooking['service_title']}",
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                      ),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: _sendMessage,
-                  icon: const Icon(Icons.send, color: AppColors.primary),
-                ),
-              ],
-            ),
-          ),
+          // 3. Input Area OR Locked Message
+          if (isChatLocked) _buildLockedFooter() else _buildInputArea(),
         ],
       ),
     );
   }
 
-  Widget _buildBookingCard(dynamic booking) {
-    final status = booking['status'];
-    final bool isPending = status == 'pending';
+  // --- WIDGETS ---
+
+  AppBar _buildModernAppBar() {
+    return AppBar(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      leading: const BackButton(color: Colors.black),
+      titleSpacing: 0,
+      title: Row(
+        children: [
+          CircleAvatar(
+            radius: 18,
+            backgroundColor: Colors.grey[200],
+            backgroundImage: widget.otherUser['profile_picture_url'] != null
+                ? CachedNetworkImageProvider(
+                    widget.otherUser['profile_picture_url'],
+                  )
+                : null,
+            child: widget.otherUser['profile_picture_url'] == null
+                ? const Icon(Icons.person, size: 20, color: Colors.grey)
+                : null,
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.otherUser['full_name'] ?? 'User',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              if (!isChatLocked)
+                Text(
+                  "Online",
+                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.green),
+                ),
+            ],
+          ),
+        ],
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.phone_outlined, color: Colors.black),
+          onPressed: () {},
+        ),
+        const SizedBox(width: 10),
+      ],
+    );
+  }
+
+  // The "Ticket" at the top showing what we are talking about
+  Widget _buildServiceTicket() {
+    if (currentBooking == null) return const SizedBox();
+
+    final serviceName = currentBooking['services']?['title'] ?? 'Service';
+    final price = currentBooking['total_price'] ?? 0;
+    bool isSwap = price == 0;
+    String status = currentBooking['status'] ?? 'pending';
 
     return Container(
-      margin: const EdgeInsets.all(10),
-      padding: const EdgeInsets.all(12),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+        border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
         ],
       ),
       child: Row(
         children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              isSwap ? Icons.swap_horiz : Icons.receipt_long,
+              color: AppColors.primary,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  booking['service_title'],
-                  style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                  serviceName,
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
                 ),
                 Text(
-                  "\$${booking['price']} • ${status.toUpperCase()}",
+                  "Status: ${status.toUpperCase()}",
                   style: GoogleFonts.poppins(
-                    fontSize: 12,
+                    fontSize: 11,
                     color: _getStatusColor(status),
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
             ),
           ),
-          if (isPending) ...[
-            // Provider Actions inside Chat
-            IconButton(
-              icon: const Icon(Icons.check_circle, color: Colors.green),
-              onPressed: () => _updateStatus('confirmed'),
-              tooltip: "Accept",
-            ),
-            IconButton(
-              icon: const Icon(Icons.cancel, color: Colors.red),
-              onPressed: () => _updateStatus('cancelled'),
-              tooltip: "Reject",
-            ),
-          ] else
-            const Icon(Icons.info_outline, color: Colors.grey),
+          if (widget.bookings.length > 1)
+            const Icon(
+              Icons.keyboard_arrow_down,
+              color: Colors.grey,
+            ), // Hint they can switch
         ],
       ),
     );
   }
 
-  Widget _buildMessageBubble(String text, bool isMe, String time) {
+  Widget _buildMessageBubble(dynamic msg, bool isMe) {
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.75,
+        ),
         decoration: BoxDecoration(
-          color: isMe ? AppColors.primary : Colors.grey[200],
-          borderRadius: BorderRadius.circular(16),
+          color: isMe ? AppColors.primary : Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(16),
+            topRight: const Radius.circular(16),
+            bottomLeft: isMe ? const Radius.circular(16) : Radius.zero,
+            bottomRight: isMe ? Radius.zero : const Radius.circular(16),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Text(
-          text,
+          msg['content'],
           style: GoogleFonts.poppins(
-            color: isMe ? Colors.white : Colors.black,
-            fontSize: 13,
+            fontSize: 14,
+            color: isMe ? Colors.white : Colors.black87,
           ),
         ),
+      ),
+    );
+  }
+
+  // The "Beautiful" Floating Input
+  Widget _buildInputArea() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      color: Colors.transparent, // Floating feel
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: TextField(
+                      controller: _messageController,
+                      decoration: InputDecoration(
+                        hintText: "Type your message...",
+                        hintStyle: GoogleFonts.poppins(color: Colors.grey[400]),
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.attach_file, color: Colors.grey),
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          GestureDetector(
+            onTap: isSending ? null : _sendMessage,
+            child: Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.4),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: isSending
+                  ? const Padding(
+                      padding: EdgeInsets.all(15),
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Icon(
+                      Icons.send_rounded,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // The "Chat Locked" Footer
+  Widget _buildLockedFooter() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20),
+        ],
+      ),
+      child: Column(
+        children: [
+          const Icon(Icons.lock_outline, color: Colors.grey, size: 30),
+          const SizedBox(height: 8),
+          Text(
+            "This service is marked as ${currentBooking['status']}.",
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+          Text(
+            "Messaging is disabled for completed or cancelled services.",
+            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: const Icon(Icons.waving_hand, size: 40, color: Colors.amber),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            "Say Hello!",
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+            ),
+          ),
+          Text(
+            "Start the conversation to discuss details.",
+            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[400]),
+          ),
+        ],
       ),
     );
   }
 
   Color _getStatusColor(String status) {
     if (status == 'confirmed') return Colors.green;
+    if (status == 'completed') return AppColors.primary;
     if (status == 'cancelled') return Colors.red;
-    if (status == 'pending') return Colors.orange;
-    return Colors.black;
+    return Colors.orange;
   }
 }

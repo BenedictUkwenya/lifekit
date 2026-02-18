@@ -209,8 +209,12 @@ class CartScreen extends StatelessWidget {
                     height: 70,
                     width: 70,
                     fit: BoxFit.cover,
-                    errorWidget: (c, u, e) =>
-                        Container(color: Colors.grey[200]),
+                    placeholder: (context, url) =>
+                        const CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => Image.asset(
+                      'assets/images/default_service.png',
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),

@@ -1,6 +1,8 @@
+import 'dart:io'; // Needed for File
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:image_picker/image_picker.dart'; // Ensure you have this package
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 
@@ -14,11 +16,15 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final ApiService _apiService = ApiService();
+
+  // Controllers
   final _nameController = TextEditingController();
   final _usernameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _bioController = TextEditingController();
+
   bool isLoading = false;
+  File? _selectedImage; // To store the locally picked image
 
   @override
   void initState() {
@@ -29,33 +35,66 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _bioController.text = widget.profile['bio'] ?? '';
   }
 
+  // --- 1. PICK IMAGE FUNCTION ---
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      setState(() {
+        _selectedImage = File(image.path);
+      });
+    }
+  }
+
+  // --- 2. UPDATED SAVE FUNCTION ---
   Future<void> _save() async {
     setState(() => isLoading = true);
     try {
+      // A. If user picked a new image, upload it first
+      if (_selectedImage != null) {
+        await _apiService.uploadProfilePic(_selectedImage!);
+      }
+
+      // B. Update text details
       await _apiService.updateProfile(
         fullName: _nameController.text,
         username: _usernameController.text,
         phone: _phoneController.text,
         bio: _bioController.text,
       );
+
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("Profile Updated!")));
-        Navigator.pop(context); // Go back
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Profile Updated!"),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
         setState(() => isLoading = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Error: $e")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+        );
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Determine which image to show (Local > Network > Placeholder)
+    ImageProvider? imageProvider;
+    if (_selectedImage != null) {
+      imageProvider = FileImage(_selectedImage!);
+    } else if (widget.profile['profile_picture_url'] != null) {
+      imageProvider = CachedNetworkImageProvider(
+        widget.profile['profile_picture_url'],
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -77,28 +116,43 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             Center(
               child: Stack(
                 children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage:
-                        widget.profile['profile_picture_url'] != null
-                        ? CachedNetworkImageProvider(
-                            widget.profile['profile_picture_url'],
-                          )
-                        : null,
+                  // Profile Image
+                  GestureDetector(
+                    onTap: _pickImage, // Allow clicking the image itself too
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.grey[200],
+                      backgroundImage: imageProvider,
+                      child: imageProvider == null
+                          ? const Icon(
+                              Icons.person,
+                              size: 50,
+                              color: Colors.grey,
+                            )
+                          : null,
+                    ),
                   ),
+
+                  // Camera Icon
                   Positioned(
                     bottom: 0,
                     right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: const BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.camera_alt,
-                        color: Colors.white,
-                        size: 16,
+                    child: GestureDetector(
+                      onTap: _pickImage, // Allow clicking the icon
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(color: Colors.white, spreadRadius: 2),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          color: Colors.white,
+                          size: 18,
+                        ),
                       ),
                     ),
                   ),
