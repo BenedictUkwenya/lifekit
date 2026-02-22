@@ -8,12 +8,13 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
   // CONFIGURATION: Switches between local and production automatically
-  final String baseUrl = kIsWeb
-      ? "http://localhost:3000"
-      : "http://10.0.2.2:3000";
+  //  final String baseUrl = kIsWeb
+  //    ? "http://localhost:3000"
+  //  : "http://10.0.2.2:3000";
 
   // UNCOMMENT FOR PRODUCTION
   //final String baseUrl = "https://lifekit-api.onrender.com";
+  final String baseUrl = "https://lifekitbackend.vercel.app/";
 
   final storage = const FlutterSecureStorage();
 
@@ -160,44 +161,34 @@ class ApiService {
   }
 
   dynamic _processResponse(http.Response response) {
-    // Keep your debug print so you can see what's happening in the console
+    // Keep your debug print
     print("SERVER RESPONSE [${response.statusCode}]: ${response.body}");
 
-    // 1. Parse the body safely
-    Map<String, dynamic>? bodyData;
-    try {
-      // We try to decode once at the top to avoid repeating jsonDecode calls
-      final decoded = jsonDecode(response.body);
-      if (decoded is Map<String, dynamic>) {
-        bodyData = decoded;
-      }
-    } catch (_) {
-      // If body isn't JSON (like an HTML error page), bodyData remains null
-    }
+    // 1. Decode the body once
+    final decoded = jsonDecode(response.body);
 
     // 2. Handle Success (200 - 299)
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      return bodyData;
+      // Return the decoded data directly (whether it's a List or a Map)
+      return decoded;
     }
 
-    // 3. Handle Errors (Extract the specific message from backend)
-    // Fallback to a generic status code message if the JSON 'error' key is missing
-    String errorMessage =
-        bodyData?['error'] ?? "Server Error: ${response.statusCode}";
+    // 3. Handle Errors
+    // If it's an error, decoded is likely a Map with an 'error' key
+    String errorMessage = "Server Error: ${response.statusCode}";
+    if (decoded is Map && decoded.containsKey('error')) {
+      errorMessage = decoded['error'];
+    }
 
     // 4. Smart Session Handling
-    // Special case for 401/403: If the error message does NOT contain the word "password",
-    // we assume the JWT token is invalid or expired.
     if ((response.statusCode == 401 || response.statusCode == 403) &&
         !errorMessage.toLowerCase().contains("password")) {
       throw Exception("Session Expired. Please login again.");
     }
 
     // 5. Throw specific exception
-    // This allows your UI to catch and show messages like "Incorrect current password"
     throw Exception(errorMessage);
-  }
-  // ===========================================================================
+  } // ===========================================================================
   // AUTHENTICATION
   // ===========================================================================
 
@@ -556,14 +547,15 @@ class ApiService {
   // SOCIAL FEEDS & EVENTS
   // ===========================================================================
 
+  // In api_service.dart, verify these look like this:
   Future<List<dynamic>> getFeeds() async {
     final response = await http.get(Uri.parse('$baseUrl/feeds/posts'));
-    return _processResponse(response);
+    return _processResponse(response); // Now returns the List correctly
   }
 
   Future<List<dynamic>> getEvents() async {
     final response = await http.get(Uri.parse('$baseUrl/feeds/events'));
-    return _processResponse(response);
+    return _processResponse(response); // Now returns the List correctly
   }
 
   Future<Map<String, dynamic>> buyEventTicket({
@@ -630,5 +622,153 @@ class ApiService {
     );
     final data = _processResponse(response);
     return data['places'] ?? [];
+  }
+
+  Future<List<dynamic>> getGroups() async {
+    final response = await http.get(Uri.parse('$baseUrl/feeds/groups'));
+    return _processResponse(response);
+  }
+
+  Future<void> joinGroup(String groupId) async {
+    await _authenticatedPost('/feeds/groups/$groupId/join', {});
+  }
+
+  Future<void> createGroup({
+    required String name,
+    required String description,
+    String? imageUrl,
+    bool anyoneCanPost = true,
+  }) async {
+    await _authenticatedPost('/feeds/groups', {
+      "name": name,
+      "description": description,
+      "image_url": imageUrl,
+      "anyone_can_post": anyoneCanPost,
+    });
+  }
+  // Future<List<dynamic>> getGroupPosts(String groupId) async {
+  //   final response = await http.get(
+  //     Uri.parse('$baseUrl/feeds/groups/$groupId/posts'),
+  //   );
+  //   return _processResponse(response);
+  // }
+
+  Future<void> updateGroupSettings(String groupId, bool anyoneCanPost) async {
+    await _authenticatedPut('/feeds/groups/$groupId/settings', {
+      "anyone_can_post": anyoneCanPost,
+    });
+  }
+
+  Future<void> removeGroupMember(String groupId, String targetUserId) async {
+    await _authenticatedDelete('/feeds/groups/$groupId/members/$targetUserId');
+  }
+
+  Future<Map<String, dynamic>> getGroupDetail(String groupId) async {
+    return await _authenticatedGet('/feeds/groups/$groupId');
+  }
+
+  Future<List<dynamic>> getGroupPosts(String groupId) async {
+    return await _authenticatedGet('/feeds/groups/$groupId/posts');
+  }
+
+  Future<void> createGroupPost(
+    String groupId,
+    String content,
+    String? imageUrl,
+  ) async {
+    await _authenticatedPost('/feeds/groups/$groupId/posts', {
+      "content": content,
+      "image_url": imageUrl,
+    });
+  }
+
+  // NEW/CORRECT
+  Future<List<dynamic>> getGroupMembers(String groupId) async {
+    // _authenticatedGet automatically adds the Bearer Token for you
+    return await _authenticatedGet('/feeds/groups/$groupId/members');
+  }
+
+  Future<void> toggleMemberAdmin(
+    String groupId,
+    String userId,
+    bool status,
+  ) async {
+    // Use a specific route or update the membership record
+    await _authenticatedPut('/feeds/groups/$groupId/members/$userId/admin', {
+      "is_admin": status,
+    });
+  }
+
+  Future<void> kickMember(String groupId, String userId) async {
+    await _authenticatedDelete('/feeds/groups/$groupId/members/$userId');
+  }
+
+  Future<void> toggleGroupPostLike(String postId) async {
+    await _authenticatedPost('/feeds/groups/posts/$postId/like', {});
+  }
+
+  Future<List<dynamic>> getGroupPostComments(String postId) async {
+    final response = await _authenticatedGet(
+      '/feeds/groups/posts/$postId/comments',
+    );
+    return response;
+  }
+
+  Future<void> postGroupComment(String postId, String content) async {
+    await _authenticatedPost('/feeds/groups/posts/$postId/comments', {
+      "content": content,
+    });
+  }
+
+  Future<void> leaveGroup(String groupId) async {
+    await _authenticatedDelete('/feeds/groups/$groupId/leave');
+  }
+
+  // 1. Toggle Admin Status for a member
+  Future<void> toggleGroupAdmin(
+    String groupId,
+    String userId,
+    bool isAdmin,
+  ) async {
+    await _authenticatedPut('/feeds/groups/$groupId/members/$userId/admin', {
+      "is_admin": isAdmin,
+    });
+  }
+
+  // 2. Permanently delete a group (Creator only)
+  Future<void> deleteGroup(String groupId) async {
+    await _authenticatedDelete('/feeds/groups/$groupId');
+  }
+
+  // Delete a group post
+  Future<void> deleteGroupPost(String postId) async {
+    await _authenticatedDelete('/feeds/groups/posts/$postId');
+  }
+
+  // Helper to get the logged-in user's ID
+  Future<String?> getCurrentUserId() async {
+    try {
+      final profileData = await getUserProfile();
+      return profileData['profile']['id'];
+    } catch (e) {
+      print("Error getting current user ID: $e");
+      return null;
+    }
+  }
+
+  // ADD THIS METHOD to your ApiService class in api_service.dart
+  // Place it right next to your existing buyEventTicket method
+  // (around line 290 in your file, in the SOCIAL FEEDS & EVENTS section)
+
+  Future<Map<String, dynamic>> buyTicket({
+    required String eventId,
+    required int quantity,
+    required double totalPrice,
+  }) async {
+    return await _authenticatedPost('/feeds/events/buy-ticket', {
+      "event_id": eventId,
+      "quantity": quantity,
+      "total_price": totalPrice,
+    });
   }
 }

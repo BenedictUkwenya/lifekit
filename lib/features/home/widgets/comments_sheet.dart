@@ -6,7 +6,13 @@ import '../../../core/services/api_service.dart';
 
 class CommentsSheet extends StatefulWidget {
   final String postId;
-  const CommentsSheet({super.key, required this.postId});
+  final bool isGroup; // <--- NEW FLAG
+
+  const CommentsSheet({
+    super.key,
+    required this.postId,
+    this.isGroup = false, // Defaults to false (standard feed)
+  });
 
   @override
   State<CommentsSheet> createState() => _CommentsSheetState();
@@ -25,9 +31,37 @@ class _CommentsSheetState extends State<CommentsSheet> {
     _fetchComments();
   }
 
+  // --- CONTENT SAFETY FILTER (For Groups) ---
+  bool _isSafe(String text) {
+    if (!widget.isGroup) return true; // Skip filter for main feed if preferred
+    final clean = text.toLowerCase().replaceAll(' ', '');
+    final hasEmail = clean.contains('@') || clean.contains('.com');
+    final hasPhone = RegExp(r'\d{10,}').hasMatch(clean);
+    final blacklist = [
+      'whatsapp',
+      'callme',
+      'telegram',
+      'zelle',
+      'cashapp',
+      'payme',
+    ];
+    return !hasEmail && !hasPhone && !hasBlacklisted(clean, blacklist);
+  }
+
+  bool hasBlacklisted(String text, List<String> list) {
+    return list.any((word) => text.contains(word));
+  }
+
   Future<void> _fetchComments() async {
     try {
-      final data = await _apiService.getComments(widget.postId);
+      final List<dynamic> data;
+      if (widget.isGroup) {
+        // You created this method in step 3 of the group social update
+        data = await _apiService.getGroupPostComments(widget.postId);
+      } else {
+        data = await _apiService.getComments(widget.postId);
+      }
+
       if (mounted) {
         setState(() {
           comments = data;
@@ -40,17 +74,31 @@ class _CommentsSheetState extends State<CommentsSheet> {
   }
 
   Future<void> _postComment() async {
-    if (_commentController.text.trim().isEmpty) return;
+    final text = _commentController.text.trim();
+    if (text.isEmpty) return;
+
+    if (!_isSafe(text)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Safety Warning: Contact details are not allowed in comments.",
+          ),
+        ),
+      );
+      return;
+    }
+
     setState(() => isPosting = true);
 
     try {
-      await _apiService.postComment(
-        widget.postId,
-        _commentController.text.trim(),
-      );
+      if (widget.isGroup) {
+        await _apiService.postGroupComment(widget.postId, text);
+      } else {
+        await _apiService.postComment(widget.postId, text);
+      }
+
       _commentController.clear();
-      // Refresh list
-      _fetchComments();
+      _fetchComments(); // Refresh the list
     } catch (e) {
       // Handle error
     } finally {
@@ -60,16 +108,14 @@ class _CommentsSheetState extends State<CommentsSheet> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Get Keyboard Height
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
-      height: MediaQuery.of(context).size.height * 0.85, // 85% Height
+      height: MediaQuery.of(context).size.height * 0.85,
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      // 2. Wrap content in padding that respects keyboard
       padding: EdgeInsets.only(bottom: bottomInset),
       child: Column(
         children: [
