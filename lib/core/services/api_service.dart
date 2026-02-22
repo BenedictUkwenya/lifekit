@@ -14,7 +14,7 @@ class ApiService {
 
   // UNCOMMENT FOR PRODUCTION
   //final String baseUrl = "https://lifekit-api.onrender.com";
-  final String baseUrl = "https://lifekitbackend.vercel.app/";
+  final String baseUrl = "https://lifekitbackend.vercel.app";
 
   final storage = const FlutterSecureStorage();
 
