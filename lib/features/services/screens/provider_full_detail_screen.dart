@@ -171,7 +171,21 @@ class _ProviderFullDetailScreenState extends State<ProviderFullDetailScreen>
                         Icons.share_outlined,
                         color: Colors.black,
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              "Share profile feature coming soon!",
+                              style: GoogleFonts.poppins(),
+                            ),
+                            behavior: SnackBarBehavior.floating,
+                            margin: const EdgeInsets.all(16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ],
                   flexibleSpace: FlexibleSpaceBar(

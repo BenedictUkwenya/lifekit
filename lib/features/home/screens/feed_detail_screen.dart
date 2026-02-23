@@ -24,12 +24,14 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
   bool isPosting = false;
   late bool isLiked;
   late int likeCount;
+  late int commentCount;
 
   @override
   void initState() {
     super.initState();
     likeCount = widget.post['likes_count'] ?? 0;
     isLiked = widget.post['is_liked_by_me'] ?? false;
+    commentCount = widget.post['comments_count'] ?? 0;
     _fetchComments();
   }
 
@@ -54,11 +56,21 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
   }
 
   void _handleLike() {
-    setState(() {
-      isLiked = !isLiked;
-      likeCount += isLiked ? 1 : -1;
-    });
-    _apiService.toggleLike(widget.post['id']);
+    _apiService
+        .toggleLike(widget.post['id'])
+        .then((result) {
+          if (!mounted) return;
+          setState(() {
+            isLiked = result['is_liked_by_me'] ?? isLiked;
+            likeCount = result['likes_count'] ?? likeCount;
+          });
+        })
+        .catchError((e) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to update like: $e')));
+        });
   }
 
   Future<void> _postComment() async {
@@ -69,6 +81,11 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
       await _apiService.postComment(widget.post['id'], text);
       _commentController.clear();
       await _fetchComments();
+      if (mounted) {
+        setState(() {
+          commentCount++;
+        });
+      }
       // Scroll to bottom after posting
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
@@ -109,7 +126,6 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
     final content = widget.post['content'] ?? '';
     final image = widget.post['image_url'];
     final createdAt = widget.post['created_at'];
-    final int commentCount = widget.post['comments_count'] ?? 0;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F7),

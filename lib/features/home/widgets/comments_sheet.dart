@@ -7,11 +7,13 @@ import '../../../core/services/api_service.dart';
 class CommentsSheet extends StatefulWidget {
   final String postId;
   final bool isGroup; // <--- NEW FLAG
+  final VoidCallback? onCommentPosted;
 
   const CommentsSheet({
     super.key,
     required this.postId,
     this.isGroup = false, // Defaults to false (standard feed)
+    this.onCommentPosted,
   });
 
   @override
@@ -98,9 +100,16 @@ class _CommentsSheetState extends State<CommentsSheet> {
       }
 
       _commentController.clear();
+      widget.onCommentPosted?.call();
       _fetchComments(); // Refresh the list
     } catch (e) {
-      // Handle error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Failed to post comment: $e',
+          ),
+        ),
+      );
     } finally {
       if (mounted) setState(() => isPosting = false);
     }

@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -18,19 +17,27 @@ class ApiService {
 
   final storage = const FlutterSecureStorage();
 
-  // ===========================================================================
-  // INTERNAL AUTH HELPERS (The "Engine")
-  // ===========================================================================
+  String? _cachedAccessToken;
+  String? _cachedRefreshToken;
+  Future<String?>? _refreshingToken;
 
   Future<void> _saveTokens(String access, String refresh) async {
+    _cachedAccessToken = access;
+    _cachedRefreshToken = refresh;
     await storage.write(key: 'jwt_token', value: access);
     await storage.write(key: 'refresh_token', value: refresh);
   }
 
-  Future<String?> _refreshToken() async {
+  Future<String?> _performTokenRefresh() async {
     try {
-      final refresh = await storage.read(key: 'refresh_token');
-      if (refresh == null) return null;
+      final refresh =
+          _cachedRefreshToken ?? await storage.read(key: 'refresh_token');
+      if (refresh == null) {
+        await storage.deleteAll();
+        _cachedAccessToken = null;
+        _cachedRefreshToken = null;
+        return null;
+      }
 
       final response = await http.post(
         Uri.parse('$baseUrl/auth/refresh-token'),
@@ -43,16 +50,30 @@ class ApiService {
         await _saveTokens(data['access_token'], data['refresh_token']);
         return data['access_token'];
       }
-      await storage.deleteAll(); // Force logout if refresh fails
+
+      await storage.deleteAll();
+      _cachedAccessToken = null;
+      _cachedRefreshToken = null;
       return null;
     } catch (e) {
       return null;
     }
   }
 
-  // Wrapper for GET requests that need a token
+  Future<String?> _refreshToken() async {
+    if (_refreshingToken != null) {
+      return _refreshingToken!;
+    }
+    _refreshingToken = _performTokenRefresh();
+    try {
+      return await _refreshingToken;
+    } finally {
+      _refreshingToken = null;
+    }
+  }
+
   Future<dynamic> _authenticatedGet(String endpoint) async {
-    String? token = await storage.read(key: 'jwt_token');
+    String? token = _cachedAccessToken ?? await storage.read(key: 'jwt_token');
     var response = await http.get(
       Uri.parse('$baseUrl$endpoint'),
       headers: {'Authorization': 'Bearer $token'},
@@ -72,12 +93,11 @@ class ApiService {
     return _processResponse(response);
   }
 
-  // Wrapper for POST requests that need a token
   Future<dynamic> _authenticatedPost(
     String endpoint,
     Map<String, dynamic> body,
   ) async {
-    String? token = await storage.read(key: 'jwt_token');
+    String? token = _cachedAccessToken ?? await storage.read(key: 'jwt_token');
     var response = await http.post(
       Uri.parse('$baseUrl$endpoint'),
       headers: {
@@ -105,12 +125,11 @@ class ApiService {
     return _processResponse(response);
   }
 
-  // Wrapper for PUT requests that need a token
   Future<dynamic> _authenticatedPut(
     String endpoint,
     Map<String, dynamic> body,
   ) async {
-    String? token = await storage.read(key: 'jwt_token');
+    String? token = _cachedAccessToken ?? await storage.read(key: 'jwt_token');
     var response = await http.put(
       Uri.parse('$baseUrl$endpoint'),
       headers: {
@@ -138,9 +157,8 @@ class ApiService {
     return _processResponse(response);
   }
 
-  // Wrapper for DELETE requests
   Future<dynamic> _authenticatedDelete(String endpoint) async {
-    String? token = await storage.read(key: 'jwt_token');
+    String? token = _cachedAccessToken ?? await storage.read(key: 'jwt_token');
     var response = await http.delete(
       Uri.parse('$baseUrl$endpoint'),
       headers: {'Authorization': 'Bearer $token'},
@@ -161,20 +179,14 @@ class ApiService {
   }
 
   dynamic _processResponse(http.Response response) {
-    // Keep your debug print
     print("SERVER RESPONSE [${response.statusCode}]: ${response.body}");
 
-    // 1. Decode the body once
     final decoded = jsonDecode(response.body);
 
-    // 2. Handle Success (200 - 299)
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      // Return the decoded data directly (whether it's a List or a Map)
       return decoded;
     }
 
-    // 3. Handle Errors
-    // If it's an error, decoded is likely a Map with an 'error' key
     String errorMessage = "Server Error: ${response.statusCode}";
     if (decoded is Map && decoded.containsKey('error')) {
       errorMessage = decoded['error'];
@@ -547,10 +559,9 @@ class ApiService {
   // SOCIAL FEEDS & EVENTS
   // ===========================================================================
 
-  // In api_service.dart, verify these look like this:
   Future<List<dynamic>> getFeeds() async {
-    final response = await http.get(Uri.parse('$baseUrl/feeds/posts'));
-    return _processResponse(response); // Now returns the List correctly
+    final data = await _authenticatedGet('/feeds/posts');
+    return data is List ? data : [];
   }
 
   Future<List<dynamic>> getEvents() async {
@@ -570,8 +581,9 @@ class ApiService {
     });
   }
 
-  Future<void> toggleLike(String postId) async {
-    await _authenticatedPost('/feeds/posts/$postId/like', {});
+  Future<Map<String, dynamic>> toggleLike(String postId) async {
+    final result = await _authenticatedPost('/feeds/posts/$postId/like', {});
+    return result is Map<String, dynamic> ? result : {};
   }
 
   Future<List<dynamic>> getComments(String postId) async {
@@ -583,6 +595,29 @@ class ApiService {
 
   Future<dynamic> postComment(String postId, String content) async {
     return await _authenticatedPost('/feeds/posts/$postId/comments', {
+      "content": content,
+    });
+  }
+
+  // ─────────────────────────────────────────────
+  // EVENT SOCIAL (likes + comments)
+  // ─────────────────────────────────────────────
+
+  Future<Map<String, dynamic>> getEventMeta(String eventId) async {
+    return await _authenticatedGet('/feeds/events/$eventId/meta');
+  }
+
+  Future<void> toggleEventLike(String eventId) async {
+    await _authenticatedPost('/feeds/events/$eventId/like', {});
+  }
+
+  Future<List<dynamic>> getEventComments(String eventId) async {
+    final data = await _authenticatedGet('/feeds/events/$eventId/comments');
+    return data is List ? data : [];
+  }
+
+  Future<void> postEventComment(String eventId, String content) async {
+    await _authenticatedPost('/feeds/events/$eventId/comments', {
       "content": content,
     });
   }
@@ -743,6 +778,24 @@ class ApiService {
   // Delete a group post
   Future<void> deleteGroupPost(String postId) async {
     await _authenticatedDelete('/feeds/groups/posts/$postId');
+  }
+
+  // Delete a feed post (admin only on backend)
+  Future<void> deletePost(String postId) async {
+    await _authenticatedDelete('/feeds/posts/$postId');
+  }
+
+  // Saved posts (bookmarks)
+  Future<Map<String, dynamic>> toggleBookmark(String postId) async {
+    final result = await _authenticatedPost('/feeds/toggle-bookmark', {
+      "postId": postId,
+    });
+    return result is Map<String, dynamic> ? result : {};
+  }
+
+  Future<List<dynamic>> getSavedPosts() async {
+    final data = await _authenticatedGet('/feeds/saved-posts');
+    return data is List ? data : [];
   }
 
   // Helper to get the logged-in user's ID

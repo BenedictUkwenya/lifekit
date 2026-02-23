@@ -1,7 +1,10 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/widgets/lifekit_loader.dart';
@@ -30,6 +33,10 @@ class _PlacesListScreenState extends State<PlacesListScreen>
   double? _userLat;
   double? _userLng;
 
+  static const String _nearbyCacheKey = 'places_nearby_cache';
+  static const String _popularCacheKey = 'places_popular_cache';
+  static const String _placesCacheTimestampKey = 'places_cache_timestamp';
+
   final List<String> _categories = [
     "All",
     "Restaurant",
@@ -46,6 +53,7 @@ class _PlacesListScreenState extends State<PlacesListScreen>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() => setState(() {}));
+    _loadCachedPlaces();
     _initLocationAndFetch();
   }
 
@@ -77,10 +85,13 @@ class _PlacesListScreenState extends State<PlacesListScreen>
       setState(() => statusMessage = "Getting your location...");
       final pos = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.medium,
+        timeLimit: const Duration(seconds: 5),
       );
       _userLat = pos.latitude;
       _userLng = pos.longitude;
       await _fetchAll(_userLat!, _userLng!);
+    } on TimeoutException {
+      _fallback("Location timeout. Showing Lagos, Nigeria.");
     } catch (e) {
       debugPrint("Location error: $e");
       _fallback("Could not get location. Showing Lagos, Nigeria.");
@@ -92,9 +103,46 @@ class _PlacesListScreenState extends State<PlacesListScreen>
     _fetchAll(6.5244, 3.3792);
   }
 
+  Future<void> _loadCachedPlaces() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final timestamp = prefs.getInt(_placesCacheTimestampKey);
+      if (timestamp == null) return;
+
+      final cacheAge =
+          DateTime.now().difference(DateTime.fromMillisecondsSinceEpoch(
+        timestamp,
+      ));
+      if (cacheAge.inMinutes > 10) {
+        return;
+      }
+
+      final nearbyJson = prefs.getString(_nearbyCacheKey);
+      final popularJson = prefs.getString(_popularCacheKey);
+      if (nearbyJson == null || popularJson == null) return;
+
+      final nearby = jsonDecode(nearbyJson);
+      final popular = jsonDecode(popularJson);
+
+      if (nearby is List && popular is List && mounted) {
+        setState(() {
+          nearbyPlaces = nearby;
+          popularPlaces = popular;
+          filteredPlaces = nearbyPlaces;
+          isLoading = false;
+          statusMessage = "Showing recent places near you";
+        });
+      }
+    } catch (e) {
+      debugPrint("Error loading cached places: $e");
+    }
+  }
+
   Future<void> _fetchAll(double lat, double lng) async {
     setState(() {
-      isLoading = true;
+      if (filteredPlaces.isEmpty) {
+        isLoading = true;
+      }
       statusMessage = "Finding places near you...";
     });
 
@@ -113,6 +161,14 @@ class _PlacesListScreenState extends State<PlacesListScreen>
           isLoading = false;
         });
       }
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_nearbyCacheKey, jsonEncode(nearbyPlaces));
+      await prefs.setString(_popularCacheKey, jsonEncode(popularPlaces));
+      await prefs.setInt(
+        _placesCacheTimestampKey,
+        DateTime.now().millisecondsSinceEpoch,
+      );
     } catch (e) {
       debugPrint("Fetch error: $e");
       if (mounted) setState(() => isLoading = false);

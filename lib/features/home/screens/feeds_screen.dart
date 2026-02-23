@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/widgets/lifekit_loader.dart';
@@ -9,6 +10,7 @@ import '../widgets/comments_sheet.dart';
 import 'event_detail_screen.dart';
 import 'feed_detail_screen.dart';
 import 'notifications_screen.dart';
+import 'saved_posts_screen.dart';
 import '../../groups/widgets/all_groups_tab.dart';
 import '../../groups/screens/create_group_screen.dart';
 
@@ -134,45 +136,61 @@ class _FeedsScreenState extends State<FeedsScreen>
                 ),
               ),
               actions: [
-                Container(
-                  margin: const EdgeInsets.only(right: 16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF2F2F7),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Stack(
-                    children: [
-                      IconButton(
-                        icon: const Icon(
-                          Icons.notifications_outlined,
-                          color: Colors.black,
-                        ),
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const NotificationsScreen(),
-                          ),
-                        ).then((_) => _fetchData()),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.bookmark_border,
+                        color: Colors.black,
                       ),
-                      if (unreadNotifications > 0)
-                        Positioned(
-                          right: 8,
-                          top: 8,
-                          child: Container(
-                            width: 10,
-                            height: 10,
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white,
-                                width: 1.5,
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const SavedPostsScreen(),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(right: 16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF2F2F7),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Stack(
+                        children: [
+                          IconButton(
+                            icon: const Icon(
+                              Icons.notifications_outlined,
+                              color: Colors.black,
+                            ),
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const NotificationsScreen(),
+                              ),
+                            ).then((_) => _fetchData()),
+                          ),
+                          if (unreadNotifications > 0)
+                            Positioned(
+                              right: 8,
+                              top: 8,
+                              child: Container(
+                                width: 10,
+                                height: 10,
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 1.5,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                    ],
-                  ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
               bottom: PreferredSize(
@@ -229,12 +247,18 @@ class _FeedsScreenState extends State<FeedsScreen>
           ],
           body: isLoading
               ? const Center(child: LifeKitLoader())
-              : TabBarView(
-                  controller: _tabController,
+              : Column(
                   children: [
-                    _buildFeedsList(),
-                    _buildEventsTab(),
-                    _buildGroupsList(),
+                    Expanded(
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          _buildFeedsList(),
+                          _buildEventsTab(),
+                          _buildGroupsList(),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
         ),
@@ -525,20 +549,139 @@ class _FeedCardState extends State<_FeedCard> {
   final ApiService _apiService = ApiService();
   bool isLiked = false;
   int likeCount = 0;
+  int commentsCount = 0;
+  bool isBookmarked = false;
+  String? myId;
 
   @override
   void initState() {
     super.initState();
     likeCount = widget.post['likes_count'] ?? 0;
     isLiked = widget.post['is_liked_by_me'] ?? false;
+    commentsCount = widget.post['comments_count'] ?? 0;
+    _loadMyId();
   }
 
-  void _handleLike() {
-    setState(() {
-      isLiked = !isLiked;
-      likeCount += isLiked ? 1 : -1;
-    });
-    _apiService.toggleLike(widget.post['id']);
+  Future<void> _loadMyId() async {
+    final id = await _apiService.getCurrentUserId();
+    if (mounted) {
+      setState(() {
+        myId = id;
+      });
+    }
+  }
+
+  Future<void> _handleLike() async {
+    try {
+      final result = await _apiService.toggleLike(widget.post['id']);
+      if (!mounted) return;
+      setState(() {
+        isLiked = result['is_liked_by_me'] ?? isLiked;
+        likeCount = result['likes_count'] ?? likeCount;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to update like: $e')));
+    }
+  }
+
+  Future<void> _handleBookmark() async {
+    try {
+      final result = await _apiService.toggleBookmark(widget.post['id']);
+      if (!mounted) return;
+      setState(() {
+        isBookmarked = result['is_saved'] ?? isBookmarked;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to update bookmark: $e')));
+    }
+  }
+
+  void _showPostOptions() {
+    final bool isOwner = myId != null && widget.post['user_id'] == myId;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(0, 12, 0, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.flag_outlined),
+              title: Text('Report Post', style: GoogleFonts.poppins()),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Post reported. Thank you.'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.share_outlined),
+              title: Text('Share', style: GoogleFonts.poppins()),
+              onTap: () {
+                Navigator.pop(context);
+                final content = widget.post['content'] ?? '';
+                final title = widget.post['title'] ?? '';
+                final text =
+                    (title.isNotEmpty ? '$title\n\n' : '') +
+                    '$content\n\nShared from LifeKit';
+                Share.share(text.trim());
+              },
+            ),
+            if (isOwner)
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: Colors.red),
+                title: Text(
+                  'Delete',
+                  style: GoogleFonts.poppins(color: Colors.red),
+                ),
+                onTap: () async {
+                  Navigator.pop(context);
+                  try {
+                    await _apiService.deletePost(widget.post['id']);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Post deleted'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Failed to delete post: $e'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                },
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -550,7 +693,6 @@ class _FeedCardState extends State<_FeedCard> {
     final title = widget.post['title'] ?? '';
     final content = widget.post['content'] ?? '';
     final image = widget.post['image_url'];
-    final int comments = widget.post['comments_count'] ?? 0;
     final createdAt = widget.post['created_at'];
 
     String dateLabel = '';
@@ -576,6 +718,7 @@ class _FeedCardState extends State<_FeedCard> {
             children: [
               // Header: avatar + name + more
               Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   CircleAvatar(
                     radius: 18,
@@ -609,7 +752,11 @@ class _FeedCardState extends State<_FeedCard> {
                       ],
                     ),
                   ),
-                  Icon(Icons.more_horiz, color: Colors.grey[400]),
+                  IconButton(
+                    icon: const Icon(Icons.more_horiz),
+                    color: Colors.grey[400],
+                    onPressed: _showPostOptions,
+                  ),
                 ],
               ),
 
@@ -703,7 +850,14 @@ class _FeedCardState extends State<_FeedCard> {
                     onTap: () => showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,
-                      builder: (_) => CommentsSheet(postId: widget.post['id']),
+                      builder: (_) => CommentsSheet(
+                        postId: widget.post['id'],
+                        onCommentPosted: () {
+                          setState(() {
+                            commentsCount++;
+                          });
+                        },
+                      ),
                     ),
                     child: Row(
                       children: [
@@ -714,7 +868,7 @@ class _FeedCardState extends State<_FeedCard> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          "$comments",
+                          "$commentsCount",
                           style: GoogleFonts.poppins(
                             color: Colors.grey[700],
                             fontSize: 13,
@@ -725,7 +879,14 @@ class _FeedCardState extends State<_FeedCard> {
                   ),
                   const SizedBox(width: 16),
                   // Bookmark
-                  Icon(Icons.bookmark_border, color: Colors.grey, size: 20),
+                  GestureDetector(
+                    onTap: _handleBookmark,
+                    child: Icon(
+                      isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                      color: isBookmarked ? AppColors.primary : Colors.grey,
+                      size: 20,
+                    ),
+                  ),
                   const Spacer(),
                   if (dateLabel.isNotEmpty)
                     Text(
