@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/services/api_service.dart';
 
 class BookingReceiptScreen extends StatelessWidget {
   final dynamic booking;

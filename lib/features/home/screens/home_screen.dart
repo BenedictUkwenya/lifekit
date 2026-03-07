@@ -192,8 +192,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Converts the 2-letter country code into a Flag Emoji
   String _getFlagEmoji(String countryCode) {
-    if (countryCode.length != 2)
+    if (countryCode.length != 2) {
       return '🇬🇪'; // Fallback to Georgia flag emoji if invalid
+    }
 
     int flagOffset = 0x1F1E6;
     int asciiOffset = 0x41;
@@ -225,26 +226,36 @@ class _HomeScreenState extends State<HomeScreen> {
   // ── Category helpers ──────────────────────
   String _getCategoryIcon(String name) {
     name = name.toLowerCase();
-    if (name.contains('health') || name.contains('wellness'))
+    if (name.contains('health') || name.contains('wellness')) {
       return 'https://cdn-icons-png.flaticon.com/512/2966/2966334.png';
-    if (name.contains('laundry'))
+    }
+    if (name.contains('laundry')) {
       return 'https://cdn-icons-png.flaticon.com/512/2954/2954888.png';
-    if (name.contains('hair') || name.contains('beauty'))
+    }
+    if (name.contains('hair') || name.contains('beauty')) {
       return 'https://cdn-icons-png.flaticon.com/512/3050/3050257.png';
-    if (name.contains('family') || name.contains('care'))
+    }
+    if (name.contains('family') || name.contains('care')) {
       return 'https://cdn-icons-png.flaticon.com/512/3050/3050226.png';
-    if (name.contains('plumb') || name.contains('maint'))
+    }
+    if (name.contains('plumb') || name.contains('maint')) {
       return 'https://cdn-icons-png.flaticon.com/512/3050/3050239.png';
-    if (name.contains('home'))
+    }
+    if (name.contains('home')) {
       return 'https://cdn-icons-png.flaticon.com/512/619/619153.png';
-    if (name.contains('tech'))
+    }
+    if (name.contains('tech')) {
       return 'https://cdn-icons-png.flaticon.com/512/1055/1055687.png';
-    if (name.contains('clean'))
+    }
+    if (name.contains('clean')) {
       return 'https://cdn-icons-png.flaticon.com/512/995/995016.png';
-    if (name.contains('edu') || name.contains('tutor'))
+    }
+    if (name.contains('edu') || name.contains('tutor')) {
       return 'https://cdn-icons-png.flaticon.com/512/2232/2232688.png';
-    if (name.contains('event'))
+    }
+    if (name.contains('event')) {
       return 'https://cdn-icons-png.flaticon.com/512/3132/3132084.png';
+    }
     return 'https://cdn-icons-png.flaticon.com/512/1055/1055685.png';
   }
 
@@ -253,8 +264,9 @@ class _HomeScreenState extends State<HomeScreen> {
     if (name.contains('health')) return const Color(0xFFE3F2FD);
     if (name.contains('laundry')) return const Color(0xFFE8F5E9);
     if (name.contains('hair')) return const Color(0xFFF3E5F5);
-    if (name.contains('care') || name.contains('family'))
+    if (name.contains('care') || name.contains('family')) {
       return const Color(0xFFFFEBEE);
+    }
     if (name.contains('clean')) return const Color(0xFFE0F7FA);
     if (name.contains('edu')) return const Color(0xFFFFF3E0);
     if (name.contains('tech')) return const Color(0xFFECEFF1);
@@ -349,8 +361,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     onTap: () {
                       setState(() {
                         _currentNavIndex = i;
-                        if (i == 2)
+                        if (i == 2) {
                           hasNewFeeds = false; // Clear feeds dot when clicked
+                        }
                       });
                       _fetchCounts();
                     },

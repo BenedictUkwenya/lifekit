@@ -39,7 +39,7 @@ class _ServiceProfileScreenState extends State<ServiceProfileScreen>
   List<dynamic> weeklySchedule = [];
 
   // Calendar State for UI Demo
-  DateTime _currentDate = DateTime.now();
+  final DateTime _currentDate = DateTime.now();
 
   @override
   void initState() {

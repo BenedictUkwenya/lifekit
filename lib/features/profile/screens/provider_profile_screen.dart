@@ -4,7 +4,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:lifekit_frontend/features/profile/screens/service_profile_screen.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
-// Import the NEW Service Profile Screen
 
 class ProviderProfileScreen extends StatefulWidget {
   final String providerId;
@@ -31,6 +30,10 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen>
   List<dynamic> services = [];
   Map<String, dynamic>? profileData;
 
+  // Dynamic values
+  String calculatedRating = "New";
+  String experienceStr = "New";
+
   @override
   void initState() {
     super.initState();
@@ -50,11 +53,56 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen>
           if (serviceData['provider_profile'] != null) {
             profileData = serviceData['provider_profile'];
           }
+          _calculateStats(); // Calculate after data is set
           isLoading = false;
         });
       }
     } catch (e) {
       if (mounted) setState(() => isLoading = false);
+    }
+  }
+
+  void _calculateStats() {
+    // 1. Calculate Average Rating
+    if (services.isNotEmpty) {
+      double totalRating = 0;
+      int count = 0;
+
+      for (var s in services) {
+        var r = s['average_rating'];
+        if (r != null) {
+          totalRating += (r is int) ? r.toDouble() : (r as double);
+          count++;
+        }
+      }
+
+      if (count > 0 && totalRating > 0) {
+        calculatedRating = (totalRating / count).toStringAsFixed(1);
+      }
+    }
+
+    // 2. Calculate Experience (Time since profile creation or first service)
+    // Note: Ensure your backend 'getProviderServices' selects 'created_at' in the profile query
+    String? dateStr = profileData?['created_at'];
+
+    // Fallback: If profile doesn't have date, try using the oldest service date
+    if (dateStr == null && services.isNotEmpty) {
+      // Sort to find oldest
+      List sorted = List.from(services);
+      sorted.sort((a, b) => a['created_at'].compareTo(b['created_at']));
+      dateStr = sorted.first['created_at'];
+    }
+
+    if (dateStr != null) {
+      final joinedDate = DateTime.parse(dateStr);
+      final diff = DateTime.now().difference(joinedDate);
+      if (diff.inDays > 365) {
+        experienceStr = "${(diff.inDays / 365).floor()}yr";
+      } else if (diff.inDays > 30) {
+        experienceStr = "${(diff.inDays / 30).floor()}mo";
+      } else {
+        experienceStr = "<1mo";
+      }
     }
   }
 
@@ -136,7 +184,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen>
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             _buildStatItem(
-                              "4.8",
+                              calculatedRating, // Dynamic
                               "Rating",
                               Icons.star,
                               Colors.amber,
@@ -148,7 +196,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen>
                               Colors.blue,
                             ),
                             _buildStatItem(
-                              "2yr",
+                              experienceStr, // Dynamic
                               "Exp.",
                               Icons.timer,
                               Colors.green,
@@ -178,16 +226,37 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen>
               body: TabBarView(
                 controller: _tabController,
                 children: [
-                  ListView.builder(
-                    padding: const EdgeInsets.all(20),
-                    itemCount: services.length,
-                    itemBuilder: (context, index) =>
-                        _buildServiceCard(services[index]),
-                  ),
+                  // Services Tab
+                  services.isEmpty
+                      ? Center(
+                          child: Text(
+                            "No services yet",
+                            style: GoogleFonts.poppins(color: Colors.grey),
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(20),
+                          itemCount: services.length,
+                          itemBuilder: (context, index) =>
+                              _buildServiceCard(services[index]),
+                        ),
+
+                  // Reviews Tab (Placeholder for now)
                   Center(
-                    child: Text(
-                      "No reviews visible yet",
-                      style: GoogleFonts.poppins(color: Colors.grey),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.rate_review_outlined,
+                          color: Colors.grey,
+                          size: 40,
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          "Reviews will appear here",
+                          style: GoogleFonts.poppins(color: Colors.grey),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -226,9 +295,16 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen>
   }
 
   Widget _buildServiceCard(dynamic service) {
+    // Safety check for image
+    String imageUrl = 'https://via.placeholder.com/150';
+    if (service['image_urls'] != null &&
+        (service['image_urls'] as List).isNotEmpty) {
+      var img = (service['image_urls'] as List)[0];
+      if (img is String) imageUrl = img;
+    }
+
     return GestureDetector(
       onTap: () {
-        // --- UPDATED NAVIGATION ---
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -257,12 +333,12 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen>
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: CachedNetworkImage(
-                imageUrl: (service['image_urls'] as List).isNotEmpty
-                    ? service['image_urls'][0]
-                    : 'https://via.placeholder.com/150',
+                imageUrl: imageUrl,
                 width: 60,
                 height: 60,
                 fit: BoxFit.cover,
+                errorWidget: (context, url, error) =>
+                    Container(color: Colors.grey[200]),
               ),
             ),
             const SizedBox(width: 12),
@@ -271,7 +347,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    service['title'],
+                    service['title'] ?? "Untitled",
                     style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
                   ),
                   Text(

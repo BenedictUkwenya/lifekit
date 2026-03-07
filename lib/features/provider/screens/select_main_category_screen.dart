@@ -102,43 +102,54 @@ class _SelectMainCategoryScreenState extends State<SelectMainCategoryScreen> {
   String _getCategoryImage(String name) {
     name = name.toLowerCase();
 
-    if (name.contains('health') || name.contains('wellness'))
+    if (name.contains('health') || name.contains('wellness')) {
       return 'https://cdn-icons-png.flaticon.com/512/2966/2966334.png';
-    if (name.contains('laundry') || name.contains('ironing'))
+    }
+    if (name.contains('laundry') || name.contains('ironing')) {
       return 'https://cdn-icons-png.flaticon.com/512/2954/2954888.png';
+    }
     if (name.contains('hair') ||
         name.contains('beauty') ||
-        name.contains('salon'))
+        name.contains('salon')) {
       return 'https://cdn-icons-png.flaticon.com/512/3050/3050257.png';
+    }
     if (name.contains('family') ||
         name.contains('care') ||
         name.contains('companion') ||
-        name.contains('baby'))
+        name.contains('baby')) {
       return 'https://cdn-icons-png.flaticon.com/512/3050/3050226.png';
+    }
     if (name.contains('plumb') ||
         name.contains('maintenance') ||
-        name.contains('handyman'))
+        name.contains('handyman')) {
       return 'https://cdn-icons-png.flaticon.com/512/3050/3050239.png';
-    if (name.contains('home') || name.contains('lifestyle'))
+    }
+    if (name.contains('home') || name.contains('lifestyle')) {
       return 'https://cdn-icons-png.flaticon.com/512/619/619153.png';
+    }
     if (name.contains('tech') ||
         name.contains('digital') ||
-        name.contains('computer'))
+        name.contains('computer')) {
       return 'https://cdn-icons-png.flaticon.com/512/1055/1055687.png';
-    if (name.contains('clean'))
+    }
+    if (name.contains('clean')) {
       return 'https://cdn-icons-png.flaticon.com/512/995/995016.png';
+    }
     if (name.contains('education') ||
         name.contains('tutor') ||
-        name.contains('guidance'))
+        name.contains('guidance')) {
       return 'https://cdn-icons-png.flaticon.com/512/2232/2232688.png';
+    }
     if (name.contains('communication') ||
         name.contains('language') ||
-        name.contains('translat'))
+        name.contains('translat')) {
       return 'https://cdn-icons-png.flaticon.com/512/3898/3898082.png';
+    }
     if (name.contains('event') ||
         name.contains('party') ||
-        name.contains('photo'))
+        name.contains('photo')) {
       return 'https://cdn-icons-png.flaticon.com/512/3132/3132084.png';
+    }
 
     return 'https://cdn-icons-png.flaticon.com/512/1055/1055685.png'; // Default
   }
@@ -149,13 +160,146 @@ class _SelectMainCategoryScreenState extends State<SelectMainCategoryScreen> {
     if (name.contains('health')) return const Color(0xFFE3F2FD);
     if (name.contains('laundry')) return const Color(0xFFE8F5E9);
     if (name.contains('hair')) return const Color(0xFFF3E5F5);
-    if (name.contains('care') || name.contains('family'))
+    if (name.contains('care') || name.contains('family')) {
       return const Color(0xFFFFEBEE);
+    }
     if (name.contains('clean')) return const Color(0xFFE0F7FA);
     if (name.contains('education')) return const Color(0xFFFFF3E0);
     if (name.contains('tech')) return const Color(0xFFECEFF1);
     if (name.contains('event')) return const Color(0xFFFCE4EC);
     return Colors.grey[100]!;
+  }
+
+  // --- NEW: REQUEST CATEGORY SHEET LOGIC ---
+  // --- NEW: REQUEST CATEGORY SHEET LOGIC ---
+  void _showRequestCategorySheet() {
+    final TextEditingController nameCtrl = TextEditingController();
+    final TextEditingController descCtrl = TextEditingController();
+    bool isSubmitting = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Needed for keyboard spacing
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) => Container(
+          // 1. We ONLY put the viewInsets.bottom here to push the sheet above the keyboard
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          // 2. Added SingleChildScrollView here to fix the overflow!
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(
+              24,
+            ), // Moved the standard padding here
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Request a Category",
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Can't find your exact service? Let us know and our team will add it.",
+                  style: GoogleFonts.poppins(color: Colors.grey, fontSize: 12),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: nameCtrl,
+                  decoration: InputDecoration(
+                    hintText: "Category Name (e.g. Dog Walking)",
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: descCtrl,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    hintText: "Brief description of the service...",
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: isSubmitting
+                        ? null
+                        : () async {
+                            if (nameCtrl.text.trim().isEmpty) return;
+                            setSheetState(() => isSubmitting = true);
+                            try {
+                              await _apiService.requestNewCategory(
+                                nameCtrl.text.trim(),
+                                descCtrl.text.trim(),
+                              );
+                              if (mounted) {
+                                Navigator.pop(context);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Request sent successfully!"),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              setSheetState(() => isSubmitting = false);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text("Error: $e")),
+                              );
+                            }
+                          },
+                    child: isSubmitting
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            "Submit Request",
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -219,6 +363,44 @@ class _SelectMainCategoryScreenState extends State<SelectMainCategoryScreen> {
                     },
                   ),
           ),
+
+          // 3. NEW: "CAN'T FIND IT?" BUTTON
+          if (!isLoading)
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: InkWell(
+                onTap: _showRequestCategorySheet,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.help_outline,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Can't find your service? Request it.",
+                      style: GoogleFonts.poppins(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );

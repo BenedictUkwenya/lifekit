@@ -75,7 +75,7 @@ class _WalletScreenState extends State<WalletScreen> {
         ],
       ),
       body: isLoading
-          ? const Center(child: const LifeKitLoader())
+          ? const Center(child: LifeKitLoader())
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(

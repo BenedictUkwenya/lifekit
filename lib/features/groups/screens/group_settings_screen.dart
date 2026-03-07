@@ -143,7 +143,7 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
                   Container(
                     color: Colors.white,
                     child: SwitchListTile(
-                      activeColor: AppColors.primary,
+                      activeThumbColor: AppColors.primary,
                       title: Text(
                         "Anyone can post",
                         style: GoogleFonts.poppins(

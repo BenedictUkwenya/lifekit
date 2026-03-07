@@ -266,10 +266,11 @@ class _SubCategorySelectionScreenState
     return InkWell(
       onTap: () {
         setState(() {
-          if (isSelected)
+          if (isSelected) {
             selectedIds.remove(item['id']);
-          else
+          } else {
             selectedIds.add(item['id']);
+          }
         });
       },
       child: Column(

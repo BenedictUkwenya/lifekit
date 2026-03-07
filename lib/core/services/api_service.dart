@@ -1,15 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
   // CONFIGURATION: Switches between local and production automatically
-  //  final String baseUrl = kIsWeb
-  //    ? "http://localhost:3000"
-  //  : "http://10.0.2.2:3000";
+  //final String baseUrl = kIsWeb
+  //  ? "http://localhost:3000"
+  // : "http://10.0.2.2:3000";
 
   // UNCOMMENT FOR PRODUCTION
   //final String baseUrl = "https://lifekit-api.onrender.com";
@@ -709,11 +710,15 @@ class ApiService {
   Future<void> createGroupPost(
     String groupId,
     String content,
-    String? imageUrl,
-  ) async {
+    String? imageUrl, {
+    String? serviceId,
+    String? parentId,
+  }) async {
     await _authenticatedPost('/feeds/groups/$groupId/posts', {
       "content": content,
       "image_url": imageUrl,
+      "service_id": serviceId,
+      "parent_id": parentId,
     });
   }
 
@@ -822,6 +827,13 @@ class ApiService {
       "event_id": eventId,
       "quantity": quantity,
       "total_price": totalPrice,
+    });
+  }
+
+  Future<void> requestNewCategory(String name, String description) async {
+    await _authenticatedPost('/services/request-category', {
+      "category_name": name,
+      "description": description,
     });
   }
 }

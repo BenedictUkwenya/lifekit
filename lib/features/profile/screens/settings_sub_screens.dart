@@ -190,7 +190,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
               child: Column(
                 children: [
                   SwitchListTile(
-                    activeColor: AppColors.primary,
+                    activeThumbColor: AppColors.primary,
                     title: Text(
                       "Biometric Login",
                       style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
@@ -360,7 +360,7 @@ class _NotificationSettingsScreenState
       ),
       value: val,
       onChanged: onChanged,
-      activeColor: AppColors.primary,
+      activeThumbColor: AppColors.primary,
     );
   }
 }

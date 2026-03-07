@@ -5,16 +5,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:http/http.dart' as http;
 
-// --- CORE IMPORTS ---
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
-
-// --- NEW IMPORT ---
 import '../../profile/screens/provider_profile_screen.dart';
 
-// =============================================================================
+// ═══════════════════════════════════════════════════════════
 // 1. INPUT BOTTOM SHEET
-// =============================================================================
+// ═══════════════════════════════════════════════════════════
 
 class SkillSwapBottomSheet extends StatefulWidget {
   const SkillSwapBottomSheet({super.key});
@@ -26,12 +23,10 @@ class SkillSwapBottomSheet extends StatefulWidget {
 class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet> {
   final ApiService _apiService = ApiService();
 
-  // --- STATE ---
   List<dynamic> myServices = [];
   Map<String, dynamic>? selectedMyService;
   Map<String, dynamic>? selectedTargetSubCategory;
-  String selectedServiceType = "Home";
-
+  String selectedServiceType = 'Home';
   bool isLoadingData = true;
 
   @override
@@ -40,7 +35,7 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet> {
     _fetchMyServices();
   }
 
-  void _showModernSnackBar(String message, {bool isError = false}) {
+  void _showSnack(String msg, {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -48,11 +43,12 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet> {
             Icon(
               isError ? Icons.error_outline : Icons.info_outline,
               color: Colors.white,
+              size: 18,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Expanded(
               child: Text(
-                message,
+                msg,
                 style: GoogleFonts.poppins(
                   fontWeight: FontWeight.w500,
                   fontSize: 13,
@@ -67,7 +63,6 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet> {
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
-        elevation: 4,
       ),
     );
   }
@@ -82,27 +77,20 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet> {
           isLoadingData = false;
         });
       }
-    } catch (e) {
+    } catch (_) {
       if (mounted) setState(() => isLoadingData = false);
     }
   }
 
   void _startSearch() {
     if (selectedMyService == null) {
-      _showModernSnackBar(
-        "Please select a service you want to offer.",
-        isError: true,
-      );
+      _showSnack('Please select a service you want to offer.', isError: true);
       return;
     }
     if (selectedTargetSubCategory == null) {
-      _showModernSnackBar(
-        "Please select a skill you are looking for.",
-        isError: true,
-      );
+      _showSnack('Please select a skill you are looking for.', isError: true);
       return;
     }
-
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -126,7 +114,7 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet> {
           borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
         ),
         child: const Center(
-          child: CircularProgressIndicator(color: Color(0xFF89273B)),
+          child: CircularProgressIndicator(color: AppColors.primary),
         ),
       );
     }
@@ -137,207 +125,315 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet> {
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
-      child: Stack(
+      child: Column(
         children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 60, 20, 100),
-            child: Column(
+          // ── Drag handle ──
+          Container(
+            width: 40,
+            height: 4,
+            margin: const EdgeInsets.only(top: 12, bottom: 4),
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+
+          // ── Header ──
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: Row(
               children: [
-                // Info Box
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFF0F3),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(width: 40),
+                Expanded(
+                  child: Column(
                     children: [
-                      const Icon(Icons.auto_awesome, color: Color(0xFF89273B)),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          "Select skill & enter any other to get matched with a suitable skill swap partner",
-                          style: GoogleFonts.poppins(fontSize: 12),
+                      Text(
+                        'Skill Swap',
+                        style: GoogleFonts.poppins(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: const Icon(
-                          Icons.close,
-                          size: 16,
+                      Text(
+                        'Eng. by LifeKit',
+                        style: GoogleFonts.poppins(
+                          fontSize: 11,
                           color: Colors.grey,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 30),
-
-                // Cards Area
-                SizedBox(
-                  height: 120,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Transform.rotate(
-                        angle: -0.2,
-                        child: _buildCardImage(
-                          selectedMyService?['image_urls'] ?? [],
-                          Colors.orange,
-                        ),
-                      ),
-                      Transform.translate(
-                        offset: const Offset(40, 0),
-                        child: Transform.rotate(
-                          angle: 0.2,
-                          child: _buildCardImage(
-                            [],
-                            Colors.blueAccent,
-                            isTarget: true,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 30),
-
-                // Selection Chips
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildChip(
-                      selectedMyService?['title'] ?? "Select Yours",
-                      const Color(0xFF89273B),
-                      Colors.white,
-                      () => _showMyServicesPicker(),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      child: Icon(Icons.sync, color: Colors.grey),
-                    ),
-                    _buildChip(
-                      selectedTargetSubCategory?['name'] ?? "Select Target",
-                      const Color(0xFFFFF0F3),
-                      Colors.black,
-                      () => _showCategoryPicker(),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 30),
-
-                // Search Field
                 GestureDetector(
-                  onTap: () => _showCategoryPicker(),
-                  behavior: HitTestBehavior.opaque,
+                  onTap: () => Navigator.pop(context),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 15,
-                    ),
+                    width: 36,
+                    height: 36,
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(30),
+                      color: Colors.grey[100],
+                      shape: BoxShape.circle,
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            selectedTargetSubCategory?['name'] ??
-                                "Search for a skill...",
-                            style: GoogleFonts.poppins(
-                              color: selectedTargetSubCategory == null
-                                  ? Colors.grey
-                                  : Colors.black,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const Icon(Icons.send, color: Color(0xFF89273B)),
-                      ],
+                    child: const Icon(
+                      Icons.close,
+                      size: 18,
+                      color: Colors.black54,
                     ),
-                  ),
-                ),
-                const SizedBox(height: 40),
-
-                // Service Type
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Select service type",
-                        style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          _serviceTypeOption("Default", Icons.fingerprint),
-                          const SizedBox(width: 10),
-                          _serviceTypeOption("Home", Icons.home_filled),
-                          const SizedBox(width: 10),
-                          _serviceTypeOption("Outdoor", Icons.chair_alt),
-                        ],
-                      ),
-                    ],
                   ),
                 ),
               ],
             ),
           ),
 
-          // Header
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          const Divider(height: 1, color: Color(0xFFF0F0F0)),
+
+          // ── Scrollable body ──
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(width: 40),
-                  Column(
+                  // ── Cards visual ──
+                  Center(
+                    child: SizedBox(
+                      height: 130,
+                      width: 200,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Left card (my service)
+                          Positioned(
+                            left: 10,
+                            child: Transform.rotate(
+                              angle: -0.2,
+                              child: _buildCardTile(
+                                imageUrls:
+                                    selectedMyService?['image_urls'] ?? [],
+                                color: const Color(0xFFE8A020),
+                                isTarget: false,
+                              ),
+                            ),
+                          ),
+                          // Right card (target — always question)
+                          Positioned(
+                            right: 10,
+                            child: Transform.rotate(
+                              angle: 0.2,
+                              child: _buildCardTile(
+                                imageUrls: [],
+                                color: Colors.blueAccent,
+                                isTarget: true,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // ── Selection chips ──
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        "Skill Swap",
-                        style: GoogleFonts.poppins(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      _buildSelectionChip(
+                        label: selectedMyService?['title'] ?? 'Select Yours',
+                        filled: true,
+                        onTap: _showMyServicesPicker,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.sync,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
-                      Text(
-                        "Eng. by LifeKit",
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
+                      _buildSelectionChip(
+                        label:
+                            selectedTargetSubCategory?['name'] ??
+                            'Select Target',
+                        filled: false,
+                        onTap: _showCategoryPicker,
                       ),
                     ],
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
+
+                  const SizedBox(height: 28),
+
+                  // ── "Looking for" skill field — FIXED ──
+                  Text(
+                    'Looking for a skill',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: _showCategoryPicker,
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 15,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF7F7F9),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: selectedTargetSubCategory != null
+                              ? AppColors.primary.withOpacity(0.4)
+                              : Colors.grey.shade200,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.search,
+                            color: selectedTargetSubCategory != null
+                                ? AppColors.primary
+                                : Colors.grey[400],
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              selectedTargetSubCategory?['name'] ??
+                                  'Search for a skill…',
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                color: selectedTargetSubCategory != null
+                                    ? Colors.black87
+                                    : Colors.grey[400],
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (selectedTargetSubCategory != null)
+                            GestureDetector(
+                              onTap: () => setState(
+                                () => selectedTargetSubCategory = null,
+                              ),
+                              child: Icon(
+                                Icons.cancel,
+                                size: 18,
+                                color: Colors.grey[400],
+                              ),
+                            )
+                          else
+                            Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: Colors.grey[400],
+                              size: 20,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // ── Service type ──
+                  Text(
+                    'Select service type',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      _serviceTypeBtn('Default', Icons.fingerprint),
+                      const SizedBox(width: 10),
+                      _serviceTypeBtn('Home', Icons.home_rounded),
+                      const SizedBox(width: 10),
+                      _serviceTypeBtn('Outdoor', Icons.chair_alt_outlined),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // ── Tip card ──
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.06),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: AppColors.primary.withOpacity(0.15),
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.auto_awesome,
+                          color: AppColors.primary,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Select your skill & choose a target to get matched with a suitable swap partner.',
+                            style: GoogleFonts.poppins(
+                              fontSize: 11,
+                              color: Colors.black54,
+                              height: 1.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // ── Start button ──
+                  SizedBox(
+                    width: double.infinity,
+                    height: 54,
+                    child: ElevatedButton(
+                      onPressed: _startSearch,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Find Match',
+                            style: GoogleFonts.poppins(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.arrow_forward_rounded, size: 18),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
-            ),
-          ),
-
-          // FAB
-          Positioned(
-            bottom: 30,
-            right: 20,
-            child: FloatingActionButton(
-              onPressed: _startSearch,
-              backgroundColor: const Color(0xFF89273B),
-              child: const Icon(Icons.arrow_forward, color: Colors.white),
             ),
           ),
         ],
@@ -345,16 +441,29 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet> {
     );
   }
 
-  // --- HELPERS & PICKERS ---
-  Widget _buildCardImage(List urls, Color color, {bool isTarget = false}) {
-    String? imageUrl = (!isTarget && urls.isNotEmpty) ? urls[0] : null;
+  // ── Card visual tile ──
+  Widget _buildCardTile({
+    required List imageUrls,
+    required Color color,
+    required bool isTarget,
+  }) {
+    final String? imageUrl = (!isTarget && imageUrls.isNotEmpty)
+        ? imageUrls[0]
+        : null;
     return Container(
       width: 80,
-      height: 100,
+      height: 105,
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: Colors.white, width: 3),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.4),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
         image: imageUrl != null
             ? DecorationImage(
                 image: CachedNetworkImageProvider(imageUrl),
@@ -364,26 +473,31 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet> {
       ),
       child: isTarget
           ? const Center(
-              child: Icon(Icons.question_mark, color: Colors.white, size: 40),
+              child: Icon(Icons.question_mark, color: Colors.white, size: 38),
             )
           : null,
     );
   }
 
-  Widget _buildChip(String label, Color bg, Color txt, VoidCallback onTap) {
+  // ── Chip ──
+  Widget _buildSelectionChip({
+    required String label,
+    required bool filled,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         constraints: const BoxConstraints(maxWidth: 140),
         decoration: BoxDecoration(
-          color: bg,
+          color: filled ? AppColors.primary : Colors.grey[100],
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
           label,
           style: GoogleFonts.poppins(
-            color: txt,
+            color: filled ? Colors.white : Colors.black87,
             fontSize: 12,
             fontWeight: FontWeight.w600,
           ),
@@ -394,72 +508,119 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet> {
     );
   }
 
-  Widget _serviceTypeOption(String label, IconData icon) {
-    bool isSelected = selectedServiceType == label;
-    return GestureDetector(
-      onTap: () => setState(() => selectedServiceType = label),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF89273B) : Colors.white,
-          border: Border.all(
-            color: isSelected ? const Color(0xFF89273B) : Colors.grey.shade300,
+  // ── Service type button ──
+  Widget _serviceTypeBtn(String label, IconData icon) {
+    final bool selected = selectedServiceType == label;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => selectedServiceType = label),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.primary : const Color(0xFFF7F7F9),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: selected ? AppColors.primary : Colors.grey.shade200,
+            ),
           ),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? Colors.white : Colors.grey,
-              size: 20,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: GoogleFonts.poppins(
-                fontSize: 10,
-                color: isSelected ? Colors.white : Colors.grey,
+          child: Column(
+            children: [
+              Icon(
+                icon,
+                color: selected ? Colors.white : Colors.grey[500],
+                size: 22,
               ),
-            ),
-          ],
+              const SizedBox(height: 6),
+              Text(
+                label,
+                style: GoogleFonts.poppins(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: selected ? Colors.white : Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
+  // ── Pickers ──
   void _showMyServicesPicker() {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        height: 400,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        height: 420,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             Text(
-              "Select a skill to offer",
+              'Select a skill to offer',
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             Expanded(
-              child: ListView.builder(
+              child: ListView.separated(
                 itemCount: myServices.length,
-                itemBuilder: (context, index) {
-                  final s = myServices[index];
+                separatorBuilder: (_, __) =>
+                    Divider(height: 1, color: Colors.grey.shade100),
+                itemBuilder: (_, i) {
+                  final s = myServices[i];
+                  final isImg = (s['image_urls'] as List).isNotEmpty;
                   return ListTile(
+                    contentPadding: EdgeInsets.zero,
                     leading: CircleAvatar(
-                      backgroundImage: (s['image_urls'] as List).isNotEmpty
+                      radius: 22,
+                      backgroundColor: AppColors.primary.withOpacity(0.1),
+                      backgroundImage: isImg
                           ? CachedNetworkImageProvider(s['image_urls'][0])
                           : null,
+                      child: !isImg
+                          ? Text(
+                              s['title'][0],
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                            )
+                          : null,
                     ),
-                    title: Text(s['title'], style: GoogleFonts.poppins()),
+                    title: Text(
+                      s['title'],
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    trailing: selectedMyService?['id'] == s['id']
+                        ? const Icon(
+                            Icons.check_circle,
+                            color: AppColors.primary,
+                            size: 20,
+                          )
+                        : null,
                     onTap: () {
                       setState(() => selectedMyService = s);
                       Navigator.pop(context);
@@ -481,35 +642,55 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet> {
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        builder: (context) => DraggableScrollableSheet(
+        backgroundColor: Colors.transparent,
+        builder: (_) => DraggableScrollableSheet(
           initialChildSize: 0.7,
           expand: false,
           builder: (_, controller) => Container(
-            padding: const EdgeInsets.all(20),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 Text(
-                  "Select Skill Category",
+                  'Select Skill Category',
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
                 Expanded(
-                  child: ListView.builder(
+                  child: ListView.separated(
                     controller: controller,
                     itemCount: cats.length,
+                    separatorBuilder: (_, __) =>
+                        Divider(height: 1, color: Colors.grey.shade100),
                     itemBuilder: (_, i) => ListTile(
+                      contentPadding: EdgeInsets.zero,
                       title: Text(
                         cats[i]['name'],
-                        style: GoogleFonts.poppins(),
+                        style: GoogleFonts.poppins(fontSize: 14),
                       ),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+                      trailing: const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 13,
+                        color: Colors.grey,
+                      ),
                       onTap: () {
                         Navigator.pop(context);
                         _handleCategorySelect(cats[i]);
@@ -522,9 +703,7 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet> {
           ),
         ),
       );
-    } catch (e) {
-      print("Error: $e");
-    }
+    } catch (_) {}
   }
 
   void _handleCategorySelect(dynamic parentCat) async {
@@ -536,7 +715,7 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet> {
       } else {
         _showSubCategoryPicker(subs, parentCat['name']);
       }
-    } catch (e) {
+    } catch (_) {
       setState(() => selectedTargetSubCategory = parentCat);
     }
   }
@@ -544,33 +723,49 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet> {
   void _showSubCategoryPicker(List subs, String parentName) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        height: 400,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        height: 420,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             Text(
-              "Select specific skill in $parentName",
+              'Specific skill in $parentName',
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             Expanded(
-              child: ListView.builder(
+              child: ListView.separated(
                 itemCount: subs.length,
-                itemBuilder: (context, index) => ListTile(
+                separatorBuilder: (_, __) =>
+                    Divider(height: 1, color: Colors.grey.shade100),
+                itemBuilder: (_, i) => ListTile(
+                  contentPadding: EdgeInsets.zero,
                   title: Text(
-                    subs[index]['name'],
-                    style: GoogleFonts.poppins(),
+                    subs[i]['name'],
+                    style: GoogleFonts.poppins(fontSize: 14),
                   ),
                   onTap: () {
-                    setState(() => selectedTargetSubCategory = subs[index]);
+                    setState(() => selectedTargetSubCategory = subs[i]);
                     Navigator.pop(context);
                   },
                 ),
@@ -583,9 +778,9 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet> {
   }
 }
 
-// =============================================================================
-// 2. ANIMATION SCREEN (CUSTOM "HIT" ANIMATION)
-// =============================================================================
+// ═══════════════════════════════════════════════════════════
+// 2. ANIMATION SCREEN — KEPT INTACT, POLISHED SLIGHTLY
+// ═══════════════════════════════════════════════════════════
 
 class FindingMatchAnimationScreen extends StatefulWidget {
   final Map<String, dynamic> myService;
@@ -621,11 +816,10 @@ class _FindingMatchAnimationScreenState
     super.initState();
 
     _controller = AnimationController(
-      duration: const Duration(seconds: 2), // The slide in duration
+      duration: const Duration(seconds: 2),
       vsync: this,
     );
 
-    // Left card slides from -200 to -30 (Near center)
     _leftPosition = Tween<double>(
       begin: -200,
       end: -50,
@@ -643,41 +837,29 @@ class _FindingMatchAnimationScreenState
       ),
     );
 
-    // Start animation
     _controller.forward().then((_) {
-      // 1. Show "Match Found" Visuals
       Future.delayed(const Duration(milliseconds: 500), () {
         if (mounted) setState(() => _isMatched = true);
 
-        // 2. TRIGGER CUSTOM SLIDE TRANSITION HERE
         Timer(const Duration(milliseconds: 2000), () {
           if (mounted) {
             Navigator.pushReplacement(
               context,
               PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    SkillSwapResultsScreen(
-                      myService: widget.myService,
-                      targetCategoryId: widget.targetCategoryId,
-                      targetCategoryName: widget.targetCategoryName,
-                    ),
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                      const begin = Offset(0.0, 1.0); // Start from bottom
-                      const end = Offset.zero; // End at center
-                      const curve =
-                          Curves.easeOutQuart; // Smooth Apple-like curve
-
-                      var tween = Tween(
-                        begin: begin,
-                        end: end,
-                      ).chain(CurveTween(curve: curve));
-
-                      return SlideTransition(
-                        position: animation.drive(tween),
-                        child: child,
-                      );
-                    },
+                pageBuilder: (_, animation, __) => SkillSwapResultsScreen(
+                  myService: widget.myService,
+                  targetCategoryId: widget.targetCategoryId,
+                  targetCategoryName: widget.targetCategoryName,
+                ),
+                transitionsBuilder: (_, animation, __, child) {
+                  return SlideTransition(
+                    position:
+                        Tween(begin: const Offset(0.0, 1.0), end: Offset.zero)
+                            .chain(CurveTween(curve: Curves.easeOutQuart))
+                            .animate(animation),
+                    child: child,
+                  );
+                },
               ),
             );
           }
@@ -694,7 +876,7 @@ class _FindingMatchAnimationScreenState
 
   @override
   Widget build(BuildContext context) {
-    String? myImg = (widget.myService['image_urls'] as List).isNotEmpty
+    final String? myImg = (widget.myService['image_urls'] as List).isNotEmpty
         ? widget.myService['image_urls'][0]
         : null;
 
@@ -703,60 +885,87 @@ class _FindingMatchAnimationScreenState
       body: Stack(
         alignment: Alignment.center,
         children: [
-          // Left Card
-          AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              return Align(
-                alignment: Alignment.center,
-                child: Transform.translate(
-                  offset: Offset(_leftPosition.value, 0),
-                  child: Transform.rotate(
-                    angle: -0.15,
-                    child: _buildCard(myImg, Colors.orange, false),
-                  ),
-                ),
-              );
-            },
-          ),
-
-          // Right Card
-          AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              return Align(
-                alignment: Alignment.center,
-                child: Transform.translate(
-                  offset: Offset(_rightPosition.value, 0),
-                  child: Transform.rotate(
-                    angle: 0.15,
-                    child: _buildCard(null, Colors.blueAccent, true),
-                  ),
-                ),
-              );
-            },
-          ),
-
-          // Match Text
+          // Subtle background circle
           Positioned(
-            bottom: MediaQuery.of(context).size.height * 0.3,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primary.withOpacity(0.04),
+              ),
+            ),
+          ),
+
+          // Left card
+          AnimatedBuilder(
+            animation: _controller,
+            builder: (_, __) => Align(
+              alignment: Alignment.center,
+              child: Transform.translate(
+                offset: Offset(_leftPosition.value, 0),
+                child: Transform.rotate(
+                  angle: -0.15,
+                  child: _buildCard(myImg, const Color(0xFFE8A020), false),
+                ),
+              ),
+            ),
+          ),
+
+          // Right card
+          AnimatedBuilder(
+            animation: _controller,
+            builder: (_, __) => Align(
+              alignment: Alignment.center,
+              child: Transform.translate(
+                offset: Offset(_rightPosition.value, 0),
+                child: Transform.rotate(
+                  angle: 0.15,
+                  child: _buildCard(null, Colors.blueAccent, true),
+                ),
+              ),
+            ),
+          ),
+
+          // Status text (below cards)
+          Positioned(
+            bottom: MediaQuery.of(context).size.height * 0.28,
+            left: 40,
+            right: 40,
             child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 400),
               child: _isMatched
                   ? Column(
                       key: const ValueKey(2),
                       children: [
-                        const Icon(
-                          Icons.check_circle,
-                          color: Colors.green,
-                          size: 40,
+                        Container(
+                          width: 52,
+                          height: 52,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFE8F5E9),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.check_rounded,
+                            color: Colors.green,
+                            size: 28,
+                          ),
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 14),
                         Text(
-                          "Match Found!",
+                          'Match Found!',
                           style: GoogleFonts.poppins(
-                            fontSize: 18,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Loading your results…',
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            color: Colors.grey,
                           ),
                         ),
                       ],
@@ -764,24 +973,65 @@ class _FindingMatchAnimationScreenState
                   : Column(
                       key: const ValueKey(1),
                       children: [
-                        const SizedBox(
-                          width: 24,
-                          height: 24,
+                        SizedBox(
+                          width: 28,
+                          height: 28,
                           child: CircularProgressIndicator(
-                            color: Color(0xFF89273B),
-                            strokeWidth: 3,
+                            color: AppColors.primary,
+                            strokeWidth: 2.5,
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 16),
                         Text(
-                          "Finding match...",
+                          'Finding best match…',
                           style: GoogleFonts.poppins(
                             fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'This will only take a moment',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
                             color: Colors.grey,
                           ),
                         ),
                       ],
                     ),
+            ),
+          ),
+
+          // Skill name badge at top
+          Positioned(
+            top: MediaQuery.of(context).size.height * 0.12,
+            child: Column(
+              children: [
+                Text(
+                  'Matching you for',
+                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    widget.targetCategoryName,
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -799,9 +1049,9 @@ class _FindingMatchAnimationScreenState
         border: Border.all(color: Colors.white, width: 4),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+            color: color.withOpacity(0.35),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
         ],
         image: url != null
@@ -820,9 +1070,9 @@ class _FindingMatchAnimationScreenState
   }
 }
 
-// =============================================================================
-// 3. RESULTS SCREEN (Interactive Similar Matches)
-// =============================================================================
+// ═══════════════════════════════════════════════════════════
+// 3. RESULTS SCREEN
+// ═══════════════════════════════════════════════════════════
 
 class SkillSwapResultsScreen extends StatefulWidget {
   final Map<String, dynamic> myService;
@@ -842,13 +1092,13 @@ class SkillSwapResultsScreen extends StatefulWidget {
 
 class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
   final ApiService _apiService = ApiService();
+
   bool isLoading = true;
   bool isSending = false;
 
-  List<dynamic> allMatches = []; // Store ALL matches here
-  Map<String, dynamic>? primaryMatch; // The one currently shown in big card
-
-  String currentUserName = "Me";
+  List<dynamic> allMatches = [];
+  Map<String, dynamic>? primaryMatch;
+  String currentUserName = 'Me';
   String? currentUserId;
   String? currentUserPic;
   List<Map<String, dynamic>> realAvailableDates = [];
@@ -859,26 +1109,27 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
     _loadAllData();
   }
 
-  void _showModernSnackBar(
-    String message, {
-    bool isError = false,
-    bool isSuccess = false,
-  }) {
-    Color bgColor = isError
+  void _showSnack(String msg, {bool isError = false, bool isSuccess = false}) {
+    final Color bg = isError
         ? Colors.red.shade600
         : (isSuccess ? Colors.green.shade600 : const Color(0xFF333333));
-    IconData icon = isError
-        ? Icons.error_outline
-        : (isSuccess ? Icons.check_circle_outline : Icons.info_outline);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           children: [
-            Icon(icon, color: Colors.white, size: 20),
-            const SizedBox(width: 12),
+            Icon(
+              isError
+                  ? Icons.error_outline
+                  : (isSuccess
+                        ? Icons.check_circle_outline
+                        : Icons.info_outline),
+              color: Colors.white,
+              size: 18,
+            ),
+            const SizedBox(width: 10),
             Expanded(
               child: Text(
-                message,
+                msg,
                 style: GoogleFonts.poppins(
                   fontWeight: FontWeight.w500,
                   fontSize: 13,
@@ -887,11 +1138,10 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
             ),
           ],
         ),
-        backgroundColor: bgColor,
+        backgroundColor: bg,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
-        elevation: 4,
         duration: const Duration(seconds: 3),
       ),
     );
@@ -905,39 +1155,35 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
       ]);
       if (mounted) {
         final profileData = results[1] as Map<String, dynamic>;
-        currentUserName = profileData['profile']['full_name'] ?? "Me";
+        currentUserName = profileData['profile']['full_name'] ?? 'Me';
         currentUserId = profileData['profile']['id'];
         currentUserPic = profileData['profile']['profile_picture_url'];
 
-        // Filter out my own services
         List<dynamic> candidates = results[0] as List<dynamic>;
         allMatches = candidates
             .where((s) => s['provider_id'] != currentUserId)
             .toList();
 
         if (allMatches.isNotEmpty) {
-          _selectMatch(allMatches[0]); // Default to first
+          _selectMatch(allMatches[0]);
         } else {
           setState(() => isLoading = false);
         }
       }
-    } catch (e) {
+    } catch (_) {
       if (mounted) setState(() => isLoading = false);
     }
   }
 
-  // --- NEW: Function to Switch Provider ---
   void _selectMatch(dynamic match) {
     setState(() {
       primaryMatch = match;
-      realAvailableDates = []; // Clear old dates while loading
-      // Fetch schedule for this new provider
-      _fetchAndCalculateDates(primaryMatch!['provider_id']);
+      realAvailableDates = [];
     });
+    _fetchAndCalculateDates(primaryMatch!['provider_id']);
   }
 
   Future<void> _fetchAndCalculateDates(String providerId) async {
-    // Show partial loading state for calendar if needed, or just refresh
     try {
       final token = await _apiService.storage.read(key: 'jwt_token');
       final response = await http.get(
@@ -949,115 +1195,146 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
           : [];
 
       List<Map<String, dynamic>> calculatedDates = [];
-      DateTime now = DateTime.now();
+      final now = DateTime.now();
       for (int i = 1; i <= 14; i++) {
-        DateTime dateToCheck = now.add(Duration(days: i));
-        String weekDayName = _getDayName(dateToCheck.weekday);
-        var scheduleForDay = schedule.firstWhere(
-          (s) => s['day_of_week'] == weekDayName,
+        final d = now.add(Duration(days: i));
+        final dName = _getDayName(d.weekday);
+        final sched = schedule.firstWhere(
+          (s) => s['day_of_week'] == dName,
           orElse: () => null,
         );
-        if (scheduleForDay != null && scheduleForDay['is_active'] == true) {
+        if (sched != null && sched['is_active'] == true) {
           calculatedDates.add({
-            'day': weekDayName,
-            'date':
-                "${_getMonthName(dateToCheck.month)} ${dateToCheck.day}, ${scheduleForDay['start_time']} - ${scheduleForDay['end_time']}",
-            'realDateObj': dateToCheck.toIso8601String(),
+            'day': dName,
+            'date': '${_getMonthName(d.month)} ${d.day}',
+            'time': '${sched['start_time']} – ${sched['end_time']}',
+            'realDateObj': d.toIso8601String(),
             'isSelected': false,
           });
         }
         if (calculatedDates.length >= 3) break;
       }
-      if (mounted)
+      if (mounted) {
         setState(() {
           realAvailableDates = calculatedDates;
-          isLoading = false; // Data fully loaded
+          isLoading = false;
         });
-    } catch (e) {
-      print("Error: $e");
+      }
+    } catch (_) {
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
   Future<void> _sendSwapRequest() async {
-    var selectedDateMap = realAvailableDates.firstWhere(
+    final selectedDate = realAvailableDates.firstWhere(
       (d) => d['isSelected'] == true,
       orElse: () => {},
     );
-    if (realAvailableDates.isNotEmpty && selectedDateMap.isEmpty) {
-      _showModernSnackBar("Please select a date.", isError: true);
+    if (realAvailableDates.isNotEmpty && selectedDate.isEmpty) {
+      _showSnack('Please select a date.', isError: true);
       return;
     }
     if (realAvailableDates.isEmpty) {
-      _showModernSnackBar("No available dates.", isError: true);
+      _showSnack('No available dates.', isError: true);
       return;
     }
     setState(() => isSending = true);
     try {
       await _apiService.createBooking(
         serviceId: primaryMatch!['id'],
-        scheduledTime: selectedDateMap['realDateObj'],
-        locationDetails: "Skill Swap (Offered: ${widget.myService['title']})",
+        scheduledTime: selectedDate['realDateObj'],
+        locationDetails: 'Skill Swap (Offered: ${widget.myService['title']})',
         totalPrice: 0.0,
       );
       if (mounted) {
-        _showModernSnackBar("Request Sent Successfully!", isSuccess: true);
+        _showSnack('Request Sent Successfully!', isSuccess: true);
         Navigator.pop(context);
         Navigator.pop(context);
       }
     } catch (e) {
-      _showModernSnackBar("Error sending request: $e", isError: true);
+      _showSnack('Error: $e', isError: true);
     } finally {
       if (mounted) setState(() => isSending = false);
     }
   }
 
   String _getDayName(int w) => [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
   ][w - 1];
   String _getMonthName(int m) => [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ][m - 1];
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading)
+    if (isLoading) {
       return const Scaffold(
         backgroundColor: Colors.white,
         body: Center(
-          child: CircularProgressIndicator(color: Color(0xFF89273B)),
+          child: CircularProgressIndicator(color: AppColors.primary),
         ),
       );
-    if (primaryMatch == null)
-      return const Scaffold(
+    }
+    if (primaryMatch == null) {
+      return Scaffold(
         backgroundColor: Colors.white,
-        body: Center(child: Text("No providers found.")),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: const BackButton(color: Colors.black),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.search_off_rounded, size: 56, color: Colors.grey[300]),
+              const SizedBox(height: 16),
+              Text(
+                'No providers found',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Try a different skill category',
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  color: Colors.grey[400],
+                ),
+              ),
+            ],
+          ),
+        ),
       );
+    }
 
-    final providerName = primaryMatch!['profiles']?['full_name'] ?? "Unknown";
+    final providerName = primaryMatch!['profiles']?['full_name'] ?? 'Unknown';
     final providerPic = primaryMatch!['profiles']?['profile_picture_url'];
     final providerId = primaryMatch!['provider_id'];
     final double rating = (primaryMatch!['average_rating'] is int)
         ? (primaryMatch!['average_rating'] as int).toDouble()
         : (primaryMatch!['average_rating'] ?? 0.0);
 
-    // List of OTHER matches (exclude current primary)
     final similarList = allMatches
         .where((s) => s['id'] != primaryMatch!['id'])
         .toList();
@@ -1065,449 +1342,473 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFF7F7F9),
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
+          surfaceTintColor: Colors.white,
           leading: const SizedBox(),
+          title: Column(
+            children: [
+              Text(
+                'Skill Swap Match',
+                style: GoogleFonts.poppins(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              Text(
+                widget.targetCategoryName,
+                style: GoogleFonts.poppins(
+                  fontSize: 11,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+          centerTitle: true,
           actions: [
-            IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              icon: const Icon(Icons.close, color: Colors.black),
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.close,
+                    size: 18,
+                    color: Colors.black54,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
           child: Column(
             children: [
-              SizedBox(
-                height: 100,
-                child: Stack(
-                  alignment: Alignment.center,
+              // ── Swap card ──────────────────────
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
                   children: [
-                    Transform.translate(
-                      offset: const Offset(-20, 0),
-                      child: Transform.rotate(
-                        angle: -0.15,
-                        child: _buildImgCard(
-                          (widget.myService['image_urls'] as List).isNotEmpty
-                              ? widget.myService['image_urls'][0]
-                              : null,
-                          Colors.grey,
-                        ),
+                    // Visual cards
+                    SizedBox(
+                      height: 100,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Transform.translate(
+                            offset: const Offset(-20, 0),
+                            child: Transform.rotate(
+                              angle: -0.15,
+                              child: _buildImgCard(
+                                (widget.myService['image_urls'] as List)
+                                        .isNotEmpty
+                                    ? widget.myService['image_urls'][0]
+                                    : null,
+                                const Color(0xFFE8A020),
+                              ),
+                            ),
+                          ),
+                          Transform.translate(
+                            offset: const Offset(20, 0),
+                            child: Transform.rotate(
+                              angle: 0.15,
+                              child: _buildImgCard(
+                                (primaryMatch!['image_urls'] as List).isNotEmpty
+                                    ? primaryMatch!['image_urls'][0]
+                                    : null,
+                                Colors.blueAccent,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Transform.translate(
-                      offset: const Offset(20, 0),
-                      child: Transform.rotate(
-                        angle: 0.15,
-                        child: _buildImgCard(
-                          (primaryMatch!['image_urls'] as List).isNotEmpty
-                              ? primaryMatch!['image_urls'][0]
-                              : null,
-                          Colors.blueAccent,
+
+                    const SizedBox(height: 16),
+
+                    // Me row
+                    _buildPartyRow(
+                      pic: currentUserPic,
+                      name: currentUserName,
+                      serviceTitle: widget.myService['title'],
+                      tag: 'Me',
+                      tagColor: Colors.grey[100]!,
+                    ),
+
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Row(
+                        children: [
+                          Expanded(child: Divider(color: Colors.grey.shade200)),
+                          Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 12),
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.swap_vert,
+                              color: AppColors.primary,
+                              size: 18,
+                            ),
+                          ),
+                          Expanded(child: Divider(color: Colors.grey.shade200)),
+                        ],
+                      ),
+                    ),
+
+                    // Target provider row
+                    _buildPartyRow(
+                      pic: providerPic,
+                      name: providerName,
+                      serviceTitle: primaryMatch!['title'],
+                      tag: 'Match',
+                      tagColor: AppColors.primary.withOpacity(0.1),
+                      tagTextColor: AppColors.primary,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ProviderProfileScreen(
+                            providerId: providerId,
+                            providerName: providerName,
+                            providerPic: providerPic,
+                          ),
                         ),
+                      ),
+                      trailing: Row(
+                        children: [
+                          const Icon(
+                            Icons.star_rounded,
+                            color: Colors.amber,
+                            size: 14,
+                          ),
+                          const SizedBox(width: 2),
+                          Text(
+                            rating == 0 ? 'New' : rating.toStringAsFixed(1),
+                            style: GoogleFonts.poppins(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
 
-              // Me Card
+              const SizedBox(height: 14),
+
+              // ── Availability ───────────────────
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF9FAFB),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        CircleAvatar(
-                          radius: 16,
-                          backgroundColor: Colors.grey[300],
-                          backgroundImage: currentUserPic != null
-                              ? CachedNetworkImageProvider(currentUserPic!)
-                              : null,
-                          child: currentUserPic == null
-                              ? const Icon(
-                                  Icons.person,
-                                  size: 16,
-                                  color: Colors.white,
-                                )
-                              : null,
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.calendar_today_outlined,
+                            color: AppColors.primary,
+                            size: 16,
+                          ),
                         ),
                         const SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.myService['title'],
-                              style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                              ),
-                            ),
-                            Text(
-                              "$currentUserName (Me)",
-                              style: GoogleFonts.poppins(
-                                color: Colors.grey,
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const Spacer(),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            "Me",
-                            style: GoogleFonts.poppins(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        Text(
+                          'Select Date',
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 15),
-                    const Center(
-                      child: Icon(
-                        Icons.swap_vert_circle,
-                        color: Color(0xFF89273B),
-                        size: 28,
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-
-                    // Target Card (Dynamic)
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => ProviderProfileScreen(
-                                          providerId: providerId,
-                                          providerName: providerName,
-                                          providerPic: providerPic,
-                                        ),
-                                      ),
-                                    );
-                                  },
+                    const SizedBox(height: 14),
+                    realAvailableDates.isEmpty
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Text(
+                              'No availability set',
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          )
+                        : Column(
+                            children: realAvailableDates.asMap().entries.map((
+                              e,
+                            ) {
+                              final selected = e.value['isSelected'] as bool;
+                              return GestureDetector(
+                                onTap: () => setState(() {
+                                  for (var d in realAvailableDates) {
+                                    d['isSelected'] = false;
+                                  }
+                                  realAvailableDates[e.key]['isSelected'] =
+                                      true;
+                                }),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  margin: const EdgeInsets.only(bottom: 10),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: selected
+                                        ? AppColors.primary.withOpacity(0.07)
+                                        : const Color(0xFFF7F7F9),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: selected
+                                          ? AppColors.primary.withOpacity(0.4)
+                                          : Colors.transparent,
+                                      width: 1.5,
+                                    ),
+                                  ),
                                   child: Row(
                                     children: [
-                                      CircleAvatar(
-                                        radius: 20,
-                                        backgroundImage: providerPic != null
-                                            ? CachedNetworkImageProvider(
-                                                providerPic,
-                                              )
-                                            : null,
-                                        child: providerPic == null
-                                            ? const Icon(Icons.person)
-                                            : null,
-                                      ),
-                                      const SizedBox(width: 10),
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              primaryMatch!['title'],
+                                              e.value['day'],
                                               style: GoogleFonts.poppins(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 13,
+                                                color: selected
+                                                    ? AppColors.primary
+                                                    : Colors.black87,
                                               ),
                                             ),
                                             Text(
-                                              providerName,
+                                              '${e.value['date']} · ${e.value['time']}',
                                               style: GoogleFonts.poppins(
-                                                color: Colors.grey,
-                                                fontSize: 12,
+                                                fontSize: 11,
+                                                color: Colors.grey[500],
                                               ),
                                             ),
                                           ],
                                         ),
                                       ),
+                                      Icon(
+                                        selected
+                                            ? Icons.check_circle_rounded
+                                            : Icons.circle_outlined,
+                                        color: selected
+                                            ? AppColors.primary
+                                            : Colors.grey[300],
+                                        size: 20,
+                                      ),
                                     ],
                                   ),
                                 ),
-                              ),
-                              Row(
-                                children: [
-                                  InkWell(
-                                    onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => ProviderProfileScreen(
-                                          providerId: providerId,
-                                          providerName: providerName,
-                                          providerPic: providerPic,
-                                        ),
-                                      ),
-                                    ),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey[100],
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: const Icon(
-                                        Icons.person_outline,
-                                        size: 18,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  InkWell(
-                                    onTap: () => _showModernSnackBar(
-                                      "Sharing...",
-                                      isSuccess: false,
-                                    ),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey[100],
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: const Icon(
-                                        Icons.ios_share,
-                                        size: 18,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                              );
+                            }).toList(),
                           ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.star,
-                                color: Colors.amber,
-                                size: 16,
-                              ),
-                              Text(
-                                rating == 0 ? " New" : " $rating",
-                                style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          Text(
-                            "Availability",
-                            style: GoogleFonts.poppins(
-                              color: Colors.grey,
-                              fontSize: 12,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          realAvailableDates.isEmpty
-                              ? Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 10,
-                                  ),
-                                  child: Text(
-                                    "No availability set.",
-                                    style: GoogleFonts.poppins(
-                                      fontStyle: FontStyle.italic,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                )
-                              : Column(
-                                  children: realAvailableDates
-                                      .asMap()
-                                      .entries
-                                      .map(
-                                        (e) => GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              for (var d
-                                                  in realAvailableDates) {
-                                                d['isSelected'] = false;
-                                              }
-                                              realAvailableDates[e
-                                                      .key]['isSelected'] =
-                                                  true;
-                                            });
-                                          },
-                                          child: _buildAvailabilityRow(
-                                            e.value['day'],
-                                            e.value['date'],
-                                            e.value['isSelected'],
-                                          ),
-                                        ),
-                                      )
-                                      .toList(),
-                                ),
-                        ],
-                      ),
-                    ),
                   ],
                 ),
               ),
 
+              // ── Similar matches ────────────────
+              if (similarList.isNotEmpty) ...[
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Similar matches',
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            '${similarList.length} found',
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      SizedBox(
+                        height: 88,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: similarList.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: 14),
+                          itemBuilder: (_, i) {
+                            final s = similarList[i];
+                            final name = s['profiles']?['full_name'] ?? 'User';
+                            final pic = s['profiles']?['profile_picture_url'];
+                            final img =
+                                pic ??
+                                ((s['image_urls'] as List).isNotEmpty
+                                    ? s['image_urls'][0]
+                                    : null);
+                            final isSelected = s['id'] == primaryMatch!['id'];
+
+                            return GestureDetector(
+                              onTap: () => _selectMatch(s),
+                              child: Column(
+                                children: [
+                                  AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    width: 52,
+                                    height: 52,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? AppColors.primary
+                                            : Colors.transparent,
+                                        width: 2.5,
+                                      ),
+                                      color: Colors.grey[200],
+                                      image: img != null
+                                          ? DecorationImage(
+                                              image: CachedNetworkImageProvider(
+                                                img,
+                                              ),
+                                              fit: BoxFit.cover,
+                                            )
+                                          : null,
+                                    ),
+                                    child: img == null
+                                        ? Center(
+                                            child: Text(
+                                              name[0].toUpperCase(),
+                                              style: GoogleFonts.poppins(
+                                                fontWeight: FontWeight.bold,
+                                                color: AppColors.primary,
+                                              ),
+                                            ),
+                                          )
+                                        : null,
+                                  ),
+                                  const SizedBox(height: 6),
+                                  SizedBox(
+                                    width: 58,
+                                    child: Text(
+                                      name.split(' ')[0],
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
               const SizedBox(height: 20),
 
-              // --- SIMILAR MATCHES SECTION ---
-              if (similarList.isNotEmpty) ...[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Similar matches",
-                      style: GoogleFonts.poppins(color: Colors.grey),
-                    ),
-                    Text(
-                      "See all",
-                      style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  height: 90, // Increased height for names
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: similarList.length,
-                    itemBuilder: (context, index) {
-                      final s = similarList[index];
-                      final sName = s['profiles']?['full_name'] ?? "User";
-                      final sPic = s['profiles']?['profile_picture_url'];
-                      // Use provider pic if available, or service image
-                      final img =
-                          sPic ??
-                          ((s['image_urls'] as List).isNotEmpty
-                              ? s['image_urls'][0]
-                              : null);
-
-                      return GestureDetector(
-                        onTap: () => _selectMatch(s), // CLICK TO SWITCH!
-                        child: Container(
-                          margin: const EdgeInsets.only(right: 16),
-                          child: Column(
-                            children: [
-                              Container(
-                                width: 50,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Colors.grey.shade300,
-                                  ),
-                                  image: img != null
-                                      ? DecorationImage(
-                                          image: CachedNetworkImageProvider(
-                                            img,
-                                          ),
-                                          fit: BoxFit.cover,
-                                        )
-                                      : null,
-                                  color: Colors.grey[200],
-                                ),
-                                child: img == null
-                                    ? const Icon(
-                                        Icons.person,
-                                        size: 20,
-                                        color: Colors.grey,
-                                      )
-                                    : null,
-                              ),
-                              const SizedBox(height: 6),
-                              SizedBox(
-                                width: 60,
-                                child: Text(
-                                  sName.split(' ')[0],
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ] else
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text(
-                    "No other providers found.",
-                    style: GoogleFonts.poppins(
-                      color: Colors.grey[400],
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-
-              const SizedBox(height: 30),
+              // ── Send button ────────────────────
               SizedBox(
                 width: double.infinity,
-                height: 55,
+                height: 54,
                 child: ElevatedButton(
                   onPressed: isSending ? null : _sendSwapRequest,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF89273B),
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    disabledBackgroundColor: AppColors.primary.withOpacity(0.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    elevation: 0,
                   ),
                   child: isSending
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : Text(
-                          "Send Request",
-                          style: GoogleFonts.poppins(
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
                             color: Colors.white,
-                            fontSize: 16,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                      : Text(
+                          'Send Swap Request',
+                          style: GoogleFonts.poppins(
+                            fontSize: 15,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                 ),
               ),
-              const SizedBox(height: 30),
             ],
           ),
         ),
@@ -1520,50 +1821,94 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
       width: 70,
       height: 90,
       decoration: BoxDecoration(
+        color: color,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.white, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
         image: url != null
             ? DecorationImage(
                 image: CachedNetworkImageProvider(url),
                 fit: BoxFit.cover,
               )
             : null,
-        color: color,
       ),
     );
   }
 
-  Widget _buildAvailabilityRow(String day, String date, bool isSelected) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: Container(
-        color: Colors.transparent,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
+  Widget _buildPartyRow({
+    required String? pic,
+    required String name,
+    required String serviceTitle,
+    required String tag,
+    required Color tagColor,
+    Color? tagTextColor,
+    VoidCallback? onTap,
+    Widget? trailing,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 20,
+            backgroundColor: Colors.grey[200],
+            backgroundImage: pic != null
+                ? CachedNetworkImageProvider(pic)
+                : null,
+            child: pic == null
+                ? Text(
+                    name[0].toUpperCase(),
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  )
+                : null,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  day,
+                  serviceTitle,
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  date,
+                  name,
                   style: GoogleFonts.poppins(color: Colors.grey, fontSize: 11),
                 ),
               ],
             ),
-            Icon(
-              Icons.check_circle,
-              color: isSelected ? const Color(0xFF89273B) : Colors.grey[300],
-              size: 20,
+          ),
+          if (trailing != null) ...[trailing, const SizedBox(width: 8)],
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: tagColor,
+              borderRadius: BorderRadius.circular(8),
             ),
-          ],
-        ),
+            child: Text(
+              tag,
+              style: GoogleFonts.poppins(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: tagTextColor ?? Colors.black54,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

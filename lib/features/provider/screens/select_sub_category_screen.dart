@@ -106,46 +106,60 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
     name = name.toLowerCase();
 
     // Fitness
-    if (name.contains('gym') || name.contains('fitness'))
+    if (name.contains('gym') || name.contains('fitness')) {
       return 'https://cdn-icons-png.flaticon.com/512/2964/2964514.png';
-    if (name.contains('run'))
+    }
+    if (name.contains('run')) {
       return 'https://cdn-icons-png.flaticon.com/512/553/553979.png';
-    if (name.contains('tennis') || name.contains('sport'))
+    }
+    if (name.contains('tennis') || name.contains('sport')) {
       return 'https://cdn-icons-png.flaticon.com/512/1165/1165187.png';
+    }
 
     // Plumbing
-    if (name.contains('sink') || name.contains('faucet'))
+    if (name.contains('sink') || name.contains('faucet')) {
       return 'https://cdn-icons-png.flaticon.com/512/3050/3050239.png';
-    if (name.contains('leak') || name.contains('drain'))
+    }
+    if (name.contains('leak') || name.contains('drain')) {
       return 'https://cdn-icons-png.flaticon.com/512/3143/3143636.png';
-    if (name.contains('toilet') || name.contains('shower'))
+    }
+    if (name.contains('toilet') || name.contains('shower')) {
       return 'https://cdn-icons-png.flaticon.com/512/2200/2200326.png';
+    }
 
     // Beauty
-    if (name.contains('braid') || name.contains('cornrow'))
+    if (name.contains('braid') || name.contains('cornrow')) {
       return 'https://cdn-icons-png.flaticon.com/512/3712/3712169.png';
-    if (name.contains('wig') || name.contains('hair'))
+    }
+    if (name.contains('wig') || name.contains('hair')) {
       return 'https://cdn-icons-png.flaticon.com/512/3050/3050257.png';
-    if (name.contains('nail') || name.contains('manicure'))
+    }
+    if (name.contains('nail') || name.contains('manicure')) {
       return 'https://cdn-icons-png.flaticon.com/512/1940/1940922.png';
-    if (name.contains('makeup'))
+    }
+    if (name.contains('makeup')) {
       return 'https://cdn-icons-png.flaticon.com/512/3050/3050215.png';
+    }
 
     // Education
-    if (name.contains('tutor') || name.contains('assignment'))
+    if (name.contains('tutor') || name.contains('assignment')) {
       return 'https://cdn-icons-png.flaticon.com/512/2232/2232688.png';
-    if (name.contains('research') || name.contains('thesis'))
+    }
+    if (name.contains('research') || name.contains('thesis')) {
       return 'https://cdn-icons-png.flaticon.com/512/2921/2921222.png';
+    }
 
     // Electrical
     if (name.contains('light') ||
         name.contains('wire') ||
-        name.contains('socket'))
+        name.contains('socket')) {
       return 'https://cdn-icons-png.flaticon.com/512/2919/2919600.png';
+    }
 
     // Cleaning
-    if (name.contains('clean'))
+    if (name.contains('clean')) {
       return 'https://cdn-icons-png.flaticon.com/512/995/995016.png';
+    }
 
     // Default
     return 'https://cdn-icons-png.flaticon.com/512/1055/1055685.png';
@@ -354,10 +368,11 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
     return InkWell(
       onTap: () {
         setState(() {
-          if (isSelected)
+          if (isSelected) {
             _selectedIds.remove(item['id']);
-          else
+          } else {
             _selectedIds.add(item['id']);
+          }
         });
       },
       child: Column(

@@ -4,7 +4,65 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import '../../home/screens/home_screen.dart';
-import 'signup_screen.dart'; // Import the Signup Wrapper we built earlier
+import 'signup_screen.dart'; // AppToast + _friendlyError live here now
+
+String _friendlyError(dynamic raw) {
+  final msg = raw
+      .toString()
+      .replaceAll('Exception: ', '')
+      .replaceAll('exception: ', '')
+      .toLowerCase()
+      .trim();
+
+  if (msg.contains('invalid login') ||
+      msg.contains('invalid credentials') ||
+      msg.contains('wrong password') ||
+      msg.contains('incorrect password')) {
+    return 'Wrong email or password. Please try again.';
+  }
+  if (msg.contains('email already') ||
+      msg.contains('already registered') ||
+      msg.contains('already in use') ||
+      msg.contains('duplicate')) {
+    return 'This email is already registered. Try signing in instead.';
+  }
+  if (msg.contains('user not found') || msg.contains('no user')) {
+    return "We couldn't find an account with that email.";
+  }
+  if (msg.contains('invalid email') || msg.contains('email format')) {
+    return 'Please enter a valid email address.';
+  }
+  if (msg.contains('weak password') || msg.contains('password too short')) {
+    return 'Your password is too weak. Try something longer.';
+  }
+  if (msg.contains('otp') ||
+      msg.contains('token') ||
+      msg.contains('code') ||
+      msg.contains('expired')) {
+    return 'That code is invalid or expired. Please request a new one.';
+  }
+  if (msg.contains('network') ||
+      msg.contains('socket') ||
+      msg.contains('connection')) {
+    return 'No internet connection. Check your network and try again.';
+  }
+  if (msg.contains('timeout')) {
+    return 'The request timed out. Please try again.';
+  }
+  if (msg.contains('session expired') || msg.contains('unauthorized')) {
+    return 'Your session expired. Please sign in again.';
+  }
+  if (msg.contains('server error') ||
+      msg.contains('500') ||
+      msg.contains('internal')) {
+    return 'Something went wrong on our end. Please try again shortly.';
+  }
+
+  // Last resort: capitalise the raw message if it's short enough to show
+  final clean = raw.toString().replaceAll('Exception: ', '').trim();
+  if (clean.length < 80) return clean;
+  return 'Something went wrong. Please try again.';
+}
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,44 +72,38 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // Controllers
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
   final ApiService _apiService = ApiService();
+
   bool isLoading = false;
   bool isPasswordVisible = false;
 
-  // --- ACTIONS ---
-
   Future<void> handleLogin() async {
-    // Basic Validation
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please enter email and password"),
-          backgroundColor: Colors.red,
-        ),
-      );
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    // ── Client-side validation first ───────────────────────
+    if (email.isEmpty) {
+      AppToast.error(context, 'Please enter your email address.');
+      return;
+    }
+    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
+      AppToast.error(context, 'That doesn\'t look like a valid email.');
+      return;
+    }
+    if (password.isEmpty) {
+      AppToast.error(context, 'Please enter your password.');
       return;
     }
 
     setState(() => isLoading = true);
 
     try {
-      final response = await _apiService.login(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
-
-      // If successful...
+      await _apiService.login(email, password);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Login Successful!"),
-            backgroundColor: Colors.green,
-          ),
-        );
+        AppToast.success(context, 'Welcome back! 👋');
+        await Future.delayed(const Duration(milliseconds: 800));
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -60,10 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        // Show the specific error message from the backend
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-        );
+        AppToast.error(context, _friendlyError(e));
       }
     } finally {
       if (mounted) setState(() => isLoading = false);
@@ -74,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      resizeToAvoidBottomInset: true, // Allows keyboard to push UI up
+      resizeToAvoidBottomInset: true,
       body: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
@@ -98,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               const SizedBox(height: 24),
                               Text(
-                                "Sign in to LifeKit",
+                                'Sign in to LifeKit',
                                 style: GoogleFonts.poppins(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
@@ -107,7 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                "Please complete all information to create\nyour LifeKit account",
+                                'Good to have you back 👋',
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.poppins(
                                   fontSize: 14,
@@ -121,39 +170,30 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const SizedBox(height: 40),
 
-                      // -- INPUT FIELDS --
-
-                      // Email Field
                       _LoginTextField(
                         controller: _emailController,
-                        hintText: "Phone, email address, or username",
+                        hintText: 'Email address',
                         keyboardType: TextInputType.emailAddress,
                       ),
-
                       const SizedBox(height: 16),
-
-                      // Password Field
                       _LoginTextField(
                         controller: _passwordController,
-                        hintText: "Enter password",
+                        hintText: 'Password',
                         isPassword: true,
                         isVisible: isPasswordVisible,
-                        onVisibilityToggle: () {
-                          setState(() {
-                            isPasswordVisible = !isPasswordVisible;
-                          });
-                        },
+                        onVisibilityToggle: () => setState(
+                          () => isPasswordVisible = !isPasswordVisible,
+                        ),
                       ),
 
-                      // Forgot Password Link
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: () {
-                            // TODO: Navigate to Forgot Password Screen
+                            // TODO: Forgot password
                           },
                           child: Text(
-                            "Forgot Password?",
+                            'Forgot Password?',
                             style: GoogleFonts.poppins(
                               color: Colors.grey,
                               fontSize: 12,
@@ -165,7 +205,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const SizedBox(height: 20),
 
-                      // Login Button
                       isLoading
                           ? const Center(
                               child: CircularProgressIndicator(
@@ -185,7 +224,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   elevation: 0,
                                 ),
                                 child: Text(
-                                  "Login",
+                                  'Login',
                                   style: GoogleFonts.poppins(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
@@ -197,14 +236,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const SizedBox(height: 24),
 
-                      // Divider
-                      const Row(
-                        children: [
+                      Row(
+                        children: const [
                           Expanded(child: Divider(color: Colors.grey)),
                           Padding(
                             padding: EdgeInsets.symmetric(horizontal: 16),
                             child: Text(
-                              "or",
+                              'or',
                               style: TextStyle(color: Colors.grey),
                             ),
                           ),
@@ -214,20 +252,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const SizedBox(height: 24),
 
-                      // Social Buttons
                       _SocialButton(
                         icon: Icons.g_mobiledata,
-                        text: "Continue with Google",
+                        text: 'Continue with Google',
                       ),
                       const SizedBox(height: 16),
                       _SocialButton(
                         icon: Icons.apple,
-                        text: "Continue with Apple",
+                        text: 'Continue with Apple',
                       ),
 
                       const Spacer(),
 
-                      // Footer: Sign Up Link
                       Padding(
                         padding: const EdgeInsets.only(bottom: 24.0, top: 16.0),
                         child: Center(
@@ -240,23 +276,19 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               children: [
                                 TextSpan(
-                                  text: "Sign Up",
+                                  text: 'Sign Up',
                                   style: GoogleFonts.poppins(
-                                    color: AppColors
-                                        .primary, // Using the Maroon color
+                                    color: AppColors.primary,
                                     fontWeight: FontWeight.bold,
                                   ),
                                   recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      // REDIRECT TO SIGNUP
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              const SignupFlowWrapper(),
-                                        ),
-                                      );
-                                    },
+                                    ..onTap = () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const SignupFlowWrapper(),
+                                      ),
+                                    ),
                                 ),
                               ],
                             ),
@@ -275,7 +307,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-// --- HELPER WIDGETS ---
+// ─────────────────────────────────────────────────────────────
+//  HELPER WIDGETS
+// ─────────────────────────────────────────────────────────────
 
 class _LoginTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -298,7 +332,7 @@ class _LoginTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF9F9F9), // Light grey background like Figma
+        color: const Color(0xFFF9F9F9),
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextField(

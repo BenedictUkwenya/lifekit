@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 // If LifeKitLoader is not found, replace with CircularProgressIndicator()
-import '../../../core/widgets/lifekit_loader.dart';
 
 class ProviderDashboardScreen extends StatefulWidget {
   const ProviderDashboardScreen({super.key});

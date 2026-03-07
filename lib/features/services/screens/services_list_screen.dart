@@ -112,8 +112,9 @@ class _ServicesListScreenState extends State<ServicesListScreen> {
     if (name.contains('health')) return const Color(0xFFE3F2FD);
     if (name.contains('laundry')) return const Color(0xFFE8F5E9);
     if (name.contains('hair')) return const Color(0xFFF3E5F5);
-    if (name.contains('care') || name.contains('family'))
+    if (name.contains('care') || name.contains('family')) {
       return const Color(0xFFFFEBEE);
+    }
     if (name.contains('clean')) return const Color(0xFFE0F7FA);
     if (name.contains('education')) return const Color(0xFFFFF3E0);
     if (name.contains('tech')) return const Color(0xFFECEFF1);

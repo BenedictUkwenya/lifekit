@@ -109,10 +109,9 @@ class _PlacesListScreenState extends State<PlacesListScreen>
       final timestamp = prefs.getInt(_placesCacheTimestampKey);
       if (timestamp == null) return;
 
-      final cacheAge =
-          DateTime.now().difference(DateTime.fromMillisecondsSinceEpoch(
-        timestamp,
-      ));
+      final cacheAge = DateTime.now().difference(
+        DateTime.fromMillisecondsSinceEpoch(timestamp),
+      );
       if (cacheAge.inMinutes > 10) {
         return;
       }
@@ -155,8 +154,8 @@ class _PlacesListScreenState extends State<PlacesListScreen>
 
       if (mounted) {
         setState(() {
-          nearbyPlaces = results[0] as List<dynamic>;
-          popularPlaces = results[1] as List<dynamic>;
+          nearbyPlaces = results[0];
+          popularPlaces = results[1];
           filteredPlaces = nearbyPlaces;
           isLoading = false;
         });

@@ -25,8 +25,8 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
   final TextEditingController _descController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
 
-  List<File> _newImages = [];
-  List<String> _existingImages = [];
+  final List<File> _newImages = [];
+  final List<String> _existingImages = [];
   int _currentImageIndex = 0;
 
   String _serviceLocation = 'Home Service (HS)';
@@ -39,7 +39,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
   List<Map<String, dynamic>> _serviceOptions = [];
   List<dynamic> _availableSubTasks = [];
 
-  List<Map<String, dynamic>> _weeklySchedule = [
+  final List<Map<String, dynamic>> _weeklySchedule = [
     {'day': 'Monday', 'active': false, 'start': '09:00', 'end': '17:00'},
     {'day': 'Tuesday', 'active': false, 'start': '09:00', 'end': '17:00'},
     {'day': 'Wednesday', 'active': false, 'start': '09:00', 'end': '17:00'},
@@ -181,10 +181,11 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
       onTimeSelected: (h, m) => setState(() {
         final t =
             '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
-        if (isStart)
+        if (isStart) {
           _weeklySchedule[index]['start'] = t;
-        else
+        } else {
           _weeklySchedule[index]['end'] = t;
+        }
       }),
     );
   }
@@ -350,7 +351,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
         'service_options': _isStandalone ? _serviceOptions : [],
       });
       if (mounted) {
-        Navigator.pop(context);
+        Navigator.pop(context, true);
         _showSnackBar('Service updated!', isError: false);
       }
     } catch (e) {
@@ -1690,7 +1691,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
               ),
               Switch(
                 value: _isVisible,
-                activeColor: AppColors.primary,
+                activeThumbColor: AppColors.primary,
                 onChanged: (v) => setState(() => _isVisible = v),
               ),
             ],

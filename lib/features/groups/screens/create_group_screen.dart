@@ -213,7 +213,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                         ),
                         Switch(
                           value: _anyoneCanPost,
-                          activeColor: AppColors.primary,
+                          activeThumbColor: AppColors.primary,
                           onChanged: (val) =>
                               setState(() => _anyoneCanPost = val),
                         ),

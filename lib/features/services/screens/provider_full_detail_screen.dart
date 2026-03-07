@@ -102,7 +102,9 @@ class _ProviderFullDetailScreenState extends State<ProviderFullDetailScreen>
           reviews = reviewsData;
           if (reviews.isNotEmpty) {
             double sum = 0;
-            for (var r in reviews) sum += (r['rating'] as int);
+            for (var r in reviews) {
+              sum += (r['rating'] as int);
+            }
             averageRating = sum / reviews.length;
             totalReviewsCount = reviews.length;
           } else if (currentService != null) {

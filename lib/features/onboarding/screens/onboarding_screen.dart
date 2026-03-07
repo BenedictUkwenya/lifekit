@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../auth/screens/signup_screen.dart';
-import '../../auth/screens/login_screen.dart';
 import '../../../core/constants/app_colors.dart';
 
 class OnboardingScreen extends StatefulWidget {

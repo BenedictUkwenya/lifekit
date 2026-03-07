@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart'; // Make sure to add this package
-import 'package:cached_network_image/cached_network_image.dart';
 
 class ShareProfileScreen extends StatelessWidget {
   final Map<String, dynamic> profile;

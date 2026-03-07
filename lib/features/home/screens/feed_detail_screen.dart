@@ -45,11 +45,12 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
   Future<void> _fetchComments() async {
     try {
       final data = await _apiService.getComments(widget.post['id']);
-      if (mounted)
+      if (mounted) {
         setState(() {
           comments = data;
           isLoadingComments = false;
         });
+      }
     } catch (_) {
       if (mounted) setState(() => isLoadingComments = false);
     }

@@ -646,8 +646,7 @@ class _FeedCardState extends State<_FeedCard> {
                 final content = widget.post['content'] ?? '';
                 final title = widget.post['title'] ?? '';
                 final text =
-                    (title.isNotEmpty ? '$title\n\n' : '') +
-                    '$content\n\nShared from LifeKit';
+                    '${title.isNotEmpty ? '$title\n\n' : ''}$content\n\nShared from LifeKit';
                 Share.share(text.trim());
               },
             ),

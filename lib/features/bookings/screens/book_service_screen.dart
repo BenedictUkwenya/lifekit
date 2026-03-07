@@ -42,7 +42,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
   int _durationHours = 1;
 
   // --- NEW: STANDALONE OPTIONS STATE ---
-  List<dynamic> _selectedOptions = [];
+  final List<dynamic> _selectedOptions = [];
 
   // --- DATA / LOGIC STATE ---
   List<dynamic> _relatedServices = [];
@@ -148,8 +148,9 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
     );
 
     if (scheduleDay != null) {
-      if (scheduleDay['is_active'] == false)
+      if (scheduleDay['is_active'] == false) {
         return "Provider does not work on $dayName";
+      }
 
       String startStr = scheduleDay['start_time'] ?? "09:00";
       String endStr = scheduleDay['end_time'] ?? "17:00";
@@ -1052,7 +1053,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                                 },
                               ),
                             );
-                          }).toList(),
+                          }),
                         ],
                       ],
                     ),

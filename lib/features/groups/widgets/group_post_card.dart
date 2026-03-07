@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
-import '../../home/widgets/comments_sheet.dart';
 
 class GroupPostCard extends StatefulWidget {
   final dynamic post;
