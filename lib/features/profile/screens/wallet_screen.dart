@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import '../../wallet/screens/add_money_screen.dart'; // Reuse existing
@@ -17,11 +18,21 @@ class _WalletScreenState extends State<WalletScreen> {
   double balance = 0.00;
   List<dynamic> transactions = [];
   bool isLoading = true;
+  bool isProvider = false;
+  bool isStripeConnected = false;
+  bool isSubmitting = false;
+  final TextEditingController _withdrawController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _fetchWallet();
+  }
+
+  @override
+  void dispose() {
+    _withdrawController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchWallet() async {
@@ -30,11 +41,119 @@ class _WalletScreenState extends State<WalletScreen> {
       setState(() {
         balance = double.parse(data['balance'].toString());
         transactions = data['transactions'] ?? [];
+        isProvider = data['is_provider'] == true;
+        isStripeConnected = data['stripe_connected'] == true;
         isLoading = false;
       });
     } catch (e) {
       if (mounted) setState(() => isLoading = false);
     }
+  }
+
+  Future<void> _startPayoutSetup() async {
+    try {
+      final response = await _apiService.onboardStripeConnect();
+      final url = response['url'];
+      if (url != null && url is String) {
+        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Setup failed: $e"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showWithdrawDialog() {
+    _withdrawController.text = balance.toStringAsFixed(2);
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            "Withdraw",
+            style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+          ),
+          content: TextField(
+            controller: _withdrawController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: const InputDecoration(hintText: "Enter amount"),
+          ),
+          actions: [
+            TextButton(
+              onPressed: isSubmitting
+                  ? null
+                  : () {
+                      Navigator.pop(context);
+                    },
+              child: Text("Cancel", style: GoogleFonts.poppins()),
+            ),
+            ElevatedButton(
+              onPressed: isSubmitting
+                  ? null
+                  : () async {
+                      final amount = double.tryParse(
+                        _withdrawController.text.trim(),
+                      );
+                      if (amount == null || amount <= 0) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Enter a valid amount."),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
+                      if (amount > balance) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Amount exceeds balance."),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
+                      setState(() => isSubmitting = true);
+                      try {
+                        await _apiService.withdrawFromWallet(amount);
+                        if (mounted) {
+                          setState(() => isSubmitting = false);
+                          Navigator.pop(context);
+                          await _fetchWallet();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Withdrawal completed."),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        setState(() => isSubmitting = false);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("Withdraw failed: $e"),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+              ),
+              child: Text(
+                "Withdraw",
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -136,7 +255,32 @@ class _WalletScreenState extends State<WalletScreen> {
                         );
                         if (result == true) _fetchWallet();
                       }),
-                      _buildActionBtn(Icons.arrow_outward, "Withdraw", () {}),
+                      _buildActionBtn(
+                        Icons.arrow_outward,
+                        isProvider && balance > 0 && !isStripeConnected
+                            ? "Setup Payouts"
+                            : "Withdraw",
+                        () {
+                          if (!isProvider || balance <= 0) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  isProvider
+                                      ? "Balance must be greater than 0."
+                                      : "Withdrawals are for providers.",
+                                  style: GoogleFonts.poppins(),
+                                ),
+                              ),
+                            );
+                            return;
+                          }
+                          if (!isStripeConnected) {
+                            _startPayoutSetup();
+                            return;
+                          }
+                          _showWithdrawDialog();
+                        },
+                      ),
                       _buildActionBtn(Icons.qr_code_scanner, "Scan", () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(

@@ -1,9 +1,10 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import 'report_user_screen.dart';
 
 class ChatDetailScreen extends StatefulWidget {
   final dynamic otherUser;
@@ -20,10 +21,14 @@ class ChatDetailScreen extends StatefulWidget {
   State<ChatDetailScreen> createState() => _ChatDetailScreenState();
 }
 
-class _ChatDetailScreenState extends State<ChatDetailScreen> {
+class _ChatDetailScreenState extends State<ChatDetailScreen>
+    with WidgetsBindingObserver {
   final ApiService _apiService = ApiService();
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final SupabaseClient _supabase = Supabase.instance.client;
+  RealtimeChannel? _messagesChannel;
+  bool _hasBooking = false;
 
   List<dynamic> messages = [];
   bool isLoading = true;
@@ -36,31 +41,54 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // Default to the first booking passed
     if (widget.bookings.isNotEmpty) {
       _selectBooking(widget.bookings[0]);
     }
-    // Start Polling (Real-time simulation)
-    _startPolling();
   }
 
   void _selectBooking(dynamic booking) {
     setState(() {
       currentBooking = booking;
+      _hasBooking = true;
       // Check Status for Locking
       String status = booking['status'] ?? 'pending';
       isChatLocked = (status == 'completed' || status == 'cancelled');
     });
     _fetchMessages();
+    _subscribeToMessages(booking['id']);
   }
 
-  void _startPolling() {
-    Future.delayed(const Duration(seconds: 5), () {
-      if (mounted) {
-        _fetchMessages(isPolling: true);
-        _startPolling();
-      }
-    });
+  Future<void> _subscribeToMessages(String bookingId) async {
+    if (_messagesChannel != null) {
+      await _supabase.removeChannel(_messagesChannel!);
+    }
+
+    _messagesChannel = _supabase.channel('public:messages:booking:$bookingId');
+    _messagesChannel!.onPostgresChanges(
+      event: PostgresChangeEvent.insert,
+      schema: 'public',
+      table: 'messages',
+      filter: PostgresChangeFilter(
+        type: PostgresChangeFilterType.eq,
+        column: 'booking_id',
+        value: bookingId,
+      ),
+      callback: (payload) {
+        final record = payload.newRecord;
+        if (record == null) return;
+        if (!mounted) return;
+        final recordId = record['id'];
+        if (recordId != null && messages.any((m) => m['id'] == recordId)) {
+          return;
+        }
+        setState(() => messages.add(record));
+        _scrollToBottom();
+      },
+    );
+
+    await _messagesChannel!.subscribe();
   }
 
   Future<void> _fetchMessages({bool isPolling = false}) async {
@@ -107,6 +135,25 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    if (_messagesChannel != null) {
+      _supabase.removeChannel(_messagesChannel!);
+    }
+    _messageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _hasBooking) {
+      _subscribeToMessages(currentBooking['id']);
+      _fetchMessages(isPolling: true);
     }
   }
 
@@ -195,6 +242,18 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         ],
       ),
       actions: [
+        IconButton(
+          icon: const Icon(Icons.report_outlined, color: Colors.black),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    ReportUserScreen(targetUserId: widget.otherUser['id']),
+              ),
+            );
+          },
+        ),
         IconButton(
           icon: const Icon(Icons.phone_outlined, color: Colors.black),
           onPressed: () {

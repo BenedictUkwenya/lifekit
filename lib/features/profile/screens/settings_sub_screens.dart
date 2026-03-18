@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../auth/screens/login_screen.dart';
 
 // =============================================================================
 // 1. MODERN SECURITY SCREEN
@@ -15,6 +17,7 @@ class SecurityScreen extends StatefulWidget {
 
 class _SecurityScreenState extends State<SecurityScreen> {
   final ApiService _apiService = ApiService();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   // Controllers
   final _currentPassController = TextEditingController();
@@ -69,6 +72,56 @@ class _SecurityScreenState extends State<SecurityScreen> {
       }
     } finally {
       if (mounted) setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _confirmDeleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          "Delete Account",
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+        ),
+        content: Text(
+          "This action is irreversible. All your data will be lost.",
+          style: GoogleFonts.poppins(fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text("Cancel", style: GoogleFonts.poppins()),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              "Delete",
+              style: GoogleFonts.poppins(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      await _apiService.deleteAccount();
+      await _storage.deleteAll();
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        _showSnackBar(
+          e.toString().replaceAll("Exception: ", ""),
+          isError: true,
+        );
+      }
     }
   }
 
@@ -224,6 +277,27 @@ class _SecurityScreenState extends State<SecurityScreen> {
                     },
                   ),
                 ],
+              ),
+            ),
+            const SizedBox(height: 30),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: _confirmDeleteAccount,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  "Delete Account",
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ),
           ],
@@ -450,8 +524,179 @@ class _LanguageScreenState extends State<LanguageScreen> {
 // =============================================================================
 // 4. HELP CENTER (Modern Placeholder)
 // =============================================================================
-class HelpCenterScreen extends StatelessWidget {
+class HelpCenterScreen extends StatefulWidget {
   const HelpCenterScreen({super.key});
+  @override
+  State<HelpCenterScreen> createState() => _HelpCenterScreenState();
+}
+
+class _HelpCenterScreenState extends State<HelpCenterScreen> {
+  final ApiService _apiService = ApiService();
+  final _subjectController = TextEditingController();
+  final _messageController = TextEditingController();
+
+  List<dynamic> _tickets = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTickets();
+  }
+
+  Future<void> _fetchTickets() async {
+    try {
+      final data = await _apiService.getMyTickets();
+      if (mounted) {
+        setState(() {
+          _tickets = data;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _showSnackBar(
+          e.toString().replaceAll("Exception: ", ""),
+          isError: true,
+        );
+      }
+    }
+  }
+
+  Future<void> _submitTicket() async {
+    if (_subjectController.text.trim().isEmpty ||
+        _messageController.text.trim().isEmpty) {
+      _showSnackBar("Please fill subject and message", isError: true);
+      return;
+    }
+    try {
+      await _apiService.createTicket(
+        _subjectController.text.trim(),
+        _messageController.text.trim(),
+      );
+      if (mounted) {
+        Navigator.pop(context);
+        _subjectController.clear();
+        _messageController.clear();
+        _fetchTickets();
+        _showSnackBar("Ticket submitted successfully!", isError: false);
+      }
+    } catch (e) {
+      if (mounted) {
+        _showSnackBar(
+          e.toString().replaceAll("Exception: ", ""),
+          isError: true,
+        );
+      }
+    }
+  }
+
+  void _openCreateTicketSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Contact Support",
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _subjectController,
+                decoration: InputDecoration(
+                  labelText: "Subject",
+                  labelStyle: GoogleFonts.poppins(fontSize: 12),
+                  filled: true,
+                  fillColor: const Color(0xFFFAFAFA),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _messageController,
+                maxLines: 4,
+                decoration: InputDecoration(
+                  labelText: "Message",
+                  labelStyle: GoogleFonts.poppins(fontSize: 12),
+                  filled: true,
+                  fillColor: const Color(0xFFFAFAFA),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _submitTicket,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    "Submit Ticket",
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  String _formatDate(String? raw) {
+    if (raw == null) return '';
+    final parsed = DateTime.tryParse(raw);
+    if (parsed == null) return '';
+    final local = parsed.toLocal();
+    return "${local.year}-${local.month.toString().padLeft(2, '0')}-${local.day.toString().padLeft(2, '0')}";
+  }
+
+  void _showSnackBar(String msg, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          msg,
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+        ),
+        backgroundColor: isError ? Colors.redAccent : Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -469,92 +714,148 @@ class HelpCenterScreen extends StatelessWidget {
         elevation: 0,
         leading: const BackButton(color: Colors.black),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Container(
+      floatingActionButton: FloatingActionButton(
+        onPressed: _openCreateTicketSheet,
+        backgroundColor: AppColors.primary,
+        child: const Icon(Icons.support_agent, color: Colors.white),
+      ),
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
+          : ListView(
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                children: [
-                  const Icon(
-                    Icons.support_agent,
-                    size: 50,
-                    color: AppColors.primary,
+              children: [
+                Text(
+                  "My Tickets",
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[700],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    "How can we help?",
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                ),
+                const SizedBox(height: 12),
+                if (_tickets.isEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "Our team is available 24/7 to assist you with any issues regarding bookings or services.",
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
-                      color: Colors.grey,
-                      fontSize: 13,
+                    child: Column(
+                      children: [
+                        const Icon(
+                          Icons.support_agent,
+                          size: 48,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          "No tickets yet",
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              "In-app support chat is coming soon!",
-                              style: GoogleFonts.poppins(),
-                            ),
-                            behavior: SnackBarBehavior.floating,
-                            margin: const EdgeInsets.all(16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                  )
+                else
+                  ..._tickets.map(
+                    (ticket) => Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  ticket['subject'] ?? 'Support Ticket',
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: (ticket['status'] == 'closed')
+                                      ? Colors.green.withOpacity(0.1)
+                                      : Colors.orange.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  (ticket['status'] ?? 'open')
+                                      .toString()
+                                      .toUpperCase(),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                    color: (ticket['status'] == 'closed')
+                                        ? Colors.green
+                                        : Colors.orange,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            ticket['message'] ?? '',
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.grey[700],
                             ),
                           ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        "Contact Support",
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
+                          if (ticket['admin_reply'] != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  ticket['admin_reply'],
+                                  style: GoogleFonts.poppins(fontSize: 12),
+                                ),
+                              ),
+                            ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _formatDate(ticket['created_at']),
+                            style: GoogleFonts.poppins(
+                              fontSize: 11,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ],
-              ),
+                const SizedBox(height: 10),
+                _buildFaqItem(
+                  "How do I cancel a booking?",
+                  "Go to the bookings tab, select the active booking, and click the 'Cancel' button.",
+                ),
+                const SizedBox(height: 10),
+                _buildFaqItem(
+                  "How do refunds work?",
+                  "Refunds are processed to your wallet immediately after cancellation confirmation.",
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-            // FAQ Expansion
-            _buildFaqItem(
-              "How do I cancel a booking?",
-              "Go to the bookings tab, select the active booking, and click the 'Cancel' button.",
-            ),
-            const SizedBox(height: 10),
-            _buildFaqItem(
-              "How do refunds work?",
-              "Refunds are processed to your wallet immediately after cancellation confirmation.",
-            ),
-          ],
-        ),
-      ),
     );
   }
 

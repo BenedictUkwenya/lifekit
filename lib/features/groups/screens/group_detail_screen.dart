@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../profile/screens/service_profile_screen.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
@@ -52,10 +52,12 @@ class GroupDetailScreen extends StatefulWidget {
 }
 
 class _GroupDetailScreenState extends State<GroupDetailScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   final ApiService _apiService = ApiService();
   final TextEditingController _postController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final SupabaseClient _supabase = Supabase.instance.client;
+  RealtimeChannel? _groupPostsChannel;
 
   bool isLoading = true;
   bool isSending = false;
@@ -71,19 +73,19 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
   Map<String, dynamic>? _selectedService;
   dynamic _replyingTo;
 
-  Timer? _pollTimer;
   late AnimationController _fadeCtrl;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _fadeCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
     _loadMyId();
     _loadData();
-    _startPolling();
+    _subscribeToGroupPosts();
     _scrollController.addListener(_scrollListener);
   }
 
@@ -107,11 +109,22 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
 
   @override
   void dispose() {
-    _pollTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    if (_groupPostsChannel != null) {
+      _supabase.removeChannel(_groupPostsChannel!);
+    }
     _postController.dispose();
     _scrollController.dispose();
     _fadeCtrl.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _subscribeToGroupPosts();
+      _refreshPosts();
+    }
   }
 
   Future<void> _loadMyId() async {
@@ -145,12 +158,35 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     } catch (_) {}
   }
 
-  void _startPolling() {
-    _pollTimer?.cancel();
-    _pollTimer = Timer.periodic(
-      const Duration(seconds: 5),
-      (_) => _refreshPosts(),
+  Future<void> _subscribeToGroupPosts() async {
+    if (_groupPostsChannel != null) {
+      await _supabase.removeChannel(_groupPostsChannel!);
+    }
+
+    _groupPostsChannel = _supabase.channel(
+      'public:group_posts:${widget.groupId}',
     );
+    _groupPostsChannel!.onPostgresChanges(
+      event: PostgresChangeEvent.insert,
+      schema: 'public',
+      table: 'group_posts',
+      filter: PostgresChangeFilter(
+        type: PostgresChangeFilterType.eq,
+        column: 'group_id',
+        value: widget.groupId,
+      ),
+      callback: (payload) {
+        if (!mounted) return;
+        final record = payload.newRecord;
+        final recordId = record?['id'];
+        if (recordId != null && posts.any((p) => p['id'] == recordId)) {
+          return;
+        }
+        _refreshPosts();
+      },
+    );
+
+    await _groupPostsChannel!.subscribe();
   }
 
   void _vibrate() => HapticFeedback.lightImpact();

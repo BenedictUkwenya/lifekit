@@ -25,11 +25,139 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
   final ApiService _apiService = ApiService();
   late dynamic _currentBooking;
   bool _isLoading = false;
+  bool _isDisputeSubmitting = false;
+  final TextEditingController _disputeReasonController =
+      TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _currentBooking = widget.booking;
+  }
+
+  @override
+  void dispose() {
+    _disputeReasonController.dispose();
+    super.dispose();
+  }
+
+  void _openDisputeSheet() {
+    _disputeReasonController.clear();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Report Issue",
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _disputeReasonController,
+                    maxLines: 4,
+                    decoration: InputDecoration(
+                      hintText: "Describe the issue",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: _isDisputeSubmitting
+                          ? null
+                          : () async {
+                              final reason = _disputeReasonController.text
+                                  .trim();
+                              if (reason.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Please enter a reason."),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                                return;
+                              }
+
+                              setSheetState(() => _isDisputeSubmitting = true);
+                              try {
+                                await _apiService.openBookingDispute(
+                                  _currentBooking['id'],
+                                  reason,
+                                );
+                                if (mounted) {
+                                  setSheetState(
+                                    () => _isDisputeSubmitting = false,
+                                  );
+                                  setState(() {
+                                    _currentBooking['status'] = 'disputed';
+                                  });
+                                  Navigator.pop(context);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Dispute submitted."),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                setSheetState(
+                                  () => _isDisputeSubmitting = false,
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Error: $e"),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: _isDisputeSubmitting
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : Text(
+                              "Submit Dispute",
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   // CALL THE NEW BACKEND ENDPOINT
@@ -85,6 +213,13 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
         ? (_currentBooking['provider_confirmed'] ?? false)
         : (_currentBooking['client_confirmed'] ?? false);
 
+    final DateTime scheduledTime = DateTime.parse(
+      _currentBooking['scheduled_time'],
+    );
+    final bool canReportIssue =
+        (status == 'confirmed' || status == 'pending') &&
+        DateTime.now().difference(scheduledTime).inHours >= 24;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -138,6 +273,34 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
                 ],
               ),
             ),
+
+            if (status == 'disputed') ...[
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red[50],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.warning, color: Colors.red),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        "Under Admin Review",
+                        style: GoogleFonts.poppins(
+                          color: Colors.red,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
 
             const SizedBox(height: 30),
 
@@ -281,6 +444,31 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+
+            if (canReportIssue) ...[
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: OutlinedButton(
+                  onPressed: _openDisputeSheet,
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.red),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: Text(
+                    "Report Issue",
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
                     ),
                   ),
                 ),

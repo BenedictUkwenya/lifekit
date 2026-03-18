@@ -8,13 +8,13 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
   // CONFIGURATION: Switches between local and production automatically
-  //final String baseUrl = kIsWeb
-  //  ? "http://localhost:3000"
-  // : "http://10.0.2.2:3000";
+  final String baseUrl = kIsWeb
+      ? "http://localhost:3000"
+      : "http://10.0.2.2:3000";
 
   // UNCOMMENT FOR PRODUCTION
   //final String baseUrl = "https://lifekit-api.onrender.com";
-  final String baseUrl = "https://lifekitbackend.vercel.app";
+  //final String baseUrl = "https://lifekitbackend.vercel.app";
 
   final storage = const FlutterSecureStorage();
 
@@ -315,6 +315,44 @@ class ApiService {
     return await _authenticatedGet('/users/counts');
   }
 
+  Future<void> deleteAccount() async {
+    await _authenticatedDelete('/users/profile');
+    await storage.deleteAll();
+    _cachedAccessToken = null;
+    _cachedRefreshToken = null;
+  }
+
+  // ===========================================================================
+  // SUPPORT
+  // ===========================================================================
+
+  Future<Map<String, dynamic>> createTicket(
+    String subject,
+    String message,
+  ) async {
+    return await _authenticatedPost('/support', {
+      "subject": subject,
+      "message": message,
+    });
+  }
+
+  Future<List<dynamic>> getMyTickets() async {
+    final data = await _authenticatedGet('/support/my-tickets');
+    return data['tickets'] ?? [];
+  }
+
+  Future<Map<String, dynamic>> reportUser({
+    required String reportedUserId,
+    required String reason,
+    String? details,
+  }) async {
+    return await _authenticatedPost('/support/report', {
+      "reported_user_id": reportedUserId,
+      "reason": reason,
+      "details": details,
+    });
+  }
+
   // ===========================================================================
   // HOME & SERVICES (PUBLIC & SEARCH)
   // ===========================================================================
@@ -478,6 +516,12 @@ class ApiService {
     await _authenticatedPut('/bookings/$bookingId/complete', {});
   }
 
+  Future<void> openBookingDispute(String bookingId, String reason) async {
+    await _authenticatedPost('/bookings/$bookingId/dispute', {
+      "reason": reason,
+    });
+  }
+
   Future<List<dynamic>> getReviews(String serviceId) async {
     return (await _authenticatedGet('/reviews/$serviceId'))['reviews'] ?? [];
   }
@@ -504,6 +548,18 @@ class ApiService {
 
   Future<Map<String, dynamic>> getWallet() async {
     return await _authenticatedGet('/wallet');
+  }
+
+  Future<Map<String, dynamic>> onboardStripeConnect() async {
+    return await _authenticatedPost('/wallet/onboard-connect', {});
+  }
+
+  Future<Map<String, dynamic>> getStripeLoginLink() async {
+    return await _authenticatedPost('/wallet/login-link', {});
+  }
+
+  Future<void> withdrawFromWallet(double amount) async {
+    await _authenticatedPost('/wallet/withdraw', {"amount": amount});
   }
 
   Future<Map<String, dynamic>> initDeposit(double amount) async {
