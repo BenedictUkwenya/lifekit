@@ -8,12 +8,12 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
   // CONFIGURATION: Switches between local and production automatically
-  final String baseUrl = kIsWeb
-      ? "http://localhost:3000"
-      : "http://10.0.2.2:3000";
+  //final String baseUrl = kIsWeb
+  //  ? "http://localhost:3000"
+  // : "http://10.0.2.2:3000";
 
   // UNCOMMENT FOR PRODUCTION
-  //final String baseUrl = "https://lifekit-api.onrender.com";
+  final String baseUrl = "https://lifekit-api.onrender.com";
   //final String baseUrl = "https://lifekitbackend.vercel.app";
 
   final storage = const FlutterSecureStorage();
