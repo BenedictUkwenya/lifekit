@@ -66,7 +66,7 @@ class _SelectMainCategoryScreenState extends State<SelectMainCategoryScreen> {
   }
 
   // --- NAVIGATION LOGIC ---
-  void _handleCategorySelection(dynamic cat) {
+  Future<void> _handleCategorySelection(dynamic cat) async {
     String parentId;
     String parentName;
 
@@ -89,13 +89,18 @@ class _SelectMainCategoryScreenState extends State<SelectMainCategoryScreen> {
       parentName = cat['name'];
     }
 
-    Navigator.push(
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) =>
             SelectSubCategoryScreen(parentId: parentId, parentName: parentName),
       ),
     );
+
+    if (!mounted) return;
+    if (result is Map && result['plan_limit'] == true) {
+      Navigator.pop(context, result);
+    }
   }
 
   // --- HELPER: Get Image for Category ---

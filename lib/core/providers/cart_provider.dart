@@ -131,6 +131,23 @@ class CartProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  double calculateServiceTotal({
+    required double basePrice,
+    required bool isHourly,
+    required int durationHours,
+    required List<dynamic> selectedOptions,
+  }) {
+    if (selectedOptions.isNotEmpty) {
+      return selectedOptions.fold<double>(
+        0,
+        (sum, opt) =>
+            sum + (double.tryParse(opt['price'].toString()) ?? 0.0),
+      );
+    }
+
+    return isHourly ? basePrice * durationHours : basePrice;
+  }
+
   void removeFromCart(String id) {
     _items.removeWhere((item) => item.id == id);
     _saveCartToStorage(); // Save changes

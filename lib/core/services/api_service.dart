@@ -1,20 +1,29 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+class ApiException implements Exception {
+  final int statusCode;
+  final String message;
+
+  ApiException(this.statusCode, this.message);
+
+  @override
+  String toString() => message;
+}
 
 class ApiService {
   // CONFIGURATION: Switches between local and production automatically
   //final String baseUrl = kIsWeb
   //  ? "http://localhost:3000"
-  // : "http://10.0.2.2:3000";
+  //: "http://10.0.2.2:3000";
 
   // UNCOMMENT FOR PRODUCTION
-  final String baseUrl = "https://lifekit-api.onrender.com";
-  //final String baseUrl = "https://lifekitbackend.vercel.app";
+  //final String baseUrl = "https://lifekit-api.onrender.com";
+  final String baseUrl = "https://lifekitbackend.vercel.app";
 
   final storage = const FlutterSecureStorage();
 
@@ -56,8 +65,22 @@ class ApiService {
       _cachedAccessToken = null;
       _cachedRefreshToken = null;
       return null;
+    } on SocketException {
+      throw Exception('NO_INTERNET');
+    } on http.ClientException {
+      throw Exception('NO_INTERNET');
     } catch (e) {
       return null;
+    }
+  }
+
+  Future<T> _withNetworkGuard<T>(Future<T> Function() action) async {
+    try {
+      return await action();
+    } on SocketException {
+      throw Exception('NO_INTERNET');
+    } on http.ClientException {
+      throw Exception('NO_INTERNET');
     }
   }
 
@@ -74,109 +97,121 @@ class ApiService {
   }
 
   Future<dynamic> _authenticatedGet(String endpoint) async {
-    String? token = _cachedAccessToken ?? await storage.read(key: 'jwt_token');
-    var response = await http.get(
-      Uri.parse('$baseUrl$endpoint'),
-      headers: {'Authorization': 'Bearer $token'},
-    );
+    return _withNetworkGuard(() async {
+      String? token =
+          _cachedAccessToken ?? await storage.read(key: 'jwt_token');
+      var response = await http.get(
+        Uri.parse('$baseUrl$endpoint'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
 
-    if (response.statusCode == 401) {
-      String? newToken = await _refreshToken();
-      if (newToken != null) {
-        response = await http.get(
-          Uri.parse('$baseUrl$endpoint'),
-          headers: {'Authorization': 'Bearer $newToken'},
-        );
-      } else {
-        throw Exception("Session Expired");
+      if (response.statusCode == 401) {
+        String? newToken = await _refreshToken();
+        if (newToken != null) {
+          response = await http.get(
+            Uri.parse('$baseUrl$endpoint'),
+            headers: {'Authorization': 'Bearer $newToken'},
+          );
+        } else {
+          throw Exception("Session Expired");
+        }
       }
-    }
-    return _processResponse(response);
+      return _processResponse(response);
+    });
   }
 
   Future<dynamic> _authenticatedPost(
     String endpoint,
     Map<String, dynamic> body,
   ) async {
-    String? token = _cachedAccessToken ?? await storage.read(key: 'jwt_token');
-    var response = await http.post(
-      Uri.parse('$baseUrl$endpoint'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(body),
-    );
+    return _withNetworkGuard(() async {
+      String? token =
+          _cachedAccessToken ?? await storage.read(key: 'jwt_token');
+      var response = await http.post(
+        Uri.parse('$baseUrl$endpoint'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(body),
+      );
 
-    if (response.statusCode == 401) {
-      String? newToken = await _refreshToken();
-      if (newToken != null) {
-        response = await http.post(
-          Uri.parse('$baseUrl$endpoint'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $newToken',
-          },
-          body: jsonEncode(body),
-        );
-      } else {
-        throw Exception("Session Expired");
+      if (response.statusCode == 401) {
+        String? newToken = await _refreshToken();
+        if (newToken != null) {
+          response = await http.post(
+            Uri.parse('$baseUrl$endpoint'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $newToken',
+            },
+            body: jsonEncode(body),
+          );
+        } else {
+          throw Exception("Session Expired");
+        }
       }
-    }
-    return _processResponse(response);
+      return _processResponse(response);
+    });
   }
 
   Future<dynamic> _authenticatedPut(
     String endpoint,
     Map<String, dynamic> body,
   ) async {
-    String? token = _cachedAccessToken ?? await storage.read(key: 'jwt_token');
-    var response = await http.put(
-      Uri.parse('$baseUrl$endpoint'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(body),
-    );
+    return _withNetworkGuard(() async {
+      String? token =
+          _cachedAccessToken ?? await storage.read(key: 'jwt_token');
+      var response = await http.put(
+        Uri.parse('$baseUrl$endpoint'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(body),
+      );
 
-    if (response.statusCode == 401) {
-      String? newToken = await _refreshToken();
-      if (newToken != null) {
-        response = await http.put(
-          Uri.parse('$baseUrl$endpoint'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $newToken',
-          },
-          body: jsonEncode(body),
-        );
-      } else {
-        throw Exception("Session Expired");
+      if (response.statusCode == 401) {
+        String? newToken = await _refreshToken();
+        if (newToken != null) {
+          response = await http.put(
+            Uri.parse('$baseUrl$endpoint'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $newToken',
+            },
+            body: jsonEncode(body),
+          );
+        } else {
+          throw Exception("Session Expired");
+        }
       }
-    }
-    return _processResponse(response);
+      return _processResponse(response);
+    });
   }
 
   Future<dynamic> _authenticatedDelete(String endpoint) async {
-    String? token = _cachedAccessToken ?? await storage.read(key: 'jwt_token');
-    var response = await http.delete(
-      Uri.parse('$baseUrl$endpoint'),
-      headers: {'Authorization': 'Bearer $token'},
-    );
+    return _withNetworkGuard(() async {
+      String? token =
+          _cachedAccessToken ?? await storage.read(key: 'jwt_token');
+      var response = await http.delete(
+        Uri.parse('$baseUrl$endpoint'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
 
-    if (response.statusCode == 401) {
-      String? newToken = await _refreshToken();
-      if (newToken != null) {
-        response = await http.delete(
-          Uri.parse('$baseUrl$endpoint'),
-          headers: {'Authorization': 'Bearer $newToken'},
-        );
-      } else {
-        throw Exception("Session Expired");
+      if (response.statusCode == 401) {
+        String? newToken = await _refreshToken();
+        if (newToken != null) {
+          response = await http.delete(
+            Uri.parse('$baseUrl$endpoint'),
+            headers: {'Authorization': 'Bearer $newToken'},
+          );
+        } else {
+          throw Exception("Session Expired");
+        }
       }
-    }
-    return _processResponse(response);
+      return _processResponse(response);
+    });
   }
 
   dynamic _processResponse(http.Response response) {
@@ -193,14 +228,25 @@ class ApiService {
       errorMessage = decoded['error'];
     }
 
-    // 4. Smart Session Handling
-    if ((response.statusCode == 401 || response.statusCode == 403) &&
-        !errorMessage.toLowerCase().contains("password")) {
-      throw Exception("Session Expired. Please login again.");
+    final lowered = errorMessage.toLowerCase();
+    if (response.statusCode == 401) {
+      throw ApiException(401, "Session Expired. Please login again.");
     }
 
-    // 5. Throw specific exception
-    throw Exception(errorMessage);
+    if (response.statusCode == 403) {
+      final isAuthRelated =
+          lowered.contains("session") ||
+          lowered.contains("token") ||
+          lowered.contains("expired") ||
+          lowered.contains("jwt") ||
+          lowered.contains("not authenticated");
+      if (isAuthRelated && !lowered.contains("password")) {
+        throw ApiException(403, "Session Expired. Please login again.");
+      }
+      throw ApiException(403, errorMessage);
+    }
+
+    throw ApiException(response.statusCode, errorMessage);
   } // ===========================================================================
   // AUTHENTICATION
   // ===========================================================================
@@ -210,48 +256,54 @@ class ApiService {
     String email,
     String password,
   ) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/signup'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        "full_name": name,
-        "email": email,
-        "password": password,
-      }),
-    );
-    return _processResponse(response);
+    return _withNetworkGuard(() async {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/signup'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "full_name": name,
+          "email": email,
+          "password": password,
+        }),
+      );
+      return _processResponse(response);
+    });
   }
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/login'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({"email": email, "password": password}),
-    );
-    final data = _processResponse(response);
-    if (data.containsKey('session')) {
-      await _saveTokens(
-        data['session']['access_token'],
-        data['session']['refresh_token'],
+    return _withNetworkGuard(() async {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({"email": email, "password": password}),
       );
-    }
-    return data;
+      final data = _processResponse(response);
+      if (data.containsKey('session')) {
+        await _saveTokens(
+          data['session']['access_token'],
+          data['session']['refresh_token'],
+        );
+      }
+      return data;
+    });
   }
 
   Future<Map<String, dynamic>> verifyOtp(String email, String token) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/verify-otp'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({"email": email, "token": token}),
-    );
-    final data = _processResponse(response);
-    if (data.containsKey('session')) {
-      await _saveTokens(
-        data['session']['access_token'],
-        data['session']['refresh_token'],
+    return _withNetworkGuard(() async {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/verify-otp'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({"email": email, "token": token}),
       );
-    }
-    return data;
+      final data = _processResponse(response);
+      if (data.containsKey('session')) {
+        await _saveTokens(
+          data['session']['access_token'],
+          data['session']['refresh_token'],
+        );
+      }
+      return data;
+    });
   }
 
   // ===========================================================================
@@ -445,6 +497,20 @@ class ApiService {
     await _authenticatedPut('/services/$serviceId', data);
   }
 
+  Future<Map<String, dynamic>> buySubscription(String tier) async {
+    return await _authenticatedPost('/upgrades/subscribe', {"tier": tier});
+  }
+
+  Future<Map<String, dynamic>> buyBoost({
+    required String targetId,
+    required String boostDuration,
+  }) async {
+    return await _authenticatedPost('/upgrades/boost', {
+      "target_id": targetId,
+      "boost_duration": boostDuration,
+    });
+  }
+
   Future<String> uploadServiceImage(File imageFile) async {
     String? token = await storage.read(key: 'jwt_token');
     var request = http.MultipartRequest(
@@ -522,8 +588,8 @@ class ApiService {
     });
   }
 
-  Future<List<dynamic>> getReviews(String serviceId) async {
-    return (await _authenticatedGet('/reviews/$serviceId'))['reviews'] ?? [];
+  Future<Map<String, dynamic>> getReviews(String serviceId) async {
+    return await _authenticatedGet('/reviews/$serviceId');
   }
 
   Future<void> submitReview({
@@ -643,6 +709,14 @@ class ApiService {
     return result is Map<String, dynamic> ? result : {};
   }
 
+  Future<Map<String, dynamic>> shareServiceToFeed(String serviceId) async {
+    final result = await _authenticatedPost(
+      '/feeds/posts/share-service/$serviceId',
+      {},
+    );
+    return result is Map<String, dynamic> ? result : {};
+  }
+
   Future<List<dynamic>> getComments(String postId) async {
     final response = await http.get(
       Uri.parse('$baseUrl/feeds/posts/$postId/comments'),
@@ -682,21 +756,23 @@ class ApiService {
   // Inside ApiService class...
 
   Future<void> changePassword(String oldPassword, String newPassword) async {
-    String? token = await storage.read(key: 'jwt_token');
+    await _withNetworkGuard(() async {
+      String? token = await storage.read(key: 'jwt_token');
 
-    final response = await http.put(
-      Uri.parse('$baseUrl/auth/update-password'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode({
-        "current_password": oldPassword, // Added this
-        "new_password": newPassword, // Added this
-      }),
-    );
+      final response = await http.put(
+        Uri.parse('$baseUrl/auth/update-password'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          "current_password": oldPassword,
+          "new_password": newPassword,
+        }),
+      );
 
-    _processResponse(response);
+      _processResponse(response);
+    });
   }
 
   // Get Nearby Places (Auto-fills from Google/OSM)

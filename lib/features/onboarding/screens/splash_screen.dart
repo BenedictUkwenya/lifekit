@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 
 import '../../auth/screens/login_screen.dart';
+import '../../home/screens/home_screen.dart';
 import 'onboarding_screen.dart';
 import '../../../core/constants/app_colors.dart';
 
@@ -89,6 +91,8 @@ class _SplashScreenState extends State<SplashScreen>
     // Wait for animation (2s) + delay (1.5s) = 3.5s total
     await Future.delayed(const Duration(milliseconds: 3500));
 
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'jwt_token');
     final prefs = await SharedPreferences.getInstance();
     bool seenOnboarding = prefs.getBool('seenOnboarding') ?? false;
 
@@ -96,8 +100,11 @@ class _SplashScreenState extends State<SplashScreen>
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) =>
-              seenOnboarding ? const LoginScreen() : const OnboardingScreen(),
+          builder: (context) => (token != null && token.isNotEmpty)
+              ? const HomeScreen()
+              : (seenOnboarding
+                    ? const LoginScreen()
+                    : const OnboardingScreen()),
         ),
       );
     }

@@ -99,7 +99,7 @@ class _ProviderFullDetailScreenState extends State<ProviderFullDetailScreen>
           }
 
           // E. Store Reviews
-          reviews = reviewsData;
+          reviews = reviewsData['reviews'] ?? [];
           if (reviews.isNotEmpty) {
             double sum = 0;
             for (var r in reviews) {

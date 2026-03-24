@@ -138,6 +138,63 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
     return true;
   }
 
+  DateTime? _findNextAvailableDate(DateTime fromDate) {
+    if (_weeklySchedule.isEmpty) return null;
+
+    for (int i = 1; i <= 30; i++) {
+      final candidate = fromDate.add(Duration(days: i));
+      final dayName = DateFormat('EEEE').format(candidate);
+      final scheduleDay = _weeklySchedule.firstWhere(
+        (d) => d['day_of_week'] == dayName,
+        orElse: () => null,
+      );
+
+      if (scheduleDay != null && scheduleDay['is_active'] == true) {
+        return candidate;
+      }
+    }
+
+    return null;
+  }
+
+  void _showNextAvailableToast(DateTime fromDate) {
+    final nextAvailable = _findNextAvailableDate(fromDate);
+    final message = nextAvailable == null
+        ? "No upcoming availability yet"
+        : "Provider is off that day. Next available: ${DateFormat('EEE, MMM d').format(nextAvailable)}";
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+        ),
+        backgroundColor: Colors.black87,
+        duration: const Duration(seconds: 3),
+        action: nextAvailable == null
+            ? null
+            : SnackBarAction(
+                label: "Use Next",
+                textColor: AppColors.primary,
+                onPressed: () {
+                  setState(() {
+                    _selectedDay = nextAvailable;
+                    _focusedDay = nextAvailable;
+                  });
+                },
+              ),
+      ),
+    );
+  }
+
+  void _selectDay(DateTime selectedDay) {
+    setState(() {
+      _selectedDay = selectedDay;
+      _focusedDay = selectedDay;
+    });
+  }
+
   String? _validateSelection() {
     if (_selectedDay == null) return "Please select a date";
 
@@ -246,19 +303,23 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
     double finalPrice = 0.0;
     String finalTitle = widget.service['title'];
 
+    String pType = widget.service['pricing_type'] ?? 'fixed';
+    double base = double.tryParse(widget.service['price'].toString()) ?? 0.0;
+
+    finalPrice = cart.calculateServiceTotal(
+      basePrice: base,
+      isHourly: pType == 'hourly',
+      durationHours: _durationHours,
+      selectedOptions: _selectedOptions,
+    );
+
     if (hasOptions) {
-      for (var opt in _selectedOptions) {
-        finalPrice += (double.tryParse(opt['price'].toString()) ?? 0.0);
-      }
       List<String> names = _selectedOptions
           .map((e) => e['name'].toString())
           .toList();
       finalTitle = "${widget.service['title']} (${names.join(', ')})";
-    } else {
-      String pType = widget.service['pricing_type'] ?? 'fixed';
-      double base = double.tryParse(widget.service['price'].toString()) ?? 0.0;
-      finalPrice = (pType == 'hourly') ? base * _durationHours : base;
-      if (pType == 'hourly') finalTitle = "$finalTitle ($_durationHours hrs)";
+    } else if (pType == 'hourly') {
+      finalTitle = "$finalTitle ($_durationHours hrs)";
     }
 
     cart.addToCart(
@@ -284,7 +345,166 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
   }
 
   // --- MODALS ---
-  void _showIOSTimePicker() {
+  List<TimeOfDay> _buildTimeSlots() {
+    if (_selectedDay == null) return [];
+
+    final dayName = DateFormat('EEEE').format(_selectedDay!);
+    final scheduleDay = _weeklySchedule.firstWhere(
+      (d) => d['day_of_week'] == dayName,
+      orElse: () => null,
+    );
+
+    String startStr = scheduleDay?['start_time'] ?? "09:00";
+    String endStr = scheduleDay?['end_time'] ?? "17:00";
+
+    final startParts = startStr.split(":");
+    final endParts = endStr.split(":");
+    final startHour = int.tryParse(startParts[0]) ?? 9;
+    final startMinute = int.tryParse(startParts[1]) ?? 0;
+    final endHour = int.tryParse(endParts[0]) ?? 17;
+    final endMinute = int.tryParse(endParts[1]) ?? 0;
+
+    final DateTime baseDay = DateTime(
+      _selectedDay!.year,
+      _selectedDay!.month,
+      _selectedDay!.day,
+    );
+    DateTime cursor = DateTime(
+      baseDay.year,
+      baseDay.month,
+      baseDay.day,
+      startHour,
+      startMinute,
+    );
+    final DateTime endTime = DateTime(
+      baseDay.year,
+      baseDay.month,
+      baseDay.day,
+      endHour,
+      endMinute,
+    );
+
+    final slots = <TimeOfDay>[];
+    while (cursor.isBefore(endTime)) {
+      slots.add(TimeOfDay(hour: cursor.hour, minute: cursor.minute));
+      cursor = cursor.add(const Duration(minutes: 30));
+    }
+    return slots;
+  }
+
+  void _showTimePickerSheet() {
+    final platform = Theme.of(context).platform;
+    if (platform == TargetPlatform.iOS || platform == TargetPlatform.macOS) {
+      _showCupertinoTimePicker();
+    } else {
+      _showMaterialTimePicker();
+    }
+  }
+
+  void _showMaterialTimePicker() {
+    final slots = _buildTimeSlots();
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          height: 360,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        "Cancel",
+                        style: GoogleFonts.poppins(
+                          color: Colors.black54,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      "Select Time",
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(width: 64),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: slots.isEmpty
+                    ? Center(
+                        child: Text(
+                          "No available time slots",
+                          style: GoogleFonts.poppins(color: Colors.grey[600]),
+                        ),
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        itemBuilder: (context, index) {
+                          final time = slots[index];
+                          final formatted = DateFormat.jm().format(
+                            DateTime(0, 0, 0, time.hour, time.minute),
+                          );
+                          final isSelected =
+                              time.hour == _selectedTime.hour &&
+                              time.minute == _selectedTime.minute;
+                          return ListTile(
+                            onTap: () {
+                              setState(() => _selectedTime = time);
+                              Navigator.pop(context);
+                            },
+                            title: Text(
+                              formatted,
+                              style: GoogleFonts.poppins(
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w500,
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : Colors.black87,
+                              ),
+                            ),
+                            trailing: isSelected
+                                ? const Icon(
+                                    Icons.check_circle,
+                                    color: AppColors.primary,
+                                  )
+                                : null,
+                          );
+                        },
+                        separatorBuilder: (_, __) =>
+                            Divider(height: 1, color: Colors.grey.shade200),
+                        itemCount: slots.length,
+                      ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showCupertinoTimePicker() {
     int tempHour = _selectedTime.hour;
     int tempMinute = _selectedTime.minute;
 
@@ -618,6 +838,77 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
     );
   }
 
+  DateTime _getThisWeekendDate() {
+    final now = DateTime.now();
+    final weekday = now.weekday;
+    if (weekday == DateTime.saturday || weekday == DateTime.sunday) {
+      return DateTime(now.year, now.month, now.day);
+    }
+    final daysUntilSaturday = DateTime.saturday - weekday;
+    final weekend = now.add(Duration(days: daysUntilSaturday));
+    return DateTime(weekend.year, weekend.month, weekend.day);
+  }
+
+  Widget _buildQuickSelectRow() {
+    final today = DateTime.now();
+    final tomorrow = today.add(const Duration(days: 1));
+    final weekend = _getThisWeekendDate();
+
+    return Row(
+      children: [
+        Expanded(child: _buildQuickSelectChip("Today", today)),
+        const SizedBox(width: 10),
+        Expanded(child: _buildQuickSelectChip("Tomorrow", tomorrow)),
+        const SizedBox(width: 10),
+        Expanded(child: _buildQuickSelectChip("This Weekend", weekend)),
+      ],
+    );
+  }
+
+  Widget _buildQuickSelectChip(String label, DateTime date) {
+    final isSelected = _selectedDay != null && isSameDay(_selectedDay, date);
+    final isAvailable = _isDayAvailable(date);
+
+    return GestureDetector(
+      onTap: () {
+        if (!isAvailable) {
+          _showNextAvailableToast(date);
+          return;
+        }
+        _selectDay(date);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary
+              : AppColors.primary.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : Colors.transparent,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: isSelected ? Colors.white : AppColors.primary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   // --- UI BUILD ---
   @override
   Widget build(BuildContext context) {
@@ -626,14 +917,19 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
     bool isHourly = pricingType == 'hourly';
     double basePrice =
         double.tryParse(widget.service['price'].toString()) ?? 0.0;
+    final cart = Provider.of<CartProvider>(context);
+    final String currency = widget.service['currency'] == 'NGN' ? '₦' : '\$';
 
     bool hasOptions =
         widget.service['service_options'] != null &&
         (widget.service['service_options'] as List).isNotEmpty;
 
-    double standardDisplayTotal = isHourly
-        ? basePrice * _durationHours
-        : basePrice;
+    double standardDisplayTotal = cart.calculateServiceTotal(
+      basePrice: basePrice,
+      isHourly: isHourly,
+      durationHours: _durationHours,
+      selectedOptions: _selectedOptions,
+    );
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -734,6 +1030,17 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text(
+                    "Quick Select",
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  _buildQuickSelectRow(),
+                  const SizedBox(height: 12),
                   // 1. CALENDAR
                   Container(
                     decoration: BoxDecoration(
@@ -821,10 +1128,10 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                         ),
                       ),
                       onDaySelected: (selectedDay, focusedDay) {
-                        setState(() {
-                          _selectedDay = selectedDay;
-                          _focusedDay = focusedDay;
-                        });
+                        _selectDay(selectedDay);
+                      },
+                      onDisabledDayTapped: (disabledDay) {
+                        _showNextAvailableToast(disabledDay);
                       },
                     ),
                   ),
@@ -1160,7 +1467,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
 
                   // 5. SERVICE TIME
                   GestureDetector(
-                    onTap: () => _showIOSTimePicker(),
+                    onTap: _showTimePickerSheet,
                     child: Container(
                       padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
@@ -1280,40 +1587,77 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
               ),
             ),
       bottomSheet: Container(
-        color: const Color(0xFFF8F9FA),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 16,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
         child: SafeArea(
-          child: SizedBox(
-            width: double.infinity,
-            height: 56,
-            child: Consumer<CartProvider>(
-              builder: (context, cart, _) => ElevatedButton(
-                onPressed: _addToCart,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 0,
-                  shadowColor: AppColors.primary.withOpacity(0.3),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.shopping_cart_outlined, size: 20),
-                    const SizedBox(width: 10),
                     Text(
-                      "Add to Cart (${cart.items.length + 1})",
+                      "Total",
                       style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      "$currency${standardDisplayTotal.toStringAsFixed(2)}",
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black87,
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SizedBox(
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: _addToCart,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 0,
+                      shadowColor: AppColors.primary.withOpacity(0.3),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.shopping_cart_outlined, size: 20),
+                        const SizedBox(width: 10),
+                        Text(
+                          "Book Now",
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

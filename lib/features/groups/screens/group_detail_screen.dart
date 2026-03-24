@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -58,6 +59,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
   final ScrollController _scrollController = ScrollController();
   final SupabaseClient _supabase = Supabase.instance.client;
   RealtimeChannel? _groupPostsChannel;
+  Timer? _activityTicker;
 
   bool isLoading = true;
   bool isSending = false;
@@ -72,6 +74,8 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
   File? _selectedImage;
   Map<String, dynamic>? _selectedService;
   dynamic _replyingTo;
+  final Map<String, DateTime> _memberActivity = {};
+  static const int _activeWindowMinutes = 15;
 
   late AnimationController _fadeCtrl;
 
@@ -86,6 +90,10 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     _loadMyId();
     _loadData();
     _subscribeToGroupPosts();
+    _activityTicker = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (!mounted) return;
+      setState(() {});
+    });
     _scrollController.addListener(_scrollListener);
   }
 
@@ -113,6 +121,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     if (_groupPostsChannel != null) {
       _supabase.removeChannel(_groupPostsChannel!);
     }
+    _activityTicker?.cancel();
     _postController.dispose();
     _scrollController.dispose();
     _fadeCtrl.dispose();
@@ -142,6 +151,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
           isMember = detail['isMember'] ?? false;
           isAdmin = detail['isAdmin'] ?? false;
           posts = postList;
+          _rebuildMemberActivity(postList);
           isLoading = false;
         });
         _fadeCtrl.forward();
@@ -154,8 +164,41 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
   Future<void> _refreshPosts({bool force = false}) async {
     try {
       final postList = await _apiService.getGroupPosts(widget.groupId);
-      if (mounted) setState(() => posts = postList);
+      if (mounted) {
+        setState(() {
+          posts = postList;
+          _rebuildMemberActivity(postList);
+        });
+      }
     } catch (_) {}
+  }
+
+  void _rebuildMemberActivity(List<dynamic> postList) {
+    _memberActivity.clear();
+    final now = DateTime.now();
+    final cutoff = now.subtract(const Duration(minutes: _activeWindowMinutes));
+    for (final post in postList) {
+      final userId = post['user_id']?.toString();
+      final createdRaw = post['created_at']?.toString();
+      if (userId == null || createdRaw == null) continue;
+      try {
+        final createdAt = DateTime.parse(createdRaw).toLocal();
+        if (createdAt.isAfter(cutoff)) {
+          final existing = _memberActivity[userId];
+          if (existing == null || createdAt.isAfter(existing)) {
+            _memberActivity[userId] = createdAt;
+          }
+        }
+      } catch (_) {}
+    }
+  }
+
+  int _activeMembersNowCount() {
+    final cutoff = DateTime.now().subtract(
+      const Duration(minutes: _activeWindowMinutes),
+    );
+    _memberActivity.removeWhere((_, lastSeen) => lastSeen.isBefore(cutoff));
+    return _memberActivity.length;
   }
 
   Future<void> _subscribeToGroupPosts() async {
@@ -179,6 +222,12 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
         if (!mounted) return;
         final record = payload.newRecord;
         final recordId = record?['id'];
+        final userId = record?['user_id']?.toString();
+        if (userId != null) {
+          setState(() {
+            _memberActivity[userId] = DateTime.now();
+          });
+        }
         if (recordId != null && posts.any((p) => p['id'] == recordId)) {
           return;
         }
@@ -540,6 +589,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
 
   PreferredSizeWidget _buildAppBar() {
     final memberCount = groupData!['member_count'] ?? 0;
+    final activeNowCount = _activeMembersNowCount();
     return PreferredSize(
       preferredSize: const Size.fromHeight(68),
       child: Container(
@@ -615,6 +665,15 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                             fontSize: 11.5,
                           ),
                         ),
+                        if (isMember)
+                          Text(
+                            "$activeNowCount members active now",
+                            style: GoogleFonts.nunito(
+                              color: _T.peach,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                       ],
                     ),
                   ),

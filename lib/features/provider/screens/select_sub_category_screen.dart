@@ -94,6 +94,10 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
         );
       }
     } catch (e) {
+      if (e is ApiException && e.statusCode == 403) {
+        Navigator.pop(context, {"plan_limit": true, "message": e.message});
+        return;
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
       );

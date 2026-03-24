@@ -37,7 +37,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
 
       if (mounted) {
         setState(() {
-          reviews = data;
+          reviews = data['reviews'] ?? [];
 
           // Calculate average locally
           if (reviews.isNotEmpty) {

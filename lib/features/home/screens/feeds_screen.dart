@@ -545,13 +545,16 @@ class _FeedCard extends StatefulWidget {
   State<_FeedCard> createState() => _FeedCardState();
 }
 
-class _FeedCardState extends State<_FeedCard> {
+class _FeedCardState extends State<_FeedCard> with SingleTickerProviderStateMixin {
   final ApiService _apiService = ApiService();
   bool isLiked = false;
   int likeCount = 0;
   int commentsCount = 0;
   bool isBookmarked = false;
   String? myId;
+  late AnimationController _heartController;
+  late Animation<double> _heartScale;
+  bool _showHeart = false;
 
   @override
   void initState() {
@@ -559,7 +562,21 @@ class _FeedCardState extends State<_FeedCard> {
     likeCount = widget.post['likes_count'] ?? 0;
     isLiked = widget.post['is_liked_by_me'] ?? false;
     commentsCount = widget.post['comments_count'] ?? 0;
+    _heartController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 320),
+    );
+    _heartScale = CurvedAnimation(
+      parent: _heartController,
+      curve: Curves.easeOutBack,
+    );
     _loadMyId();
+  }
+
+  @override
+  void dispose() {
+    _heartController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadMyId() async {
@@ -584,6 +601,20 @@ class _FeedCardState extends State<_FeedCard> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Failed to update like: $e')));
+    }
+  }
+
+  Future<void> _handleImageDoubleTapLike() async {
+    setState(() => _showHeart = true);
+    _heartController.forward(from: 0);
+    Future.delayed(const Duration(milliseconds: 650), () {
+      if (mounted) {
+        setState(() => _showHeart = false);
+      }
+    });
+
+    if (!isLiked) {
+      await _handleLike();
     }
   }
 
@@ -766,21 +797,38 @@ class _FeedCardState extends State<_FeedCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (image != null)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: CachedNetworkImage(
-                        imageUrl: image,
-                        width: 100,
-                        height: 90,
-                        fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) => Container(
-                          width: 100,
-                          height: 90,
-                          color: Colors.grey[200],
-                          child: const Icon(
-                            Icons.image_not_supported,
-                            color: Colors.grey,
-                          ),
+                    GestureDetector(
+                      onDoubleTap: _handleImageDoubleTapLike,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            CachedNetworkImage(
+                              imageUrl: image,
+                              width: 100,
+                              height: 90,
+                              fit: BoxFit.cover,
+                              errorWidget: (_, __, ___) => Container(
+                                width: 100,
+                                height: 90,
+                                color: Colors.grey[200],
+                                child: const Icon(
+                                  Icons.image_not_supported,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                            if (_showHeart)
+                              ScaleTransition(
+                                scale: _heartScale,
+                                child: const Icon(
+                                  Icons.favorite,
+                                  color: Colors.white,
+                                  size: 34,
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     ),

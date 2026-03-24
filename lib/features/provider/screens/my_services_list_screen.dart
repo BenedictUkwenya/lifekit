@@ -5,6 +5,8 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import 'select_main_category_screen.dart';
 import 'edit_service_screen.dart';
+import 'subscription_plans_screen.dart';
+import '../../wallet/screens/add_money_screen.dart';
 
 // PREMIUM POLISHED VERSION
 // Features: Enhanced design, better image handling, modern cards
@@ -20,6 +22,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
   final ApiService _apiService = ApiService();
   List<dynamic> myServices = [];
   bool isLoading = true;
+  bool _isOpeningCreateFlow = false;
 
   @override
   void initState() {
@@ -53,6 +56,252 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
       }
     }
     return ""; // Return empty to trigger placeholder
+  }
+
+  Future<void> _openCreateServiceFlow() async {
+    if (_isOpeningCreateFlow) return;
+    setState(() => _isOpeningCreateFlow = true);
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const SelectMainCategoryScreen()),
+    );
+    if (!mounted) return;
+    setState(() => _isOpeningCreateFlow = false);
+
+    if (result == true) {
+      _fetchMyServices();
+      return;
+    }
+
+    if (result is Map && result['plan_limit'] == true) {
+      await _showPlanLimitDialog(message: result['message']?.toString());
+    }
+  }
+
+  Future<void> _showPlanLimitDialog({String? message}) async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          "You've reached your plan limit",
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
+        ),
+        content: Text(
+          message ??
+              "Upgrade your subscription to post more services and grow faster.",
+          style: GoogleFonts.poppins(height: 1.45),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              "Later",
+              style: GoogleFonts.poppins(color: Colors.grey.shade700),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const SubscriptionPlansScreen(),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            child: Text(
+              "View Plans",
+              style: GoogleFonts.poppins(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showAddMoneyPrompt() async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          "Insufficient Funds",
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
+        ),
+        content: Text(
+          "You need more wallet balance to continue. Add money now?",
+          style: GoogleFonts.poppins(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              "Cancel",
+              style: GoogleFonts.poppins(color: Colors.grey.shade700),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AddMoneyScreen()),
+              );
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            child: Text(
+              "Add Money",
+              style: GoogleFonts.poppins(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showBoostSheet(dynamic service) async {
+    final serviceId = service['id']?.toString();
+    if (serviceId == null || serviceId.isEmpty) return;
+
+    String? selectedDuration;
+    bool isSubmitting = false;
+    final options = [
+      {"duration": "24h", "price": "\$2.99"},
+      {"duration": "3d", "price": "\$6.99"},
+      {"duration": "7d", "price": "\$14.99"},
+    ];
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) => Container(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 48,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                "Boost Service Visibility",
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                "Choose a boost duration to rank this service higher.",
+                style: GoogleFonts.poppins(color: Colors.black54, fontSize: 13),
+              ),
+              const SizedBox(height: 16),
+              ...options.map(
+                (option) => RadioListTile<String>(
+                  value: option["duration"]!,
+                  groupValue: selectedDuration,
+                  activeColor: AppColors.primary,
+                  onChanged: isSubmitting
+                      ? null
+                      : (value) {
+                          setSheetState(() => selectedDuration = value);
+                        },
+                  title: Text(
+                    option["duration"]!,
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: Text(
+                    option["price"]!,
+                    style: GoogleFonts.poppins(color: AppColors.primary),
+                  ),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: (selectedDuration == null || isSubmitting)
+                      ? null
+                      : () async {
+                          setSheetState(() => isSubmitting = true);
+                          try {
+                            await _apiService.buyBoost(
+                              targetId: serviceId,
+                              boostDuration: selectedDuration!,
+                            );
+                            if (!mounted) return;
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Boost activated successfully."),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                            _fetchMyServices();
+                          } catch (e) {
+                            if (e is ApiException && e.statusCode == 402) {
+                              if (mounted) Navigator.pop(context);
+                              if (mounted) await _showAddMoneyPrompt();
+                            } else {
+                              setSheetState(() => isSubmitting = false);
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(e.toString()),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            }
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: isSubmitting
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          "Buy Boost",
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -224,17 +473,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
             width: double.infinity,
             height: 52,
             child: ElevatedButton(
-              onPressed: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const SelectMainCategoryScreen(),
-                  ),
-                );
-                if (result == true) {
-                  _fetchMyServices();
-                }
-              },
+              onPressed: _isOpeningCreateFlow ? null : _openCreateServiceFlow,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
@@ -247,15 +486,34 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.add_circle_outline, size: 20),
-                  const SizedBox(width: 10),
-                  Text(
-                    "Create New Service",
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
+                  if (_isOpeningCreateFlow) ...[
+                    const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 10),
+                    Text(
+                      "Opening...",
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ] else ...[
+                    const Icon(Icons.add_circle_outline, size: 20),
+                    const SizedBox(width: 10),
+                    Text(
+                      "Create New Service",
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -510,6 +768,31 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                     color: AppColors.primary,
                   ),
                 ),
+                if (status == 'active' && !isDraft) ...[
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 28,
+                    child: ElevatedButton(
+                      onPressed: () => _showBoostSheet(service),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        elevation: 0,
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        "🚀 Boost",
+                        style: GoogleFonts.poppins(
+                          fontSize: 10,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ],

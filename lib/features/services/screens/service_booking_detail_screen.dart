@@ -42,6 +42,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
   late TabController _tabController;
 
   bool isLoading = true;
+  bool _isSharingToFeed = false;
   String? currentUserId;
 
   // Data Containers
@@ -58,6 +59,8 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
   // Calculated Fields
   double averageRating = 0.0;
   int totalReviewsCount = 0;
+  Map<int, int> ratingsBreakdown = {5: 0, 4: 0, 3: 0, 2: 0, 1: 0};
+  final int firstReviewRewardPoints = 50;
 
   @override
   void initState() {
@@ -128,7 +131,10 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
           }
 
           // Reviews
-          reviews = reviewsData;
+          reviews = reviewsData['reviews'] ?? [];
+          ratingsBreakdown = _normalizeRatingsBreakdown(
+            reviewsData['ratings_breakdown'],
+          );
           if (reviews.isNotEmpty) {
             double sum = 0;
             for (var r in reviews) {
@@ -148,6 +154,27 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
       if (mounted) setState(() => isLoading = false);
       print("Error fetching details: $e");
     }
+  }
+
+  Map<int, int> _normalizeRatingsBreakdown(dynamic raw) {
+    final Map<int, int> normalized = {5: 0, 4: 0, 3: 0, 2: 0, 1: 0};
+
+    if (raw is Map) {
+      raw.forEach((key, value) {
+        final intKey = int.tryParse(key.toString());
+        if (intKey != null && normalized.containsKey(intKey)) {
+          if (value is int) {
+            normalized[intKey] = value;
+          } else if (value is double) {
+            normalized[intKey] = value.toInt();
+          } else if (value is String) {
+            normalized[intKey] = int.tryParse(value) ?? 0;
+          }
+        }
+      });
+    }
+
+    return normalized;
   }
 
   // --- SEARCH LOGIC ---
@@ -206,6 +233,40 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
     }
   }
 
+  Future<void> _shareServiceToFeed() async {
+    if (_isSharingToFeed) return;
+    setState(() => _isSharingToFeed = true);
+    try {
+      await _apiService.shareServiceToFeed(widget.serviceId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Service shared to feed",
+            style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+          ),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.primary,
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Unable to share service",
+            style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSharingToFeed = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     const Color brandColor = Color(0xFF89273B); // Use consistent brand color
@@ -230,13 +291,20 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
                   leading: const BackButton(color: Colors.black),
                   actions: [
                     IconButton(
-                      icon: const Icon(
-                        Icons.share_outlined,
-                        color: Colors.black,
-                      ),
-                      onPressed: () {
-                        // Implement Share Logic
-                      },
+                      icon: _isSharingToFeed
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.primary,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.share_outlined,
+                              color: Colors.black,
+                            ),
+                      onPressed: _isSharingToFeed ? null : _shareServiceToFeed,
                     ),
                   ],
                   flexibleSpace: FlexibleSpaceBar(
@@ -491,67 +559,14 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
 
                     // 2. REVIEWS
                     reviews.isEmpty
-                        ? Center(
-                            child: Text(
-                              "No reviews yet.",
-                              style: GoogleFonts.poppins(color: Colors.grey),
-                            ),
-                          )
-                        : ListView.builder(
+                        ? _buildEmptyReviewsState()
+                        : ListView(
                             padding: const EdgeInsets.all(20),
-                            itemCount: reviews.length,
-                            itemBuilder: (context, index) {
-                              final r = reviews[index];
-                              final user = r['profiles'];
-                              return Container(
-                                margin: const EdgeInsets.only(bottom: 20),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        CircleAvatar(
-                                          radius: 16,
-                                          backgroundImage:
-                                              CachedNetworkImageProvider(
-                                                user?['profile_picture_url'] ??
-                                                    '',
-                                              ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Text(
-                                          user?['full_name'] ?? "User",
-                                          style: GoogleFonts.poppins(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const Spacer(),
-                                        const Icon(
-                                          Icons.star,
-                                          size: 14,
-                                          color: Colors.amber,
-                                        ),
-                                        Text(
-                                          " ${r['rating']}",
-                                          style: GoogleFonts.poppins(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      r['comment'] ?? "",
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 13,
-                                        color: Colors.grey[700],
-                                      ),
-                                    ),
-                                    const Divider(),
-                                  ],
-                                ),
-                              );
-                            },
+                            children: [
+                              _buildRatingsSummary(),
+                              const SizedBox(height: 20),
+                              ...reviews.map((r) => _buildReviewItem(r)),
+                            ],
                           ),
 
                     // 3. AVAILABILITY
@@ -834,6 +849,293 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
                   ),
                 ),
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRatingsSummary() {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Ratings Summary",
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: AppColors.textDark,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                averageRating.toStringAsFixed(1),
+                style: GoogleFonts.poppins(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: List.generate(
+                      5,
+                      (index) => Icon(
+                        Icons.star,
+                        size: 16,
+                        color: index < averageRating.round()
+                            ? Colors.amber
+                            : Colors.grey[300],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "$totalReviewsCount reviews",
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Column(
+            children: [
+              5,
+              4,
+              3,
+              2,
+              1,
+            ].map((stars) => _buildRatingRow(stars)).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRatingRow(int stars) {
+    final int count = ratingsBreakdown[stars] ?? 0;
+    final int total = totalReviewsCount == 0 ? 1 : totalReviewsCount;
+    final double fill = count / total;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 28,
+            child: Text(
+              "$stars",
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textDark,
+              ),
+            ),
+          ),
+          const Icon(Icons.star, size: 14, color: Colors.amber),
+          const SizedBox(width: 8),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Container(
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      width: constraints.maxWidth * fill,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(6),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.25),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            "$count",
+            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewItem(dynamic r) {
+    final user = r['profiles'];
+    final bool isVerified = r['verified'] == true;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 18),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 18,
+                backgroundColor: Colors.grey[200],
+                backgroundImage: (user?['profile_picture_url'] ?? "").isNotEmpty
+                    ? CachedNetworkImageProvider(
+                        user?['profile_picture_url'] ?? '',
+                      )
+                    : null,
+                child: (user?['profile_picture_url'] ?? "").isEmpty
+                    ? const Icon(Icons.person, color: Colors.grey)
+                    : null,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      user?['full_name'] ?? "User",
+                      style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                    ),
+                    if (isVerified)
+                      Container(
+                        margin: const EdgeInsets.only(top: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.verified_rounded,
+                              size: 12,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              "Verified Service",
+                              style: GoogleFonts.poppins(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.star, size: 14, color: Colors.amber),
+              Text(
+                " ${r['rating']}",
+                style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            r['comment'] ?? "",
+            style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey[700]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyReviewsState() {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 14,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.card_giftcard_rounded,
+                color: AppColors.primary,
+                size: 28,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              "No reviews yet",
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              "Be the first to review and get $firstReviewRewardPoints reward points",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
             ),
           ],
         ),

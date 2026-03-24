@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:lifekit_frontend/features/provider/screens/my_services_list_screen.dart';
 import 'package:lifekit_frontend/features/provider/screens/provider_dashboard_screen.dart';
+import 'package:lifekit_frontend/features/provider/screens/subscription_plans_screen.dart';
 
 // --- CORE ---
 import '../../../core/constants/app_colors.dart';
@@ -28,6 +29,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final ApiService _apiService = ApiService();
   Map<String, dynamic>? profile;
   bool isLoading = true;
+  bool _isBalanceVisible = false;
+  bool _isWalletLoading = true;
+  bool _isUsageLoading = true;
+  double? _walletBalance;
+  int _activeServicesCount = 0;
 
   @override
   void initState() {
@@ -36,16 +42,67 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _fetchProfile() async {
+    if (mounted) {
+      setState(() {
+        isLoading = true;
+      });
+    }
     try {
       final data = await _apiService.getUserProfile();
       if (mounted) {
         setState(() {
           profile = data['profile'];
           isLoading = false;
+          _isWalletLoading = true;
+          _isUsageLoading = true;
+        });
+      }
+      _fetchMonetizationData();
+    } catch (e) {
+      if (mounted) setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _fetchMonetizationData() async {
+    try {
+      final walletData = await _apiService.getWallet();
+      final rawBalance = walletData['balance'];
+      final parsedBalance = rawBalance is num
+          ? rawBalance.toDouble()
+          : double.tryParse(rawBalance?.toString() ?? '');
+      if (mounted) {
+        setState(() {
+          _walletBalance = parsedBalance;
+          _isWalletLoading = false;
         });
       }
     } catch (e) {
-      if (mounted) setState(() => isLoading = false);
+      if (mounted) {
+        setState(() {
+          _walletBalance = null;
+          _isWalletLoading = false;
+        });
+      }
+    }
+
+    try {
+      final services = await _apiService.getMyServices();
+      final activeCount = services
+          .where((service) => service['status'] == 'active')
+          .length;
+      if (mounted) {
+        setState(() {
+          _activeServicesCount = activeCount;
+          _isUsageLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _activeServicesCount = 0;
+          _isUsageLoading = false;
+        });
+      }
     }
   }
 
@@ -90,6 +147,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final String name = profile!['full_name'] ?? 'User';
     final String bio = profile!['bio'] ?? 'No bio added';
     final String? pic = profile!['profile_picture_url'];
+    final String tierKey =
+        (profile!['subscription_tier'] ?? 'free').toString().toLowerCase();
+    final String tierLabel =
+        "${tierKey.isNotEmpty ? tierKey[0].toUpperCase() : 'F'}${tierKey.length > 1 ? tierKey.substring(1) : ''}";
+    final bool isBusinessTier = tierKey == 'business';
+    final int? tierServiceLimit = switch (tierKey) {
+      'plus' => 1,
+      'pro' => 5,
+      'business' => null,
+      _ => 0,
+    };
+    final String usageText = _isUsageLoading
+        ? "Loading usage..."
+        : tierServiceLimit == null
+            ? "Services: $_activeServicesCount/∞ (Business Limit)"
+            : "Services: $_activeServicesCount/$tierServiceLimit (${tierLabel} Limit)";
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -111,6 +184,168 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
               ),
+
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.08),
+                      blurRadius: 18,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          "Wallet Balance",
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          onPressed: _isWalletLoading
+                              ? null
+                              : () {
+                                  setState(() {
+                                    _isBalanceVisible = !_isBalanceVisible;
+                                  });
+                                },
+                          icon: Icon(
+                            _isBalanceVisible
+                                ? Icons.visibility_off_rounded
+                                : Icons.visibility_rounded,
+                            color: AppColors.primary,
+                            size: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    _isWalletLoading
+                        ? Row(
+                            children: [
+                              const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                "Loading wallet...",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          )
+                        : Text(
+                            _isBalanceVisible
+                                ? "\$${(_walletBalance ?? 0).toStringAsFixed(2)}"
+                                : "****",
+                            style: GoogleFonts.poppins(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black87,
+                            ),
+                          ),
+                    const SizedBox(height: 14),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.06),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Account Usage",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  usageText,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    color: Colors.black87,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          GestureDetector(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const SubscriptionPlansScreen(),
+                              ),
+                            ),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFF89273B),
+                                    Color(0xFFA83B52),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.primary.withOpacity(0.25),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                "Upgrade Plan",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
 
               // 1. PROFILE CARD
               Container(
@@ -163,6 +398,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               fontWeight: FontWeight.w600,
                               color: Colors.black87,
                             ),
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isBusinessTier
+                                      ? const Color(0xFF10B981).withOpacity(0.14)
+                                      : AppColors.primary.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(100),
+                                ),
+                                child: Text(
+                                  tierLabel,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: isBusinessTier
+                                        ? const Color(0xFF059669)
+                                        : AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                              if (isBusinessTier) ...[
+                                const SizedBox(width: 6),
+                                const Icon(
+                                  Icons.verified_rounded,
+                                  size: 18,
+                                  color: Color(0xFF059669),
+                                ),
+                              ],
+                            ],
                           ),
                           const SizedBox(height: 4),
                           Text(
@@ -274,6 +544,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             );
                             _fetchProfile();
                           },
+                        ),
+                        _buildToolItem(
+                          Icons.auto_awesome_rounded,
+                          "AI Premium",
+                          () => ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("AI Premium Tools coming soon!"),
+                            ),
+                          ),
                         ),
                         _buildToolItem(
                           Icons.card_giftcard,

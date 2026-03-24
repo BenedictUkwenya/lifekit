@@ -34,6 +34,7 @@ class _ServiceProfileScreenState extends State<ServiceProfileScreen>
   late TabController _tabController;
 
   bool isLoading = true;
+  bool _isSharingToFeed = false;
   List<dynamic> reviews = [];
   List<dynamic> otherServices = [];
   List<dynamic> weeklySchedule = [];
@@ -72,7 +73,7 @@ class _ServiceProfileScreenState extends State<ServiceProfileScreen>
 
       if (mounted) {
         setState(() {
-          reviews = reviewsData;
+          reviews = reviewsData['reviews'] ?? [];
           otherServices = others;
           if (scheduleRes.statusCode == 200) {
             weeklySchedule = jsonDecode(scheduleRes.body)['schedule'] ?? [];
@@ -98,6 +99,40 @@ class _ServiceProfileScreenState extends State<ServiceProfileScreen>
     return true;
   }
 
+  Future<void> _shareServiceToFeed() async {
+    if (_isSharingToFeed) return;
+    setState(() => _isSharingToFeed = true);
+    try {
+      await _apiService.shareServiceToFeed(widget.service['id']);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Service shared to feed successfully",
+            style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+          ),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.primary,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Could not share service to feed",
+            style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSharingToFeed = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     const Color brandColor = Color(0xFF89273B);
@@ -116,6 +151,24 @@ class _ServiceProfileScreenState extends State<ServiceProfileScreen>
         elevation: 0,
         centerTitle: true,
         leading: const BackButton(color: Colors.black),
+        actions: [
+          IconButton(
+            onPressed: _isSharingToFeed ? null : _shareServiceToFeed,
+            icon: _isSharingToFeed
+                ? SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primary,
+                    ),
+                  )
+                : const Icon(
+                    Icons.campaign_outlined,
+                    color: AppColors.primary,
+                  ),
+          ),
+        ],
         title: Text(
           widget.service['title'] ?? "Service",
           style: GoogleFonts.poppins(

@@ -6,71 +6,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:pinput/pinput.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/utils/error_handler.dart';
 import 'login_screen.dart';
 import '../../home/screens/home_screen.dart';
 import '../../../core/widgets/lifekit_loader.dart';
-
-// ─────────────────────────────────────────────────────────────
-//  ERROR MESSAGE SANITIZER
-//  Converts raw backend/exception strings into friendly copy
-// ─────────────────────────────────────────────────────────────
-String _friendlyError(dynamic raw) {
-  final msg = raw
-      .toString()
-      .replaceAll('Exception: ', '')
-      .replaceAll('exception: ', '')
-      .toLowerCase()
-      .trim();
-
-  if (msg.contains('invalid login') ||
-      msg.contains('invalid credentials') ||
-      msg.contains('wrong password') ||
-      msg.contains('incorrect password')) {
-    return 'Wrong email or password. Please try again.';
-  }
-  if (msg.contains('email already') ||
-      msg.contains('already registered') ||
-      msg.contains('already in use') ||
-      msg.contains('duplicate')) {
-    return 'This email is already registered. Try signing in instead.';
-  }
-  if (msg.contains('user not found') || msg.contains('no user')) {
-    return "We couldn't find an account with that email.";
-  }
-  if (msg.contains('invalid email') || msg.contains('email format')) {
-    return 'Please enter a valid email address.';
-  }
-  if (msg.contains('weak password') || msg.contains('password too short')) {
-    return 'Your password is too weak. Try something longer.';
-  }
-  if (msg.contains('otp') ||
-      msg.contains('token') ||
-      msg.contains('code') ||
-      msg.contains('expired')) {
-    return 'That code is invalid or expired. Please request a new one.';
-  }
-  if (msg.contains('network') ||
-      msg.contains('socket') ||
-      msg.contains('connection')) {
-    return 'No internet connection. Check your network and try again.';
-  }
-  if (msg.contains('timeout')) {
-    return 'The request timed out. Please try again.';
-  }
-  if (msg.contains('session expired') || msg.contains('unauthorized')) {
-    return 'Your session expired. Please sign in again.';
-  }
-  if (msg.contains('server error') ||
-      msg.contains('500') ||
-      msg.contains('internal')) {
-    return 'Something went wrong on our end. Please try again shortly.';
-  }
-
-  // Last resort: capitalise the raw message if it's short enough to show
-  final clean = raw.toString().replaceAll('Exception: ', '').trim();
-  if (clean.length < 80) return clean;
-  return 'Something went wrong. Please try again.';
-}
 
 // ─────────────────────────────────────────────────────────────
 //  BEAUTIFUL TOAST HELPER
@@ -313,7 +252,7 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
   );
 
   // ── Use AppToast everywhere — no raw SnackBar ──
-  void showError(dynamic e) => AppToast.error(context, _friendlyError(e));
+  void showError(dynamic e) => AppToast.error(context, friendlyError(e));
 
   void showSuccess(String msg) => AppToast.success(context, msg);
 
