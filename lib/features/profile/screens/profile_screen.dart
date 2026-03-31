@@ -13,6 +13,7 @@ import '../../../core/widgets/lifekit_loader.dart';
 
 // --- SCREENS ---
 import '../../auth/screens/login_screen.dart';
+import '../../bookings/screens/bookings_screen.dart';
 import 'edit_profile_screen.dart';
 import 'wallet_screen.dart';
 import 'share_profile_screen.dart';
@@ -41,17 +42,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _fetchProfile();
   }
 
-  Future<void> _fetchProfile() async {
-    if (mounted) {
+  Future<void> _fetchProfile({bool showPageLoader = true}) async {
+    if (mounted && showPageLoader) {
       setState(() {
         isLoading = true;
       });
     }
     try {
       final data = await _apiService.getUserProfile();
+      final backendProfileRaw = data['profile'];
+      final backendProfile = backendProfileRaw is Map<String, dynamic>
+          ? Map<String, dynamic>.from(backendProfileRaw)
+          : Map<String, dynamic>.from(data);
+      backendProfile['subscription_tier'] =
+          (backendProfile['subscription_tier'] ?? 'free').toString();
+      backendProfile['subscription_expiry'] =
+          backendProfile['subscription_expiry']?.toString();
       if (mounted) {
         setState(() {
-          profile = data['profile'];
+          profile = backendProfile;
           isLoading = false;
           _isWalletLoading = true;
           _isUsageLoading = true;
@@ -59,7 +68,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
       _fetchMonetizationData();
     } catch (e) {
-      if (mounted) setState(() => isLoading = false);
+      if (mounted && showPageLoader) setState(() => isLoading = false);
     }
   }
 
@@ -147,11 +156,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final String name = profile!['full_name'] ?? 'User';
     final String bio = profile!['bio'] ?? 'No bio added';
     final String? pic = profile!['profile_picture_url'];
-    final String tierKey =
-        (profile!['subscription_tier'] ?? 'free').toString().toLowerCase();
+    final String tierKey = (profile!['subscription_tier'] ?? 'free')
+        .toString()
+        .toLowerCase();
     final String tierLabel =
         "${tierKey.isNotEmpty ? tierKey[0].toUpperCase() : 'F'}${tierKey.length > 1 ? tierKey.substring(1) : ''}";
     final bool isBusinessTier = tierKey == 'business';
+    final DateTime? subscriptionExpiry = DateTime.tryParse(
+      (profile!['subscription_expiry'] ?? '').toString(),
+    )?.toLocal();
+    final bool showRenewalCountdown =
+        tierKey != 'free' && subscriptionExpiry != null;
+    final int renewalDays = showRenewalCountdown
+        ? (() {
+            final diff = subscriptionExpiry.difference(DateTime.now());
+            if (diff.isNegative) return 0;
+            return ((diff.inHours + 23) ~/ 24);
+          })()
+        : 0;
     final int? tierServiceLimit = switch (tierKey) {
       'plus' => 1,
       'pro' => 5,
@@ -161,17 +183,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final String usageText = _isUsageLoading
         ? "Loading usage..."
         : tierServiceLimit == null
-            ? "Services: $_activeServicesCount/∞ (Business Limit)"
-            : "Services: $_activeServicesCount/$tierServiceLimit (${tierLabel} Limit)";
+        ? "Services: $_activeServicesCount/∞ (Business Limit)"
+        : "Services: $_activeServicesCount/$tierServiceLimit ($tierLabel Limit)";
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        child: RefreshIndicator(
+          color: AppColors.primary,
+          onRefresh: () => _fetchProfile(showPageLoader: false),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               // Header
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
@@ -294,17 +320,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
+                                if (showRenewalCountdown) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    "Renews in $renewalDays days",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 11,
+                                      color: renewalDays <= 3
+                                          ? Colors.orange.shade700
+                                          : Colors.grey.shade600,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
                           const SizedBox(width: 12),
                           GestureDetector(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const SubscriptionPlansScreen(),
-                              ),
-                            ),
+                            onTap: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => SubscriptionPlansScreen(
+                                    currentTier: tierKey,
+                                  ),
+                                ),
+                              );
+                              if (!mounted) return;
+                              _fetchProfile();
+                            },
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 14,
@@ -409,7 +454,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                                 decoration: BoxDecoration(
                                   color: isBusinessTier
-                                      ? const Color(0xFF10B981).withOpacity(0.14)
+                                      ? const Color(
+                                          0xFF10B981,
+                                        ).withOpacity(0.14)
                                       : AppColors.primary.withOpacity(0.12),
                                   borderRadius: BorderRadius.circular(100),
                                 ),
@@ -588,6 +635,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Column(
                   children: [
                     _buildSettingTile(
+                      Icons.calendar_month_rounded,
+                      "My Bookings",
+                      () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const BookingsScreen()),
+                      ),
+                    ),
+                    _buildDivider(),
+                    _buildSettingTile(
                       Icons.person_outline,
                       "Personal Information",
                       () async {
@@ -676,7 +732,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               const SizedBox(height: 40),
-            ],
+              ],
+            ),
           ),
         ),
       ),

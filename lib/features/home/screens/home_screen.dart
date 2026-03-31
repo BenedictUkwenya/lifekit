@@ -1,4 +1,3 @@
-import 'dart:io'; // <-- Added for Platform.localeName
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,8 +12,8 @@ import '../../../core/widgets/lifekit_loader.dart';
 import '../../services/screens/services_list_screen.dart';
 import '../../services/screens/category_items_screen.dart';
 import '../../provider/screens/provider_onboarding_intro_screen.dart';
+import '../../provider/screens/my_services_list_screen.dart';
 import 'feeds_screen.dart';
-import '../../bookings/screens/bookings_screen.dart';
 import 'chats_list_screen.dart';
 import 'notifications_screen.dart';
 import '../../profile/screens/profile_screen.dart';
@@ -23,6 +22,7 @@ import '../../places/screens/places_list_screen.dart';
 import '../../places/screens/place_detail_screen.dart';
 // If you have a specific Service Details Screen for the popular items, import it:
 import '../../services/screens/service_booking_detail_screen.dart';
+import '../../bookings/screens/bookings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -45,6 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   int _currentNavIndex = 0;
   int _currentBannerIndex = 0;
+  int _profileScreenRefreshSeed = 0;
 
   // Places filter
   final List<String> _placeFilters = [
@@ -59,6 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Badge counts & Indicators
   int unreadNotifications = 0;
   int unreadChats = 0;
+  int activeBookingsCount = 0;
   bool hasNewFeeds = true; // <-- NEW: Toggle this based on your logic
 
   @override
@@ -82,6 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           unreadNotifications = data['notifications'] ?? 0;
           unreadChats = data['chats'] ?? 0;
+          activeBookingsCount = data['active_bookings'] ?? 0;
         });
       }
     } catch (_) {}
@@ -179,29 +182,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Gets the country code from the user's physical phone settings (e.g., 'en_GE' -> 'GE')
   String _getLocalCountryCode() {
-    try {
-      final String localeName = Platform.localeName;
-      if (localeName.contains('_')) {
-        return localeName.split('_').last.toUpperCase();
-      }
-      return 'GE'; // Fallback to Georgia
-    } catch (e) {
-      return 'GE'; // Fallback to Georgia
+    final profileCountry = userProfile?['country']?.toString();
+    if (profileCountry != null && profileCountry.trim().length == 2) {
+      return profileCountry.trim().toUpperCase();
     }
+    return 'NG';
   }
 
   // Converts the 2-letter country code into a Flag Emoji
   String _getFlagEmoji(String countryCode) {
-    if (countryCode.length != 2) {
-      return '🇬🇪'; // Fallback to Georgia flag emoji if invalid
-    }
-
-    int flagOffset = 0x1F1E6;
-    int asciiOffset = 0x41;
-
-    int firstChar = countryCode.codeUnitAt(0) - asciiOffset + flagOffset;
-    int secondChar = countryCode.codeUnitAt(1) - asciiOffset + flagOffset;
-
+    final normalized = countryCode.toUpperCase().trim();
+    final isValid =
+        normalized.length == 2 &&
+        normalized.codeUnits.every((c) => c >= 0x41 && c <= 0x5A);
+    final safeCode = isValid ? normalized : 'NG';
+    const int flagOffset = 0x1F1E6;
+    const int asciiOffset = 0x41;
+    final int firstChar = safeCode.codeUnitAt(0) - asciiOffset + flagOffset;
+    final int secondChar = safeCode.codeUnitAt(1) - asciiOffset + flagOffset;
     return String.fromCharCode(firstChar) + String.fromCharCode(secondChar);
   }
 
@@ -281,10 +279,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final List<Widget> screens = [
       _buildHomeContent(),
-      const BookingsScreen(),
+      const ServicesListScreen(),
       const FeedsScreen(),
       const ChatsListScreen(),
-      const ProfileScreen(),
+      ProfileScreen(key: ValueKey('profile_$_profileScreenRefreshSeed')),
     ];
 
     return Scaffold(
@@ -305,9 +303,9 @@ class _HomeScreenState extends State<HomeScreen> {
         label: 'Home',
       ),
       _NavItem(
-        icon: Icons.calendar_today_outlined,
-        activeIcon: Icons.calendar_today,
-        label: 'Bookings',
+        icon: Icons.explore_outlined,
+        activeIcon: Icons.explore,
+        label: 'Explore',
       ),
       _NavItem(
         icon: Icons.grid_view_outlined,
@@ -363,6 +361,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         _currentNavIndex = i;
                         if (i == 2) {
                           hasNewFeeds = false; // Clear feeds dot when clicked
+                        }
+                        if (i == 4) {
+                          _profileScreenRefreshSeed += 1;
                         }
                       });
                       _fetchCounts();
@@ -588,6 +589,19 @@ class _HomeScreenState extends State<HomeScreen> {
           child: _CircleIconBtn(
             icon: Icons.notifications_outlined,
             hasBadge: unreadNotifications > 0,
+          ),
+        ),
+        const SizedBox(width: 8),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const BookingsScreen()),
+            );
+          },
+          child: _CircleIconBtn(
+            icon: Icons.calendar_today_outlined,
+            hasBadge: activeBookingsCount > 0,
           ),
         ),
         const SizedBox(width: 8),
@@ -882,12 +896,22 @@ class _HomeScreenState extends State<HomeScreen> {
         icon: Icons.add,
         label: 'Create\nService',
         isIconWhite: true,
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const ProviderOnboardingIntroScreen(),
-          ),
-        ),
+        onTap: () {
+          final isProvider = userProfile?['is_service_provider'] == true;
+          if (isProvider) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const MyServicesListScreen()),
+            );
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const ProviderOnboardingIntroScreen(),
+              ),
+            );
+          }
+        },
       ),
       ...categories
           .take(4)

@@ -143,6 +143,22 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool hasTierInfo = filteredServices.any((service) {
+      final tier = service['profiles']?['subscription_tier'];
+      return tier != null && tier.toString().trim().isNotEmpty;
+    });
+    final List<dynamic> featuredServices = [];
+    final List<dynamic> standardServices = [];
+    for (int i = 0; i < filteredServices.length; i++) {
+      final service = filteredServices[i];
+      final isPremium = _isPremiumService(service, i, hasTierInfo);
+      if (isPremium) {
+        featuredServices.add(service);
+      } else {
+        standardServices.add(service);
+      }
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
@@ -264,14 +280,31 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
                 Expanded(
                   child: filteredServices.isEmpty
                       ? const Center(child: Text("No services found."))
-                      : ListView.builder(
+                      : ListView(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 20,
                             vertical: 10,
                           ),
-                          itemCount: filteredServices.length,
-                          itemBuilder: (context, index) =>
-                              _buildProviderCard(filteredServices[index]),
+                          children: [
+                            if (featuredServices.isNotEmpty) ...[
+                              _buildSectionHeader("Featured Providers"),
+                              ...featuredServices.map(
+                                (service) => _buildProviderCard(
+                                  service,
+                                  isPremium: true,
+                                ),
+                              ),
+                            ],
+                            if (standardServices.isNotEmpty) ...[
+                              _buildSectionHeader("More Providers"),
+                              ...standardServices.map(
+                                (service) => _buildProviderCard(
+                                  service,
+                                  isPremium: false,
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                 ),
               ],
@@ -279,7 +312,25 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
     );
   }
 
-  Widget _buildProviderCard(dynamic service) {
+  bool _isPremiumService(dynamic service, int index, bool hasTierInfo) {
+    final tier = service['profiles']?['subscription_tier']?.toString();
+    if (hasTierInfo) {
+      return tier == 'Business' || tier == 'Pro';
+    }
+    return index < 2;
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Text(
+        title,
+        style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700),
+      ),
+    );
+  }
+
+  Widget _buildProviderCard(dynamic service, {required bool isPremium}) {
     final Map<String, dynamic> provider = service['profiles'] ?? {};
     final String providerName = provider['full_name'] ?? "Unknown Provider";
     final String? providerPic = provider['profile_picture_url'];
@@ -300,6 +351,10 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
     if (rawImages != null && rawImages is List && rawImages.isNotEmpty) {
       coverImage = (rawImages[0] is String) ? rawImages[0] : null;
     }
+
+    final Color premiumBorderColor = AppColors.primary.withOpacity(0.6);
+    final Color premiumBackgroundColor = const Color(0xFFFFF7ED);
+    final Color standardBorderColor = Colors.grey.shade100;
 
     return GestureDetector(
       // --- NEW LOGIC: PREVENT SELF-BOOKING ---
@@ -347,15 +402,16 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
       child: Container(
         margin: const EdgeInsets.only(bottom: 24),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isPremium && !isMe ? premiumBackgroundColor : Colors.white,
           borderRadius: BorderRadius.circular(20),
-          // Highlight border if Me
           border: isMe
               ? Border.all(
                   color: AppColors.primary.withOpacity(0.5),
                   width: 1.5,
                 )
-              : Border.all(color: Colors.grey.shade100),
+              : isPremium
+              ? Border.all(color: premiumBorderColor, width: 1.5)
+              : Border.all(color: standardBorderColor),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.03),
@@ -440,6 +496,30 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (isPremium)
+                    Positioned(
+                      top: isMe ? 44 : 12,
+                      right: 12,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFE9CF),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: premiumBorderColor),
+                        ),
+                        child: Text(
+                          "Featured",
+                          style: GoogleFonts.poppins(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
                           ),
                         ),
                       ),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../provider/screens/subscription_plans_screen.dart';
 import 'report_user_screen.dart';
 
 class ChatDetailScreen extends StatefulWidget {
@@ -28,20 +30,43 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
   final ScrollController _scrollController = ScrollController();
   final SupabaseClient _supabase = Supabase.instance.client;
   RealtimeChannel? _messagesChannel;
+  RealtimeChannel? _typingChannel;
+  Timer? _typingDebounceTimer;
+  Timer? _typingVisibilityTimer;
   bool _hasBooking = false;
 
   List<dynamic> messages = [];
   bool isLoading = true;
   bool isSending = false;
+  bool _isOtherUserTyping = false;
+  bool _isTypingBroadcastActive = false;
+  String _subscriptionTier = 'free';
+  bool _isLoadingTier = false;
+  bool _hasLoadedTier = false;
+  final List<String> _savedReplies = [
+    'Hi, I am on my way!',
+    'Here is my pricing and what is included.',
+    'Thanks for reaching out. I can start today.',
+    'I just shared an update. Please check and confirm.',
+  ];
 
   // Current Booking Context
   late dynamic currentBooking;
   bool isChatLocked = false;
 
+  bool get _isProviderForCurrentBooking {
+    if (!_hasBooking) return false;
+    final currentUserId = _supabase.auth.currentUser?.id;
+    if (currentUserId == null) return false;
+    return currentBooking['provider_id'] == currentUserId;
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _messageController.addListener(_onMessageInputChanged);
+    _loadSubscriptionTier();
     // Default to the first booking passed
     if (widget.bookings.isNotEmpty) {
       _selectBooking(widget.bookings[0]);
@@ -57,7 +82,8 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
       isChatLocked = (status == 'completed' || status == 'cancelled');
     });
     _fetchMessages();
-    _subscribeToMessages(booking['id']);
+    _subscribeToMessages(booking['id'].toString());
+    _subscribeToTyping(booking['id'].toString());
   }
 
   Future<void> _subscribeToMessages(String bookingId) async {
@@ -77,7 +103,6 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
       ),
       callback: (payload) {
         final record = payload.newRecord;
-        if (record == null) return;
         if (!mounted) return;
         final recordId = record['id'];
         if (recordId != null && messages.any((m) => m['id'] == recordId)) {
@@ -88,7 +113,39 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
       },
     );
 
-    await _messagesChannel!.subscribe();
+    _messagesChannel!.subscribe();
+  }
+
+  Future<void> _subscribeToTyping(String bookingId) async {
+    if (_typingChannel != null) {
+      await _supabase.removeChannel(_typingChannel!);
+    }
+
+    _typingChannel = _supabase.channel('public:typing:booking:$bookingId');
+    _typingChannel!.onBroadcast(
+      event: 'typing',
+      callback: (payload) {
+        if (!mounted) return;
+        final currentUserId = _supabase.auth.currentUser?.id;
+        final senderId = payload['sender_id']?.toString();
+        if (currentUserId != null && senderId == currentUserId) return;
+
+        final isTyping = payload['is_typing'] == true;
+        _typingVisibilityTimer?.cancel();
+
+        if (isTyping) {
+          setState(() => _isOtherUserTyping = true);
+          _typingVisibilityTimer = Timer(const Duration(seconds: 3), () {
+            if (!mounted) return;
+            setState(() => _isOtherUserTyping = false);
+          });
+        } else {
+          setState(() => _isOtherUserTyping = false);
+        }
+      },
+    );
+
+    _typingChannel!.subscribe();
   }
 
   Future<void> _fetchMessages({bool isPolling = false}) async {
@@ -101,6 +158,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
         });
         if (!isPolling) _scrollToBottom();
       }
+      try {
+        await _apiService.markChatAsRead(currentBooking['id'].toString());
+      } catch (_) {}
     } catch (e) {
       if (!isPolling) setState(() => isLoading = false);
     }
@@ -123,6 +183,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
 
     final content = _messageController.text;
     _messageController.clear();
+    _broadcastTyping(isTyping: false);
     setState(() => isSending = true);
 
     try {
@@ -132,18 +193,288 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
       _scrollToBottom();
     } catch (e) {
       setState(() => isSending = false);
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
   }
 
+  void _onMessageInputChanged() {
+    if (!_hasBooking || isChatLocked) return;
+    _typingDebounceTimer?.cancel();
+
+    final hasText = _messageController.text.trim().isNotEmpty;
+    if (!hasText) {
+      _broadcastTyping(isTyping: false);
+      return;
+    }
+
+    _typingDebounceTimer = Timer(const Duration(milliseconds: 650), () {
+      _broadcastTyping(isTyping: true);
+    });
+  }
+
+  Future<void> _broadcastTyping({required bool isTyping}) async {
+    if (_typingChannel == null || !_hasBooking) return;
+    if (!isTyping && !_isTypingBroadcastActive) return;
+
+    final userId = _supabase.auth.currentUser?.id;
+    try {
+      await _typingChannel!.sendBroadcastMessage(
+        event: 'typing',
+        payload: {
+          'booking_id': currentBooking['id'],
+          'sender_id': userId,
+          'is_typing': isTyping,
+          'ts': DateTime.now().millisecondsSinceEpoch,
+        },
+      );
+      _isTypingBroadcastActive = isTyping;
+    } catch (_) {}
+  }
+
+  Future<void> _loadSubscriptionTier() async {
+    if (_isLoadingTier) return;
+    _isLoadingTier = true;
+    try {
+      final tier = await _apiService.getCurrentSubscriptionTier();
+      setState(() {
+        _subscriptionTier = tier.toLowerCase();
+        _hasLoadedTier = true;
+        _hasLoadedTier = true;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _subscriptionTier = 'free';
+        _hasLoadedTier = true;
+      });
+    } finally {
+      _isLoadingTier = false;
+    }
+  }
+
+  Future<void> _onSavedRepliesTap() async {
+    if (_isLoadingTier) return;
+    if (!_hasLoadedTier) await _loadSubscriptionTier();
+
+    final tier = _subscriptionTier.toLowerCase();
+    final hasAccess = tier == 'pro' || tier == 'business';
+    if (!mounted) return;
+    if (hasAccess) {
+      _showSavedRepliesSheet();
+    } else {
+      _showUpgradeToProSheet();
+    }
+  }
+
+  void _showUpgradeToProSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.fromLTRB(22, 16, 22, 26),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 50,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.18),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.bolt_rounded,
+                    color: AppColors.primary,
+                    size: 30,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Upgrade to Pro to use Saved Replies',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1A1C1E),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Save time by inserting pre-written templates.',
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    height: 1.45,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        this.context,
+                        MaterialPageRoute(
+                          builder: (_) => const SubscriptionPlansScreen(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      shadowColor: AppColors.primary.withOpacity(0.35),
+                    ),
+                    child: Text(
+                      'Upgrade Now',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSavedRepliesSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.fromLTRB(22, 16, 22, 20),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 50,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  'Saved Replies',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1A1C1E),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ..._savedReplies.map((reply) {
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8F9FC),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: ListTile(
+                      onTap: () {
+                        Navigator.pop(context);
+                        _messageController.text = reply;
+                        _messageController.selection =
+                            TextSelection.fromPosition(
+                              TextPosition(offset: reply.length),
+                            );
+                      },
+                      title: Text(
+                        reply,
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      trailing: const Icon(
+                        Icons.north_west_rounded,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _formatMessageTime(dynamic rawTime) {
+    final parsed = DateTime.tryParse(rawTime?.toString() ?? '');
+    if (parsed == null) return '';
+    final local = parsed.toLocal();
+    final hour = local.hour % 12 == 0 ? 12 : local.hour % 12;
+    final minute = local.minute.toString().padLeft(2, '0');
+    final period = local.hour >= 12 ? 'PM' : 'AM';
+    return '$hour:$minute $period';
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _broadcastTyping(isTyping: false);
     if (_messagesChannel != null) {
       _supabase.removeChannel(_messagesChannel!);
     }
+    if (_typingChannel != null) {
+      _supabase.removeChannel(_typingChannel!);
+    }
+    _typingDebounceTimer?.cancel();
+    _typingVisibilityTimer?.cancel();
+    _messageController.removeListener(_onMessageInputChanged);
     _messageController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -152,8 +483,11 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && _hasBooking) {
-      _subscribeToMessages(currentBooking['id']);
+      _subscribeToMessages(currentBooking['id'].toString());
+      _subscribeToTyping(currentBooking['id'].toString());
       _fetchMessages(isPolling: true);
+    } else if (state == AppLifecycleState.paused) {
+      _broadcastTyping(isTyping: false);
     }
   }
 
@@ -192,7 +526,17 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
           ),
 
           // 3. Input Area OR Locked Message
-          if (isChatLocked) _buildLockedFooter() else _buildInputArea(),
+          if (isChatLocked)
+            _buildLockedFooter()
+          else
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_isProviderForCurrentBooking) _buildQuickActionBar(),
+                _buildTypingIndicator(),
+                _buildInputArea(),
+              ],
+            ),
         ],
       ),
     );
@@ -348,6 +692,35 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
   }
 
   Widget _buildMessageBubble(dynamic msg, bool isMe) {
+    final bool isSystemMessage =
+        (msg['sender_id']?.toString().toUpperCase() == 'SYSTEM') ||
+        (msg['type']?.toString().toLowerCase() == 'system');
+
+    if (isSystemMessage) {
+      return Center(
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 10, top: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Text(
+            (msg['content'] ?? '').toString(),
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              color: Colors.grey.shade700,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
+    final messageTime = _formatMessageTime(msg['created_at']);
+    final isRead = msg['is_read'] == true;
+
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -372,13 +745,135 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
             ),
           ],
         ),
-        child: Text(
-          msg['content'],
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            color: isMe ? Colors.white : Colors.black87,
-          ),
+        child: Column(
+          crossAxisAlignment: isMe
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
+          children: [
+            Text(
+              msg['content'],
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: isMe ? Colors.white : Colors.black87,
+              ),
+            ),
+            if (messageTime.isNotEmpty) const SizedBox(height: 6),
+            if (messageTime.isNotEmpty)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    messageTime,
+                    style: GoogleFonts.poppins(
+                      fontSize: 10,
+                      color: isMe
+                          ? Colors.white.withOpacity(0.85)
+                          : Colors.grey.shade600,
+                    ),
+                  ),
+                  if (isMe) ...[
+                    const SizedBox(width: 4),
+                    Icon(
+                      isRead ? Icons.done_all_rounded : Icons.done_rounded,
+                      size: 14,
+                      color: isRead
+                          ? const Color(0xFF59B8FF)
+                          : Colors.grey.shade300,
+                    ),
+                  ],
+                ],
+              ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTypingIndicator() {
+    final typingName = (widget.otherUser['full_name'] ?? 'User').toString();
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 220),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      child: !_isOtherUserTyping
+          ? const SizedBox.shrink()
+          : Container(
+              key: const ValueKey('typing-indicator'),
+              margin: const EdgeInsets.only(left: 18, right: 18, bottom: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 12,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '...',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '$typingName is typing',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey.shade700,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
+
+  void _applyQuickActionText(String text) {
+    _messageController.text = text;
+    _messageController.selection = TextSelection.fromPosition(
+      TextPosition(offset: _messageController.text.length),
+    );
+  }
+
+  Widget _buildQuickActionBar() {
+    final actions = ["Request Location", "Send Offer", "Mark Complete"];
+
+    return SizedBox(
+      height: 50,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemBuilder: (context, index) {
+          final label = actions[index];
+          return ActionChip(
+            label: Text(
+              label,
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primary,
+              ),
+            ),
+            backgroundColor: AppColors.primary.withOpacity(0.1),
+            shape: StadiumBorder(
+              side: BorderSide(color: AppColors.primary.withOpacity(0.25)),
+            ),
+            onPressed: () => _applyQuickActionText(label),
+          );
+        },
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        itemCount: actions.length,
       ),
     );
   }
@@ -433,6 +928,13 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
                         ),
                       );
                     },
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.bolt_rounded,
+                      color: AppColors.primary.withOpacity(0.9),
+                    ),
+                    onPressed: _onSavedRepliesTap,
                   ),
                 ],
               ),

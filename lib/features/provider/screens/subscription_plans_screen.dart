@@ -5,10 +5,13 @@ import '../../../core/services/api_service.dart';
 import '../../wallet/screens/add_money_screen.dart';
 
 class SubscriptionPlansScreen extends StatefulWidget {
-  const SubscriptionPlansScreen({super.key});
+  final String? currentTier;
+
+  const SubscriptionPlansScreen({super.key, this.currentTier});
 
   @override
-  State<SubscriptionPlansScreen> createState() => _SubscriptionPlansScreenState();
+  State<SubscriptionPlansScreen> createState() =>
+      _SubscriptionPlansScreenState();
 }
 
 class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
@@ -22,30 +25,60 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
       "tier": "free",
       "price": "\$0/mo",
       "highlight": false,
-      "features": ["0 services", "Max 1 community", "Basic visibility"]
+      "features": ["0 services", "Max 1 community", "Basic visibility"],
     },
     {
       "name": "Plus",
       "tier": "plus",
       "price": "\$6.99/mo",
       "highlight": false,
-      "features": ["1 service", "Max 3 communities", "Priority listing boost ready"]
+      "features": [
+        "1 service",
+        "Max 3 communities",
+        "Priority listing boost ready",
+      ],
     },
     {
       "name": "Pro",
       "tier": "pro",
       "price": "\$17.99/mo",
       "highlight": true,
-      "features": ["5 services", "Max 5 communities", "Best for growing providers"]
+      "features": [
+        "5 services",
+        "Max 5 communities",
+        "Best for growing providers",
+      ],
     },
     {
       "name": "Business",
       "tier": "business",
       "price": "\$44.99/mo",
       "highlight": false,
-      "features": ["Unlimited services", "Unlimited communities", "Top-tier monetization access"]
-    }
+      "features": [
+        "Unlimited services",
+        "Unlimited communities",
+        "Top-tier monetization access",
+      ],
+    },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    final currentTier = widget.currentTier?.toLowerCase();
+    if (currentTier != null && currentTier.isNotEmpty) {
+      _selectedTier = currentTier;
+    }
+    _syncCurrentTier();
+  }
+
+  Future<void> _syncCurrentTier() async {
+    try {
+      final tier = await _apiService.getCurrentSubscriptionTier();
+      if (!mounted) return;
+      setState(() => _selectedTier = tier);
+    } catch (_) {}
+  }
 
   Future<void> _buyPlan(String tier) async {
     setState(() => _loadingTiers.add(tier));
@@ -143,7 +176,10 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18),
               gradient: LinearGradient(
-                colors: [AppColors.primary, AppColors.primary.withOpacity(0.85)],
+                colors: [
+                  AppColors.primary,
+                  AppColors.primary.withOpacity(0.85),
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -172,7 +208,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          ..._plans.map((plan) => _buildPlanCard(plan)).toList(),
+          ..._plans.map((plan) => _buildPlanCard(plan)),
         ],
       ),
     );
@@ -222,7 +258,10 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
               ),
               if (isHighlighted)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(20),
@@ -253,12 +292,19 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
               padding: const EdgeInsets.only(bottom: 8),
               child: Row(
                 children: [
-                  const Icon(Icons.check_circle_rounded, size: 18, color: Color(0xFF10B981)),
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    size: 18,
+                    color: Color(0xFF10B981),
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       f,
-                      style: GoogleFonts.poppins(fontSize: 13, color: Colors.black87),
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
                 ],
@@ -270,11 +316,15 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
             width: double.infinity,
             height: 48,
             child: ElevatedButton(
-              onPressed: isFree || isLoading || isCurrent ? null : () => _buyPlan(tier),
+              onPressed: isFree || isLoading || isCurrent
+                  ? null
+                  : () => _buyPlan(tier),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 disabledBackgroundColor: Colors.grey.shade300,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               child: isLoading
                   ? const SizedBox(
@@ -286,9 +336,13 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
                       ),
                     )
                   : Text(
-                      isFree ? "Current Plan" : (isCurrent ? "Active Plan" : "Upgrade"),
+                      isCurrent
+                          ? "Current Plan"
+                          : (isFree ? "Free Plan" : "Upgrade"),
                       style: GoogleFonts.poppins(
-                        color: isFree || isCurrent ? Colors.grey.shade700 : Colors.white,
+                        color: isFree || isCurrent
+                            ? Colors.grey.shade700
+                            : Colors.white,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

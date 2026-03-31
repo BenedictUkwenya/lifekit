@@ -17,13 +17,13 @@ class ApiException implements Exception {
 
 class ApiService {
   // CONFIGURATION: Switches between local and production automatically
-  //final String baseUrl = kIsWeb
-  //  ? "http://localhost:3000"
-  //: "http://10.0.2.2:3000";
+  final String baseUrl = const bool.fromEnvironment('dart.library.js_util')
+      ? "http://localhost:3000"
+      : "http://10.0.2.2:3000";
 
   // UNCOMMENT FOR PRODUCTION
   //final String baseUrl = "https://lifekit-api.onrender.com";
-  final String baseUrl = "https://lifekitbackend.vercel.app";
+  //  final String baseUrl = "https://lifekitbackend.vercel.app";
 
   final storage = const FlutterSecureStorage();
 
@@ -100,6 +100,12 @@ class ApiService {
     return _withNetworkGuard(() async {
       String? token =
           _cachedAccessToken ?? await storage.read(key: 'jwt_token');
+      if (token == null) {
+        token = await _refreshToken();
+        if (token == null) {
+          throw Exception("Session Expired. Please login again.");
+        }
+      }
       var response = await http.get(
         Uri.parse('$baseUrl$endpoint'),
         headers: {'Authorization': 'Bearer $token'},
@@ -116,7 +122,7 @@ class ApiService {
           throw Exception("Session Expired");
         }
       }
-      return _processResponse(response);
+      return await _processResponse(response);
     });
   }
 
@@ -127,6 +133,12 @@ class ApiService {
     return _withNetworkGuard(() async {
       String? token =
           _cachedAccessToken ?? await storage.read(key: 'jwt_token');
+      if (token == null) {
+        token = await _refreshToken();
+        if (token == null) {
+          throw Exception("Session Expired. Please login again.");
+        }
+      }
       var response = await http.post(
         Uri.parse('$baseUrl$endpoint'),
         headers: {
@@ -151,7 +163,7 @@ class ApiService {
           throw Exception("Session Expired");
         }
       }
-      return _processResponse(response);
+      return await _processResponse(response);
     });
   }
 
@@ -162,6 +174,12 @@ class ApiService {
     return _withNetworkGuard(() async {
       String? token =
           _cachedAccessToken ?? await storage.read(key: 'jwt_token');
+      if (token == null) {
+        token = await _refreshToken();
+        if (token == null) {
+          throw Exception("Session Expired. Please login again.");
+        }
+      }
       var response = await http.put(
         Uri.parse('$baseUrl$endpoint'),
         headers: {
@@ -186,7 +204,7 @@ class ApiService {
           throw Exception("Session Expired");
         }
       }
-      return _processResponse(response);
+      return await _processResponse(response);
     });
   }
 
@@ -194,6 +212,12 @@ class ApiService {
     return _withNetworkGuard(() async {
       String? token =
           _cachedAccessToken ?? await storage.read(key: 'jwt_token');
+      if (token == null) {
+        token = await _refreshToken();
+        if (token == null) {
+          throw Exception("Session Expired. Please login again.");
+        }
+      }
       var response = await http.delete(
         Uri.parse('$baseUrl$endpoint'),
         headers: {'Authorization': 'Bearer $token'},
@@ -210,11 +234,11 @@ class ApiService {
           throw Exception("Session Expired");
         }
       }
-      return _processResponse(response);
+      return await _processResponse(response);
     });
   }
 
-  dynamic _processResponse(http.Response response) {
+  Future<dynamic> _processResponse(http.Response response) async {
     print("SERVER RESPONSE [${response.statusCode}]: ${response.body}");
 
     final decoded = jsonDecode(response.body);
@@ -228,22 +252,28 @@ class ApiService {
       errorMessage = decoded['error'];
     }
 
-    final lowered = errorMessage.toLowerCase();
-    if (response.statusCode == 401) {
-      throw ApiException(401, "Session Expired. Please login again.");
+    final lowerError = errorMessage.toLowerCase();
+    if ((response.statusCode == 401 || response.statusCode == 403) &&
+        !lowerError.contains("password") &&
+        !lowerError.contains("credentials") &&
+        !lowerError.contains("invalid login")) {
+      final isAuthRelated =
+          response.statusCode == 401 ||
+          lowerError.contains("session") ||
+          lowerError.contains("token") ||
+          lowerError.contains("expired") ||
+          lowerError.contains("jwt") ||
+          lowerError.contains("not authenticated");
+      if (isAuthRelated) {
+        await storage.deleteAll();
+        _cachedAccessToken = null;
+        _cachedRefreshToken = null;
+        throw Exception("Session Expired. Please login again.");
+      }
     }
 
-    if (response.statusCode == 403) {
-      final isAuthRelated =
-          lowered.contains("session") ||
-          lowered.contains("token") ||
-          lowered.contains("expired") ||
-          lowered.contains("jwt") ||
-          lowered.contains("not authenticated");
-      if (isAuthRelated && !lowered.contains("password")) {
-        throw ApiException(403, "Session Expired. Please login again.");
-      }
-      throw ApiException(403, errorMessage);
+    if (response.statusCode == 401 || response.statusCode == 403) {
+      throw ApiException(response.statusCode, errorMessage);
     }
 
     throw ApiException(response.statusCode, errorMessage);
@@ -266,7 +296,7 @@ class ApiService {
           "password": password,
         }),
       );
-      return _processResponse(response);
+      return await _processResponse(response);
     });
   }
 
@@ -277,7 +307,7 @@ class ApiService {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({"email": email, "password": password}),
       );
-      final data = _processResponse(response);
+      final data = await _processResponse(response);
       if (data.containsKey('session')) {
         await _saveTokens(
           data['session']['access_token'],
@@ -295,7 +325,7 @@ class ApiService {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({"email": email, "token": token}),
       );
-      final data = _processResponse(response);
+      final data = await _processResponse(response);
       if (data.containsKey('session')) {
         await _saveTokens(
           data['session']['access_token'],
@@ -312,6 +342,13 @@ class ApiService {
 
   Future<Map<String, dynamic>> getUserProfile() async {
     return await _authenticatedGet('/users/profile');
+  }
+
+  Future<String> getCurrentSubscriptionTier() async {
+    final data = await getUserProfile();
+    final profile = data['profile'];
+    if (profile is! Map<String, dynamic>) return 'free';
+    return (profile['subscription_tier'] ?? 'free').toString().toLowerCase();
   }
 
   Future<void> updateProfile({
@@ -411,13 +448,13 @@ class ApiService {
 
   Future<List<dynamic>> getOffers() async {
     final response = await http.get(Uri.parse('$baseUrl/home/offers'));
-    final data = _processResponse(response);
+    final data = await _processResponse(response);
     return data['offers'] ?? [];
   }
 
   Future<List<dynamic>> getCategories() async {
     final response = await http.get(Uri.parse('$baseUrl/home/categories'));
-    final data = _processResponse(response);
+    final data = await _processResponse(response);
     return data['categories'] ?? [];
   }
 
@@ -425,8 +462,13 @@ class ApiService {
     final response = await http.get(
       Uri.parse('$baseUrl/home/popular-services'),
     );
-    final data = _processResponse(response);
+    final data = await _processResponse(response);
     return data['services'] ?? [];
+  }
+
+  Future<Map<String, dynamic>> getExplore() async {
+    final response = await http.get(Uri.parse('$baseUrl/home/explore'));
+    return await _processResponse(response);
   }
 
   Future<List<dynamic>> getRecentSearches() async {
@@ -438,7 +480,7 @@ class ApiService {
     final response = await http.get(
       Uri.parse('$baseUrl/services/category/$categoryId'),
     );
-    final data = _processResponse(response);
+    final data = await _processResponse(response);
     return data['services'] ?? [];
   }
 
@@ -446,14 +488,14 @@ class ApiService {
     final response = await http.get(
       Uri.parse('$baseUrl/services/provider/$providerId'),
     );
-    return _processResponse(response);
+    return await _processResponse(response);
   }
 
   Future<List<dynamic>> getSubCategories(String parentId) async {
     final response = await http.get(
       Uri.parse('$baseUrl/home/categories/children/$parentId'),
     );
-    final data = _processResponse(response);
+    final data = await _processResponse(response);
     return data['categories'] ?? [];
   }
 
@@ -461,14 +503,14 @@ class ApiService {
     final response = await http.get(
       Uri.parse('$baseUrl/home/search?query=$query'),
     );
-    return _processResponse(response);
+    return await _processResponse(response);
   }
 
   Future<List<dynamic>> searchCategories(String query) async {
     final response = await http.get(
       Uri.parse('$baseUrl/home/categories/search/dropdown?query=$query'),
     );
-    final data = _processResponse(response);
+    final data = await _processResponse(response);
     return data['categories'] ?? [];
   }
 
@@ -671,6 +713,10 @@ class ApiService {
     return (await _authenticatedGet('/chats/$bookingId'))['messages'] ?? [];
   }
 
+  Future<void> markChatAsRead(String bookingId) async {
+    await _authenticatedPut('/chats/$bookingId/read', {});
+  }
+
   Future<void> sendMessage(String bookingId, String content) async {
     await _authenticatedPost('/chats/message', {
       "booking_id": bookingId,
@@ -689,7 +735,7 @@ class ApiService {
 
   Future<List<dynamic>> getEvents() async {
     final response = await http.get(Uri.parse('$baseUrl/feeds/events'));
-    return _processResponse(response); // Now returns the List correctly
+    return await _processResponse(response); // Now returns the List correctly
   }
 
   Future<Map<String, dynamic>> buyEventTicket({
@@ -721,7 +767,7 @@ class ApiService {
     final response = await http.get(
       Uri.parse('$baseUrl/feeds/posts/$postId/comments'),
     );
-    return _processResponse(response);
+    return await _processResponse(response);
   }
 
   Future<dynamic> postComment(String postId, String content) async {
@@ -771,7 +817,7 @@ class ApiService {
         }),
       );
 
-      _processResponse(response);
+      await _processResponse(response);
     });
   }
 
@@ -780,7 +826,7 @@ class ApiService {
     final response = await http.get(
       Uri.parse('$baseUrl/places/nearby?lat=$lat&lng=$lng'),
     );
-    final data = _processResponse(response);
+    final data = await _processResponse(response);
     return data['places'] ?? [];
   }
 
@@ -788,13 +834,13 @@ class ApiService {
     final response = await http.get(
       Uri.parse('$baseUrl/places/popular?lat=$lat&lng=$lng'),
     );
-    final data = _processResponse(response);
+    final data = await _processResponse(response);
     return data['places'] ?? [];
   }
 
   Future<List<dynamic>> getGroups() async {
     final response = await http.get(Uri.parse('$baseUrl/feeds/groups'));
-    return _processResponse(response);
+    return await _processResponse(response);
   }
 
   Future<void> joinGroup(String groupId) async {

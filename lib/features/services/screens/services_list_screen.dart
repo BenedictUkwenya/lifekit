@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -7,8 +8,11 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 
 import 'category_items_screen.dart';
-import 'skill_swap_screens.dart'; // Ensure this exists
-import '../../home/screens/search_results_screen.dart'; // Import Search Screen
+import 'skill_swap_screens.dart';
+import '../../home/screens/search_results_screen.dart';
+import 'service_booking_detail_screen.dart';
+import '../../profile/screens/provider_profile_screen.dart';
+import 'all_categories_screen.dart';
 
 class ServicesListScreen extends StatefulWidget {
   const ServicesListScreen({super.key});
@@ -17,31 +21,52 @@ class ServicesListScreen extends StatefulWidget {
   State<ServicesListScreen> createState() => _ServicesListScreenState();
 }
 
-class _ServicesListScreenState extends State<ServicesListScreen> {
+class _ServicesListScreenState extends State<ServicesListScreen>
+    with SingleTickerProviderStateMixin {
   final ApiService _apiService = ApiService();
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  late final AnimationController _fabGlowController;
+  late final Animation<double> _fabGlowBlur;
 
   List<dynamic> categories = [];
+  List<dynamic> featuredProviders = [];
+  List<dynamic> allServices = [];
   bool isLoading = true;
-  bool isFabExpanded = false;
+  bool _isFabExtended = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchCategories();
-
-    // Auto-expand animation on load
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) setState(() => isFabExpanded = true);
-    });
+    _fabGlowController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+    _fabGlowBlur = Tween<double>(
+      begin: 4.0,
+      end: 12.0,
+    ).animate(_fabGlowController);
+    _fetchExploreData();
   }
 
-  Future<void> _fetchCategories() async {
+  @override
+  void dispose() {
+    _fabGlowController.dispose();
+    _scrollController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fetchExploreData() async {
     try {
-      final data = await _apiService.getCategories();
+      final data = await _apiService.getExplore();
       if (mounted) {
         setState(() {
-          categories = data;
+          categories = List<dynamic>.from(data['categories'] ?? []);
+          featuredProviders = List<dynamic>.from(
+            data['featured_providers'] ?? [],
+          );
+          allServices = List<dynamic>.from(data['all_services'] ?? []);
           isLoading = false;
         });
       }
@@ -132,277 +157,529 @@ class _ServicesListScreenState extends State<ServicesListScreen> {
     }
   }
 
-  // --- ACTION: Menu ---
-  void _showSortMenu() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              "Sort Categories",
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFAFAFA),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 85),
+        child: TweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0.0, end: 1.0),
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.elasticOut,
+          builder: (context, scale, child) {
+            return Transform.scale(scale: scale, child: child);
+          },
+          child: AnimatedBuilder(
+            animation: _fabGlowBlur,
+            builder: (context, child) {
+              return Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.6),
+                      blurRadius: _fabGlowBlur.value,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+                child: child,
+              );
+            },
+            child: FloatingActionButton.extended(
+              backgroundColor: AppColors.primary,
+              isExtended: _isFabExtended,
+              onPressed: _openSkillSwap,
+              icon: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.swap_horiz, color: Colors.white),
+                  Transform.translate(
+                    offset: const Offset(-3, -6),
+                    child: const Icon(
+                      Icons.auto_awesome,
+                      color: Colors.white,
+                      size: 14,
+                    ),
+                  ),
+                ],
+              ),
+              label: Text(
+                "Skill Swap",
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
             ),
-            ListTile(
-              leading: const Icon(Icons.sort_by_alpha),
-              title: const Text("Name (A-Z)"),
-              onTap: () {
-                setState(
-                  () =>
-                      categories.sort((a, b) => a['name'].compareTo(b['name'])),
-                );
-                Navigator.pop(context);
-              },
+          ),
+        ),
+      ),
+      body: NotificationListener<UserScrollNotification>(
+        onNotification: (notification) {
+          if (notification.direction == ScrollDirection.reverse &&
+              _isFabExtended) {
+            setState(() => _isFabExtended = false);
+          } else if (notification.direction == ScrollDirection.forward &&
+              !_isFabExtended) {
+            setState(() => _isFabExtended = true);
+          }
+          return false;
+        },
+        child: CustomScrollView(
+          controller: _scrollController,
+          slivers: [
+            SliverAppBar(
+              pinned: true,
+              floating: true,
+              backgroundColor: const Color(0xFFFAFAFA),
+              toolbarHeight: 76,
+              titleSpacing: 20,
+              title: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F5F5),
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  onSubmitted: _onSearch,
+                  textInputAction: TextInputAction.search,
+                  decoration: InputDecoration(
+                    hintText: "Search service providers",
+                    hintStyle: GoogleFonts.poppins(
+                      color: Colors.grey,
+                      fontSize: 13,
+                    ),
+                    prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
+              ),
             ),
-            ListTile(
-              leading: const Icon(Icons.star_border),
-              title: const Text("Most Popular"),
-              onTap: () {
-                // Mock logic: Reverse for now
-                setState(() => categories = categories.reversed.toList());
-                Navigator.pop(context);
-              },
-            ),
+            if (isLoading)
+              const SliverFillRemaining(
+                child: Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                ),
+              )
+            else ...[
+              if (featuredProviders.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 0, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader("Featured Professionals"),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 170,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: featuredProviders.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(width: 12),
+                            itemBuilder: (context, index) =>
+                                _buildFeaturedProviderCard(
+                                  featuredProviders[index],
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              if (categories.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            _buildSectionHeader("Browse Categories"),
+                            const Spacer(),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const AllCategoriesScreen(),
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                "See all",
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          height: 46,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: categories.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(width: 10),
+                            itemBuilder: (context, index) =>
+                                _buildCategoryChip(categories[index]),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+                  child: _buildSectionHeader("All Services"),
+                ),
+              ),
+              if (allServices.isEmpty)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: _buildEmptyState(
+                      icon: Icons.storefront_outlined,
+                      title: "No services found",
+                      subtitle: "New services will appear here once available.",
+                    ),
+                  ),
+                )
+              else
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => _buildServiceCard(allServices[index]),
+                    childCount: allServices.length,
+                  ),
+                ),
+              const SliverToBoxAdapter(child: SizedBox(height: 120)),
+            ],
           ],
         ),
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        leading: const BackButton(color: Colors.black),
-        title: Text(
-          "Services",
-          style: GoogleFonts.poppins(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.more_horiz, color: Colors.black),
-            onPressed: _showSortMenu,
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              // 1. Search Bar
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF5F5F5),
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    onSubmitted: _onSearch,
-                    textInputAction: TextInputAction.search,
-                    decoration: InputDecoration(
-                      hintText: "Search service providers",
-                      hintStyle: GoogleFonts.poppins(
-                        color: Colors.grey,
-                        fontSize: 13,
-                      ),
-                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                  ),
-                ),
-              ),
-
-              // 2. Category List
-              Expanded(
-                child: isLoading
-                    ? const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primary,
-                        ),
-                      )
-                    : categories.isEmpty
-                    ? Center(
-                        child: Text(
-                          "No categories found",
-                          style: GoogleFonts.poppins(color: Colors.grey),
-                        ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
-                        itemCount: categories.length,
-                        itemBuilder: (context, index) {
-                          final cat = categories[index];
-                          return _buildCategoryTile(cat);
-                        },
-                      ),
-              ),
-            ],
-          ),
-
-          // 3. ANIMATED FAB (FIXED OVERFLOW)
-          Positioned(
-            bottom: 30,
-            right: 20,
-            child: GestureDetector(
-              onTap: () {
-                setState(() => isFabExpanded = !isFabExpanded);
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (context) => const SkillSwapBottomSheet(),
-                );
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                height: 56, // Slightly taller
-                width: isFabExpanded ? 150 : 56, // Adjusted width
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(28), // Perfectly round
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.4),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min, // Ensures tight wrap
-                  children: [
-                    const Icon(Icons.swap_horiz, color: Colors.white, size: 24),
-                    if (isFabExpanded) ...[
-                      const SizedBox(width: 8),
-                      // Flexible prevents overflow if text is too long
-                      Flexible(
-                        child: Text(
-                          "Skill Swap",
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                          overflow: TextOverflow
-                              .clip, // Prevent ellipsis visual glitch
-                          softWrap: false,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
+  Widget _buildSectionHeader(String title) {
+    return Text(
+      title,
+      style: GoogleFonts.poppins(
+        fontSize: 16,
+        fontWeight: FontWeight.w700,
+        color: Colors.black87,
       ),
     );
   }
 
-  Widget _buildCategoryTile(dynamic category) {
-    String price = "min. \$12"; // Mock price
-    String imageUrl = _getCategoryImage(category['name']);
-    Color bgColor = _getCategoryColor(category['name']);
+  Future<void> _openCategory(dynamic category) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CategoryItemsScreen(
+          categoryId: category['id'],
+          categoryName: category['name'],
+        ),
+      ),
+    );
+  }
+
+  Map<String, dynamic>? _getProvider(dynamic service) {
+    final raw = service['profiles'];
+    if (raw is Map<String, dynamic>) return raw;
+    if (raw is List && raw.isNotEmpty && raw.first is Map<String, dynamic>) {
+      return raw.first as Map<String, dynamic>;
+    }
+    return null;
+  }
+
+  String? _getServiceImage(dynamic service) {
+    final rawImages = service['image_urls'];
+    if (rawImages is List && rawImages.isNotEmpty) {
+      final first = rawImages.first;
+      if (first is String && first.isNotEmpty) return first;
+    }
+    return null;
+  }
+
+  Future<void> _openSkillSwap() async {
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const SkillSwapBottomSheet(),
+    );
+  }
+
+  Widget _buildFeaturedProviderCard(dynamic provider) {
+    final providerId = (provider['id'] ?? '').toString();
+    final providerName = (provider['full_name'] ?? 'Professional').toString();
+    final providerPic = provider['profile_picture_url']?.toString();
+    final tier = (provider['subscription_tier'] ?? 'pro')
+        .toString()
+        .toUpperCase();
 
     return GestureDetector(
       onTap: () {
+        if (providerId.isEmpty) return;
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => CategoryItemsScreen(
-              categoryId: category['id'],
-              categoryName: category['name'],
+            builder: (_) => ProviderProfileScreen(
+              providerId: providerId,
+              providerName: providerName,
+              providerPic: providerPic,
             ),
           ),
         );
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(12),
+        width: 220,
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFFBF3),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFFE1BF5A), width: 1.3),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Align(
+                alignment: Alignment.topRight,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    tier,
+                    style: GoogleFonts.poppins(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              CircleAvatar(
+                radius: 32,
+                backgroundColor: Colors.grey.shade100,
+                backgroundImage: providerPic != null
+                    ? CachedNetworkImageProvider(providerPic)
+                    : null,
+                child: providerPic == null
+                    ? const Icon(Icons.person, color: Colors.grey)
+                    : null,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                providerName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                "Featured Professional",
+                style: GoogleFonts.poppins(
+                  fontSize: 11,
+                  color: Colors.grey.shade700,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryChip(dynamic category) {
+    return GestureDetector(
+      onTap: () => _openCategory(category),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 26,
+              height: 26,
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: _getCategoryColor(category['name']),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: CachedNetworkImage(
+                imageUrl: _getCategoryImage(category['name']),
+                fit: BoxFit.contain,
+                placeholder: (context, url) =>
+                    const Icon(Icons.category, color: Colors.grey, size: 14),
+                errorWidget: (context, url, error) =>
+                    const Icon(Icons.error, color: Colors.grey, size: 14),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              category['name'] ?? 'Category',
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildServiceCard(dynamic service) {
+    final provider = _getProvider(service);
+    final providerName = (provider?['full_name'] ?? 'Service Provider')
+        .toString();
+    final serviceTitle = (service['title'] ?? 'Service').toString();
+    final price = service['price'] ?? 0;
+    final rating =
+        double.tryParse((service['average_rating'] ?? '0').toString()) ?? 0.0;
+    final coverImage = _getServiceImage(service);
+
+    return GestureDetector(
+      onTap: () {
+        final serviceId = (service['id'] ?? '').toString();
+        final providerId = (service['provider_id'] ?? '').toString();
+        if (serviceId.isEmpty || providerId.isEmpty) return;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ServiceBookingDetailScreen(
+              serviceId: serviceId,
+              providerId: providerId,
+              providerName: providerName,
+              providerPic: provider?['profile_picture_url']?.toString(),
+              serviceTitle: serviceTitle,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(20, 0, 20, 18),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.grey.shade100),
           boxShadow: [
-            BoxShadow(color: Colors.grey.withOpacity(0.05), blurRadius: 10),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
           ],
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Custom Icon Box
-            Container(
-              width: 60,
-              height: 60,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: bgColor,
-                borderRadius: BorderRadius.circular(16),
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
               ),
-              child: CachedNetworkImage(
-                imageUrl: imageUrl,
-                fit: BoxFit.contain,
+              child: SizedBox(
+                height: 170,
+                width: double.infinity,
+                child: coverImage != null
+                    ? CachedNetworkImage(
+                        imageUrl: coverImage,
+                        fit: BoxFit.cover,
+                      )
+                    : Container(
+                        color: Colors.grey.shade200,
+                        child: const Icon(Icons.image, color: Colors.grey),
+                      ),
               ),
             ),
-            const SizedBox(width: 16),
-
-            // Text Info
-            Expanded(
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    category['name'],
+                    serviceTitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.bold,
                       fontSize: 15,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
-                    price,
+                    providerName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
-                      color: AppColors.primary,
                       fontSize: 12,
+                      color: Colors.grey.shade700,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                ],
-              ),
-            ),
-
-            // Overlapping Avatars (Provider Preview)
-            SizedBox(
-              width: 60,
-              height: 30,
-              child: Stack(
-                children: [
-                  _buildMiniAvatar(0, 'https://i.pravatar.cc/150?img=1'),
-                  _buildMiniAvatar(15, 'https://i.pravatar.cc/150?img=2'),
-                  _buildMiniAvatar(30, 'https://i.pravatar.cc/150?img=3'),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.star_rounded,
+                        size: 16,
+                        color: Colors.amber,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        rating == 0 ? "New" : rating.toStringAsFixed(1),
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        "\$$price",
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -412,16 +689,38 @@ class _ServicesListScreenState extends State<ServicesListScreen> {
     );
   }
 
-  Widget _buildMiniAvatar(double left, String url) {
-    return Positioned(
-      left: left,
-      child: Container(
-        width: 24,
-        height: 24,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 1.5),
-          image: DecorationImage(image: NetworkImage(url), fit: BoxFit.cover),
+  Widget _buildEmptyState({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 28),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 42, color: Colors.grey.shade400),
+            const SizedBox(height: 14),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ],
         ),
       ),
     );

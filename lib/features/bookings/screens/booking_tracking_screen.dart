@@ -201,6 +201,7 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
   Widget build(BuildContext context) {
     final status = _currentBooking['status'];
     final isSwap = (_currentBooking['total_price'] == 0);
+    final bool isOverdue = _isOverdueBooking(_currentBooking);
     final otherName = widget.isClient
         ? (_currentBooking['profiles']?['full_name'] ?? "Provider")
         : (_currentBooking['profiles']?['full_name'] ?? "Client");
@@ -218,7 +219,7 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
     );
     final bool canReportIssue =
         (status == 'confirmed' || status == 'pending') &&
-        DateTime.now().difference(scheduledTime).inHours >= 24;
+        (DateTime.now().difference(scheduledTime).inHours >= 24 || isOverdue);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -236,6 +237,35 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
+            if (isOverdue) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.red[50],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.warning_amber_rounded, color: Colors.red),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        "This service is past its deadline. Please confirm if the work was completed or report a dispute to hold the funds.",
+                        style: GoogleFonts.poppins(
+                          color: Colors.red[900],
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
             // 1. STATUS HEADER
             Container(
               padding: const EdgeInsets.all(20),
@@ -243,22 +273,40 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
               decoration: BoxDecoration(
                 color: status == 'completed'
                     ? Colors.green[50]
+                    : isOverdue
+                    ? Colors.red[50]
                     : Colors.orange[50],
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: status == 'completed' ? Colors.green : Colors.orange,
+                  color: status == 'completed'
+                      ? Colors.green
+                      : isOverdue
+                      ? Colors.red
+                      : Colors.orange,
                 ),
               ),
               child: Column(
                 children: [
                   Icon(
-                    status == 'completed' ? Icons.check_circle : Icons.pending,
+                    status == 'completed'
+                        ? Icons.check_circle
+                        : isOverdue
+                        ? Icons.warning_amber_rounded
+                        : Icons.pending,
                     size: 40,
-                    color: status == 'completed' ? Colors.green : Colors.orange,
+                    color: status == 'completed'
+                        ? Colors.green
+                        : isOverdue
+                        ? Colors.red
+                        : Colors.orange,
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    status == 'completed' ? "Service Completed" : "In Progress",
+                    status == 'completed'
+                        ? "Service Completed"
+                        : isOverdue
+                        ? "Service Overdue"
+                        : "In Progress",
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
@@ -267,6 +315,8 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
                   Text(
                     status == 'completed'
                         ? "Funds have been released."
+                        : isOverdue
+                        ? "Resolution needed before releasing funds."
                         : "Waiting for confirmation.",
                     style: GoogleFonts.poppins(color: Colors.grey),
                   ),
@@ -455,23 +505,46 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
               SizedBox(
                 width: double.infinity,
                 height: 55,
-                child: OutlinedButton(
-                  onPressed: _openDisputeSheet,
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.red),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: Text(
-                    "Report Issue",
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.red,
-                    ),
-                  ),
-                ),
+                child: isOverdue
+                    ? ElevatedButton.icon(
+                        onPressed: _openDisputeSheet,
+                        icon: const Icon(
+                          Icons.report_problem_rounded,
+                          color: Colors.white,
+                        ),
+                        label: Text(
+                          "Report Issue",
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          elevation: 0,
+                        ),
+                      )
+                    : OutlinedButton(
+                        onPressed: _openDisputeSheet,
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.red),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: Text(
+                          "Report Issue",
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ),
               ),
             ],
           ],
@@ -536,5 +609,16 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
       width: 2,
       color: isActive ? Colors.green : Colors.grey[300],
     );
+  }
+
+  bool _isOverdueBooking(dynamic booking) {
+    if (booking['is_overdue'] == true) return true;
+    final status = (booking['status'] ?? '').toString().toLowerCase();
+    if (status != 'confirmed') return false;
+    final rawTime = booking['scheduled_time'];
+    if (rawTime == null) return false;
+    final scheduledTime = DateTime.tryParse(rawTime.toString());
+    if (scheduledTime == null) return false;
+    return scheduledTime.isBefore(DateTime.now());
   }
 }

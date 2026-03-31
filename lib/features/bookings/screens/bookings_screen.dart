@@ -18,9 +18,11 @@ class BookingsScreen extends StatefulWidget {
 }
 
 class _BookingsScreenState extends State<BookingsScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   final ApiService _apiService = ApiService();
   late TabController _tabController;
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
 
   List<dynamic> clientBookings = [];
   List<dynamic> providerRequests = [];
@@ -30,7 +32,21 @@ class _BookingsScreenState extends State<BookingsScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
+    _pulseAnimation = Tween<double>(begin: 0.9, end: 1.1).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
     _fetchData();
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchData() async {
@@ -517,6 +533,7 @@ class _BookingsScreenState extends State<BookingsScreen>
     final dateObj = DateTime.parse(booking['scheduled_time']);
     final dateStr = DateFormat('MMM dd, hh:mm a').format(dateObj);
     final status = booking['status'];
+    final isOverdue = _isOverdueBooking(booking);
 
     final String type = booking['service_type'] ?? "Default";
     final String? note = booking['comments'];
@@ -651,7 +668,19 @@ class _BookingsScreenState extends State<BookingsScreen>
                       padding: const EdgeInsets.symmetric(vertical: 4),
                     ),
                     if (isClient || status != 'pending')
-                      _buildStatusBadge(status),
+                      _buildStatusBadge(status, isOverdue: isOverdue),
+                    if (isOverdue)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: ScaleTransition(
+                          scale: _pulseAnimation,
+                          child: const Icon(
+                            Icons.warning_amber_rounded,
+                            color: Colors.red,
+                            size: 18,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ],
@@ -824,23 +853,36 @@ class _BookingsScreenState extends State<BookingsScreen>
     );
   }
 
-  Widget _buildStatusBadge(String status) {
+  Widget _buildStatusBadge(String status, {bool isOverdue = false}) {
+    final badgeText = isOverdue ? 'OVERDUE' : status.toUpperCase();
+    final badgeColor = isOverdue ? Colors.red : _getStatusColor(status);
     return Container(
       margin: const EdgeInsets.only(top: 4),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: _getStatusColor(status).withOpacity(0.1),
+        color: badgeColor.withOpacity(0.12),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
-        status.toUpperCase(),
+        badgeText,
         style: GoogleFonts.poppins(
           fontSize: 9,
           fontWeight: FontWeight.bold,
-          color: _getStatusColor(status),
+          color: badgeColor,
         ),
       ),
     );
+  }
+
+  bool _isOverdueBooking(dynamic booking) {
+    if (booking['is_overdue'] == true) return true;
+    final status = (booking['status'] ?? '').toString().toLowerCase();
+    if (status != 'confirmed') return false;
+    final rawTime = booking['scheduled_time'];
+    if (rawTime == null) return false;
+    final scheduledTime = DateTime.tryParse(rawTime.toString());
+    if (scheduledTime == null) return false;
+    return scheduledTime.isBefore(DateTime.now());
   }
 
   Widget _buildFilterChip(String label, bool isSelected) {

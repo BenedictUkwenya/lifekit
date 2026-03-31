@@ -8,6 +8,7 @@ import '../../auth/screens/login_screen.dart';
 import '../../home/screens/home_screen.dart';
 import 'onboarding_screen.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/services/api_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -96,16 +97,23 @@ class _SplashScreenState extends State<SplashScreen>
     final prefs = await SharedPreferences.getInstance();
     bool seenOnboarding = prefs.getBool('seenOnboarding') ?? false;
 
+    Widget nextScreen = seenOnboarding
+        ? const LoginScreen()
+        : const OnboardingScreen();
+
+    if (token != null && token.isNotEmpty) {
+      try {
+        await ApiService().getUserProfile();
+        nextScreen = const HomeScreen();
+      } catch (_) {
+        await storage.deleteAll();
+      }
+    }
+
     if (mounted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => (token != null && token.isNotEmpty)
-              ? const HomeScreen()
-              : (seenOnboarding
-                    ? const LoginScreen()
-                    : const OnboardingScreen()),
-        ),
+        MaterialPageRoute(builder: (context) => nextScreen),
       );
     }
   }

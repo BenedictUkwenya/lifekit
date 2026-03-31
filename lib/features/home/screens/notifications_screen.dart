@@ -55,9 +55,26 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     try {
       await _apiService.markAllNotificationsRead();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("All marked as read"),
-          duration: Duration(seconds: 1),
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle_outline, color: Colors.white),
+              const SizedBox(width: 10),
+              Text(
+                "All notifications marked as read",
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.green.shade600,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.all(16),
+          elevation: 4,
+          duration: const Duration(seconds: 2),
         ),
       );
     } catch (e) {
@@ -74,6 +91,29 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     // 2. Call API
     try {
       await _apiService.deleteNotification(id);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.delete_outline, color: Colors.white),
+              const SizedBox(width: 10),
+              Text(
+                "Notification deleted",
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.red.shade600,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.all(16),
+          elevation: 4,
+          duration: const Duration(seconds: 2),
+        ),
+      );
     } catch (e) {
       // Ideally revert UI change here if fail, but for delete it's rare
       print("Delete failed: $e");
