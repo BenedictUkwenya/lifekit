@@ -221,6 +221,18 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
         (status == 'confirmed' || status == 'pending') &&
         (DateTime.now().difference(scheduledTime).inHours >= 24 || isOverdue);
 
+    // True when the provider has confirmed but the client hasn't yet acted —
+    // the 48-hour auto-release clock is now running.
+    final bool providerConfirmed =
+        _currentBooking['provider_confirmed'] == true;
+    final bool clientConfirmed =
+        _currentBooking['client_confirmed'] == true;
+    final bool showEscrowWarning =
+        widget.isClient &&
+        providerConfirmed &&
+        !clientConfirmed &&
+        (status == 'confirmed' || status == 'pending');
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -237,6 +249,58 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
+            // ── 48-hour auto-release warning (provider confirmed, client hasn't) ──
+            if (showEscrowWarning) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFFF3E0), Color(0xFFFFEBEE)],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.orange.shade400),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.access_time_filled_rounded,
+                      color: Colors.orange,
+                      size: 22,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "⚠️ Action Required",
+                            style: GoogleFonts.poppins(
+                              color: Colors.orange[900],
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "The provider marked this job as done. If you do not confirm or report an issue, funds will be automatically released in 48 hours.",
+                            style: GoogleFonts.poppins(
+                              color: Colors.orange[900],
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+
             if (isOverdue) ...[
               Container(
                 width: double.infinity,
@@ -459,6 +523,35 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey),
                 ),
+
+              // ── Dispute shortcut (visible when escrow clock is ticking) ──
+              if (showEscrowWarning && !iHaveConfirmed) ...[
+                const SizedBox(height: 14),
+                GestureDetector(
+                  onTap: _openDisputeSheet,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.flag_outlined,
+                        color: Colors.red,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        "Report an Issue (Dispute)",
+                        style: GoogleFonts.poppins(
+                          color: Colors.red,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
 
             // 4. RATE PROVIDER BUTTON (Added Section)

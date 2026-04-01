@@ -77,6 +77,27 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
   final Map<String, DateTime> _memberActivity = {};
   static const int _activeWindowMinutes = 15;
 
+  // Post-type filter (All / Gigs / Tips / Showcase)
+  String _activeFilter = 'All';
+
+  List<dynamic> get _filteredPosts {
+    switch (_activeFilter) {
+      case 'Gigs':
+        return posts.where((p) => p['service_id'] != null).toList();
+      case 'Tips':
+        return posts
+            .where((p) => p['service_id'] == null && p['image_url'] == null)
+            .toList();
+      case 'Showcase':
+        return posts
+            .where(
+                (p) => p['image_url'] != null && p['service_id'] == null)
+            .toList();
+      default:
+        return posts;
+    }
+  }
+
   late AnimationController _fadeCtrl;
 
   @override
@@ -221,8 +242,8 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
       callback: (payload) {
         if (!mounted) return;
         final record = payload.newRecord;
-        final recordId = record?['id'];
-        final userId = record?['user_id']?.toString();
+        final recordId = record['id'];
+        final userId = record['user_id']?.toString();
         if (userId != null) {
           setState(() {
             _memberActivity[userId] = DateTime.now();
@@ -246,8 +267,30 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
       _showSnack("You're in! Welcome 🌸", isSuccess: true);
       _loadData();
     } catch (e) {
-      _showSnack("Couldn't join. Try again!", isError: true);
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('plan limit') || msg.contains('plan_limit_reached')) {
+        _showPlanLimitSheet();
+      } else {
+        _showSnack("Couldn't join. Try again!", isError: true);
+      }
     }
+  }
+
+  void _showPlanLimitSheet() {
+    final String groupName = groupData?['name'] ?? 'this hub';
+    final String? imageUrl = groupData?['image_url'];
+    final int memberCount = groupData?['member_count'] ?? 0;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _PlanLimitDetailSheet(
+        groupName: groupName,
+        groupImageUrl: imageUrl,
+        memberCount: memberCount,
+      ),
+    );
   }
 
   Future<void> _pickImage() async {
@@ -580,9 +623,81 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
           : null,
       body: Column(
         children: [
+          _buildFilterPills(),
           Expanded(child: _buildFeed()),
           if (isMember) _buildInputArea() else _buildJoinBanner(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFilterPills() {
+    const filters = [
+      {'id': 'All', 'emoji': '🌐', 'label': 'All'},
+      {'id': 'Gigs', 'emoji': '💼', 'label': 'Gigs/Leads'},
+      {'id': 'Tips', 'emoji': '💡', 'label': 'Tips'},
+      {'id': 'Showcase', 'emoji': '📸', 'label': 'Showcase'},
+    ];
+
+    return Container(
+      color: _T.headerBg,
+      // Extra bottom padding prevents the 1-2px vertical clip on pill shadows
+      padding: const EdgeInsets.only(bottom: 4),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none,
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
+        child: Row(
+          children: filters.map((f) {
+            final isActive = _activeFilter == f['id'];
+            return GestureDetector(
+              onTap: () => setState(() => _activeFilter = f['id']!),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.only(right: 8),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 14, vertical: 7),
+                decoration: BoxDecoration(
+                  color: isActive
+                      ? AppColors.primary
+                      : Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isActive
+                        ? AppColors.primary
+                        : _T.border,
+                    width: 1.4,
+                  ),
+                  boxShadow: isActive
+                      ? [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.25),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          )
+                        ]
+                      : [],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(f['emoji']!,
+                        style: const TextStyle(fontSize: 13)),
+                    const SizedBox(width: 5),
+                    Text(
+                      f['label']!,
+                      style: GoogleFonts.nunito(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        color: isActive ? Colors.white : _T.textSec,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
   }
@@ -695,22 +810,39 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
   }
 
   Widget _buildFeed() {
-    if (posts.isEmpty) return _buildEmptyState();
+    final filtered = _filteredPosts;
+    if (filtered.isEmpty) {
+      if (_activeFilter == 'All') return _buildEmptyState();
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('🔍', style: TextStyle(fontSize: 44)),
+            const SizedBox(height: 12),
+            Text(
+              'No ${_activeFilter} posts yet',
+              style: GoogleFonts.nunito(
+                  color: _T.textSec, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+      );
+    }
     return FadeTransition(
       opacity: _fadeCtrl,
       child: ListView.builder(
         controller: _scrollController,
         reverse: true,
         padding: const EdgeInsets.only(top: 16, bottom: 8, left: 16, right: 16),
-        itemCount: posts.length,
+        itemCount: filtered.length,
         itemBuilder: (context, index) {
-          final post = posts[index];
+          final post = filtered[index];
           final current = DateTime.parse(post['created_at']);
           bool showDate = false;
-          if (index == posts.length - 1) {
+          if (index == filtered.length - 1) {
             showDate = true;
           } else {
-            final next = DateTime.parse(posts[index + 1]['created_at']);
+            final next = DateTime.parse(filtered[index + 1]['created_at']);
             if (current.day != next.day ||
                 current.month != next.month ||
                 current.year != next.year)
@@ -772,6 +904,66 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     );
   }
 
+  // Tier badge shown next to poster name in bubbles
+  Widget _buildTierBadge(String tier) {
+    Color color;
+    String emoji;
+    switch (tier) {
+      case 'business':
+        color = const Color(0xFF7C3AED);
+        emoji = '👑';
+        break;
+      case 'pro':
+        color = const Color(0xFFD97706);
+        emoji = '⭐';
+        break;
+      case 'plus':
+        color = const Color(0xFF2563EB);
+        emoji = '💎';
+        break;
+      default:
+        return const SizedBox.shrink();
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        emoji,
+        style: const TextStyle(fontSize: 9),
+      ),
+    );
+  }
+
+  // Rating badge shown next to poster name in bubbles
+  Widget _buildRatingBadge(double rating) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF3CD),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.star_rounded,
+              size: 9, color: Color(0xFFD97706)),
+          const SizedBox(width: 2),
+          Text(
+            rating.toStringAsFixed(1),
+            style: GoogleFonts.nunito(
+              fontSize: 9,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFFD97706),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildBubble(dynamic post) {
     final bool isMine = myId != null && post['user_id'] == myId;
     final profile = post['profiles'] ?? {};
@@ -786,6 +978,14 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     final int likes = post['likes_count'] ?? 0;
     final bool isLiked = post['is_liked_by_me'] ?? false;
     final int comments = post['comments_count'] ?? 0;
+
+    // Tier comes from the poster's profile; rating comes from the attached service
+    // (average_rating does not exist on the profiles table).
+    final String posterTier =
+        (profile['subscription_tier'] ?? 'free').toString().toLowerCase();
+    final double? avgRating = service != null
+        ? (service['average_rating'] as num?)?.toDouble()
+        : null;
 
     final userColors = [_T.rose, _T.peach, _T.lavender, _T.mint, _T.butter];
     final nameColor = userColors[name.hashCode.abs() % userColors.length];
@@ -851,13 +1051,31 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                         if (!isMine)
                           Padding(
                             padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
-                            child: Text(
-                              name,
-                              style: GoogleFonts.nunito(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
-                                color: nameColor,
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: GoogleFonts.nunito(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800,
+                                      color: nameColor,
+                                    ),
+                                  ),
+                                ),
+                                if (posterTier != 'free') ...[
+                                  const SizedBox(width: 5),
+                                  _buildTierBadge(posterTier),
+                                ],
+                                if (avgRating != null && avgRating > 0) ...[
+                                  const SizedBox(width: 5),
+                                  _buildRatingBadge(avgRating),
+                                ],
+                              ],
                             ),
                           ),
                         if (parent != null) _buildReplyPreview(parent),
@@ -969,7 +1187,25 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     );
   }
 
+  Widget _serviceImagePlaceholder() {
+    return Container(
+      height: 105,
+      width: double.infinity,
+      color: _T.elevated,
+      child: const Center(
+        child: Icon(Icons.storefront_outlined, color: _T.textMuted, size: 36),
+      ),
+    );
+  }
+
   Widget _buildServiceCard(dynamic service) {
+    // Services use provider_id; image may come as image_urls array or image_url string.
+    final String? rawImage = service['image_url']?.toString() ??
+        (service['image_urls'] is List && (service['image_urls'] as List).isNotEmpty
+            ? (service['image_urls'] as List).first?.toString()
+            : null);
+    final bool hasImage = rawImage != null && rawImage.isNotEmpty;
+
     return Container(
       margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
       decoration: BoxDecoration(
@@ -983,13 +1219,17 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
         children: [
           Stack(
             children: [
-              CachedNetworkImage(
-                imageUrl:
-                    service['image_url'] ?? "https://via.placeholder.com/150",
-                height: 105,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+              // Guard against null/missing image
+              if (hasImage)
+                CachedNetworkImage(
+                  imageUrl: rawImage,
+                  height: 105,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorWidget: (_, __, ___) => _serviceImagePlaceholder(),
+                )
+              else
+                _serviceImagePlaceholder(),
               Positioned.fill(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
@@ -1015,7 +1255,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        service['title'] ?? 'Service',
+                        service['title']?.toString() ?? 'Service',
                         style: GoogleFonts.nunito(
                           color: _T.textPri,
                           fontWeight: FontWeight.w800,
@@ -1038,14 +1278,21 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                 TextButton(
                   onPressed: () {
                     final provider = service['profiles'];
+                    // Use provider_id first; fall back to user_id; final fallback ''
+                    final String resolvedProviderId =
+                        service['provider_id']?.toString() ??
+                        service['user_id']?.toString() ??
+                        '';
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => ServiceProfileScreen(
                           service: service,
-                          providerName: provider?['full_name'] ?? 'Provider',
-                          providerPic: provider?['profile_picture_url'],
-                          providerId: service['user_id'],
+                          providerName:
+                              provider?['full_name']?.toString() ?? 'Provider',
+                          providerPic:
+                              provider?['profile_picture_url']?.toString(),
+                          providerId: resolvedProviderId,
                         ),
                       ),
                     );
@@ -1507,5 +1754,209 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     if (RegExp(r'\d{10,}').hasMatch(clean.replaceAll(' ', ''))) return false;
     final blacklist = ['whatsapp', 'call me', 'phone', 'pay outside'];
     return !blacklist.any((w) => clean.contains(w));
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// PLAN LIMIT DETAIL SHEET  (shown when joining from GroupDetailScreen)
+// ──────────────────────────────────────────────────────────────────────
+class _PlanLimitDetailSheet extends StatelessWidget {
+  final String groupName;
+  final String? groupImageUrl;
+  final int memberCount;
+
+  const _PlanLimitDetailSheet({
+    required this.groupName,
+    required this.groupImageUrl,
+    required this.memberCount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom + 28,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 12),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 28),
+
+          // Gradient icon
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [AppColors.primary, AppColors.primary.withOpacity(0.65)],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.3),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: const Icon(Icons.lock_rounded, color: Colors.white, size: 32),
+          ),
+          const SizedBox(height: 18),
+
+          Text(
+            'Hub Limit Reached',
+            style: GoogleFonts.poppins(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF1A1A1A),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              'Upgrade your plan to join "$groupName" and unlock access to more exclusive communities.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                  fontSize: 13, color: Colors.grey[600], height: 1.5),
+            ),
+          ),
+          const SizedBox(height: 28),
+
+          // Plan comparison row
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                _TierCell(label: 'Free', detail: '1 hub', isCurrent: true),
+                const SizedBox(width: 8),
+                _TierCell(
+                    label: 'Plus',
+                    detail: '3 hubs',
+                    color: const Color(0xFF2563EB)),
+                const SizedBox(width: 8),
+                _TierCell(
+                    label: 'Pro',
+                    detail: '5 hubs',
+                    color: const Color(0xFFD97706)),
+                const SizedBox(width: 8),
+                _TierCell(
+                    label: 'Business',
+                    detail: '∞ hubs',
+                    color: const Color(0xFF7C3AED)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // CTA
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: SizedBox(
+              width: double.infinity,
+              height: 54,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  // TODO: navigate to subscription/upgrade screen
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.rocket_launch_rounded, size: 18),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Upgrade Now — Unlock More Hubs',
+                      style: GoogleFonts.poppins(
+                          fontSize: 14, fontWeight: FontWeight.w700),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Maybe later',
+              style: GoogleFonts.poppins(
+                  color: Colors.grey[500], fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TierCell extends StatelessWidget {
+  final String label;
+  final String detail;
+  final Color? color;
+  final bool isCurrent;
+
+  const _TierCell({
+    required this.label,
+    required this.detail,
+    this.color,
+    this.isCurrent = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveColor = color ?? Colors.grey;
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: isCurrent
+              ? Colors.grey.shade100
+              : effectiveColor.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: isCurrent
+              ? Border.all(color: Colors.grey.shade300)
+              : Border.all(color: effectiveColor.withOpacity(0.3)),
+        ),
+        child: Column(
+          children: [
+            Text(label,
+                style: GoogleFonts.poppins(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: isCurrent ? Colors.grey : effectiveColor)),
+            Text(detail,
+                style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    color: isCurrent ? Colors.grey[500] : effectiveColor)),
+            if (isCurrent)
+              Text('Current',
+                  style: GoogleFonts.poppins(
+                      fontSize: 8.5, color: Colors.grey[400])),
+          ],
+        ),
+      ),
+    );
   }
 }

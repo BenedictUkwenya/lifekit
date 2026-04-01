@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
@@ -5,6 +6,7 @@ import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+// ── Custom exceptions ──────────────────────────────────────────────────────
 class ApiException implements Exception {
   final int statusCode;
   final String message;
@@ -15,17 +17,27 @@ class ApiException implements Exception {
   String toString() => message;
 }
 
+/// Thrown when the Vercel server cold-start or slow network causes a timeout.
+class UserFriendlyTimeoutException implements Exception {
+  static const message =
+      'The network is taking too long. Please check your signal and try again.';
+
+  @override
+  String toString() => message;
+}
+
+// ── Timeout constants ──────────────────────────────────────────────────────
+const _kRequestTimeout = Duration(seconds: 30);
+
 class ApiService {
-  // CONFIGURATION: Switches between local and production automatically
-  final String baseUrl = const bool.fromEnvironment('dart.library.js_util')
-      ? "http://localhost:3000"
-      : "http://10.0.2.2:3000";
+  // ── Production Vercel backend ────────────────────────────────────────────
+  // All emulator/localhost references removed for production APK.
+  final String baseUrl = "https://lifekitbackend.vercel.app";
 
-  // UNCOMMENT FOR PRODUCTION
-  //final String baseUrl = "https://lifekit-api.onrender.com";
-  //  final String baseUrl = "https://lifekitbackend.vercel.app";
-
-  final storage = const FlutterSecureStorage();
+  // ── Secure storage with encryptedSharedPreferences for hardware compat ───
+  final storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
 
   String? _cachedAccessToken;
   String? _cachedRefreshToken;
@@ -49,11 +61,13 @@ class ApiService {
         return null;
       }
 
-      final response = await http.post(
-        Uri.parse('$baseUrl/auth/refresh-token'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({"refresh_token": refresh}),
-      );
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/auth/refresh-token'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({"refresh_token": refresh}),
+          )
+          .timeout(_kRequestTimeout);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -77,6 +91,8 @@ class ApiService {
   Future<T> _withNetworkGuard<T>(Future<T> Function() action) async {
     try {
       return await action();
+    } on TimeoutException {
+      throw UserFriendlyTimeoutException();
     } on SocketException {
       throw Exception('NO_INTERNET');
     } on http.ClientException {
@@ -106,18 +122,22 @@ class ApiService {
           throw Exception("Session Expired. Please login again.");
         }
       }
-      var response = await http.get(
-        Uri.parse('$baseUrl$endpoint'),
-        headers: {'Authorization': 'Bearer $token'},
-      );
+      var response = await http
+          .get(
+            Uri.parse('$baseUrl$endpoint'),
+            headers: {'Authorization': 'Bearer $token'},
+          )
+          .timeout(_kRequestTimeout);
 
       if (response.statusCode == 401) {
         String? newToken = await _refreshToken();
         if (newToken != null) {
-          response = await http.get(
-            Uri.parse('$baseUrl$endpoint'),
-            headers: {'Authorization': 'Bearer $newToken'},
-          );
+          response = await http
+              .get(
+                Uri.parse('$baseUrl$endpoint'),
+                headers: {'Authorization': 'Bearer $newToken'},
+              )
+              .timeout(_kRequestTimeout);
         } else {
           throw Exception("Session Expired");
         }
@@ -139,26 +159,30 @@ class ApiService {
           throw Exception("Session Expired. Please login again.");
         }
       }
-      var response = await http.post(
-        Uri.parse('$baseUrl$endpoint'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(body),
-      );
+      var response = await http
+          .post(
+            Uri.parse('$baseUrl$endpoint'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode(body),
+          )
+          .timeout(_kRequestTimeout);
 
       if (response.statusCode == 401) {
         String? newToken = await _refreshToken();
         if (newToken != null) {
-          response = await http.post(
-            Uri.parse('$baseUrl$endpoint'),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $newToken',
-            },
-            body: jsonEncode(body),
-          );
+          response = await http
+              .post(
+                Uri.parse('$baseUrl$endpoint'),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer $newToken',
+                },
+                body: jsonEncode(body),
+              )
+              .timeout(_kRequestTimeout);
         } else {
           throw Exception("Session Expired");
         }
@@ -180,26 +204,30 @@ class ApiService {
           throw Exception("Session Expired. Please login again.");
         }
       }
-      var response = await http.put(
-        Uri.parse('$baseUrl$endpoint'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(body),
-      );
+      var response = await http
+          .put(
+            Uri.parse('$baseUrl$endpoint'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode(body),
+          )
+          .timeout(_kRequestTimeout);
 
       if (response.statusCode == 401) {
         String? newToken = await _refreshToken();
         if (newToken != null) {
-          response = await http.put(
-            Uri.parse('$baseUrl$endpoint'),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $newToken',
-            },
-            body: jsonEncode(body),
-          );
+          response = await http
+              .put(
+                Uri.parse('$baseUrl$endpoint'),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer $newToken',
+                },
+                body: jsonEncode(body),
+              )
+              .timeout(_kRequestTimeout);
         } else {
           throw Exception("Session Expired");
         }
@@ -218,18 +246,22 @@ class ApiService {
           throw Exception("Session Expired. Please login again.");
         }
       }
-      var response = await http.delete(
-        Uri.parse('$baseUrl$endpoint'),
-        headers: {'Authorization': 'Bearer $token'},
-      );
+      var response = await http
+          .delete(
+            Uri.parse('$baseUrl$endpoint'),
+            headers: {'Authorization': 'Bearer $token'},
+          )
+          .timeout(_kRequestTimeout);
 
       if (response.statusCode == 401) {
         String? newToken = await _refreshToken();
         if (newToken != null) {
-          response = await http.delete(
-            Uri.parse('$baseUrl$endpoint'),
-            headers: {'Authorization': 'Bearer $newToken'},
-          );
+          response = await http
+              .delete(
+                Uri.parse('$baseUrl$endpoint'),
+                headers: {'Authorization': 'Bearer $newToken'},
+              )
+              .timeout(_kRequestTimeout);
         } else {
           throw Exception("Session Expired");
         }
@@ -537,6 +569,10 @@ class ApiService {
     Map<String, dynamic> data,
   ) async {
     await _authenticatedPut('/services/$serviceId', data);
+  }
+
+  Future<void> deleteService(String serviceId) async {
+    await _authenticatedDelete('/services/$serviceId');
   }
 
   Future<Map<String, dynamic>> buySubscription(String tier) async {

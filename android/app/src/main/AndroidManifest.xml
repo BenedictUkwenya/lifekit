@@ -1,6 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Prevents Android from killing the app during active payment processing -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Required for secure HTTPS connections to Vercel backend -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:label="lifekit_frontend"
         android:name="${applicationName}"

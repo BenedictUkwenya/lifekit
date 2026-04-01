@@ -438,37 +438,48 @@ class _ChatsListScreenState extends State<ChatsListScreen>
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Row(
-                        children: [
-                          if (lastActive.isNotEmpty)
-                            Text(
-                              lastActive,
-                              style: GoogleFonts.poppins(
-                                fontSize: 10,
-                                color: Colors.grey,
+                      // Wrap in Flexible so this side can never push
+                      // the name text off-screen.
+                      Flexible(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (lastActive.isNotEmpty)
+                              Text(
+                                lastActive,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 10,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            if (lastActive.isNotEmpty)
+                              const SizedBox(width: 6),
+                            // Hard cap so a long title can't overflow.
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 90),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF5F7FA),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  serviceContext,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 10,
+                                    color: Colors.grey[800],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
                               ),
                             ),
-                          if (lastActive.isNotEmpty) const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF5F7FA),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              serviceContext,
-                              style: GoogleFonts.poppins(
-                                fontSize: 10,
-                                color: Colors.grey[800],
-                                fontWeight: FontWeight.w500,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),

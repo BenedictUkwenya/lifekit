@@ -183,8 +183,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final String usageText = _isUsageLoading
         ? "Loading usage..."
         : tierServiceLimit == null
-        ? "Services: $_activeServicesCount/∞ (Business Limit)"
-        : "Services: $_activeServicesCount/$tierServiceLimit ($tierLabel Limit)";
+        ? "Slots Used: $_activeServicesCount/∞ (Includes Drafts & Pending)"
+        : "Slots Used: $_activeServicesCount/$tierServiceLimit (Includes Drafts & Pending)";
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),

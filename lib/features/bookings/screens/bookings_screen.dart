@@ -240,6 +240,167 @@ class _BookingsScreenState extends State<BookingsScreen>
     );
   }
 
+  // ── Profile Avatar ─────────────────────────────────────────────────────────
+  // Shows the network image when available; falls back to a coloured circle
+  // with the user's first initial — never shows a generic asset image.
+  Widget _buildAvatar(String? picUrl, String name, {double radius = 22}) {
+    final hasImage = picUrl != null && picUrl.isNotEmpty;
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: AppColors.primary.withOpacity(0.12),
+      backgroundImage:
+          hasImage ? CachedNetworkImageProvider(picUrl) : null,
+      child: hasImage
+          ? null
+          : Text(
+              initial,
+              style: GoogleFonts.poppins(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w700,
+                fontSize: radius * 0.75,
+              ),
+            ),
+    );
+  }
+
+  // ── Rounded-square avatar (standard card) ──────────────────────────────────
+  // Matches the original 50×50 ClipRRect shape used in _buildStandardBookingCard.
+  Widget _buildRoundedAvatar(String? picUrl, String name) {
+    final hasImage = picUrl != null && picUrl.isNotEmpty;
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: 50,
+        height: 50,
+        color: AppColors.primary.withOpacity(0.10),
+        child: hasImage
+            ? CachedNetworkImage(
+                imageUrl: picUrl,
+                width: 50,
+                height: 50,
+                fit: BoxFit.cover,
+                errorWidget: (_, __, ___) => Center(
+                  child: Text(
+                    initial,
+                    style: GoogleFonts.poppins(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+              )
+            : Center(
+                child: Text(
+                  initial,
+                  style: GoogleFonts.poppins(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 20,
+                  ),
+                ),
+              ),
+      ),
+    );
+  }
+
+  // ── Integrated Chat Button ──────────────────────────────────────────────────
+  Widget _buildChatBtn(dynamic booking, bool isClient) {
+    return GestureDetector(
+      onTap: () => _goToChat(booking, isClient),
+      child: Container(
+        width: 34,
+        height: 34,
+        decoration: BoxDecoration(
+          color: AppColors.primary.withOpacity(0.08),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(
+          Icons.chat_bubble_outline_rounded,
+          color: AppColors.primary,
+          size: 17,
+        ),
+      ),
+    );
+  }
+
+  // ── Relative-time label for upcoming confirmed bookings ─────────────────
+  Map<String, dynamic>? _getRelativeTimeLabel(DateTime scheduledTime) {
+    final now = DateTime.now();
+    final diff = scheduledTime.difference(now);
+
+    // Don't show badge for past bookings beyond a short grace window.
+    if (diff.inMinutes < -30) return null;
+
+    final todayMidnight = DateTime(now.year, now.month, now.day);
+    final scheduledMidnight = DateTime(
+      scheduledTime.year,
+      scheduledTime.month,
+      scheduledTime.day,
+    );
+    final dayDiff = scheduledMidnight.difference(todayMidnight).inDays;
+
+    if (diff.inMinutes <= 120) {
+      // < 2 h away (or just started) → Happening Now
+      return {'text': '🔴 Happening Now!', 'color': Colors.red, 'pulse': true};
+    } else if (dayDiff == 0) {
+      // Same calendar day, more than 2 h away
+      final timeStr = DateFormat('h:mm a').format(scheduledTime);
+      return {
+        'text': 'Today at $timeStr',
+        'color': AppColors.primary,
+        'pulse': false,
+      };
+    } else if (dayDiff == 1) {
+      return {
+        'text': '⏰ Tomorrow',
+        'color': Colors.orange[700],
+        'pulse': false,
+      };
+    } else if (dayDiff == 2) {
+      return {
+        'text': '📅 In 2 Days',
+        'color': Colors.blue[700],
+        'pulse': false,
+      };
+    }
+    return null;
+  }
+
+  // ── Time badge pill widget ───────────────────────────────────────────────
+  Widget _buildTimeBadge(DateTime scheduledTime) {
+    final label = _getRelativeTimeLabel(scheduledTime);
+    if (label == null) return const SizedBox.shrink();
+
+    final bool pulse = label['pulse'] == true;
+    final Color color = label['color'] as Color;
+    final String text = label['text'] as String;
+
+    final pill = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.35), width: 1),
+      ),
+      child: Text(
+        text,
+        style: GoogleFonts.poppins(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
+      ),
+    );
+
+    if (pulse) {
+      return ScaleTransition(scale: _pulseAnimation, child: pill);
+    }
+    return pill;
+  }
+
   Widget _buildEmptyState(String message) {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -330,14 +491,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                 Expanded(
                   child: Row(
                     children: [
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: Colors.grey[200],
-                        backgroundImage: otherPic != null
-                            ? CachedNetworkImageProvider(otherPic)
-                            : const AssetImage('assets/images/onboarding1.png')
-                                  as ImageProvider,
-                      ),
+                      _buildAvatar(otherPic, otherName, radius: 22),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -345,18 +499,23 @@ class _BookingsScreenState extends State<BookingsScreen>
                           children: [
                             Text(
                               statusText,
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                color: statusColor,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            Text(
-                              otherName,
+                              maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                                color: statusColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 1),
+                            Text(
+                              otherName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w700,
                                 fontSize: 14,
+                                color: Colors.black87,
                               ),
                             ),
                           ],
@@ -365,18 +524,11 @@ class _BookingsScreenState extends State<BookingsScreen>
                     ],
                   ),
                 ),
+                const SizedBox(width: 8),
                 Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.chat_bubble_outline,
-                        color: Colors.blue,
-                        size: 22,
-                      ),
-                      onPressed: () => _goToChat(booking, isClient),
-                      constraints: const BoxConstraints(),
-                      padding: const EdgeInsets.only(right: 8),
-                    ),
+                    _buildChatBtn(booking, isClient),
+                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
@@ -448,6 +600,11 @@ class _BookingsScreenState extends State<BookingsScreen>
               "Service: $serviceName",
               style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
             ),
+            // ── Countdown badge (confirmed bookings only) ──
+            if (status == 'confirmed') ...[
+              const SizedBox(height: 10),
+              _buildTimeBadge(dateObj),
+            ],
             if (isPrivateLocation)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
@@ -572,23 +729,10 @@ class _BookingsScreenState extends State<BookingsScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: otherPic != null
-                      ? CachedNetworkImage(
-                          imageUrl: otherPic,
-                          width: 50,
-                          height: 50,
-                          fit: BoxFit.cover,
-                        )
-                      : Image.asset(
-                          'assets/images/onboarding1.png',
-                          width: 50,
-                          height: 50,
-                          fit: BoxFit.cover,
-                        ),
-                ),
+                // ── Avatar with initials fallback ──
+                _buildRoundedAvatar(otherPic, otherName),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -596,24 +740,30 @@ class _BookingsScreenState extends State<BookingsScreen>
                     children: [
                       Text(
                         serviceName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w700,
                           fontSize: 14,
+                          color: Colors.black87,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         otherName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.poppins(
                           fontSize: 12,
-                          color: Colors.black87,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
                   ),
                 ),
 
-                // ── Price or Skill Swap badge ──
+                // ── Right column: price/swap + chat + status ──
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -652,23 +802,17 @@ class _BookingsScreenState extends State<BookingsScreen>
                         : Text(
                             "\$${price.toStringAsFixed(2)}",
                             style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w700,
                               fontSize: 16,
                               color: AppColors.primary,
                             ),
                           ),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.chat_bubble_outline,
-                        color: Colors.blue,
-                        size: 20,
-                      ),
-                      onPressed: () => _goToChat(booking, isClient),
-                      constraints: const BoxConstraints(),
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                    ),
-                    if (isClient || status != 'pending')
+                    const SizedBox(height: 6),
+                    _buildChatBtn(booking, isClient),
+                    if (isClient || status != 'pending') ...[
+                      const SizedBox(height: 6),
                       _buildStatusBadge(status, isOverdue: isOverdue),
+                    ],
                     if (isOverdue)
                       Padding(
                         padding: const EdgeInsets.only(top: 6),
@@ -725,6 +869,14 @@ class _BookingsScreenState extends State<BookingsScreen>
                 ),
               ],
             ),
+
+            // ── Countdown badge (confirmed bookings only) ──
+            if (status == 'confirmed') ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [_buildTimeBadge(dateObj)],
+              ),
+            ],
 
             // ── Client note ──
             if (note != null && note.isNotEmpty) ...[

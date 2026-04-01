@@ -34,6 +34,11 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
   bool _isVisible = true;
   bool _isLoading = false;
 
+  // Edit limit enforcement
+  static const int _maxEdits = 2;
+  int get _editCount => (widget.service['edit_count'] as num?)?.toInt() ?? 0;
+  bool get _isLocked => _editCount >= _maxEdits;
+
   List<String> _locationOptions = [];
   bool _isStandalone = false;
   List<Map<String, dynamic>> _serviceOptions = [];
@@ -430,28 +435,29 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
         onPressed: () => Navigator.pop(context),
       ),
       actions: [
-        Padding(
-          padding: const EdgeInsets.only(right: 16, top: 10, bottom: 10),
-          child: ElevatedButton(
-            onPressed: _isLoading ? null : _saveService,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+        if (!_isLocked)
+          Padding(
+            padding: const EdgeInsets.only(right: 16, top: 10, bottom: 10),
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _saveService,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-            ),
-            child: Text(
-              'Save',
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
+              child: Text(
+                'Save',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
             ),
           ),
-        ),
       ],
     );
   }
@@ -479,10 +485,96 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
     );
   }
 
+  Widget _buildEditLimitBadge() {
+    final remaining = (_maxEdits - _editCount).clamp(0, _maxEdits);
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: _isLocked
+            ? const Color(0xFFEF4444).withOpacity(0.08)
+            : AppColors.primary.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _isLocked
+              ? const Color(0xFFEF4444).withOpacity(0.3)
+              : AppColors.primary.withOpacity(0.25),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            _isLocked ? Icons.lock_rounded : Icons.edit_note_rounded,
+            size: 18,
+            color: _isLocked ? const Color(0xFFEF4444) : AppColors.primary,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'Edits remaining: $remaining / $_maxEdits',
+            style: GoogleFonts.poppins(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: _isLocked ? const Color(0xFFEF4444) : AppColors.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLockedBanner() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEF4444).withOpacity(0.09),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: const Color(0xFFEF4444).withOpacity(0.4),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('⚠️', style: TextStyle(fontSize: 18)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Edit Limit Reached',
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    color: const Color(0xFFB91C1C),
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  'This service is now locked. Please contact support to request further changes.',
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: const Color(0xFFB91C1C),
+                    height: 1.45,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildBody() {
     return SingleChildScrollView(
       child: Column(
         children: [
+          // ── Edit limit indicators ──────────────
+          _buildEditLimitBadge(),
+          if (_isLocked) _buildLockedBanner(),
+
           // ── Image gallery ─────────────────────
           _buildImageSection(),
 
@@ -1012,9 +1104,10 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
               controller: controller,
               maxLines: maxLines,
               keyboardType: keyboardType,
+              enabled: !_isLocked,
               style: GoogleFonts.poppins(
                 fontSize: 14,
-                color: Colors.black87,
+                color: _isLocked ? Colors.grey.shade500 : Colors.black87,
                 fontWeight: FontWeight.w500,
               ),
               decoration: InputDecoration(

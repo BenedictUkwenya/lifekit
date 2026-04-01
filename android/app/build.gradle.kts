@@ -29,11 +29,9 @@ android {
 
     
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.lifekit_frontend"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // minSdk 21 is required by flutter_stripe and FlutterSecureStorage.
+        minSdk = 21
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -41,20 +39,14 @@ android {
 
     buildTypes {
         getByName("release") {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // Signing with debug keys until a release keystore is configured.
             signingConfig = signingConfigs.getByName("debug")
 
-            // Enables R8 code shrinking
-            isMinifyEnabled = true
-            // Optional: Removes unused resources
-            isShrinkResources = true 
-
-            // LINKING THE RULES (Kotlin Syntax)
-            proguardFiles(
-                getDefaultProguardFile("proguard-android.txt"),
-                "proguard-rules.pro"
-            )
+            // Disabled to prevent Stripe, Supabase, and secure-storage classes
+            // from being removed or obfuscated during the production build.
+            // Re-enable only after adding correct ProGuard keep rules.
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }

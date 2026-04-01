@@ -1,13 +1,16 @@
+import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/widgets/lifekit_loader.dart';
+import '../../../core/providers/cart_provider.dart';
 
 import '../../services/screens/services_list_screen.dart';
 import '../../services/screens/category_items_screen.dart';
@@ -20,9 +23,9 @@ import '../../profile/screens/profile_screen.dart';
 import 'search_results_screen.dart';
 import '../../places/screens/places_list_screen.dart';
 import '../../places/screens/place_detail_screen.dart';
-// If you have a specific Service Details Screen for the popular items, import it:
 import '../../services/screens/service_booking_detail_screen.dart';
 import '../../bookings/screens/bookings_screen.dart';
+import '../../bookings/screens/cart_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -63,11 +66,15 @@ class _HomeScreenState extends State<HomeScreen> {
   int activeBookingsCount = 0;
   bool hasNewFeeds = true; // <-- NEW: Toggle this based on your logic
 
+  // Nearest upcoming confirmed booking (for home banner)
+  Map<String, dynamic>? _nearestBooking;
+
   @override
   void initState() {
     super.initState();
     _loadLocalRecents();
-    _fetchAllData();
+    // SWR: paint from cache immediately, then revalidate in background
+    _loadHomeCache().then((_) => _fetchAllData());
     _fetchCounts();
   }
 
@@ -121,6 +128,46 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted) setState(() {});
   }
 
+  // ── Stale-While-Revalidate cache helpers ─────────────────────────────────
+
+  /// Paints the UI instantly from SharedPreferences cache (if available).
+  /// Sets isLoading = false so the user sees content immediately.
+  Future<void> _loadHomeCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cachedProfile = prefs.getString('home_cache_profile');
+      final cachedOffers = prefs.getString('home_cache_offers');
+      final cachedCats = prefs.getString('home_cache_categories');
+      final cachedPop = prefs.getString('home_cache_popular');
+      if (cachedProfile == null) return; // no cache yet
+      if (!mounted) return;
+      setState(() {
+        userProfile = Map<String, dynamic>.from(
+            jsonDecode(cachedProfile) as Map);
+        offers = jsonDecode(cachedOffers ?? '[]') as List;
+        categories = jsonDecode(cachedCats ?? '[]') as List;
+        popularServices = jsonDecode(cachedPop ?? '[]') as List;
+        isLoading = false; // show stale content immediately
+      });
+    } catch (_) {}
+  }
+
+  /// Persists fresh home data to SharedPreferences for the next cold start.
+  Future<void> _saveHomeCache({
+    required Map<String, dynamic> profile,
+    required List offers,
+    required List categories,
+    required List popular,
+  }) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('home_cache_profile', jsonEncode(profile));
+      await prefs.setString('home_cache_offers', jsonEncode(offers));
+      await prefs.setString('home_cache_categories', jsonEncode(categories));
+      await prefs.setString('home_cache_popular', jsonEncode(popular));
+    } catch (_) {}
+  }
+
   void _onSearch(String query) async {
     if (query.trim().isEmpty) return;
     await _saveRecent(query.trim());
@@ -168,10 +215,34 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
 
+      // Persist to cache so the next launch is instant (SWR revalidation)
+      _saveHomeCache(
+        profile: profileData['profile'] as Map<String, dynamic>,
+        offers: offersData,
+        categories: catsData,
+        popular: popData,
+      );
+
       // Non-critical: places
       try {
         final placesData = await _apiService.getNearbyPlaces(6.5244, 3.3792);
         if (mounted) setState(() => nearbyPlaces = placesData);
+      } catch (_) {}
+
+      // Non-critical: nearest confirmed booking for proactive banner
+      try {
+        final bookings = await _apiService.getClientBookings();
+        final now = DateTime.now();
+        final upcoming = bookings.where((b) {
+          if (b['status'] != 'confirmed') return false;
+          final t = DateTime.tryParse(b['scheduled_time'] ?? '');
+          return t != null && t.isAfter(now.subtract(const Duration(minutes: 30)));
+        }).toList();
+        upcoming.sort((a, b) => DateTime.parse(a['scheduled_time'])
+            .compareTo(DateTime.parse(b['scheduled_time'])));
+        if (mounted) {
+          setState(() => _nearestBooking = upcoming.isNotEmpty ? upcoming.first : null);
+        }
       } catch (_) {}
     } catch (_) {
       if (mounted) setState(() => isLoading = false);
@@ -481,14 +552,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildHeader(),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 22),
                         _buildSearchBar(),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 16),
+                        _buildQuickActionBar(),
+                        if (_nearestBooking != null) ...[
+                          const SizedBox(height: 16),
+                          _buildUpcomingBanner(),
+                        ],
+                        const SizedBox(height: 22),
 
                         // Offers
                         if (offers.isNotEmpty) ...[
                           _buildOffersCard(),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 28),
                         ],
 
                         // Services
@@ -501,20 +578,20 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 14),
                         _buildServicesRow(),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 28),
 
-                        // --- NEW: POPULAR SERVICES FUNCTIONAL SECTION ---
+                        // Popular services
                         _buildPopularServices(),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 28),
 
                         // Recent Searches
                         if (recentSearches.isNotEmpty) ...[
                           _buildRecentSearchesHeader(),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 14),
                           _buildRecentSearchCards(),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 28),
                         ],
 
                         // Places
@@ -527,9 +604,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 14),
                         _buildPlaceFilterChips(),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 14),
                         _buildPlacesList(),
                       ],
                     ),
@@ -537,6 +614,121 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
       ],
+    );
+  }
+
+  // ── Upcoming Banner Helpers ───────────────────────────────────────────────
+
+  /// Returns relative time info for the home banner.
+  /// Returns null if the booking is too far away (> 2 days).
+  Map<String, dynamic>? _getRelativeTimeLabelHome(DateTime scheduledTime) {
+    final now = DateTime.now();
+    final diff = scheduledTime.difference(now);
+    if (diff.inMinutes < -30) return null;
+
+    final todayMidnight = DateTime(now.year, now.month, now.day);
+    final scheduledMidnight = DateTime(
+      scheduledTime.year,
+      scheduledTime.month,
+      scheduledTime.day,
+    );
+    final dayDiff = scheduledMidnight.difference(todayMidnight).inDays;
+
+    if (diff.inMinutes <= 120) {
+      return {
+        'text': 'happening right now!',
+        'emoji': '🔴',
+        'isUrgent': true,
+      };
+    } else if (dayDiff == 0) {
+      final timeStr =
+          '${scheduledTime.hour % 12 == 0 ? 12 : scheduledTime.hour % 12}:${scheduledTime.minute.toString().padLeft(2, '0')} ${scheduledTime.hour >= 12 ? 'PM' : 'AM'}';
+      return {'text': 'today at $timeStr', 'emoji': '⏰', 'isUrgent': true};
+    } else if (dayDiff == 1) {
+      return {'text': 'tomorrow', 'emoji': '📅', 'isUrgent': false};
+    } else if (dayDiff == 2) {
+      return {'text': 'in 2 days', 'emoji': '🗓️', 'isUrgent': false};
+    }
+    return null;
+  }
+
+  Widget _buildUpcomingBanner() {
+    if (_nearestBooking == null) return const SizedBox.shrink();
+
+    final scheduledTime = DateTime.tryParse(_nearestBooking!['scheduled_time'] ?? '');
+    if (scheduledTime == null) return const SizedBox.shrink();
+
+    final label = _getRelativeTimeLabelHome(scheduledTime);
+    if (label == null) return const SizedBox.shrink();
+
+    final serviceTitle =
+        (_nearestBooking!['services']?['title'] ?? 'a service') as String;
+    final bool isUrgent = label['isUrgent'] == true;
+    final String emoji = label['emoji'] as String;
+    final String timeText = label['text'] as String;
+
+    final List<Color> gradientColors = isUrgent
+        ? [AppColors.primary, const Color(0xFFFF5C5C)]
+        : [const Color(0xFFFF8C42), const Color(0xFFFFBF69)];
+
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const BookingsScreen()),
+      ),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: gradientColors),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: gradientColors.last.withOpacity(0.35),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 22)),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isUrgent ? 'Service is $timeText!' : 'Reminder',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '"$serviceTitle" is $timeText',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: Colors.white70,
+              size: 14,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -591,39 +783,42 @@ class _HomeScreenState extends State<HomeScreen> {
             hasBadge: unreadNotifications > 0,
           ),
         ),
-        const SizedBox(width: 8),
-        GestureDetector(
-          onTap: () {
-            Navigator.push(
+        const SizedBox(width: 10),
+        // ── Cart shortcut with live badge ──────
+        Consumer<CartProvider>(
+          builder: (context, cart, _) => GestureDetector(
+            onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const BookingsScreen()),
-            );
-          },
-          child: _CircleIconBtn(
-            icon: Icons.calendar_today_outlined,
-            hasBadge: activeBookingsCount > 0,
-          ),
-        ),
-        const SizedBox(width: 8),
-        // ── NEW: Country Flag ─────────────────
-        Container(
-          width: 40,
-          height: 40,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 8,
-                offset: Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Text(
-              _getFlagEmoji(_getLocalCountryCode()), // Uses the phone's region!
-              style: const TextStyle(fontSize: 20),
+              MaterialPageRoute(builder: (_) => const CartScreen()),
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                _CircleIconBtn(
+                  icon: Icons.shopping_cart_outlined,
+                  hasBadge: false,
+                ),
+                if (cart.items.isNotEmpty)
+                  Positioned(
+                    top: -2,
+                    right: -2,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '${cart.items.length}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
@@ -651,11 +846,124 @@ class _HomeScreenState extends State<HomeScreen> {
         textInputAction: TextInputAction.search,
         style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
         decoration: InputDecoration(
-          hintText: 'Search...',
+          hintText: 'Search services, providers...',
           hintStyle: GoogleFonts.poppins(color: Colors.grey[400], fontSize: 14),
           prefixIcon: const Icon(Icons.search, color: Colors.black45, size: 20),
+          suffixIcon: Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Center(
+              widthFactor: 1.0,
+              child: Text(
+                _getFlagEmoji(_getLocalCountryCode()),
+                style: const TextStyle(fontSize: 22),
+              ),
+            ),
+          ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 15),
+        ),
+      ),
+    );
+  }
+
+  // ── Quick Action Bar ──────────────────────
+  Widget _buildQuickActionBar() {
+    return SizedBox(
+      height: 44,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        children: [
+          _buildQuickChip(
+            icon: Icons.calendar_today_outlined,
+            label: 'My Bookings',
+            badge: activeBookingsCount > 0 ? activeBookingsCount : null,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const BookingsScreen()),
+            ),
+          ),
+          const SizedBox(width: 10),
+          _buildQuickChip(
+            icon: Icons.place_outlined,
+            label: 'Places',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const PlacesListScreen()),
+            ),
+          ),
+          const SizedBox(width: 10),
+          _buildQuickChip(
+            icon: Icons.card_giftcard_outlined,
+            label: 'Rewards',
+            onTap: () {},
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickChip({
+    required IconData icon,
+    required String label,
+    int? badge,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: Colors.grey.shade200, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(icon, size: 15, color: AppColors.primary),
+                if (badge != null && badge > 0)
+                  Positioned(
+                    right: -7,
+                    top: -5,
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '$badge',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+          ],
         ),
       ),
     );

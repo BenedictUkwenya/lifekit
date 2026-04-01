@@ -123,37 +123,37 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
 
   // --- VALIDATION ---
   bool _isDayAvailable(DateTime day) {
-    String dayName = DateFormat('EEEE').format(day);
-    var scheduleDay = _weeklySchedule.firstWhere(
-      (d) => d['day_of_week'] == dayName,
+    if (_weeklySchedule.isEmpty) return false;
+    final String dayName = DateFormat('EEEE').format(day);
+    final scheduleDay = _weeklySchedule.firstWhere(
+      (d) => d is Map && d['day_of_week'] == dayName,
       orElse: () => null,
     );
-
-    debugPrint("Schedule for $dayName: $scheduleDay");
-
-    if (scheduleDay == null || scheduleDay['is_active'] == false) {
-      return false;
-    }
-
-    return true;
+    if (scheduleDay == null) return false;
+    return scheduleDay['is_active'] == true;
   }
 
   DateTime? _findNextAvailableDate(DateTime fromDate) {
     if (_weeklySchedule.isEmpty) return null;
+    // Always search forward from today so we never suggest a past date
+    final DateTime searchStart = (() {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final from = DateTime(fromDate.year, fromDate.month, fromDate.day);
+      return from.isAfter(today) ? from : today;
+    })();
 
     for (int i = 1; i <= 30; i++) {
-      final candidate = fromDate.add(Duration(days: i));
+      final candidate = searchStart.add(Duration(days: i));
       final dayName = DateFormat('EEEE').format(candidate);
       final scheduleDay = _weeklySchedule.firstWhere(
-        (d) => d['day_of_week'] == dayName,
+        (d) => d is Map && d['day_of_week'] == dayName,
         orElse: () => null,
       );
-
       if (scheduleDay != null && scheduleDay['is_active'] == true) {
         return candidate;
       }
     }
-
     return null;
   }
 
@@ -238,6 +238,76 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
     if (isConflict) return "This time slot is already booked.";
 
     return null;
+  }
+
+  // --- CALENDAR DAY CELL BUILDER ---
+  // Shared builder for all day states: available, today, selected, disabled, outside.
+  // The SizedBox(height: 7) on unavailable rows keeps every row the same height
+  // so the calendar never jumps when scrolling between months.
+  Widget _buildCalendarDay({
+    required DateTime day,
+    bool isAvailable = false,
+    bool isSelected = false,
+    bool isToday = false,
+    bool isDisabled = false,
+    bool isOutside = false,
+  }) {
+    final Color bgColor = isSelected
+        ? AppColors.primary
+        : isToday
+            ? AppColors.primary.withOpacity(0.15)
+            : Colors.transparent;
+
+    final Color textColor = isSelected
+        ? Colors.white
+        : isToday
+            ? AppColors.primary
+            : isDisabled || isOutside
+                ? (isOutside ? Colors.grey.shade300 : Colors.grey.shade400)
+                : Colors.black87;
+
+    final FontWeight fontWeight = (isSelected || isToday)
+        ? FontWeight.w700
+        : isDisabled || isOutside
+            ? FontWeight.w400
+            : FontWeight.w600;
+
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
+            child: Center(
+              child: Text(
+                '${day.day}',
+                style: GoogleFonts.poppins(
+                  color: textColor,
+                  fontWeight: fontWeight,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ),
+          // Show green dot for available days; reserve the space for all
+          // others so every row stays identical in height.
+          if (isAvailable && !isDisabled && !isOutside)
+            Container(
+              width: 5,
+              height: 5,
+              margin: const EdgeInsets.only(top: 2),
+              decoration: const BoxDecoration(
+                color: Color(0xFF10B981),
+                shape: BoxShape.circle,
+              ),
+            )
+          else
+            const SizedBox(height: 7),
+        ],
+      ),
+    );
   }
 
   // --- HELPERS ---
@@ -1057,9 +1127,13 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                     padding: const EdgeInsets.all(16),
                     child: TableCalendar(
                       firstDay: DateTime.now(),
-                      lastDay: DateTime.now().add(const Duration(days: 365)),
+                      lastDay: DateTime.now().add(const Duration(days: 180)),
                       focusedDay: _focusedDay,
-                      currentDay: _selectedDay,
+                      // currentDay must be today — not _selectedDay.
+                      // _selectedDay is tracked via selectedDayPredicate below.
+                      currentDay: DateTime.now(),
+                      selectedDayPredicate: (day) =>
+                          isSameDay(_selectedDay, day),
                       calendarFormat: CalendarFormat.month,
                       startingDayOfWeek: StartingDayOfWeek.sunday,
                       enabledDayPredicate: _isDayAvailable,
@@ -1072,12 +1146,12 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                           fontSize: 16,
                           color: Colors.black87,
                         ),
-                        leftChevronIcon: Icon(
+                        leftChevronIcon: const Icon(
                           Icons.chevron_left_rounded,
                           color: Colors.black87,
                           size: 28,
                         ),
-                        rightChevronIcon: Icon(
+                        rightChevronIcon: const Icon(
                           Icons.chevron_right_rounded,
                           color: Colors.black87,
                           size: 28,
@@ -1095,6 +1169,8 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                           color: Colors.black54,
                         ),
                       ),
+                      // calendarStyle acts as a safety-net fallback; the
+                      // calendarBuilders below fully own every cell type.
                       calendarStyle: CalendarStyle(
                         todayDecoration: BoxDecoration(
                           color: AppColors.primary.withOpacity(0.15),
@@ -1127,11 +1203,47 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                           color: Colors.grey.shade300,
                         ),
                       ),
+                      calendarBuilders: CalendarBuilders(
+                        // Enabled day in the visible month that is neither
+                        // today nor selected — always available because
+                        // enabledDayPredicate gates entry.
+                        defaultBuilder: (context, day, focusedDay) =>
+                            _buildCalendarDay(day: day, isAvailable: true),
+
+                        // Today's cell — show availability dot if the
+                        // provider works today.
+                        todayBuilder: (context, day, focusedDay) =>
+                            _buildCalendarDay(
+                              day: day,
+                              isAvailable: _isDayAvailable(day),
+                              isToday: true,
+                            ),
+
+                        // Selected day — show selection ring AND the green dot
+                        // so the user can still see it's an available day.
+                        selectedBuilder: (context, day, focusedDay) =>
+                            _buildCalendarDay(
+                              day: day,
+                              isAvailable: _isDayAvailable(day),
+                              isSelected: true,
+                            ),
+
+                        // Disabled (provider off) days in the visible month.
+                        disabledBuilder: (context, day, focusedDay) =>
+                            _buildCalendarDay(day: day, isDisabled: true),
+
+                        // Days from adjacent months — greyed out, no dot.
+                        outsideBuilder: (context, day, focusedDay) =>
+                            _buildCalendarDay(day: day, isOutside: true),
+                      ),
                       onDaySelected: (selectedDay, focusedDay) {
                         _selectDay(selectedDay);
                       },
                       onDisabledDayTapped: (disabledDay) {
                         _showNextAvailableToast(disabledDay);
+                      },
+                      onPageChanged: (focusedDay) {
+                        setState(() => _focusedDay = focusedDay);
                       },
                     ),
                   ),
@@ -1638,18 +1750,24 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                       ),
                       elevation: 0,
                       shadowColor: AppColors.primary.withOpacity(0.3),
+                      // Fix 3: remove internal padding so Row has room
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.shopping_cart_outlined, size: 20),
-                        const SizedBox(width: 10),
-                        Text(
-                          "Book Now",
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                        const Icon(Icons.shopping_cart_outlined, size: 18, color: Colors.white),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            "Book Now",
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.poppins(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ],

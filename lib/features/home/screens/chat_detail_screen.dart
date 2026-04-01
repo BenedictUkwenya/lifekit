@@ -501,6 +501,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
           // 1. UNIQUE: Service Context Ticket
           _buildServiceTicket(),
 
+          // 1b. Sticky deadline banner (confirmed bookings only)
+          _buildDeadlineBanner(),
+
           // 2. Chat Area
           Expanded(
             child: isLoading
@@ -518,8 +521,13 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
                       final msg = messages[index];
-                      // Identify sender. If sender_id matches OtherUser ID, it's incoming.
-                      bool isMe = msg['sender_id'] != widget.otherUser['id'];
+                      // null sender_id = system message (handled inside
+                      // _buildMessageBubble). A non-null id that is NOT the
+                      // other user's id means the current user sent it.
+                      final senderId = msg['sender_id'];
+                      final bool isMe =
+                          senderId != null &&
+                          senderId != widget.otherUser['id'];
                       return _buildMessageBubble(msg, isMe);
                     },
                   ),
@@ -565,23 +573,32 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
                 : null,
           ),
           const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.otherUser['full_name'] ?? 'User',
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              if (!isChatLocked)
+          // Expanded lets the Column take remaining space and prevents
+          // long names from overflowing into the action icons.
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Text(
-                  "Online",
-                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.green),
+                  widget.otherUser['full_name'] ?? 'User',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
-            ],
+                if (!isChatLocked)
+                  Text(
+                    "Online",
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.green,
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
       ),
@@ -622,6 +639,82 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
   }
 
   // The "Ticket" at the top showing what we are talking about
+  // ── Deadline sticky banner ────────────────────────────────────────────────
+  Widget _buildDeadlineBanner() {
+    if (currentBooking == null) return const SizedBox.shrink();
+    final String status = currentBooking['status'] ?? '';
+    if (status != 'confirmed') return const SizedBox.shrink();
+
+    final DateTime? scheduledTime =
+        DateTime.tryParse(currentBooking['scheduled_time'] ?? '');
+    if (scheduledTime == null) return const SizedBox.shrink();
+
+    final now = DateTime.now();
+    final diff = scheduledTime.difference(now);
+
+    // Grace: show up to 30 min past start
+    if (diff.inMinutes < -30) return const SizedBox.shrink();
+
+    final todayMidnight = DateTime(now.year, now.month, now.day);
+    final scheduledMidnight = DateTime(
+      scheduledTime.year,
+      scheduledTime.month,
+      scheduledTime.day,
+    );
+    final dayDiff = scheduledMidnight.difference(todayMidnight).inDays;
+
+    String bannerText;
+    Color bannerColor;
+    IconData bannerIcon;
+
+    if (diff.inMinutes <= 120) {
+      bannerText = '🔴 Service is happening Today!';
+      bannerColor = Colors.red.shade600;
+      bannerIcon = Icons.alarm_on_rounded;
+    } else if (dayDiff == 0) {
+      final h = scheduledTime.hour % 12 == 0 ? 12 : scheduledTime.hour % 12;
+      final m = scheduledTime.minute.toString().padLeft(2, '0');
+      final period = scheduledTime.hour >= 12 ? 'PM' : 'AM';
+      bannerText = '⏰ Service is happening Today at $h:$m $period';
+      bannerColor = AppColors.primary;
+      bannerIcon = Icons.today_rounded;
+    } else if (dayDiff == 1) {
+      bannerText = '📅 Service is Tomorrow';
+      bannerColor = Colors.orange.shade700;
+      bannerIcon = Icons.event_rounded;
+    } else if (dayDiff == 2) {
+      bannerText = '🗓️ Service is in 2 Days';
+      bannerColor = Colors.blue.shade600;
+      bannerIcon = Icons.calendar_today_rounded;
+    } else {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+      color: bannerColor.withOpacity(0.1),
+      child: Row(
+        children: [
+          Icon(bannerIcon, color: bannerColor, size: 15),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              bannerText,
+              style: TextStyle(
+                color: bannerColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildServiceTicket() {
     if (currentBooking == null) return const SizedBox();
 
@@ -692,7 +785,10 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
   }
 
   Widget _buildMessageBubble(dynamic msg, bool isMe) {
+    // null sender_id = system-generated pill (booking confirmed, disputed, etc.)
+    // The legacy 'SYSTEM' string check keeps old database rows rendering correctly.
     final bool isSystemMessage =
+        msg['sender_id'] == null ||
         (msg['sender_id']?.toString().toUpperCase() == 'SYSTEM') ||
         (msg['type']?.toString().toLowerCase() == 'system');
 
@@ -701,6 +797,10 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
         child: Container(
           margin: const EdgeInsets.only(bottom: 10, top: 2),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+          // Cap width so very long system messages wrap instead of overflow.
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.78,
+          ),
           decoration: BoxDecoration(
             color: Colors.grey.shade200,
             borderRadius: BorderRadius.circular(999),
