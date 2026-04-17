@@ -44,6 +44,10 @@ class _ServicesListScreenState extends State<ServicesListScreen>
   String _flagEmoji = '🇳🇬';
   int _unreadNotifications = 0;
 
+  // AI City Pulse
+  String? _cityPulseInsight;
+  String? _cityPulseCategorySuggestion;
+
   @override
   void initState() {
     super.initState();
@@ -74,8 +78,8 @@ class _ServicesListScreenState extends State<ServicesListScreen>
         _apiService.getUserProfile(),
         _apiService.getUnreadCounts(),
       ]);
-      final profileData = results[0];
-      final countsData = results[1];
+      final profileData = results[0] as Map<String, dynamic>;
+      final countsData = results[1] as Map<String, dynamic>;
       final profileCountry =
           profileData['profile']?['country']?.toString() ?? 'NG';
       if (mounted) {
@@ -88,6 +92,32 @@ class _ServicesListScreenState extends State<ServicesListScreen>
           _unreadNotifications = countsData['notifications'] ?? 0;
         });
       }
+
+      // Non-critical: AI City Pulse
+      try {
+        final now = DateTime.now();
+        final hour = now.hour;
+        final String timeOfDay = hour < 12
+            ? 'Morning'
+            : hour < 17
+            ? 'Afternoon'
+            : 'Evening';
+        final String userCity =
+            profileData['profile']?['city'] ??
+            profileData['profile']?['country'] ??
+            'your area';
+        final pulseData = await _apiService.getCityPulse(
+          city: userCity,
+          localTime: timeOfDay,
+        );
+        if (mounted) {
+          setState(() {
+            _cityPulseInsight = pulseData['insight'] as String?;
+            _cityPulseCategorySuggestion =
+                pulseData['category_suggestion'] as String?;
+          });
+        }
+      } catch (_) {}
     } catch (_) {}
   }
 
@@ -114,8 +144,9 @@ class _ServicesListScreenState extends State<ServicesListScreen>
       final data = jsonDecode(raw) as Map;
       setState(() {
         categories = List<dynamic>.from(data['categories'] ?? []);
-        featuredProviders =
-            List<dynamic>.from(data['featured_providers'] ?? []);
+        featuredProviders = List<dynamic>.from(
+          data['featured_providers'] ?? [],
+        );
         allServices = List<dynamic>.from(data['all_services'] ?? []);
         isLoading = false; // show stale content immediately
       });
@@ -328,7 +359,10 @@ class _ServicesListScreenState extends State<ServicesListScreen>
                   controller: _searchController,
                   onSubmitted: _onSearch,
                   textInputAction: TextInputAction.search,
-                  style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
                   decoration: InputDecoration(
                     hintText: "Search services, providers...",
                     hintStyle: GoogleFonts.poppins(
@@ -482,6 +516,10 @@ class _ServicesListScreenState extends State<ServicesListScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        if (_cityPulseInsight != null) ...[
+                          _buildCityPulseBanner(),
+                          const SizedBox(height: 16),
+                        ],
                         _buildSectionHeader("Featured Professionals"),
                         const SizedBox(height: 12),
                         SizedBox(
@@ -574,6 +612,86 @@ class _ServicesListScreenState extends State<ServicesListScreen>
                 ),
               const SliverToBoxAdapter(child: SizedBox(height: 120)),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── AI City Pulse Banner ──────────────────────────────────────────────────
+  Widget _buildCityPulseBanner() {
+    return GestureDetector(
+      onTap: () {
+        final suggestion = _cityPulseCategorySuggestion;
+        if (suggestion != null && suggestion.isNotEmpty) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => SearchResultsScreen(query: suggestion),
+            ),
+          );
+        }
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF0F7FF),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFBBD9F5), width: 1),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFDDEEFD),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.lightbulb_outline_rounded,
+                color: Color(0xFF1A78C2),
+                size: 18,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'City Pulse',
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF1A78C2),
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    _cityPulseInsight ?? '',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: const Color(0xFF1A2D40),
+                      height: 1.45,
+                    ),
+                  ),
+                  if (_cityPulseCategorySuggestion != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      'Tap to explore: $_cityPulseCategorySuggestion →',
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        color: const Color(0xFF1A78C2),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ],
         ),
       ),

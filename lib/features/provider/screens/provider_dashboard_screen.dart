@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../core/services/api_service.dart';
-// If LifeKitLoader is not found, replace with CircularProgressIndicator()
+import '../../../core/constants/app_colors.dart';
+import 'select_main_category_screen.dart';
 
 class ProviderDashboardScreen extends StatefulWidget {
   const ProviderDashboardScreen({super.key});
@@ -23,6 +24,10 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
   int reviewCount = 0;
   List<double> weeklyData = [0, 0, 0, 0, 0, 0, 0];
 
+  // AI Opportunity Radar
+  List<dynamic> opportunities = [];
+  bool isAiLoading = true;
+
   // Theme Color
   final Color primaryColor = const Color(0xFF89273B);
 
@@ -30,6 +35,7 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
   void initState() {
     super.initState();
     _fetchStats();
+    _fetchOpportunities();
   }
 
   Future<void> _fetchStats() async {
@@ -56,6 +62,20 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
     } catch (e) {
       if (mounted) setState(() => isLoading = false);
       print("Dashboard Error: $e");
+    }
+  }
+
+  Future<void> _fetchOpportunities() async {
+    try {
+      final data = await _apiService.getAiOpportunities();
+      if (mounted) {
+        setState(() {
+          opportunities = (data['opportunities'] as List<dynamic>?) ?? [];
+          isAiLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => isAiLoading = false);
     }
   }
 
@@ -109,6 +129,10 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
                     _buildSectionTitle("Income Analytics"),
                     const SizedBox(height: 15),
                     _buildChartSection(),
+                    const SizedBox(height: 28),
+                    _buildOpportunityRadarHeader(),
+                    const SizedBox(height: 15),
+                    _buildOpportunityRadar(),
                     const SizedBox(height: 40), // Bottom padding
                   ],
                 ),
@@ -437,5 +461,263 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
       spots.add(FlSpot(i.toDouble(), weeklyData[i]));
     }
     return spots;
+  }
+
+  // ── AI OPPORTUNITY RADAR ────────────────────────────────────────────────
+
+  Widget _buildOpportunityRadarHeader() {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppColors.primary, Color(0xFF7C3AED)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: const Icon(Icons.auto_awesome, color: Colors.white, size: 16),
+        ),
+        const SizedBox(width: 10),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '\u2728 AI Opportunity Radar',
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Colors.black87,
+              ),
+            ),
+            Text(
+              'Services you could offer right now',
+              style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey[500]),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOpportunityRadar() {
+    if (isAiLoading) {
+      return Container(
+        height: 120,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.primary.withOpacity(0.15)),
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(
+            color: AppColors.primary,
+            strokeWidth: 2.5,
+          ),
+        ),
+      );
+    }
+
+    if (opportunities.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.primary.withOpacity(0.15)),
+        ),
+        child: Column(
+          children: [
+            const Icon(Icons.search_off_rounded, color: Colors.grey, size: 36),
+            const SizedBox(height: 8),
+            Text(
+              'No opportunities found right now.',
+              style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey[500]),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      children: opportunities.map((opp) {
+        final map = Map<String, dynamic>.from(opp as Map);
+        final isHigh =
+            (map['demand_level']?.toString() ?? '').toLowerCase() == 'high';
+        return _buildOpportunityCard(map, isHigh);
+      }).toList(),
+    );
+  }
+
+  Widget _buildOpportunityCard(Map<String, dynamic> opp, bool isHigh) {
+    final title = opp['title']?.toString() ?? '';
+    final reason = opp['reason']?.toString() ?? '';
+    final price = opp['suggested_price']?.toString() ?? '';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isHigh
+              ? AppColors.primary.withOpacity(0.3)
+              : Colors.grey.withOpacity(0.15),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isHigh
+                ? AppColors.primary.withOpacity(0.07)
+                : Colors.black.withOpacity(0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Top gradient strip
+          Container(
+            height: 4,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: isHigh
+                    ? [AppColors.primary, const Color(0xFF7C3AED)]
+                    : [Colors.grey.shade300, Colors.grey.shade200],
+              ),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title row + demand badge
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isHigh
+                            ? AppColors.primary.withOpacity(0.1)
+                            : Colors.orange.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        isHigh
+                            ? '\uD83D\uDD25 High Demand'
+                            : '\uD83D\uDCC8 Medium',
+                        style: GoogleFonts.poppins(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: isHigh
+                              ? AppColors.primary
+                              : Colors.orange.shade700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                // Reason
+                Text(
+                  reason,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    color: Colors.grey[600],
+                    height: 1.45,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Price + CTA row
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.attach_money_rounded,
+                            size: 14,
+                            color: Colors.green.shade700,
+                          ),
+                          Text(
+                            price,
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.green.shade700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    ElevatedButton.icon(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const SelectMainCategoryScreen(),
+                        ),
+                      ),
+                      icon: const Icon(Icons.add_rounded, size: 15),
+                      label: Text(
+                        'Create Service',
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

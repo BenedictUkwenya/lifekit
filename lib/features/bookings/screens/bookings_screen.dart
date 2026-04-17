@@ -9,6 +9,7 @@ import '../../../core/widgets/lifekit_loader.dart';
 // IMPORT THE TRACKING & CHAT SCREENS
 import 'booking_tracking_screen.dart';
 import '../../home/screens/chat_detail_screen.dart';
+import '../../services/screens/skill_swap_screens.dart';
 
 class BookingsScreen extends StatefulWidget {
   const BookingsScreen({super.key});
@@ -26,12 +27,14 @@ class _BookingsScreenState extends State<BookingsScreen>
 
   List<dynamic> clientBookings = [];
   List<dynamic> providerRequests = [];
+  List<dynamic> swapBookings = [];
+  List<dynamic> pendingSwaps = [];
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
@@ -51,11 +54,30 @@ class _BookingsScreenState extends State<BookingsScreen>
 
   Future<void> _fetchData() async {
     try {
-      final cBookings = await _apiService.getClientBookings();
-      final pRequests = await _apiService.getProviderRequests();
+      final results = await Future.wait([
+        _apiService.getClientBookings(),
+        _apiService.getProviderRequests(),
+        _apiService.getIncomingSwaps(),
+        _apiService.getOutgoingSwaps(),
+      ]);
+      final cBookings = results[0];
+      final pRequests = results[1];
+      final incomingSwaps = results[2];
+      final outgoingSwaps = results[3];
 
       if (mounted) {
         setState(() {
+          // Swap bookings = $0 bookings from client side
+          swapBookings = cBookings
+              .where((b) => (b['total_price'] ?? 0) == 0)
+              .toList();
+          // Pending swap proposals (not yet accepted)
+          pendingSwaps = [
+            ...incomingSwaps.where((s) => s['status'] == 'pending'),
+            ...outgoingSwaps.where((s) => s['status'] == 'pending'),
+          ];
+          // Remove swaps from regular clientBookings view
+          cBookings.removeWhere((b) => (b['total_price'] ?? 0) == 0);
           cBookings.sort((a, b) {
             final dateA = DateTime.parse(a['scheduled_time']);
             final dateB = DateTime.parse(b['scheduled_time']);
@@ -161,9 +183,35 @@ class _BookingsScreenState extends State<BookingsScreen>
           indicatorColor: AppColors.primary,
           indicatorWeight: 3,
           labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-          tabs: const [
-            Tab(text: "My Bookings"),
-            Tab(text: "Client Requests"),
+          tabs: [
+            const Tab(text: "My Bookings"),
+            const Tab(text: "Client Requests"),
+            Tab(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text("My Swaps"),
+                  if (pendingSwaps.isNotEmpty) ...[
+                    const SizedBox(width: 5),
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFE8A020),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '${pendingSwaps.length}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -171,7 +219,11 @@ class _BookingsScreenState extends State<BookingsScreen>
           ? const Center(child: LifeKitLoader())
           : TabBarView(
               controller: _tabController,
-              children: [_buildClientView(), _buildProviderView()],
+              children: [
+                _buildClientView(),
+                _buildProviderView(),
+                _buildSwapsView(),
+              ],
             ),
     );
   }
@@ -249,8 +301,7 @@ class _BookingsScreenState extends State<BookingsScreen>
     return CircleAvatar(
       radius: radius,
       backgroundColor: AppColors.primary.withOpacity(0.12),
-      backgroundImage:
-          hasImage ? CachedNetworkImageProvider(picUrl) : null,
+      backgroundImage: hasImage ? CachedNetworkImageProvider(picUrl) : null,
       child: hasImage
           ? null
           : Text(
@@ -873,9 +924,7 @@ class _BookingsScreenState extends State<BookingsScreen>
             // ── Countdown badge (confirmed bookings only) ──
             if (status == 'confirmed') ...[
               const SizedBox(height: 8),
-              Row(
-                children: [_buildTimeBadge(dateObj)],
-              ),
+              Row(children: [_buildTimeBadge(dateObj)]),
             ],
 
             // ── Client note ──
@@ -1035,6 +1084,376 @@ class _BookingsScreenState extends State<BookingsScreen>
     final scheduledTime = DateTime.tryParse(rawTime.toString());
     if (scheduledTime == null) return false;
     return scheduledTime.isBefore(DateTime.now());
+  }
+
+  // ── My Swaps Tab ───────────────────────────────────────────────────────────
+  Widget _buildSwapsView() {
+    final hasData = swapBookings.isNotEmpty || pendingSwaps.isNotEmpty;
+    return RefreshIndicator(
+      onRefresh: _fetchData,
+      color: const Color(0xFFE8A020),
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          // Pending proposals banner
+          if (pendingSwaps.isNotEmpty)
+            SliverToBoxAdapter(child: _buildPendingBanner()),
+          // Confirmed/Active swap bookings
+          if (swapBookings.isNotEmpty) ...[
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+                child: Text(
+                  'Active & Past Swaps',
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (ctx, i) => _buildSwapBookingCard(swapBookings[i]),
+                  childCount: swapBookings.length,
+                ),
+              ),
+            ),
+          ],
+          if (!hasData) SliverFillRemaining(child: _buildSwapsEmptyState()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPendingBanner() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 20, 20, 4),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF1A1A2E), Color(0xFF16213E)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFE8A020).withOpacity(0.25),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const SwapBoardScreen()),
+          ).then((_) => _fetchData()),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE8A020).withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.swap_horiz_rounded,
+                    color: Color(0xFFE8A020),
+                    size: 26,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${pendingSwaps.length} Pending Swap ${pendingSwaps.length == 1 ? "Proposal" : "Proposals"}',
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        'Tap to view and respond',
+                        style: GoogleFonts.poppins(
+                          color: Colors.white60,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: Color(0xFFE8A020),
+                  size: 22,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSwapBookingCard(dynamic booking) {
+    final dateObj = DateTime.parse(booking['scheduled_time']);
+    final dateStr = DateFormat('dd MMM, h:mm a').format(dateObj);
+    final serviceName = booking['services']?['title'] ?? 'Service';
+    final status = booking['status'] as String? ?? 'pending';
+    final provider = booking['profiles'];
+    final providerName = provider?['full_name'] ?? 'Partner';
+    final providerPic = provider?['profile_picture_url'];
+
+    final Color statusColor;
+    final String statusLabel;
+    switch (status) {
+      case 'confirmed':
+        statusColor = const Color(0xFF22C55E);
+        statusLabel = 'Swap Active';
+        break;
+      case 'completed':
+        statusColor = const Color(0xFF3B82F6);
+        statusLabel = 'Completed';
+        break;
+      case 'cancelled':
+        statusColor = Colors.red;
+        statusLabel = 'Cancelled';
+        break;
+      default:
+        statusColor = const Color(0xFFE8A020);
+        statusLabel = 'Awaiting';
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => _goToChat(booking, true),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Stack(
+                  children: [
+                    _buildAvatar(providerPic, providerName, radius: 26),
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        width: 18,
+                        height: 18,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE8A020),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: const Icon(
+                          Icons.swap_horiz_rounded,
+                          color: Colors.white,
+                          size: 10,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        serviceName,
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: Colors.black87,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'with $providerName',
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: Colors.black54,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.schedule_rounded,
+                            size: 12,
+                            color: Colors.black38,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            dateStr,
+                            style: GoogleFonts.poppins(
+                              fontSize: 11,
+                              color: Colors.black45,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusColor.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        statusLabel,
+                        style: GoogleFonts.poppins(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: statusColor,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFE8A020), Color(0xFFD97706)],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text(
+                        'SWAP',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSwapsEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 90,
+              height: 90,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFFE8A020).withOpacity(0.15),
+                    const Color(0xFFE8A020).withOpacity(0.05),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.swap_horiz_rounded,
+                size: 40,
+                color: Color(0xFFE8A020),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'No Swaps Yet',
+              style: GoogleFonts.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Exchange skills with others.\nBrowse the Swap Board to find your first match.',
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                color: Colors.black45,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 28),
+            ElevatedButton.icon(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SwapBoardScreen()),
+              ).then((_) => _fetchData()),
+              icon: const Icon(Icons.explore_rounded, size: 18),
+              label: Text(
+                'Browse Swap Board',
+                style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE8A020),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                elevation: 0,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildFilterChip(String label, bool isSelected) {

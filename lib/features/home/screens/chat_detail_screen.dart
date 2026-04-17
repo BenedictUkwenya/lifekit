@@ -501,7 +501,10 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
           // 1. UNIQUE: Service Context Ticket
           _buildServiceTicket(),
 
-          // 1b. Sticky deadline banner (confirmed bookings only)
+          // 1b. Swap Contract banner (swap bookings only)
+          _buildSwapContractBanner(),
+
+          // 1c. Sticky deadline banner (confirmed bookings only)
           _buildDeadlineBanner(),
 
           // 2. Chat Area
@@ -638,6 +641,116 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
     );
   }
 
+  // ── Swap Contract Banner ───────────────────────────────────────────────
+  Widget _buildSwapContractBanner() {
+    if (currentBooking == null) return const SizedBox.shrink();
+    final price = currentBooking!['total_price'] ?? 0;
+    if (price != 0) return const SizedBox.shrink(); // not a swap
+
+    final String status = currentBooking!['status'] ?? 'pending';
+    Color statusColor;
+    String statusLabel;
+    IconData statusIcon;
+    switch (status) {
+      case 'confirmed':
+        statusColor = Colors.green.shade600;
+        statusLabel = 'Swap Active';
+        statusIcon = Icons.check_circle_outline;
+        break;
+      case 'completed':
+        statusColor = const Color(0xFF3B82F6);
+        statusLabel = 'Swap Completed';
+        statusIcon = Icons.verified_outlined;
+        break;
+      case 'cancelled':
+        statusColor = Colors.red.shade400;
+        statusLabel = 'Swap Cancelled';
+        statusIcon = Icons.cancel_outlined;
+        break;
+      default:
+        statusColor = AppColors.primary;
+        statusLabel = 'Awaiting Confirmation';
+        statusIcon = Icons.hourglass_empty_rounded;
+    }
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primary.withOpacity(0.07),
+            const Color(0xFF3B82F6).withOpacity(0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.12),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.swap_horiz,
+              color: AppColors.primary,
+              size: 16,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Skill Swap Contract',
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black87,
+                  ),
+                ),
+                if (status == 'pending')
+                  Text(
+                    'Waiting for the other party to confirm',
+                    style: GoogleFonts.poppins(
+                      fontSize: 10,
+                      color: Colors.black45,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+            decoration: BoxDecoration(
+              color: statusColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(statusIcon, size: 11, color: statusColor),
+                const SizedBox(width: 4),
+                Text(
+                  statusLabel,
+                  style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: statusColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // The "Ticket" at the top showing what we are talking about
   // ── Deadline sticky banner ────────────────────────────────────────────────
   Widget _buildDeadlineBanner() {
@@ -645,8 +758,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
     final String status = currentBooking['status'] ?? '';
     if (status != 'confirmed') return const SizedBox.shrink();
 
-    final DateTime? scheduledTime =
-        DateTime.tryParse(currentBooking['scheduled_time'] ?? '');
+    final DateTime? scheduledTime = DateTime.tryParse(
+      currentBooking['scheduled_time'] ?? '',
+    );
     if (scheduledTime == null) return const SizedBox.shrink();
 
     final now = DateTime.now();

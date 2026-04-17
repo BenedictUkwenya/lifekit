@@ -401,6 +401,204 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
   }
 
   // ═══════════════════════════════════════════
+  // AI AUTOFILL
+  // ═══════════════════════════════════════════
+
+  void _showAiDialog() {
+    final promptController = TextEditingController();
+    bool isGenerating = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) {
+          Future<void> generate() async {
+            final prompt = promptController.text.trim();
+            if (prompt.isEmpty) return;
+            setSheetState(() => isGenerating = true);
+            try {
+              final response = await _apiService.generateServiceWithAI(prompt);
+              if (!mounted) return;
+              Navigator.pop(ctx);
+              setState(() {
+                _titleController.text = (response['title'] ?? '').toString();
+                _descController.text = (response['description'] ?? '')
+                    .toString();
+                _basePriceController.text = (response['price'] ?? '')
+                    .toString();
+              });
+              _showSnackBar(
+                "✨ AI Autofill complete! Don't forget to select your Category and Images.",
+                isError: false,
+              );
+            } catch (_) {
+              setSheetState(() => isGenerating = false);
+              _showSnackBar(
+                'AI generation failed. Please try again.',
+                isError: true,
+              );
+            }
+          }
+
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(ctx).viewInsets.bottom,
+            ),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Drag handle
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      const Text('✨', style: TextStyle(fontSize: 22)),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Autofill with AI',
+                        style: GoogleFonts.poppins(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Describe the service you want to offer and AI will fill in the details for you.',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: Colors.black54,
+                      height: 1.45,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: promptController,
+                    autofocus: true,
+                    maxLines: 3,
+                    maxLength: 500,
+                    decoration: InputDecoration(
+                      hintText: 'e.g. I want to teach English online',
+                      hintStyle: GoogleFonts.poppins(
+                        color: Colors.black38,
+                        fontSize: 14,
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xFFF2F2F7),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.all(14),
+                    ),
+                    style: GoogleFonts.poppins(fontSize: 14),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: isGenerating ? null : generate,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: AppColors.primary.withOpacity(
+                          0.6,
+                        ),
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: isGenerating
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Text(
+                              'Generate',
+                              style: GoogleFonts.poppins(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildAiAutofillButton() {
+    return GestureDetector(
+      onTap: _isLocked ? null : _showAiDialog,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppColors.primary, Color(0xFF7C3AED)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withOpacity(0.30),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('✨', style: TextStyle(fontSize: 18)),
+            const SizedBox(width: 8),
+            Text(
+              'Autofill with AI',
+              style: GoogleFonts.poppins(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ═══════════════════════════════════════════
   // BUILD
   // ═══════════════════════════════════════════
   @override
@@ -529,9 +727,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
       decoration: BoxDecoration(
         color: const Color(0xFFEF4444).withOpacity(0.09),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: const Color(0xFFEF4444).withOpacity(0.4),
-        ),
+        border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.4)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -584,6 +780,10 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // ── AI Autofill button ────────────────
+                if (!_isLocked) _buildAiAutofillButton(),
+                if (!_isLocked) const SizedBox(height: 14),
+
                 _buildCard(
                   children: [
                     _buildSectionHeader('Service Title', Icons.title_rounded),
@@ -601,6 +801,9 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                   children: [
                     _buildSectionHeader('Pricing', Icons.payments_outlined),
                     const SizedBox(height: 12),
+                    // Pricing type toggle — applies to both standard and standalone
+                    _buildPricingTypeToggle(),
+                    const SizedBox(height: 12),
                     if (_isStandalone) ...[
                       if (_serviceOptions.isEmpty) _buildEmptyOptions(),
                       ..._serviceOptions.asMap().entries.map(
@@ -609,14 +812,11 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                       const SizedBox(height: 8),
                       _buildAddOptionBtn(),
                     ] else ...[
-                      // Pricing type toggle
-                      _buildPricingTypeToggle(),
-                      const SizedBox(height: 12),
                       _buildTextField(
                         controller: _basePriceController,
                         hint: _pricingType == 'fixed'
-                            ? 'Fixed price (e.g., 150)'
-                            : 'Hourly rate (e.g., 50)',
+                            ? 'Flat fee (e.g., 150)'
+                            : 'Rate per hour (e.g., 50)',
                         keyboardType: TextInputType.number,
                         prefixWidget: Padding(
                           padding: const EdgeInsets.only(left: 14, right: 6),
@@ -629,6 +829,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                             ),
                           ),
                         ),
+                        suffixText: _pricingType == 'hourly' ? '/hr' : null,
                       ),
                     ],
                   ],
@@ -1082,6 +1283,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
     int maxLines = 1,
     TextInputType keyboardType = TextInputType.text,
     Widget? prefixWidget,
+    String? suffixText,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -1117,6 +1319,14 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                   fontSize: 14,
                   color: Colors.grey[400],
                 ),
+                suffixText: suffixText,
+                suffixStyle: suffixText != null
+                    ? GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      )
+                    : null,
                 isDense: true,
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: prefixWidget != null ? 4 : 14,
@@ -1258,6 +1468,12 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                         prefixStyle: GoogleFonts.poppins(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
+                          color: AppColors.primary,
+                        ),
+                        suffixText: _pricingType == 'hourly' ? '/hr' : null,
+                        suffixStyle: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
                           color: AppColors.primary,
                         ),
                         isDense: true,

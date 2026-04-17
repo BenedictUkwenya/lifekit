@@ -30,9 +30,12 @@ class UserFriendlyTimeoutException implements Exception {
 const _kRequestTimeout = Duration(seconds: 30);
 
 class ApiService {
-  // ── Production Vercel backend ────────────────────────────────────────────
-  // All emulator/localhost references removed for production APK.
-  final String baseUrl = "https://lifekitbackend.vercel.app";
+  // ── Local development server ─────────────────────────────────────────────
+  // 10.0.2.2 routes to the host machine from an Android emulator.
+  // Switch back to "https://lifekitbackend.vercel.app" before deploying.
+  final String baseUrl = Platform.isAndroid
+      ? "http://10.0.2.2:3000"
+      : "http://localhost:3000";
 
   // ── Secure storage with encryptedSharedPreferences for hardware compat ───
   final storage = const FlutterSecureStorage(
@@ -761,8 +764,88 @@ class ApiService {
   }
 
   // ===========================================================================
-  // SOCIAL FEEDS & EVENTS
+  // SKILL SWAP
   // ===========================================================================
+
+  Future<Map<String, dynamic>> createSwapRequest({
+    required String proposerServiceId,
+    required String targetUserId,
+    String? targetServiceId,
+    String? targetCategoryId,
+    String? targetCategoryName,
+    String serviceType = 'Default',
+    String? notes,
+    String? scheduledTime,
+    double aiMatchScore = 0,
+    String aiMatchReason = '',
+  }) async {
+    return await _authenticatedPost('/swap-requests', {
+      'proposer_service_id': proposerServiceId,
+      'target_user_id': targetUserId,
+      if (targetServiceId != null) 'target_service_id': targetServiceId,
+      if (targetCategoryId != null) 'target_category_id': targetCategoryId,
+      if (targetCategoryName != null)
+        'target_category_name': targetCategoryName,
+      'service_type': serviceType,
+      if (notes != null) 'notes': notes,
+      if (scheduledTime != null) 'scheduled_time': scheduledTime,
+      'ai_match_score': aiMatchScore,
+      'ai_match_reason': aiMatchReason,
+    });
+  }
+
+  Future<List<dynamic>> getIncomingSwaps() async {
+    return (await _authenticatedGet('/swap-requests/incoming'))['swaps'] ?? [];
+  }
+
+  Future<List<dynamic>> getOutgoingSwaps() async {
+    return (await _authenticatedGet('/swap-requests/outgoing'))['swaps'] ?? [];
+  }
+
+  Future<List<dynamic>> getSwapBoard() async {
+    return (await _authenticatedGet('/swap-requests/board'))['board'] ?? [];
+  }
+
+  Future<List<dynamic>> getAiRankedSwapBoard() async {
+    return (await _authenticatedGet(
+          '/swap-requests/board/ai-ranked',
+        ))['board'] ??
+        [];
+  }
+
+  Future<Map<String, dynamic>> getSwapRequest(String swapId) async {
+    return (await _authenticatedGet('/swap-requests/$swapId'))['swap'] ?? {};
+  }
+
+  Future<Map<String, dynamic>> acceptSwap(
+    String swapId, {
+    String? targetServiceId,
+    String? scheduledTime,
+  }) async {
+    return await _authenticatedPut('/swap-requests/$swapId/accept', {
+      if (targetServiceId != null) 'target_service_id': targetServiceId,
+      if (scheduledTime != null) 'scheduled_time': scheduledTime,
+    });
+  }
+
+  Future<void> declineSwap(String swapId) async {
+    await _authenticatedPut('/swap-requests/$swapId/decline', {});
+  }
+
+  Future<void> cancelSwap(String swapId) async {
+    await _authenticatedPut('/swap-requests/$swapId/cancel', {});
+  }
+
+  Future<List<dynamic>> getAiSkillSwapMatches({
+    required String myServiceId,
+    required String targetCategoryId,
+  }) async {
+    return (await _authenticatedPost('/ai/skill-swap-matches', {
+          'my_service_id': myServiceId,
+          'target_category_id': targetCategoryId,
+        }))['matches'] ??
+        [];
+  }
 
   Future<List<dynamic>> getFeeds() async {
     final data = await _authenticatedGet('/feeds/posts');
@@ -1048,6 +1131,63 @@ class ApiService {
     await _authenticatedPost('/services/request-category', {
       "category_name": name,
       "description": description,
+    });
+  }
+
+  // ===========================================================================
+  // AI — Module 2.4: Service Creation Assistant
+  // ===========================================================================
+
+  Future<Map<String, dynamic>> generateServiceWithAI(String prompt) async {
+    return await _authenticatedPost('/ai/generate-service', {"prompt": prompt});
+  }
+
+  // Module 2.1 — LifeKit AI Assistant (core chat engine)
+  Future<Map<String, dynamic>> sendAiChatMessage(
+    String message,
+    List<Map<String, String>> history,
+  ) async {
+    return await _authenticatedPost('/ai/chat', {
+      "message": message,
+      "history": history,
+    });
+  }
+
+  // Module 2.2 — AI Onboarding Engine
+  Future<Map<String, dynamic>> generateOnboardingPlan(
+    String goals,
+    String skills,
+    String interests,
+  ) async {
+    return await _authenticatedPost('/ai/onboarding-plan', {
+      "goals": goals,
+      "skills": skills,
+      "interests": interests,
+    });
+  }
+
+  // Module 2.3 — AI Opportunity Engine
+  Future<Map<String, dynamic>> getAiOpportunities() async {
+    return await _authenticatedGet('/ai/opportunities');
+  }
+
+  // Module 2.5/2.6 — AI Discovery Engine
+  Future<Map<String, dynamic>> getAiDiscovery() async {
+    return await _authenticatedGet('/ai/discovery');
+  }
+
+  // Module 2.5/2.7 — AI City Pulse
+  Future<Map<String, dynamic>> getCityPulse({
+    double? lat,
+    double? lng,
+    required String city,
+    required String localTime,
+  }) async {
+    return await _authenticatedPost('/ai/city-pulse', {
+      'lat': lat,
+      'lng': lng,
+      'city': city,
+      'local_time': localTime,
     });
   }
 }

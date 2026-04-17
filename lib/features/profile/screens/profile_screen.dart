@@ -18,6 +18,7 @@ import 'edit_profile_screen.dart';
 import 'wallet_screen.dart';
 import 'share_profile_screen.dart';
 import 'settings_sub_screens.dart';
+import '../../onboarding/screens/ai_onboarding_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -198,540 +199,558 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-              // Header
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Text(
-                  "Profile",
-                  style: GoogleFonts.poppins(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                // Header
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Text(
+                    "Profile",
+                    style: GoogleFonts.poppins(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
                   ),
                 ),
-              ),
 
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.08),
-                      blurRadius: 18,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          "Wallet Balance",
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey[700],
-                          ),
-                        ),
-                        const Spacer(),
-                        IconButton(
-                          onPressed: _isWalletLoading
-                              ? null
-                              : () {
-                                  setState(() {
-                                    _isBalanceVisible = !_isBalanceVisible;
-                                  });
-                                },
-                          icon: Icon(
-                            _isBalanceVisible
-                                ? Icons.visibility_off_rounded
-                                : Icons.visibility_rounded,
-                            color: AppColors.primary,
-                            size: 20,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    _isWalletLoading
-                        ? Row(
-                            children: [
-                              const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Text(
-                                "Loading wallet...",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 14,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          )
-                        : Text(
-                            _isBalanceVisible
-                                ? "\$${(_walletBalance ?? 0).toStringAsFixed(2)}"
-                                : "****",
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.08),
+                        blurRadius: 18,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            "Wallet Balance",
                             style: GoogleFonts.poppins(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black87,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[700],
                             ),
                           ),
-                    const SizedBox(height: 14),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.06),
-                        borderRadius: BorderRadius.circular(14),
+                          const Spacer(),
+                          IconButton(
+                            onPressed: _isWalletLoading
+                                ? null
+                                : () {
+                                    setState(() {
+                                      _isBalanceVisible = !_isBalanceVisible;
+                                    });
+                                  },
+                            icon: Icon(
+                              _isBalanceVisible
+                                  ? Icons.visibility_off_rounded
+                                  : Icons.visibility_rounded,
+                              color: AppColors.primary,
+                              size: 20,
+                            ),
+                          ),
+                        ],
                       ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                      const SizedBox(height: 6),
+                      _isWalletLoading
+                          ? Row(
                               children: [
-                                Text(
-                                  "Account Usage",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.grey[700],
+                                const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.primary,
                                   ),
                                 ),
-                                const SizedBox(height: 4),
+                                const SizedBox(width: 10),
                                 Text(
-                                  usageText,
+                                  "Loading wallet...",
                                   style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    color: Colors.black87,
-                                    fontWeight: FontWeight.w500,
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
                                   ),
                                 ),
-                                if (showRenewalCountdown) ...[
-                                  const SizedBox(height: 2),
+                              ],
+                            )
+                          : Text(
+                              _isBalanceVisible
+                                  ? "\$${(_walletBalance ?? 0).toStringAsFixed(2)}"
+                                  : "****",
+                              style: GoogleFonts.poppins(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black87,
+                              ),
+                            ),
+                      const SizedBox(height: 14),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.06),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                   Text(
-                                    "Renews in $renewalDays days",
+                                    "Account Usage",
                                     style: GoogleFonts.poppins(
-                                      fontSize: 11,
-                                      color: renewalDays <= 3
-                                          ? Colors.orange.shade700
-                                          : Colors.grey.shade600,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey[700],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    usageText,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      color: Colors.black87,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
-                                ],
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          GestureDetector(
-                            onTap: () async {
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => SubscriptionPlansScreen(
-                                    currentTier: tierKey,
-                                  ),
-                                ),
-                              );
-                              if (!mounted) return;
-                              _fetchProfile();
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFF89273B),
-                                    Color(0xFFA83B52),
+                                  if (showRenewalCountdown) ...[
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      "Renews in $renewalDays days",
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 11,
+                                        color: renewalDays <= 3
+                                            ? Colors.orange.shade700
+                                            : Colors.grey.shade600,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
                                   ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.primary.withOpacity(0.25),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 4),
-                                  ),
                                 ],
                               ),
-                              child: Text(
-                                "Upgrade Plan",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // 1. PROFILE CARD
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.08),
-                      blurRadius: 20,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.primary.withOpacity(0.1),
-                          width: 3,
-                        ),
-                      ),
-                      child: CircleAvatar(
-                        radius: 32,
-                        backgroundColor: Colors.grey[100],
-                        backgroundImage: pic != null
-                            ? CachedNetworkImageProvider(pic)
-                            : null,
-                        child: pic == null
-                            ? const Icon(
-                                Icons.person,
-                                color: Colors.grey,
-                                size: 30,
-                              )
-                            : null,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            name,
-                            style: GoogleFonts.poppins(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              Container(
+                            const SizedBox(width: 12),
+                            GestureDetector(
+                              onTap: () async {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => SubscriptionPlansScreen(
+                                      currentTier: tierKey,
+                                    ),
+                                  ),
+                                );
+                                if (!mounted) return;
+                                _fetchProfile();
+                              },
+                              child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
+                                  horizontal: 14,
+                                  vertical: 10,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: isBusinessTier
-                                      ? const Color(
-                                          0xFF10B981,
-                                        ).withOpacity(0.14)
-                                      : AppColors.primary.withOpacity(0.12),
-                                  borderRadius: BorderRadius.circular(100),
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFF89273B),
+                                      Color(0xFFA83B52),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.primary.withOpacity(
+                                        0.25,
+                                      ),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
                                 ),
                                 child: Text(
-                                  tierLabel,
+                                  "Upgrade Plan",
                                   style: GoogleFonts.poppins(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: isBusinessTier
-                                        ? const Color(0xFF059669)
-                                        : AppColors.primary,
+                                    fontSize: 12,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
-                              if (isBusinessTier) ...[
-                                const SizedBox(width: 6),
-                                const Icon(
-                                  Icons.verified_rounded,
-                                  size: 18,
-                                  color: Color(0xFF059669),
-                                ),
-                              ],
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            bio,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              color: Colors.grey[600],
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.ios_share, size: 22),
-                      color: AppColors.primary,
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ShareProfileScreen(profile: profile!),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 25),
-
-              // 2. BUSINESS TOOLS (Redesigned with Grid)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF89273B), Color(0xFFA03348)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                    ],
                   ),
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF89273B).withOpacity(0.3),
-                      blurRadius: 15,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Business Tools",
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
 
-                    // FLEXIBLE GRID LAYOUT
-                    Wrap(
-                      spacing: 20, // Horizontal space
-                      runSpacing: 20, // Vertical space
-                      alignment: WrapAlignment.start,
-                      children: [
-                        _buildToolItem(
-                          Icons.dashboard_outlined,
-                          "Dashboard",
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const ProviderDashboardScreen(),
-                            ),
+                const SizedBox(height: 16),
+
+                // 1. PROFILE CARD
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.08),
+                        blurRadius: 20,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppColors.primary.withOpacity(0.1),
+                            width: 3,
                           ),
                         ),
-                        _buildToolItem(
-                          Icons.add_circle_outline,
-                          "Services",
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const MyServicesListScreen(),
-                            ),
-                          ),
+                        child: CircleAvatar(
+                          radius: 32,
+                          backgroundColor: Colors.grey[100],
+                          backgroundImage: pic != null
+                              ? CachedNetworkImageProvider(pic)
+                              : null,
+                          child: pic == null
+                              ? const Icon(
+                                  Icons.person,
+                                  color: Colors.grey,
+                                  size: 30,
+                                )
+                              : null,
                         ),
-                        _buildToolItem(
-                          Icons.account_balance_wallet_outlined,
-                          "Wallet",
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const WalletScreen(),
-                            ),
-                          ),
-                        ),
-                        _buildToolItem(
-                          Icons.edit_outlined,
-                          "Edit Profile",
-                          () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    EditProfileScreen(profile: profile!),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              name,
+                              style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
                               ),
-                            );
-                            _fetchProfile();
-                          },
-                        ),
-                        _buildToolItem(
-                          Icons.auto_awesome_rounded,
-                          "AI Premium",
-                          () => ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("AI Premium Tools coming soon!"),
                             ),
-                          ),
-                        ),
-                        _buildToolItem(
-                          Icons.card_giftcard,
-                          "Rewards",
-                          () => ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Rewards coming soon!"),
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isBusinessTier
+                                        ? const Color(
+                                            0xFF10B981,
+                                          ).withOpacity(0.14)
+                                        : AppColors.primary.withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(100),
+                                  ),
+                                  child: Text(
+                                    tierLabel,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: isBusinessTier
+                                          ? const Color(0xFF059669)
+                                          : AppColors.primary,
+                                    ),
+                                  ),
+                                ),
+                                if (isBusinessTier) ...[
+                                  const SizedBox(width: 6),
+                                  const Icon(
+                                    Icons.verified_rounded,
+                                    size: 18,
+                                    color: Color(0xFF059669),
+                                  ),
+                                ],
+                              ],
                             ),
-                          ),
+                            const SizedBox(height: 4),
+                            Text(
+                              bio,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              // 3. SETTINGS SECTION
-              _buildSectionHeader("General Settings"),
-              const SizedBox(height: 10),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.05),
-                      blurRadius: 10,
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    _buildSettingTile(
-                      Icons.calendar_month_rounded,
-                      "My Bookings",
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const BookingsScreen()),
                       ),
-                    ),
-                    _buildDivider(),
-                    _buildSettingTile(
-                      Icons.person_outline,
-                      "Personal Information",
-                      () async {
-                        await Navigator.push(
+                      IconButton(
+                        icon: const Icon(Icons.ios_share, size: 22),
+                        color: AppColors.primary,
+                        onPressed: () => Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (_) =>
-                                EditProfileScreen(profile: profile!),
+                                ShareProfileScreen(profile: profile!),
                           ),
-                        );
-                        _fetchProfile();
-                      },
-                    ),
-                    _buildDivider(),
-                    _buildSettingTile(
-                      Icons.lock_outline,
-                      "Password & Security",
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const SecurityScreen(),
                         ),
                       ),
-                    ),
-                    _buildDivider(),
-                    _buildSettingTile(
-                      Icons.notifications_none_rounded,
-                      "Notifications",
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const NotificationSettingsScreen(),
-                        ),
-                      ),
-                    ),
-                    _buildDivider(),
-                    _buildSettingTile(
-                      Icons.language,
-                      "Language",
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const LanguageScreen(),
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 25),
+                const SizedBox(height: 25),
 
-              _buildSectionHeader("Support"),
-              const SizedBox(height: 10),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.05),
-                      blurRadius: 10,
+                // 2. BUSINESS TOOLS (Redesigned with Grid)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF89273B), Color(0xFFA03348)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    _buildSettingTile(
-                      Icons.help_outline_rounded,
-                      "Help Center",
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const HelpCenterScreen(),
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF89273B).withOpacity(0.3),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Business Tools",
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ),
-                    _buildDivider(),
-                    _buildSettingTile(
-                      Icons.logout_rounded,
-                      "Log Out",
-                      _logout,
-                      isDestructive: true,
-                    ),
-                  ],
+                      const SizedBox(height: 20),
+
+                      // FLEXIBLE GRID LAYOUT
+                      Wrap(
+                        spacing: 20, // Horizontal space
+                        runSpacing: 20, // Vertical space
+                        alignment: WrapAlignment.start,
+                        children: [
+                          _buildToolItem(
+                            Icons.dashboard_outlined,
+                            "Dashboard",
+                            () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ProviderDashboardScreen(),
+                              ),
+                            ),
+                          ),
+                          _buildToolItem(
+                            Icons.add_circle_outline,
+                            "Services",
+                            () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const MyServicesListScreen(),
+                              ),
+                            ),
+                          ),
+                          _buildToolItem(
+                            Icons.account_balance_wallet_outlined,
+                            "Wallet",
+                            () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const WalletScreen(),
+                              ),
+                            ),
+                          ),
+                          _buildToolItem(
+                            Icons.edit_outlined,
+                            "Edit Profile",
+                            () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      EditProfileScreen(profile: profile!),
+                                ),
+                              );
+                              _fetchProfile();
+                            },
+                          ),
+                          _buildToolItem(
+                            Icons.auto_awesome_rounded,
+                            "AI Premium",
+                            () => ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("AI Premium Tools coming soon!"),
+                              ),
+                            ),
+                          ),
+                          _buildToolItem(
+                            Icons.card_giftcard,
+                            "Rewards",
+                            () => ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Rewards coming soon!"),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 40),
+
+                const SizedBox(height: 30),
+
+                // 3. SETTINGS SECTION
+                _buildSectionHeader("General Settings"),
+                const SizedBox(height: 10),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.05),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      _buildSettingTile(
+                        Icons.calendar_month_rounded,
+                        "My Bookings",
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const BookingsScreen(),
+                          ),
+                        ),
+                      ),
+                      _buildDivider(),
+                      _buildSettingTile(
+                        Icons.auto_awesome,
+                        "AI Setup Guide",
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AIOnboardingScreen(),
+                          ),
+                        ),
+                        iconColor: AppColors.primary,
+                        subtitle: "Generate your 7-Day Success Plan",
+                      ),
+                      _buildDivider(),
+                      _buildSettingTile(
+                        Icons.person_outline,
+                        "Personal Information",
+                        () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  EditProfileScreen(profile: profile!),
+                            ),
+                          );
+                          _fetchProfile();
+                        },
+                      ),
+                      _buildDivider(),
+                      _buildSettingTile(
+                        Icons.lock_outline,
+                        "Password & Security",
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const SecurityScreen(),
+                          ),
+                        ),
+                      ),
+                      _buildDivider(),
+                      _buildSettingTile(
+                        Icons.notifications_none_rounded,
+                        "Notifications",
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const NotificationSettingsScreen(),
+                          ),
+                        ),
+                      ),
+                      _buildDivider(),
+                      _buildSettingTile(
+                        Icons.language,
+                        "Language",
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LanguageScreen(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 25),
+
+                _buildSectionHeader("Support"),
+                const SizedBox(height: 10),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.05),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      _buildSettingTile(
+                        Icons.help_outline_rounded,
+                        "Help Center",
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const HelpCenterScreen(),
+                          ),
+                        ),
+                      ),
+                      _buildDivider(),
+                      _buildSettingTile(
+                        Icons.logout_rounded,
+                        "Log Out",
+                        _logout,
+                        isDestructive: true,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 40),
               ],
             ),
           ),
@@ -796,6 +815,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     String title,
     VoidCallback onTap, {
     bool isDestructive = false,
+    Color? iconColor,
+    String? subtitle,
   }) {
     return ListTile(
       onTap: onTap,
@@ -805,12 +826,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         decoration: BoxDecoration(
           color: isDestructive
               ? Colors.red.withOpacity(0.1)
+              : iconColor != null
+              ? iconColor.withOpacity(0.1)
               : const Color(0xFFF5F5F5),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(
           icon,
-          color: isDestructive ? Colors.red : Colors.grey[700],
+          color: isDestructive ? Colors.red : iconColor ?? Colors.grey[700],
           size: 20,
         ),
       ),
@@ -822,6 +845,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           color: isDestructive ? Colors.red : Colors.black87,
         ),
       ),
+      subtitle: subtitle != null
+          ? Text(
+              subtitle,
+              style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[500]),
+            )
+          : null,
       trailing: Icon(
         Icons.chevron_right_rounded,
         color: Colors.grey[400],

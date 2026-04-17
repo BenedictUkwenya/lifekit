@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -26,6 +27,8 @@ import '../../places/screens/place_detail_screen.dart';
 import '../../services/screens/service_booking_detail_screen.dart';
 import '../../bookings/screens/bookings_screen.dart';
 import '../../bookings/screens/cart_screen.dart';
+import '../../groups/screens/group_detail_screen.dart';
+import 'ai_assistant_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -69,6 +72,12 @@ class _HomeScreenState extends State<HomeScreen> {
   // Nearest upcoming confirmed booking (for home banner)
   Map<String, dynamic>? _nearestBooking;
 
+  // AI Discovery recommendations
+  List<dynamic> aiRecommendations = [];
+
+  // AI Success Task
+  bool _taskDoneToday = false;
+
   @override
   void initState() {
     super.initState();
@@ -76,6 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // SWR: paint from cache immediately, then revalidate in background
     _loadHomeCache().then((_) => _fetchAllData());
     _fetchCounts();
+    _checkTaskDone();
   }
 
   @override
@@ -102,6 +112,24 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       recentSearches = prefs.getStringList('recent_searches') ?? [];
     });
+  }
+
+  Future<void> _checkTaskDone() async {
+    final prefs = await SharedPreferences.getInstance();
+    final doneDate = prefs.getString('task_done_date');
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    if (mounted) setState(() => _taskDoneToday = doneDate == today);
+  }
+
+  /// Returns the task for today based on days since profile creation.
+  Map<String, dynamic>? _getTodayTask() {
+    final plan = userProfile?['onboarding_plan'];
+    if (plan == null || plan is! List || plan.isEmpty) return null;
+    final createdAt = DateTime.tryParse(userProfile?['created_at'] ?? '');
+    final dayIndex = createdAt != null
+        ? DateTime.now().difference(createdAt).inDays.clamp(0, 6)
+        : 0;
+    return Map<String, dynamic>.from(plan[dayIndex] as Map);
   }
 
   Future<void> _saveRecent(String query) async {
@@ -143,7 +171,8 @@ class _HomeScreenState extends State<HomeScreen> {
       if (!mounted) return;
       setState(() {
         userProfile = Map<String, dynamic>.from(
-            jsonDecode(cachedProfile) as Map);
+          jsonDecode(cachedProfile) as Map,
+        );
         offers = jsonDecode(cachedOffers ?? '[]') as List;
         categories = jsonDecode(cachedCats ?? '[]') as List;
         popularServices = jsonDecode(cachedPop ?? '[]') as List;
@@ -229,6 +258,13 @@ class _HomeScreenState extends State<HomeScreen> {
         if (mounted) setState(() => nearbyPlaces = placesData);
       } catch (_) {}
 
+      // Non-critical: AI Discovery recommendations
+      try {
+        final discoveryData = await _apiService.getAiDiscovery();
+        final recs = discoveryData['recommendations'] as List<dynamic>? ?? [];
+        if (mounted) setState(() => aiRecommendations = recs);
+      } catch (_) {}
+
       // Non-critical: nearest confirmed booking for proactive banner
       try {
         final bookings = await _apiService.getClientBookings();
@@ -236,12 +272,18 @@ class _HomeScreenState extends State<HomeScreen> {
         final upcoming = bookings.where((b) {
           if (b['status'] != 'confirmed') return false;
           final t = DateTime.tryParse(b['scheduled_time'] ?? '');
-          return t != null && t.isAfter(now.subtract(const Duration(minutes: 30)));
+          return t != null &&
+              t.isAfter(now.subtract(const Duration(minutes: 30)));
         }).toList();
-        upcoming.sort((a, b) => DateTime.parse(a['scheduled_time'])
-            .compareTo(DateTime.parse(b['scheduled_time'])));
+        upcoming.sort(
+          (a, b) => DateTime.parse(
+            a['scheduled_time'],
+          ).compareTo(DateTime.parse(b['scheduled_time'])),
+        );
         if (mounted) {
-          setState(() => _nearestBooking = upcoming.isNotEmpty ? upcoming.first : null);
+          setState(
+            () => _nearestBooking = upcoming.isNotEmpty ? upcoming.first : null,
+          );
         }
       } catch (_) {}
     } catch (_) {
@@ -361,6 +403,31 @@ class _HomeScreenState extends State<HomeScreen> {
       extendBody:
           true, // IMPORTANT: Lets content scroll behind the floating nav bar
       body: IndexedStack(index: _currentNavIndex, children: screens),
+      floatingActionButton: _currentNavIndex == 0
+          ? Padding(
+              padding: const EdgeInsets.only(bottom: 80),
+              child: FloatingActionButton(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AIAssistantScreen()),
+                ),
+                backgroundColor: AppColors.primary,
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                tooltip: 'LifeKit AI',
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Image.asset(
+                    'assets/images/logo_white2.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            )
+          : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: _buildModernBottomNav(),
     );
   }
@@ -562,6 +629,18 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                         const SizedBox(height: 22),
 
+                        // AI Success Task
+                        if (_getTodayTask() != null && !_taskDoneToday) ...[
+                          _buildSuccessTaskCard(),
+                          const SizedBox(height: 20),
+                        ],
+
+                        // AI Recommendations
+                        if (aiRecommendations.isNotEmpty) ...[
+                          _buildAiRecommendations(),
+                          const SizedBox(height: 28),
+                        ],
+
                         // Offers
                         if (offers.isNotEmpty) ...[
                           _buildOffersCard(),
@@ -635,11 +714,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final dayDiff = scheduledMidnight.difference(todayMidnight).inDays;
 
     if (diff.inMinutes <= 120) {
-      return {
-        'text': 'happening right now!',
-        'emoji': '🔴',
-        'isUrgent': true,
-      };
+      return {'text': 'happening right now!', 'emoji': '🔴', 'isUrgent': true};
     } else if (dayDiff == 0) {
       final timeStr =
           '${scheduledTime.hour % 12 == 0 ? 12 : scheduledTime.hour % 12}:${scheduledTime.minute.toString().padLeft(2, '0')} ${scheduledTime.hour >= 12 ? 'PM' : 'AM'}';
@@ -655,7 +730,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildUpcomingBanner() {
     if (_nearestBooking == null) return const SizedBox.shrink();
 
-    final scheduledTime = DateTime.tryParse(_nearestBooking!['scheduled_time'] ?? '');
+    final scheduledTime = DateTime.tryParse(
+      _nearestBooking!['scheduled_time'] ?? '',
+    );
     if (scheduledTime == null) return const SizedBox.shrink();
 
     final label = _getRelativeTimeLabelHome(scheduledTime);
@@ -1616,6 +1693,299 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
+    );
+  }
+
+  // ── AI Success Task Card ─────────────────
+  Widget _buildSuccessTaskCard() {
+    final task = _getTodayTask();
+    if (task == null) return const SizedBox.shrink();
+    final dayNum = task['day'] ?? 1;
+    final taskText = task['task']?.toString() ?? '';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColors.primary, Color(0xFF7C3AED)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.35),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text('\uD83C\uDFAF', style: TextStyle(fontSize: 18)),
+              const SizedBox(width: 8),
+              Text(
+                'Your AI Success Task',
+                style: GoogleFonts.poppins(
+                  color: Colors.white70,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  'Day $dayNum',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            taskText,
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Align(
+            alignment: Alignment.centerRight,
+            child: GestureDetector(
+              onTap: () async {
+                HapticFeedback.mediumImpact();
+                final prefs = await SharedPreferences.getInstance();
+                final today = DateTime.now().toIso8601String().substring(0, 10);
+                await prefs.setString('task_done_date', today);
+                if (mounted) setState(() => _taskDoneToday = true);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.check_rounded,
+                      size: 16,
+                      color: AppColors.primary,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Mark Done',
+                      style: GoogleFonts.poppins(
+                        color: AppColors.primary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── AI Recommendations ────────────────────
+  Widget _buildAiRecommendations() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            ShaderMask(
+              shaderCallback: (bounds) => const LinearGradient(
+                colors: [AppColors.primary, Color(0xFF7C3AED)],
+              ).createShader(bounds),
+              child: const Icon(
+                Icons.auto_awesome,
+                color: Colors.white,
+                size: 18,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Recommended for You',
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF1A1A2E),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        SizedBox(
+          height: 150,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: aiRecommendations.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final rec = aiRecommendations[index] as Map<String, dynamic>;
+              final type = rec['type'] as String? ?? '';
+              final title = rec['title'] as String? ?? '';
+              final reason = rec['reason'] as String? ?? '';
+              final imageUrl = rec['image_url'] as String? ?? '';
+              final id = rec['id'] as String? ?? '';
+
+              return GestureDetector(
+                onTap: () {
+                  if (type == 'service' && id.isNotEmpty) {
+                    final providerId = rec['provider_id']?.toString() ?? '';
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ServiceBookingDetailScreen(
+                          serviceId: id,
+                          serviceTitle: title,
+                          providerId: providerId,
+                        ),
+                      ),
+                    );
+                  } else if (type == 'community' && id.isNotEmpty) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => GroupDetailScreen(groupId: id),
+                      ),
+                    );
+                  }
+                },
+                child: Container(
+                  width: 200,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.07),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        if (imageUrl.isNotEmpty)
+                          CachedNetworkImage(
+                            imageUrl: imageUrl,
+                            fit: BoxFit.cover,
+                            errorWidget: (_, __, ___) => Container(
+                              color: Colors.grey[200],
+                              child: const Icon(
+                                Icons.image_not_supported,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          )
+                        else
+                          Container(
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [AppColors.primary, Color(0xFF7C3AED)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                            ),
+                          ),
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withOpacity(0.75),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 7,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.85),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  type.toUpperCase(),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              Text(
+                                reason,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 10,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
