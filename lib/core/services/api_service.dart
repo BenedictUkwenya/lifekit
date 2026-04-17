@@ -30,12 +30,10 @@ class UserFriendlyTimeoutException implements Exception {
 const _kRequestTimeout = Duration(seconds: 30);
 
 class ApiService {
-  // ── Local development server ─────────────────────────────────────────────
-  // 10.0.2.2 routes to the host machine from an Android emulator.
-  // Switch back to "https://lifekitbackend.vercel.app" before deploying.
-  final String baseUrl = Platform.isAndroid
-      ? "http://10.0.2.2:3000"
-      : "http://localhost:3000";
+  // ── Production backend ───────────────────────────────────────────────────
+  // To run against a local server instead, replace with:
+  //   Platform.isAndroid ? "http://10.0.2.2:3000" : "http://localhost:3000"
+  final String baseUrl = "https://lifekitbackend.vercel.app";
 
   // ── Secure storage with encryptedSharedPreferences for hardware compat ───
   final storage = const FlutterSecureStorage(
