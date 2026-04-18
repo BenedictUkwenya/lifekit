@@ -12,7 +12,7 @@ import '../../../core/services/api_service.dart';
 import '../../../core/providers/cart_provider.dart';
 
 import 'category_items_screen.dart';
-import 'skill_swap_screens.dart';
+import 'skill_swap_dashboard_screen.dart';
 import '../../home/screens/search_results_screen.dart';
 import '../../home/screens/notifications_screen.dart';
 import 'service_booking_detail_screen.dart';
@@ -78,8 +78,8 @@ class _ServicesListScreenState extends State<ServicesListScreen>
         _apiService.getUserProfile(),
         _apiService.getUnreadCounts(),
       ]);
-      final profileData = results[0] as Map<String, dynamic>;
-      final countsData = results[1] as Map<String, dynamic>;
+      final Map<String, dynamic> profileData = results[0];
+      final Map<String, dynamic> countsData = results[1];
       final profileCountry =
           profileData['profile']?['country']?.toString() ?? 'NG';
       if (mounted) {
@@ -296,7 +296,12 @@ class _ServicesListScreenState extends State<ServicesListScreen>
             child: FloatingActionButton.extended(
               backgroundColor: AppColors.primary,
               isExtended: _isFabExtended,
-              onPressed: _openSkillSwap,
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const SkillSwapDashboardScreen(),
+                ),
+              ),
               icon: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -739,15 +744,6 @@ class _ServicesListScreenState extends State<ServicesListScreen>
     return null;
   }
 
-  Future<void> _openSkillSwap() async {
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => const SkillSwapBottomSheet(),
-    );
-  }
-
   Widget _buildFeaturedProviderCard(dynamic provider) {
     final providerId = (provider['id'] ?? '').toString();
     final providerName = (provider['full_name'] ?? 'Professional').toString();
@@ -936,23 +932,29 @@ class _ServicesListScreenState extends State<ServicesListScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(20),
-              ),
-              child: SizedBox(
-                height: 170,
-                width: double.infinity,
-                child: coverImage != null
-                    ? CachedNetworkImage(
-                        imageUrl: coverImage,
-                        fit: BoxFit.cover,
-                      )
-                    : Container(
-                        color: Colors.grey.shade200,
-                        child: const Icon(Icons.image, color: Colors.grey),
-                      ),
-              ),
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
+                  ),
+                  child: SizedBox(
+                    height: 170,
+                    width: double.infinity,
+                    child: coverImage != null
+                        ? CachedNetworkImage(
+                            imageUrl: coverImage,
+                            fit: BoxFit.cover,
+                          )
+                        : Container(
+                            color: Colors.grey.shade200,
+                            child: const Icon(Icons.image, color: Colors.grey),
+                          ),
+                  ),
+                ),
+                if (service['is_skill_swap_available'] == true)
+                  Positioned(top: 10, left: 12, child: _buildSwappableBadge()),
+              ],
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
@@ -1011,6 +1013,40 @@ class _ServicesListScreenState extends State<ServicesListScreen>
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSwappableBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF22C55E), Color(0xFF16A34A)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF22C55E).withOpacity(0.45),
+            blurRadius: 8,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('🔄', style: TextStyle(fontSize: 10)),
+          const SizedBox(width: 4),
+          Text(
+            'Swappable',
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -5,6 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import '../../services/screens/service_booking_detail_screen.dart';
 import '../../groups/screens/group_detail_screen.dart';
+import '../../provider/screens/subscription_plans_screen.dart';
 
 class AIAssistantScreen extends StatefulWidget {
   const AIAssistantScreen({super.key});
@@ -108,7 +109,14 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
         });
         _scrollToBottom();
       }
-    } catch (_) {
+    } catch (e) {
+      if (e is UpgradeRequiredException) {
+        if (mounted) {
+          setState(() => _isThinking = false);
+          _showUpgradeDialog();
+        }
+        return;
+      }
       if (mounted) {
         setState(() {
           _isThinking = false;
@@ -121,6 +129,67 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
         _scrollToBottom();
       }
     }
+  }
+
+  void _showUpgradeDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Text('🔒', style: TextStyle(fontSize: 22)),
+            const SizedBox(width: 8),
+            Text(
+              'Pro Feature',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'The LifeKit AI Assistant is available on Pro and Business plans. Upgrade to unlock AI chat, smart recommendations, and more.',
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            color: Colors.black87,
+            height: 1.4,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Maybe Later',
+              style: GoogleFonts.poppins(color: Colors.grey),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const SubscriptionPlansScreen(),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              'Upgrade Now ⚡',
+              style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _handleAction(Map<String, dynamic> action) {

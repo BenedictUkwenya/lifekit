@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import 'subscription_plans_screen.dart';
 
 class EditServiceScreen extends StatefulWidget {
   final dynamic service;
@@ -32,6 +33,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
   String _serviceLocation = 'Home Service (HS)';
   String _pricingType = 'fixed';
   bool _isVisible = true;
+  bool _isSkillSwapAvailable = true;
   bool _isLoading = false;
 
   // Edit limit enforcement
@@ -76,6 +78,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
     _locationController.text = widget.service['location_text'] ?? '';
     _serviceLocation = widget.service['service_type'] ?? 'Home Service (HS)';
     _pricingType = widget.service['pricing_type'] ?? 'fixed';
+    _isSkillSwapAvailable = widget.service['is_skill_swap_available'] ?? true;
     if (widget.service['price'] != null) {
       _basePriceController.text = widget.service['price'].toString();
     }
@@ -329,6 +332,14 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
       _showSnackBar('Please enter a service title', isError: true);
       return;
     }
+    if (!_isSkillSwapAvailable) {
+      final keepOff = await _confirmSkillSwapOff();
+      if (keepOff == null) return;
+      if (!keepOff) {
+        setState(() => _isSkillSwapAvailable = true);
+        return;
+      }
+    }
     setState(() => _isLoading = true);
     try {
       List<String> finalImageUrls = [..._existingImages];
@@ -354,6 +365,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
         'status': _isVisible ? 'active' : 'draft',
         'availability': _weeklySchedule,
         'service_options': _isStandalone ? _serviceOptions : [],
+        'is_skill_swap_available': _isSkillSwapAvailable,
       });
       if (mounted) {
         Navigator.pop(context, true);
@@ -433,7 +445,18 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                 "✨ AI Autofill complete! Don't forget to select your Category and Images.",
                 isError: false,
               );
-            } catch (_) {
+            } catch (e) {
+              if (e is UpgradeRequiredException) {
+                if (!mounted) return;
+                Navigator.pop(ctx); // close bottom sheet
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const SubscriptionPlansScreen(),
+                  ),
+                );
+                return;
+              }
               setSheetState(() => isGenerating = false);
               _showSnackBar(
                 'AI generation failed. Please try again.',
@@ -895,6 +918,9 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                   ],
                 ),
 
+                const SizedBox(height: 14),
+
+                _buildSkillSwapToggleCard(),
                 const SizedBox(height: 14),
 
                 _buildVisibilityCard(),
@@ -1928,6 +1954,246 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: AppColors.primary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────
+  // SKILL SWAP TOGGLE CARD
+  // ─────────────────────────────────────────
+  Widget _buildSkillSwapToggleCard() {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: _isSkillSwapAvailable
+            ? const LinearGradient(
+                colors: [Color(0xFF0A0A14), Color(0xFF1A1A2E)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+        color: _isSkillSwapAvailable ? null : Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: _isSkillSwapAvailable
+                ? const Color(0xFFE8A020).withOpacity(0.3)
+                : Colors.black.withOpacity(0.04),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: _isSkillSwapAvailable
+                  ? const Color(0xFFE8A020).withOpacity(0.18)
+                  : Colors.grey.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.swap_horiz_rounded,
+              color: _isSkillSwapAvailable
+                  ? const Color(0xFFE8A020)
+                  : Colors.grey,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Available for Skill Swap',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: _isSkillSwapAvailable
+                            ? Colors.white
+                            : Colors.black87,
+                      ),
+                    ),
+                    if (_isSkillSwapAvailable) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE8A020).withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '⚡ ON',
+                          style: GoogleFonts.poppins(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFFE8A020),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  _isSkillSwapAvailable
+                      ? 'Get free services by trading your skills'
+                      : 'Enable to attract swap proposals',
+                  style: GoogleFonts.poppins(
+                    fontSize: 11,
+                    color: _isSkillSwapAvailable
+                        ? Colors.white54
+                        : Colors.grey[500],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: _isSkillSwapAvailable,
+            activeColor: const Color(0xFFE8A020),
+            activeTrackColor: const Color(0xFFE8A020).withOpacity(0.3),
+            inactiveThumbColor: Colors.grey[400],
+            inactiveTrackColor: Colors.grey.withOpacity(0.25),
+            onChanged: (v) => setState(() => _isSkillSwapAvailable = v),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<bool?> _confirmSkillSwapOff() {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: EdgeInsets.zero,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF0A0A14), Color(0xFF1A1A2E)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    width: 58,
+                    height: 58,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8A020).withOpacity(0.18),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.swap_horiz_rounded,
+                      color: Color(0xFFE8A020),
+                      size: 30,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Disable Skill Swap?',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 17,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+              child: Column(
+                children: [
+                  Text(
+                    'Are you sure you don\'t want to enable Skill Swap?',
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Trading skills is the fastest way to grow your network and get free services!',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(ctx, true),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: Colors.grey.shade300),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: Text(
+                            'Keep Off',
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[700],
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(ctx, false),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFE8A020),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: Text(
+                            'Turn On ⚡',
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],

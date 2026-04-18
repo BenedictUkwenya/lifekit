@@ -26,6 +26,15 @@ class UserFriendlyTimeoutException implements Exception {
   String toString() => message;
 }
 
+/// Thrown when the backend returns 403 with requires_upgrade: true.
+/// The UI should navigate the user to SubscriptionPlansScreen.
+class UpgradeRequiredException implements Exception {
+  static const message = 'AI features require a Pro or Business subscription.';
+
+  @override
+  String toString() => message;
+}
+
 // ── Timeout constants ──────────────────────────────────────────────────────
 const _kRequestTimeout = Duration(seconds: 30);
 
@@ -283,6 +292,13 @@ class ApiService {
     String errorMessage = "Server Error: ${response.statusCode}";
     if (decoded is Map && decoded.containsKey('error')) {
       errorMessage = decoded['error'];
+    }
+
+    // AI paywall: 403 with requires_upgrade flag → dedicated exception
+    if (response.statusCode == 403 &&
+        decoded is Map &&
+        decoded['requires_upgrade'] == true) {
+      throw UpgradeRequiredException();
     }
 
     final lowerError = errorMessage.toLowerCase();
@@ -1138,6 +1154,20 @@ class ApiService {
 
   Future<Map<String, dynamic>> generateServiceWithAI(String prompt) async {
     return await _authenticatedPost('/ai/generate-service', {"prompt": prompt});
+  }
+
+  // AI Swap Proposal Generator — Pro/Business only
+  Future<String> generateSwapProposal({
+    required String myServiceTitle,
+    required String targetServiceTitle,
+    required String targetUserName,
+  }) async {
+    final data = await _authenticatedPost('/ai/generate-swap-proposal', {
+      'my_service_title': myServiceTitle,
+      'target_service_title': targetServiceTitle,
+      'target_user_name': targetUserName,
+    });
+    return (data['proposal'] as String?) ?? '';
   }
 
   // Module 2.1 — LifeKit AI Assistant (core chat engine)

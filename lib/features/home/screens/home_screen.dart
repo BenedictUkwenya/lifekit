@@ -14,6 +14,7 @@ import '../../../core/widgets/lifekit_loader.dart';
 import '../../../core/providers/cart_provider.dart';
 
 import '../../services/screens/services_list_screen.dart';
+import '../../services/screens/skill_swap_dashboard_screen.dart';
 import '../../services/screens/category_items_screen.dart';
 import '../../provider/screens/provider_onboarding_intro_screen.dart';
 import '../../provider/screens/my_services_list_screen.dart';
@@ -46,6 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> categories = [];
   List<String> recentSearches = [];
   List<dynamic> popularServices = [];
+  List<dynamic> swapOpportunities = [];
   List<dynamic> nearbyPlaces = [];
   bool isLoading = true;
 
@@ -240,6 +242,10 @@ class _HomeScreenState extends State<HomeScreen> {
           offers = offersData;
           categories = catsData;
           popularServices = popData;
+          swapOpportunities = popData
+              .where((s) => s['is_skill_swap_available'] == true)
+              .take(10)
+              .toList();
           isLoading = false;
         });
       }
@@ -660,6 +666,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 14),
                         _buildServicesRow(),
                         const SizedBox(height: 28),
+
+                        // Top Swap Opportunities
+                        if (swapOpportunities.isNotEmpty) ...[
+                          _buildTopSwapOpportunities(),
+                          const SizedBox(height: 28),
+                        ],
 
                         // Popular services
                         _buildPopularServices(),
@@ -1359,6 +1371,186 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // ── SWAPPABLE BADGE ──────────────────────
+  Widget _buildSwappableBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF22C55E), Color(0xFF16A34A)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF22C55E).withOpacity(0.45),
+            blurRadius: 8,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('🔄', style: TextStyle(fontSize: 9)),
+          const SizedBox(width: 3),
+          Text(
+            'Swappable',
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontSize: 9,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── TOP SWAP OPPORTUNITIES ────────────────
+  Widget _buildTopSwapOpportunities() {
+    if (swapOpportunities.isEmpty) return const SizedBox();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(
+          '🔄 Top Swap Opportunities',
+          () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const SkillSwapDashboardScreen()),
+          ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 210,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            itemCount: swapOpportunities.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 14),
+            itemBuilder: (_, i) {
+              final service = swapOpportunities[i];
+              final sId = service['id']?.toString();
+              final pId = service['provider_id']?.toString();
+              final provider = service['profiles'] ?? {};
+              final providerName = (provider['full_name'] ?? 'Provider')
+                  .toString();
+              final title = (service['title'] ?? 'Service').toString();
+              final coverImage = _getSafeImage(service);
+              final price = service['price'] ?? 0;
+
+              return GestureDetector(
+                onTap: () {
+                  if (sId == null || pId == null) return;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ServiceBookingDetailScreen(
+                        serviceId: sId,
+                        providerId: pId,
+                        providerName: providerName,
+                        providerPic: provider['profile_picture_url'],
+                        serviceTitle: title,
+                      ),
+                    ),
+                  );
+                },
+                child: Container(
+                  width: 165,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.06),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(20),
+                            ),
+                            child: CachedNetworkImage(
+                              imageUrl: coverImage,
+                              height: 110,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              errorWidget: (_, __, ___) => Container(
+                                height: 110,
+                                color: Colors.grey[200],
+                                child: const Icon(
+                                  Icons.image_not_supported,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: 8,
+                            left: 8,
+                            child: _buildSwappableBadge(),
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(10, 10, 10, 6),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    providerName,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 10,
+                                      color: Colors.grey[600],
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Text(
+                                  '\$$price',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   // ── NEW: POPULAR SERVICES ─────────────────
   // ── NEW: POPULAR SERVICES ─────────────────
   Widget _buildPopularServices() {
@@ -1437,24 +1629,34 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(20),
-                        ),
-                        child: CachedNetworkImage(
-                          imageUrl: coverImage,
-                          height: 110,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorWidget: (_, __, ___) => Container(
-                            height: 110,
-                            color: Colors.grey[200],
-                            child: const Icon(
-                              Icons.image_not_supported,
-                              color: Colors.grey,
+                      Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(20),
+                            ),
+                            child: CachedNetworkImage(
+                              imageUrl: coverImage,
+                              height: 110,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              errorWidget: (_, __, ___) => Container(
+                                height: 110,
+                                color: Colors.grey[200],
+                                child: const Icon(
+                                  Icons.image_not_supported,
+                                  color: Colors.grey,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                          if (service['is_skill_swap_available'] == true)
+                            Positioned(
+                              top: 8,
+                              left: 8,
+                              child: _buildSwappableBadge(),
+                            ),
+                        ],
                       ),
                       Padding(
                         padding: const EdgeInsets.all(12),
