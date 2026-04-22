@@ -18,6 +18,7 @@ import '../../services/screens/skill_swap_dashboard_screen.dart';
 import '../../services/screens/category_items_screen.dart';
 import '../../provider/screens/provider_onboarding_intro_screen.dart';
 import '../../provider/screens/my_services_list_screen.dart';
+import '../../provider/screens/provider_dashboard_screen.dart';
 import 'feeds_screen.dart';
 import 'chats_list_screen.dart';
 import 'notifications_screen.dart';
@@ -88,6 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadHomeCache().then((_) => _fetchAllData());
     _fetchCounts();
     _checkTaskDone();
+    _checkInactivityNudge();
   }
 
   @override
@@ -121,6 +123,150 @@ class _HomeScreenState extends State<HomeScreen> {
     final doneDate = prefs.getString('task_done_date');
     final today = DateTime.now().toIso8601String().substring(0, 10);
     if (mounted) setState(() => _taskDoneToday = doneDate == today);
+  }
+
+  /// Shows a bottom-sheet AI nudge when the user hasn't opened the app in 3+
+  /// days and is registered as a service provider.
+  Future<void> _checkInactivityNudge() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastSeenStr = prefs.getString('last_app_open');
+    final today = DateTime.now();
+    final todayKey = today.toIso8601String().substring(0, 10);
+
+    // Always update the last-seen timestamp
+    await prefs.setString('last_app_open', today.toIso8601String());
+
+    if (lastSeenStr == null) return; // First ever open — no nudge
+
+    final lastSeen = DateTime.tryParse(lastSeenStr);
+    if (lastSeen == null) return;
+
+    final daysSinceLastOpen = today.difference(lastSeen).inDays;
+    if (daysSinceLastOpen < 3) return; // Not inactive enough
+
+    // Only nudge service providers
+    final isProvider = userProfile?['is_service_provider'] == true;
+    if (!isProvider) {
+      // Wait for profile to load if it hasn't yet
+      await Future.delayed(const Duration(seconds: 2));
+      if (!(userProfile?['is_service_provider'] == true)) return;
+    }
+
+    // Don't nudge more than once per day
+    final lastNudgeDate = prefs.getString('last_inactivity_nudge_date');
+    if (lastNudgeDate == todayKey) return;
+    await prefs.setString('last_inactivity_nudge_date', todayKey);
+
+    if (!mounted) return;
+    // Slight delay so the home screen finishes building first
+    await Future.delayed(const Duration(milliseconds: 800));
+    if (!mounted) return;
+    _showAiNudgeSheet(daysSinceLastOpen);
+  }
+
+  void _showAiNudgeSheet(int daysSince) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(99),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF1E1B4B), Color(0xFF4C1D95)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('📈', style: TextStyle(fontSize: 32)),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Welcome back! ${daysSince}d of new opportunities',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Our AI has been tracking demand in your area. New service opportunities are waiting for you!',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: Colors.white70,
+                      height: 1.45,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ProviderDashboardScreen(),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: Text(
+                  '✨ View AI Opportunity Radar',
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Maybe later',
+                style: GoogleFonts.poppins(
+                  color: Colors.grey.shade600,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   /// Returns the task for today based on days since profile creation.

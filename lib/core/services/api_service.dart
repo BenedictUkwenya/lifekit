@@ -40,9 +40,11 @@ const _kRequestTimeout = Duration(seconds: 30);
 
 class ApiService {
   // ── Production backend ───────────────────────────────────────────────────
-  // To run against a local server instead, replace with:
-  //   Platform.isAndroid ? "http://10.0.2.2:3000" : "http://localhost:3000"
-  final String baseUrl = "https://lifekitbackend.vercel.app";
+  // To switch back to production, replace with:
+  //   "https://lifekitbackend.vercel.app"
+  final String baseUrl = Platform.isAndroid
+      ? "http://10.0.2.2:3000"
+      : "http://localhost:3000";
 
   // ── Secure storage with encryptedSharedPreferences for hardware compat ───
   final storage = const FlutterSecureStorage(
@@ -1096,9 +1098,19 @@ class ApiService {
     await _authenticatedDelete('/feeds/groups/posts/$postId');
   }
 
-  // Delete a feed post (admin only on backend)
+  // Delete a feed post (owner or admin)
   Future<void> deletePost(String postId) async {
     await _authenticatedDelete('/feeds/posts/$postId');
+  }
+
+  // Delete own comment on a feed post
+  Future<void> deleteComment(String postId, String commentId) async {
+    await _authenticatedDelete('/feeds/posts/$postId/comments/$commentId');
+  }
+
+  // Delete own comment on a group post
+  Future<void> deleteGroupComment(String postId, String commentId) async {
+    await _authenticatedDelete('/feeds/groups/posts/$postId/comments/$commentId');
   }
 
   // Saved posts (bookmarks)

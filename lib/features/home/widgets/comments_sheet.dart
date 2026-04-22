@@ -26,11 +26,18 @@ class _CommentsSheetState extends State<CommentsSheet> {
   List<dynamic> comments = [];
   bool isLoading = true;
   bool isPosting = false;
+  String? _myId;
 
   @override
   void initState() {
     super.initState();
     _fetchComments();
+    _loadMyId();
+  }
+
+  Future<void> _loadMyId() async {
+    final id = await _apiService.getCurrentUserId();
+    if (mounted) setState(() => _myId = id);
   }
 
   // --- CONTENT SAFETY FILTER (For Groups) ---
@@ -115,6 +122,27 @@ class _CommentsSheetState extends State<CommentsSheet> {
     }
   }
 
+  Future<void> _deleteComment(dynamic comment) async {
+    final commentId = comment['id'] as String?;
+    if (commentId == null) return;
+    try {
+      if (widget.isGroup) {
+        await _apiService.deleteGroupComment(widget.postId, commentId);
+      } else {
+        await _apiService.deleteComment(widget.postId, commentId);
+      }
+      if (mounted) {
+        setState(() => comments.removeWhere((c) => c['id'] == commentId));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete comment: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
@@ -169,6 +197,7 @@ class _CommentsSheetState extends State<CommentsSheet> {
                     itemBuilder: (context, index) {
                       final c = comments[index];
                       final user = c['profiles'];
+                      final bool isOwn = _myId != null && c['user_id'] == _myId;
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 16),
                         child: Row(
@@ -204,6 +233,18 @@ class _CommentsSheetState extends State<CommentsSheet> {
                                 ],
                               ),
                             ),
+                            if (isOwn)
+                              GestureDetector(
+                                onTap: () => _deleteComment(c),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 8, top: 2),
+                                  child: Icon(
+                                    Icons.delete_outline,
+                                    size: 18,
+                                    color: Colors.grey[400],
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
                       );

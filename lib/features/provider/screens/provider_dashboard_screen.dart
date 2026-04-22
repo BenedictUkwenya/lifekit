@@ -24,6 +24,10 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
   int reviewCount = 0;
   List<double> weeklyData = [0, 0, 0, 0, 0, 0, 0];
 
+  // Trial
+  bool isTrialActive = false;
+  int trialDaysLeft = 0;
+
   // AI Opportunity Radar
   List<dynamic> opportunities = [];
   bool isAiLoading = true;
@@ -55,6 +59,18 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
           } else {
             weeklyData = rawChart.map((e) => (e as num).toDouble()).toList();
           }
+
+          // Trial
+          final String? trialEndDateStr = data['trialEndDate']?.toString();
+          final DateTime? trialEndDate =
+              (trialEndDateStr != null && trialEndDateStr.isNotEmpty)
+              ? DateTime.tryParse(trialEndDateStr)
+              : null;
+          isTrialActive =
+              trialEndDate != null && trialEndDate.isAfter(DateTime.now());
+          trialDaysLeft = isTrialActive
+              ? trialEndDate!.difference(DateTime.now()).inDays + 1
+              : 0;
 
           isLoading = false;
         });
@@ -120,6 +136,10 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (isTrialActive) ...[
+                      _buildTrialBanner(),
+                      const SizedBox(height: 20),
+                    ],
                     _buildEarningsCard(),
                     const SizedBox(height: 25),
                     _buildSectionTitle("Performance Overview"),
@@ -148,6 +168,131 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
         fontSize: 16,
         fontWeight: FontWeight.w600,
         color: Colors.black87,
+      ),
+    );
+  }
+
+  // ── TRIAL BANNER ──────────────────────────────────────────────────────────
+
+  Widget _buildTrialBanner() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFF6B00), Color(0xFFFFAB00), Color(0xFFFFD000)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFFF6B00).withOpacity(0.35),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '🎉 Launch Special — Limited Time',
+                  style: GoogleFonts.poppins(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withOpacity(0.85),
+                    letterSpacing: 0.4,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Only 3% commission & up to 5 services!',
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    _buildBannerPerk('💰 3% Fee'),
+                    const SizedBox(width: 8),
+                    _buildBannerPerk('💼 5 Services'),
+                    const SizedBox(width: 8),
+                    _buildBannerPerk('✨ Pro AI'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.25),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.5),
+                    width: 1,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      '$trialDaysLeft',
+                      style: GoogleFonts.poppins(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        height: 1,
+                      ),
+                    ),
+                    Text(
+                      'days left',
+                      style: GoogleFonts.poppins(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white.withOpacity(0.85),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBannerPerk(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.25),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.4), width: 0.8),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.poppins(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+        ),
       ),
     );
   }

@@ -320,6 +320,10 @@ class _FeedsScreenState extends State<FeedsScreen>
               builder: (_) => FeedDetailScreen(post: posts[index]),
             ),
           ),
+          onDeleted: () {
+            final deletedId = posts[index]['id'];
+            setState(() => posts.removeWhere((p) => p['id'] == deletedId));
+          },
         ),
       ),
     );
@@ -539,7 +543,8 @@ class _FeedsScreenState extends State<FeedsScreen>
 class _FeedCard extends StatefulWidget {
   final dynamic post;
   final VoidCallback? onTap;
-  const _FeedCard({required this.post, this.onTap});
+  final VoidCallback? onDeleted;
+  const _FeedCard({required this.post, this.onTap, this.onDeleted});
 
   @override
   State<_FeedCard> createState() => _FeedCardState();
@@ -692,19 +697,24 @@ class _FeedCardState extends State<_FeedCard> with SingleTickerProviderStateMixi
                   Navigator.pop(context);
                   try {
                     await _apiService.deletePost(widget.post['id']);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Post deleted'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
+                    widget.onDeleted?.call();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Post deleted'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
                   } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Failed to delete post: $e'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Failed to delete post: $e'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
                   }
                 },
               ),

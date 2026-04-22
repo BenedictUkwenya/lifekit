@@ -116,6 +116,94 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Widget _buildTrialUsageContent(
+    int daysLeft,
+    String endsOnFormatted,
+    String tierKey,
+  ) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFFFEF3C7),
+            const Color(0xFFFDE68A).withOpacity(0.6),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(9),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF59E0B).withOpacity(0.18),
+              shape: BoxShape.circle,
+            ),
+            child: const Text('\uD83D\uDE80', style: TextStyle(fontSize: 16)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Launch Offer: Pro Trial Active',
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF92400E),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Renews in $daysLeft days \u2022 Ends $endsOnFormatted',
+                  style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFFB45309),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    _buildTrialPerk('\u2714 5 Services'),
+                    const SizedBox(width: 8),
+                    _buildTrialPerk('\u2714 3% Commission'),
+                    const SizedBox(width: 8),
+                    _buildTrialPerk('\u2714 Pro AI'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTrialPerk(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF59E0B).withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.poppins(
+          fontSize: 9,
+          fontWeight: FontWeight.w600,
+          color: const Color(0xFF92400E),
+        ),
+      ),
+    );
+  }
+
   void _logout() async {
     const storage = FlutterSecureStorage();
     await storage.deleteAll();
@@ -186,6 +274,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
         : tierServiceLimit == null
         ? "Slots Used: $_activeServicesCount/∞ (Includes Drafts & Pending)"
         : "Slots Used: $_activeServicesCount/$tierServiceLimit (Includes Drafts & Pending)";
+
+    // Trial & founding member
+    final String? trialEndDateStr = profile!['trial_end_date']?.toString();
+    final DateTime? trialEndDate =
+        (trialEndDateStr != null && trialEndDateStr.isNotEmpty)
+        ? DateTime.tryParse(trialEndDateStr)?.toLocal()
+        : null;
+    final bool isTrialActive =
+        trialEndDate != null && trialEndDate.isAfter(DateTime.now());
+    final int trialDaysLeft = isTrialActive
+        ? trialEndDate.difference(DateTime.now()).inDays + 1
+        : 0;
+    final bool isFoundingMember = profile!['is_founding_member'] == true;
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    final String trialEndFormatted = isTrialActive
+        ? '${months[trialEndDate.month - 1]} ${trialEndDate.day}, ${trialEndDate.year}'
+        : '';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -298,96 +416,103 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           color: AppColors.primary.withOpacity(0.06),
                           borderRadius: BorderRadius.circular(14),
                         ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                        child: isTrialActive
+                            ? _buildTrialUsageContent(
+                                trialDaysLeft,
+                                trialEndFormatted,
+                                tierKey,
+                              )
+                            : Row(
                                 children: [
-                                  Text(
-                                    "Account Usage",
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.grey[700],
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Account Usage",
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.grey[700],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          usageText,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 12,
+                                            color: Colors.black87,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        if (showRenewalCountdown) ...[
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            "Renews in $renewalDays days",
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 11,
+                                              color: renewalDays <= 3
+                                                  ? Colors.orange.shade700
+                                                  : Colors.grey.shade600,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    usageText,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 12,
-                                      color: Colors.black87,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  if (showRenewalCountdown) ...[
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      "Renews in $renewalDays days",
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 11,
-                                        color: renewalDays <= 3
-                                            ? Colors.orange.shade700
-                                            : Colors.grey.shade600,
-                                        fontWeight: FontWeight.w500,
+                                  const SizedBox(width: 12),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              SubscriptionPlansScreen(
+                                                currentTier: tierKey,
+                                              ),
+                                        ),
+                                      );
+                                      if (!mounted) return;
+                                      _fetchProfile();
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14,
+                                        vertical: 10,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          colors: [
+                                            Color(0xFF89273B),
+                                            Color(0xFFA83B52),
+                                          ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
+                                        borderRadius: BorderRadius.circular(12),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: AppColors.primary
+                                                .withOpacity(0.25),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Text(
+                                        "Upgrade Plan",
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 12,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
                                     ),
-                                  ],
+                                  ),
                                 ],
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            GestureDetector(
-                              onTap: () async {
-                                await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => SubscriptionPlansScreen(
-                                      currentTier: tierKey,
-                                    ),
-                                  ),
-                                );
-                                if (!mounted) return;
-                                _fetchProfile();
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 10,
-                                ),
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFF89273B),
-                                      Color(0xFFA83B52),
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.primary.withOpacity(
-                                        0.25,
-                                      ),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: Text(
-                                  "Upgrade Plan",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                     ],
                   ),
@@ -439,13 +564,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              name,
-                              style: GoogleFonts.poppins(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87,
-                              ),
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    name,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                if (isFoundingMember) ...[
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          Color(0xFFFBBF24),
+                                          Color(0xFFF59E0B),
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      borderRadius: BorderRadius.circular(20),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: const Color(
+                                            0xFFF59E0B,
+                                          ).withOpacity(0.35),
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Text(
+                                      '🌟 Founding Member',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                        letterSpacing: 0.3,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                             const SizedBox(height: 6),
                             Row(

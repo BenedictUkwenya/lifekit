@@ -23,6 +23,8 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
   List<dynamic> myServices = [];
   bool isLoading = true;
   bool _isOpeningCreateFlow = false;
+  List<dynamic> aiSuggestions = [];
+  bool isAiLoading = false;
 
   @override
   void initState() {
@@ -38,9 +40,26 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
           myServices = data;
           isLoading = false;
         });
+        if (data.isEmpty) _fetchAiSuggestions();
       }
     } catch (e) {
       if (mounted) setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _fetchAiSuggestions() async {
+    if (!mounted) return;
+    setState(() => isAiLoading = true);
+    try {
+      final data = await _apiService.getAiOpportunities();
+      if (mounted) {
+        setState(() {
+          aiSuggestions = (data['opportunities'] as List<dynamic>?) ?? [];
+          isAiLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => isAiLoading = false);
     }
   }
 
@@ -77,18 +96,23 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel',
-                style: GoogleFonts.poppins(color: Colors.grey.shade700)),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.poppins(color: Colors.grey.shade700),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFEF4444),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
-            child: Text('Delete',
-                style: GoogleFonts.poppins(color: Colors.white)),
+            child: Text(
+              'Delete',
+              style: GoogleFonts.poppins(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -465,7 +489,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
 
                     // Services List or Empty State
                     if (myServices.isEmpty)
-                      _buildEmptyState()
+                      _buildAiEmptyState()
                     else
                       ...myServices.map(
                         (service) => _buildServiceItem(service),
@@ -584,49 +608,322 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildAiEmptyState() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Hero header
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF1E1B4B), Color(0xFF4C1D95)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0xFF4C1D95),
+                blurRadius: 20,
+                offset: Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white24,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Text('\u2728', style: TextStyle(fontSize: 20)),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'AI-Powered Suggestions',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white70,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Post your first service\n& start earning!',
+                style: GoogleFonts.poppins(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  height: 1.25,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Based on your skills and location, here\'s what\'s in demand right now:',
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  color: Colors.white60,
+                  height: 1.45,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        if (isAiLoading)
+          _buildAiLoadingState()
+        else if (aiSuggestions.isEmpty)
+          _buildNoSuggestionsState()
+        else
+          ...aiSuggestions.asMap().entries.map(
+            (e) => _buildSuggestionCard(e.value, e.key),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildAiLoadingState() {
     return Container(
-      margin: const EdgeInsets.only(top: 40),
-      padding: const EdgeInsets.all(40),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.primary.withOpacity(0.15)),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(
+            width: 40,
+            height: 40,
+            child: CircularProgressIndicator(
+              color: AppColors.primary,
+              strokeWidth: 3,
+            ),
+          ),
+          const SizedBox(height: 18),
+          Text(
+            'AI is analysing your profile...',
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Finding the best opportunities for you',
+            style: GoogleFonts.poppins(fontSize: 12, color: Colors.black45),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoSuggestionsState() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        children: [
+          const Icon(Icons.search_off_rounded, size: 40, color: Colors.grey),
+          const SizedBox(height: 12),
+          Text(
+            'No AI suggestions right now.',
+            style: GoogleFonts.poppins(fontSize: 14, color: Colors.black54),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Try updating your profile bio and skills.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(fontSize: 12, color: Colors.black38),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSuggestionCard(dynamic opp, int index) {
+    final title = opp['title']?.toString() ?? 'Untitled';
+    final reason = opp['reason']?.toString() ?? '';
+    final price = opp['suggested_price']?.toString() ?? '';
+    final isHigh =
+        (opp['demand_level']?.toString() ?? '').toLowerCase() == 'high';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isHigh
+              ? AppColors.primary.withOpacity(0.25)
+              : Colors.grey.shade200,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: isHigh
+                ? AppColors.primary.withOpacity(0.07)
+                : Colors.black.withOpacity(0.03),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Top accent stripe
           Container(
-            padding: const EdgeInsets.all(20),
+            height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.inventory_2_outlined,
-              size: 56,
-              color: Colors.grey.shade400,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            "No Services Yet",
-            style: GoogleFonts.poppins(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              gradient: LinearGradient(
+                colors: isHigh
+                    ? [AppColors.primary, const Color(0xFF7C3AED)]
+                    : [Colors.grey.shade300, Colors.grey.shade200],
+              ),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(18),
+              ),
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            "Get started by creating your first service above",
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(fontSize: 14, color: Colors.black54),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isHigh
+                            ? AppColors.primary.withOpacity(0.1)
+                            : Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        isHigh ? '\uD83D\uDD25 High' : '\uD83D\uDCC8 Medium',
+                        style: GoogleFonts.poppins(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: isHigh
+                              ? AppColors.primary
+                              : Colors.grey.shade600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  reason,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Colors.black54,
+                    height: 1.45,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF10B981).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.attach_money_rounded,
+                            size: 13,
+                            color: Color(0xFF059669),
+                          ),
+                          Text(
+                            price,
+                            style: GoogleFonts.poppins(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF059669),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    SizedBox(
+                      height: 36,
+                      child: ElevatedButton(
+                        onPressed: _isOpeningCreateFlow
+                            ? null
+                            : () async {
+                                setState(() => _isOpeningCreateFlow = true);
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        const SelectMainCategoryScreen(),
+                                  ),
+                                );
+                                if (!mounted) return;
+                                setState(() => _isOpeningCreateFlow = false);
+                                if (result == true) _fetchMyServices();
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: Text(
+                          '\u2728 Create This Service',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),

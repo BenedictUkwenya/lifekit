@@ -8,7 +8,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/utils/error_handler.dart';
 import 'login_screen.dart';
-import '../../home/screens/home_screen.dart';
+import '../../onboarding/screens/ai_onboarding_screen.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 
 // ─────────────────────────────────────────────────────────────
@@ -315,9 +315,11 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
       showSuccess("You're all set! Welcome to LifeKit 🎉");
       await Future.delayed(const Duration(seconds: 1));
       if (mounted) {
+        // Navigate to AI Onboarding so the user immediately sees
+        // personalised service suggestions after sign-up.
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          MaterialPageRoute(builder: (_) => const AIOnboardingScreen()),
           (route) => false,
         );
       }
@@ -327,7 +329,7 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
       if (mounted) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          MaterialPageRoute(builder: (_) => const AIOnboardingScreen()),
           (route) => false,
         );
       }
