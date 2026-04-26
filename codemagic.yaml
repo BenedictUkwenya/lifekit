@@ -16,9 +16,7 @@ workflows:
         script: flutter analyze --no-fatal-infos --no-fatal-warnings
       - name: Build IPA
         script: |
-          flutter build ipa --release \
-            --bundle-sksl-path flutter_01.sksl.json \
-            --no-codesign
+           flutter build ipa --release --no-codesign
     artifacts:
       - build/ios/ipa/*.ipa
       - flutter_notarization_logs.log
