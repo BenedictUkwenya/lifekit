@@ -16,11 +16,31 @@ workflows:
       - name: Flutter analyze
         script: flutter analyze --no-fatal-infos --no-fatal-warnings
 
-      - name: Build IPA
-        script: flutter build ipa --release --no-codesign
+      - name: Build iOS
+        script: |
+          flutter build ios --release --no-codesign
+
+      - name: Archive
+        script: |
+          xcodebuild \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -sdk iphoneos \
+            -configuration Release \
+            -archivePath $CM_BUILD_DIR/Runner.xcarchive \
+            archive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Package IPA manually
+        script: |
+          mkdir -p $CM_BUILD_DIR/Payload
+          cp -r "$CM_BUILD_DIR/Runner.xcarchive/Products/Applications/Runner.app" $CM_BUILD_DIR/Payload/
+          cd $CM_BUILD_DIR && zip -r Lifekit.ipa Payload
 
     artifacts:
-      - build/ios/ipa/*.ipa
+      - $CM_BUILD_DIR/Lifekit.ipa
 
     publishing:
       email:
