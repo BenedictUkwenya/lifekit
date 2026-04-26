@@ -41,10 +41,10 @@ const _kRequestTimeout = Duration(seconds: 30);
 class ApiService {
   // ── Production backend ───────────────────────────────────────────────────
   // To switch back to production, replace with:
-  //   "https://lifekitbackend.vercel.app"
-  final String baseUrl = Platform.isAndroid
-      ? "http://10.0.2.2:3000"
-      : "http://localhost:3000";
+  final String baseUrl = "https://lifekitbackend.vercel.app";
+  //final String baseUrl = Platform.isAndroid
+  //  ? "http://10.0.2.2:3000"
+  //: "http://localhost:3000";
 
   // ── Secure storage with encryptedSharedPreferences for hardware compat ───
   final storage = const FlutterSecureStorage(

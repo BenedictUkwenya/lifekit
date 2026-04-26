@@ -1,0 +1,31 @@
+workflows:
+  ios-release:
+    name: iOS IPA Build
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Install CocoaPods
+        script: |
+          cd ios && pod install
+      - name: Flutter analyze
+        script: flutter analyze --no-fatal-infos --no-fatal-warnings
+      - name: Build IPA
+        script: |
+          flutter build ipa --release \
+            --bundle-sksl-path flutter_01.sksl.json \
+            --no-codesign
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - flutter_notarization_logs.log
+    publishing:
+      email:
+        recipients:
+          - your@email.com
+        notify:
+          success: true
+          failure: true

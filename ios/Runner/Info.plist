@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Lifekit Frontend</string>
+	<string>Lifekit</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -13,7 +13,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>lifekit_frontend</string>
+	<string>Lifekit</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -45,5 +45,13 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Lifekit needs camera access to take photos for your profile and bookings.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Lifekit needs photo library access to choose images for your profile and bookings.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Lifekit needs microphone access when you record video.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Lifekit uses your location while you use the app to show nearby services and improve bookings.</string>
 </dict>
 </plist>
