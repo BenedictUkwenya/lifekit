@@ -25,7 +25,7 @@ workflows:
     publishing:
       email:
         recipients:
-          - your@email.com
+          - ukwenzyb@email.com
         notify:
           success: true
           failure: true
