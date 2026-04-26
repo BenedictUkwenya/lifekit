@@ -16,30 +16,11 @@ workflows:
       - name: Flutter analyze
         script: flutter analyze --no-fatal-infos --no-fatal-warnings
 
-      - name: Build iOS archive
-        script: |
-          flutter build ios --release --no-codesign
-          cd ios && xcodebuild \
-            -workspace Runner.xcworkspace \
-            -scheme Runner \
-            -sdk iphoneos \
-            -configuration Release \
-            -archivePath $CM_BUILD_DIR/Runner.xcarchive \
-            archive \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
-
-      - name: Export IPA
-        script: |
-          xcodebuild -exportArchive \
-            -archivePath $CM_BUILD_DIR/Runner.xcarchive \
-            -exportPath $CM_BUILD_DIR/output \
-            -exportOptionsPlist ios/ExportOptions.plist \
-            -allowProvisioningUpdates
+      - name: Build IPA
+        script: flutter build ipa --release --no-codesign
 
     artifacts:
-      - $CM_BUILD_DIR/output/*.ipa
+      - build/ios/ipa/*.ipa
 
     publishing:
       email:
