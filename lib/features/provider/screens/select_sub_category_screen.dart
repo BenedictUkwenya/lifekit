@@ -9,11 +9,13 @@ import 'edit_service_screen.dart';
 class SelectSubCategoryScreen extends StatefulWidget {
   final String parentId;
   final String parentName;
+  final Map<String, dynamic>? prefillData;
 
   const SelectSubCategoryScreen({
     super.key,
     required this.parentId,
     required this.parentName,
+    this.prefillData,
   });
 
   @override
@@ -80,10 +82,17 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
       final List createdServices = response['services'] ?? [];
 
       if (createdServices.length == 1) {
+        // Merge any AI prefill data into the service before opening editor
+        final service = Map<String, dynamic>.from(createdServices[0]);
+        if (widget.prefillData != null) {
+          widget.prefillData!.forEach((k, v) {
+            if (v != null) service[k] = v;
+          });
+        }
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => EditServiceScreen(service: createdServices[0]),
+            builder: (_) => EditServiceScreen(service: service),
           ),
         );
       } else {

@@ -822,6 +822,13 @@ class ApiService {
     return (await _authenticatedGet('/swap-requests/board'))['board'] ?? [];
   }
 
+  Future<List<dynamic>> getSwapAvailableServices() async {
+    return (await _authenticatedGet(
+          '/swap-requests/available-services',
+        ))['services'] ??
+        [];
+  }
+
   Future<List<dynamic>> getAiRankedSwapBoard() async {
     return (await _authenticatedGet(
           '/swap-requests/board/ai-ranked',
@@ -1110,7 +1117,9 @@ class ApiService {
 
   // Delete own comment on a group post
   Future<void> deleteGroupComment(String postId, String commentId) async {
-    await _authenticatedDelete('/feeds/groups/posts/$postId/comments/$commentId');
+    await _authenticatedDelete(
+      '/feeds/groups/posts/$postId/comments/$commentId',
+    );
   }
 
   // Saved posts (bookmarks)

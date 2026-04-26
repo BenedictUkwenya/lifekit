@@ -110,7 +110,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
       if (mounted) {
         setState(() {
           _weeklySchedule = jsonDecode(results[0].body)['schedule'] ?? [];
-          List rawBookings = jsonDecode(results[1].body)['bookings'] ?? [];
+          List rawBookings = jsonDecode(results[1].body)['schedule'] ?? [];
           _existingBookings = List<Map<String, dynamic>>.from(rawBookings);
 
           _isLoadingAvailability = false;
@@ -255,22 +255,22 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
     final Color bgColor = isSelected
         ? AppColors.primary
         : isToday
-            ? AppColors.primary.withOpacity(0.15)
-            : Colors.transparent;
+        ? AppColors.primary.withOpacity(0.15)
+        : Colors.transparent;
 
     final Color textColor = isSelected
         ? Colors.white
         : isToday
-            ? AppColors.primary
-            : isDisabled || isOutside
-                ? (isOutside ? Colors.grey.shade300 : Colors.grey.shade400)
-                : Colors.black87;
+        ? AppColors.primary
+        : isDisabled || isOutside
+        ? (isOutside ? Colors.grey.shade300 : Colors.grey.shade400)
+        : Colors.black87;
 
     final FontWeight fontWeight = (isSelected || isToday)
         ? FontWeight.w700
         : isDisabled || isOutside
-            ? FontWeight.w400
-            : FontWeight.w600;
+        ? FontWeight.w400
+        : FontWeight.w600;
 
     return Center(
       child: Column(
@@ -1757,7 +1757,11 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.shopping_cart_outlined, size: 18, color: Colors.white),
+                        const Icon(
+                          Icons.shopping_cart_outlined,
+                          size: 18,
+                          color: Colors.white,
+                        ),
                         const SizedBox(width: 6),
                         Flexible(
                           child: Text(

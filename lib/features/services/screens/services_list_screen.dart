@@ -18,6 +18,8 @@ import '../../home/screens/notifications_screen.dart';
 import 'service_booking_detail_screen.dart';
 import '../../profile/screens/provider_profile_screen.dart';
 import 'all_categories_screen.dart';
+import '../../../core/widgets/service_action_sheet.dart';
+import 'skill_swap_screens.dart' show SkillSwapBottomSheet;
 import '../../bookings/screens/cart_screen.dart';
 
 class ServicesListScreen extends StatefulWidget {
@@ -43,6 +45,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
 
   String _flagEmoji = '🇳🇬';
   int _unreadNotifications = 0;
+  String? _currentUserId;
 
   // AI City Pulse
   String? _cityPulseInsight;
@@ -90,6 +93,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
                 : 'NG',
           );
           _unreadNotifications = countsData['notifications'] ?? 0;
+          _currentUserId = profileData['profile']?['id']?.toString();
         });
       }
 
@@ -896,123 +900,218 @@ class _ServicesListScreenState extends State<ServicesListScreen>
     final rating =
         double.tryParse((service['average_rating'] ?? '0').toString()) ?? 0.0;
     final coverImage = _getServiceImage(service);
+    final providerId = (service['provider_id'] ?? '').toString();
+    final isOwn = _currentUserId != null && providerId == _currentUserId;
 
     return GestureDetector(
       onTap: () {
+        if (isOwn) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'This is your service. Manage it from My Services.',
+                style: GoogleFonts.poppins(fontSize: 13),
+              ),
+              backgroundColor: const Color(0xFF4F46E5),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              margin: const EdgeInsets.all(16),
+            ),
+          );
+          return;
+        }
         final serviceId = (service['id'] ?? '').toString();
-        final providerId = (service['provider_id'] ?? '').toString();
         if (serviceId.isEmpty || providerId.isEmpty) return;
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ServiceBookingDetailScreen(
-              serviceId: serviceId,
-              providerId: providerId,
-              providerName: providerName,
-              providerPic: provider?['profile_picture_url']?.toString(),
-              serviceTitle: serviceTitle,
+        showServiceActionSheet(
+          context: context,
+          serviceTitle: serviceTitle,
+          providerName: providerName,
+          coverImageUrl: coverImage,
+          isSwappable: service['is_skill_swap_available'] == true,
+          onBook: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ServiceBookingDetailScreen(
+                serviceId: serviceId,
+                providerId: providerId,
+                providerName: providerName,
+                providerPic: provider?['profile_picture_url']?.toString(),
+                serviceTitle: serviceTitle,
+              ),
+            ),
+          ),
+          onSwap: () => showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (_) => SkillSwapBottomSheet(
+              initialTargetCategoryId: service['category_id']?.toString(),
+              initialTargetCategoryName:
+                  (service['service_categories']?['name'] ?? serviceTitle)
+                      .toString(),
+              initialTargetCoverImageUrl: coverImage,
+              initialTargetServiceId:
+                  (service['id'] ?? '').toString().isNotEmpty
+                  ? (service['id']).toString()
+                  : null,
+              initialTargetProviderId: providerId.isNotEmpty
+                  ? providerId
+                  : null,
+              initialTargetProviderName: providerName,
+              initialTargetServiceTitle: serviceTitle,
+              initialTargetProviderPic: provider?['profile_picture_url']
+                  ?.toString(),
             ),
           ),
         );
       },
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(20, 0, 20, 18),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.grey.shade100),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(20),
-                  ),
-                  child: SizedBox(
-                    height: 170,
-                    width: double.infinity,
-                    child: coverImage != null
-                        ? CachedNetworkImage(
-                            imageUrl: coverImage,
-                            fit: BoxFit.cover,
-                          )
-                        : Container(
-                            color: Colors.grey.shade200,
-                            child: const Icon(Icons.image, color: Colors.grey),
-                          ),
-                  ),
-                ),
-                if (service['is_skill_swap_available'] == true)
-                  Positioned(top: 10, left: 12, child: _buildSwappableBadge()),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      child: Opacity(
+        opacity: isOwn ? 0.75 : 1.0,
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(20, 0, 20, 18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.grey.shade100),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Stack(
                 children: [
-                  Text(
-                    serviceTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.poppins(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
+                    child: SizedBox(
+                      height: 170,
+                      width: double.infinity,
+                      child: coverImage != null
+                          ? CachedNetworkImage(
+                              imageUrl: coverImage,
+                              fit: BoxFit.cover,
+                            )
+                          : Container(
+                              color: Colors.grey.shade200,
+                              child: const Icon(
+                                Icons.image,
+                                color: Colors.grey,
+                              ),
+                            ),
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    providerName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: Colors.grey.shade700,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.star_rounded,
-                        size: 16,
-                        color: Colors.amber,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        rating == 0 ? "New" : rating.toStringAsFixed(1),
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        "\$$price",
-                        style: GoogleFonts.poppins(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ],
+                  Positioned(
+                    top: 10,
+                    left: 12,
+                    child: isOwn
+                        ? _buildYourServiceBadge()
+                        : service['is_skill_swap_available'] == true
+                        ? _buildSwappableBadge()
+                        : const SizedBox(),
                   ),
                 ],
               ),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      serviceTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      providerName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Colors.grey.shade700,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.star_rounded,
+                          size: 16,
+                          color: Colors.amber,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          rating == 0 ? "New" : rating.toStringAsFixed(1),
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          "\$$price",
+                          style: GoogleFonts.poppins(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildYourServiceBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF6366F1).withOpacity(0.45),
+            blurRadius: 8,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.person_rounded, color: Colors.white, size: 10),
+          const SizedBox(width: 4),
+          Text(
+            'Your Service',
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }

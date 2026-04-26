@@ -7,7 +7,11 @@ import '../../../core/widgets/lifekit_loader.dart';
 
 // Navigation Targets
 import '../../bookings/screens/bookings_screen.dart';
+import '../../provider/screens/my_services_list_screen.dart';
+import '../../provider/screens/subscription_plans_screen.dart';
+import '../../services/screens/skill_swap_dashboard_screen.dart';
 import 'chats_list_screen.dart';
+import 'feeds_screen.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -71,7 +75,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ),
           backgroundColor: Colors.green.shade600,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           margin: const EdgeInsets.all(16),
           elevation: 4,
           duration: const Duration(seconds: 2),
@@ -108,7 +114,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ),
           backgroundColor: Colors.red.shade600,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           margin: const EdgeInsets.all(16),
           elevation: 4,
           duration: const Duration(seconds: 2),
@@ -121,6 +129,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Future<void> _handleTap(dynamic notif) async {
+    // Mark as read
     if (notif['is_read'] == false) {
       setState(() {
         final index = notifications.indexOf(notif);
@@ -129,18 +138,48 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       _apiService.markNotificationRead(notif['id']);
     }
 
-    final type = notif['type'];
+    final type = notif['type']?.toString() ?? '';
+
     if (type == 'chat_message') {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const ChatsListScreen()),
       );
-    } else if (type.toString().startsWith('booking')) {
+    } else if (type.startsWith('booking') ||
+        type == 'event_ticket' ||
+        type == 'dispute_resolved') {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const BookingsScreen()),
       );
+    } else if (type == 'service_review') {
+      // Rejected/approved service — take user to their services list to fix it
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const MyServicesListScreen()),
+      );
+    } else if (type == 'trial_expired' ||
+        type == 'ai_nudge_no_services' ||
+        type == 'ai_nudge_inactive') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const SubscriptionPlansScreen()),
+      );
+    } else if (type == 'post_comment' ||
+        type == 'event_comment' ||
+        type == 'group_comment' ||
+        type == 'ai_city_pulse') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const FeedsScreen()),
+      );
+    } else if (type == 'swap_request' || type == 'swap_update') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const SkillSwapDashboardScreen()),
+      );
     }
+    // system / payment / earning — no navigation, just marking read is enough
   }
 
   @override
@@ -238,6 +277,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final DateTime created = DateTime.parse(notif['created_at']);
     final String timeAgo = _getTimeAgo(created);
 
+    // Types that navigate somewhere on tap
+    final bool isActionable =
+        type != 'system' &&
+        type != 'payment' &&
+        type != 'earning' &&
+        type != 'refund';
+
     return GestureDetector(
       onTap: () => _handleTap(notif),
       child: Container(
@@ -273,18 +319,21 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        notif['title'] ?? 'Notification',
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: isRead ? Colors.black : AppColors.primary,
+                      Expanded(
+                        child: Text(
+                          notif['title'] ?? 'Notification',
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: isRead ? Colors.black : AppColors.primary,
+                          ),
                         ),
                       ),
                       if (!isRead)
                         Container(
                           width: 8,
                           height: 8,
+                          margin: const EdgeInsets.only(left: 6),
                           decoration: const BoxDecoration(
                             color: Colors.red,
                             shape: BoxShape.circle,
@@ -301,16 +350,40 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    timeAgo,
-                    style: GoogleFonts.poppins(
-                      fontSize: 10,
-                      color: Colors.grey[400],
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        timeAgo,
+                        style: GoogleFonts.poppins(
+                          fontSize: 10,
+                          color: Colors.grey[400],
+                        ),
+                      ),
+                      if (isActionable) ...[
+                        const SizedBox(width: 6),
+                        Text(
+                          '· Tap to view',
+                          style: GoogleFonts.poppins(
+                            fontSize: 10,
+                            color: AppColors.primary.withOpacity(0.6),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),
             ),
+            if (isActionable)
+              Padding(
+                padding: const EdgeInsets.only(left: 4, top: 2),
+                child: Icon(
+                  Icons.chevron_right,
+                  size: 18,
+                  color: Colors.grey[300],
+                ),
+              ),
           ],
         ),
       ),
@@ -324,11 +397,33 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     if (type == 'chat_message') {
       icon = Icons.chat_bubble_outline;
       color = Colors.blue;
-    } else if (type.startsWith('booking')) {
+    } else if (type.startsWith('booking') || type == 'event_ticket') {
       icon = Icons.calendar_today;
       color = Colors.orange;
-    } else if (type == 'event_ticket') {
-      icon = Icons.confirmation_number_outlined;
+    } else if (type == 'dispute_resolved' || type == 'booking_dispute') {
+      icon = Icons.gavel_rounded;
+      color = Colors.purple;
+    } else if (type == 'service_review') {
+      icon = Icons.rate_review_outlined;
+      color = Colors.red;
+    } else if (type == 'post_comment' ||
+        type == 'event_comment' ||
+        type == 'group_comment') {
+      icon = Icons.comment_outlined;
+      color = Colors.teal;
+    } else if (type == 'ai_city_pulse' ||
+        type == 'ai_nudge_no_services' ||
+        type == 'ai_nudge_inactive') {
+      icon = Icons.auto_awesome;
+      color = const Color(0xFF89273B);
+    } else if (type == 'trial_expired') {
+      icon = Icons.timer_off_outlined;
+      color = Colors.deepOrange;
+    } else if (type == 'swap_request' || type == 'swap_update') {
+      icon = Icons.swap_horiz_rounded;
+      color = const Color(0xFFE8A020);
+    } else if (type == 'earning' || type == 'payment' || type == 'refund') {
+      icon = Icons.account_balance_wallet_outlined;
       color = Colors.green;
     } else {
       icon = Icons.notifications_outlined;

@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import 'select_main_category_screen.dart';
+import 'select_sub_category_screen.dart';
 import 'edit_service_screen.dart';
 import 'subscription_plans_screen.dart';
 import '../../wallet/screens/add_money_screen.dart';
@@ -24,6 +25,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
   bool isLoading = true;
   bool _isOpeningCreateFlow = false;
   List<dynamic> aiSuggestions = [];
+  List<dynamic> _mainCategories = [];
   bool isAiLoading = false;
 
   @override
@@ -51,16 +53,120 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
     if (!mounted) return;
     setState(() => isAiLoading = true);
     try {
-      final data = await _apiService.getAiOpportunities();
+      final results = await Future.wait([
+        _apiService.getAiOpportunities(),
+        _apiService.getCategories(),
+      ]);
       if (mounted) {
         setState(() {
-          aiSuggestions = (data['opportunities'] as List<dynamic>?) ?? [];
+          aiSuggestions =
+              ((results[0] as Map)['opportunities'] as List<dynamic>?) ?? [];
+          _mainCategories = results[1] as List<dynamic>;
           isAiLoading = false;
         });
       }
     } catch (_) {
       if (mounted) setState(() => isAiLoading = false);
     }
+  }
+
+  /// Tries to find the best-matching main category for an AI suggestion.
+  /// Strategy: exact name → fuzzy name → searchCategories(categoryName) →
+  /// searchCategories(title) → null (fallback to main screen).
+  Future<dynamic> _findCategory(String categoryName, String title) async {
+    // 1. Exact match from cached categories
+    if (categoryName.isNotEmpty) {
+      final exact = _mainCategories.cast<dynamic?>().firstWhere(
+        (c) =>
+            (c?['name']?.toString() ?? '').toLowerCase() ==
+            categoryName.toLowerCase(),
+        orElse: () => null,
+      );
+      if (exact != null) return exact;
+
+      // 2. Partial match (AI name contains our name or vice versa)
+      final partial = _mainCategories.cast<dynamic?>().firstWhere((c) {
+        final n = (c?['name']?.toString() ?? '').toLowerCase();
+        return n.contains(categoryName.toLowerCase()) ||
+            categoryName.toLowerCase().contains(n);
+      }, orElse: () => null);
+      if (partial != null) return partial;
+    }
+
+    // 3. Use searchCategories API with category name
+    for (final query in [categoryName, title]) {
+      if (query.isEmpty) continue;
+      try {
+        final results = await _apiService.searchCategories(query);
+        // Find the first result that is a main category (no parent)
+        final mainCat = (results as List<dynamic>).cast<dynamic?>().firstWhere(
+          (c) => c?['parent_category_id'] == null,
+          orElse: () => null,
+        );
+        if (mainCat != null) return mainCat;
+        // Or use a sub-category's parent
+        final subCat = (results as List<dynamic>).cast<dynamic?>().firstWhere(
+          (c) => c?['parent_category_id'] != null,
+          orElse: () => null,
+        );
+        if (subCat != null) {
+          // Return a synthetic main category from the sub's parent info
+          return {
+            'id': subCat['parent_category_id'],
+            'name': subCat['parent']?['name'] ?? query,
+          };
+        }
+      } catch (_) {}
+    }
+    return null;
+  }
+
+  Future<void> _openCreateFromSuggestion(dynamic opp) async {
+    final title = opp['title']?.toString() ?? '';
+    final categoryName = opp['category']?.toString() ?? '';
+    final reason = opp['reason']?.toString() ?? '';
+    // Parse a numeric price from the suggested_price string (e.g. "$20 - $40 per hour" → 20)
+    final rawPrice = opp['suggested_price']?.toString() ?? '';
+    final priceMatch = RegExp(r'\d+').firstMatch(rawPrice);
+    final parsedPrice = priceMatch != null
+        ? int.tryParse(priceMatch.group(0)!)
+        : null;
+
+    final prefill = <String, dynamic>{
+      if (title.isNotEmpty) 'title': title,
+      if (reason.isNotEmpty) 'description': reason,
+      if (parsedPrice != null) 'price': parsedPrice,
+    };
+
+    setState(() => _isOpeningCreateFlow = true);
+    final matched = await _findCategory(categoryName, title);
+    if (!mounted) return;
+    setState(() => _isOpeningCreateFlow = false);
+
+    dynamic result;
+    if (matched != null) {
+      result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SelectSubCategoryScreen(
+            parentId: matched['id'].toString(),
+            parentName: matched['name'].toString(),
+            prefillData: prefill,
+          ),
+        ),
+      );
+    } else {
+      // Fallback: open main category screen pre-searched
+      result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SelectMainCategoryScreen(
+            initialQuery: categoryName.isNotEmpty ? categoryName : title,
+          ),
+        ),
+      );
+    }
+    if (mounted && result == true) _fetchMyServices();
   }
 
   String _getSafeImage(dynamic service) {
@@ -762,6 +868,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
     final price = opp['suggested_price']?.toString() ?? '';
     final isHigh =
         (opp['demand_level']?.toString() ?? '').toLowerCase() == 'high';
+    final categoryName = opp['category']?.toString() ?? '';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -855,64 +962,57 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF10B981).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.attach_money_rounded,
-                            size: 13,
-                            color: Color(0xFF059669),
-                          ),
-                          Text(
-                            price,
-                            style: GoogleFonts.poppins(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF059669),
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF10B981).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.attach_money_rounded,
+                              size: 13,
+                              color: Color(0xFF059669),
                             ),
-                          ),
-                        ],
+                            Flexible(
+                              child: Text(
+                                price,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF059669),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    const Spacer(),
+                    const SizedBox(width: 8),
                     SizedBox(
                       height: 36,
                       child: ElevatedButton(
                         onPressed: _isOpeningCreateFlow
                             ? null
-                            : () async {
-                                setState(() => _isOpeningCreateFlow = true);
-                                final result = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        const SelectMainCategoryScreen(),
-                                  ),
-                                );
-                                if (!mounted) return;
-                                setState(() => _isOpeningCreateFlow = false);
-                                if (result == true) _fetchMyServices();
-                              },
+                            : () => _openCreateFromSuggestion(opp),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           elevation: 0,
-                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
                         child: Text(
-                          '\u2728 Create This Service',
+                          '\u2728 Create Service',
                           style: GoogleFonts.poppins(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,

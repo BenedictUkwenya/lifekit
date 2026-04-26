@@ -6,7 +6,8 @@ import '../../../core/constants/app_colors.dart';
 import 'select_sub_category_screen.dart';
 
 class SelectMainCategoryScreen extends StatefulWidget {
-  const SelectMainCategoryScreen({super.key});
+  final String? initialQuery;
+  const SelectMainCategoryScreen({super.key, this.initialQuery});
 
   @override
   State<SelectMainCategoryScreen> createState() =>
@@ -26,6 +27,13 @@ class _SelectMainCategoryScreenState extends State<SelectMainCategoryScreen> {
   void initState() {
     super.initState();
     _fetchMainCategories();
+    if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
+      _searchController.text = widget.initialQuery!;
+      // Run search after categories load
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _onSearchChanged(widget.initialQuery!);
+      });
+    }
   }
 
   Future<void> _fetchMainCategories() async {

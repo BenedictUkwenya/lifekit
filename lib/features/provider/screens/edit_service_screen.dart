@@ -2015,14 +2015,17 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
               children: [
                 Row(
                   children: [
-                    Text(
-                      'Available for Skill Swap',
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: _isSkillSwapAvailable
-                            ? Colors.white
-                            : Colors.black87,
+                    Flexible(
+                      child: Text(
+                        'Available for Skill Swap',
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: _isSkillSwapAvailable
+                              ? Colors.white
+                              : Colors.black87,
+                        ),
                       ),
                     ),
                     if (_isSkillSwapAvailable) ...[
