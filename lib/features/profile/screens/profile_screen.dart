@@ -9,6 +9,7 @@ import 'package:lifekit_frontend/features/provider/screens/subscription_plans_sc
 // --- CORE ---
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/services/app_cache.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 
 // --- SCREENS ---
@@ -43,33 +44,64 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _fetchProfile();
   }
 
-  Future<void> _fetchProfile({bool showPageLoader = true}) async {
-    if (mounted && showPageLoader) {
-      setState(() {
-        isLoading = true;
-      });
+  Map<String, dynamic>? _parseProfile(Map<String, dynamic> data) {
+    final raw = data['profile'];
+    final p = raw is Map<String, dynamic>
+        ? Map<String, dynamic>.from(raw)
+        : Map<String, dynamic>.from(data);
+    p['subscription_tier'] = (p['subscription_tier'] ?? 'free').toString();
+    p['subscription_expiry'] = p['subscription_expiry']?.toString();
+    return p;
+  }
+
+  Future<void> _fetchProfile({bool forceRefresh = false}) async {
+    // 1. If we already have profile data displayed, never show the full-page loader again.
+    final hasCachedProfile =
+        profile != null || AppCache.instance.has('user_profile');
+
+    if (!hasCachedProfile) {
+      // First ever load — show the page spinner
+      if (mounted) setState(() => isLoading = true);
     }
+
+    // 2. Paint from cache immediately if available
+    if (!forceRefresh) {
+      final cached = AppCache.instance.get<Map<String, dynamic>>(
+        'user_profile',
+      );
+      if (cached != null && profile == null) {
+        final parsed = _parseProfile(cached);
+        if (mounted) {
+          setState(() {
+            profile = parsed;
+            isLoading = false;
+          });
+        }
+        // Also fill wallet from cache without waiting
+        _fetchMonetizationData();
+      }
+    }
+
+    // 3. Always revalidate in the background (SWR)
     try {
+      // Force a fresh fetch by temporarily clearing cache when forceRefresh
+      if (forceRefresh) AppCache.instance.invalidate('user_profile');
       final data = await _apiService.getUserProfile();
-      final backendProfileRaw = data['profile'];
-      final backendProfile = backendProfileRaw is Map<String, dynamic>
-          ? Map<String, dynamic>.from(backendProfileRaw)
-          : Map<String, dynamic>.from(data);
-      backendProfile['subscription_tier'] =
-          (backendProfile['subscription_tier'] ?? 'free').toString();
-      backendProfile['subscription_expiry'] =
-          backendProfile['subscription_expiry']?.toString();
+      final parsed = _parseProfile(data);
       if (mounted) {
         setState(() {
-          profile = backendProfile;
+          profile = parsed;
           isLoading = false;
-          _isWalletLoading = true;
-          _isUsageLoading = true;
+          // Only reset wallet loading if we're doing a full refresh
+          if (forceRefresh) {
+            _isWalletLoading = true;
+            _isUsageLoading = true;
+          }
         });
       }
-      _fetchMonetizationData();
+      if (forceRefresh) _fetchMonetizationData();
     } catch (e) {
-      if (mounted && showPageLoader) setState(() => isLoading = false);
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
@@ -207,6 +239,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _logout() async {
     const storage = FlutterSecureStorage();
     await storage.deleteAll();
+    AppCache.instance.clear();
     if (mounted) {
       Navigator.pushAndRemoveUntil(
         context,
@@ -310,7 +343,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: SafeArea(
         child: RefreshIndicator(
           color: AppColors.primary,
-          onRefresh: () => _fetchProfile(showPageLoader: false),
+          onRefresh: () => _fetchProfile(forceRefresh: true),
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -475,7 +508,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         ),
                                       );
                                       if (!mounted) return;
-                                      _fetchProfile();
+                                      _fetchProfile(forceRefresh: true);
                                     },
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
@@ -536,27 +569,64 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   child: Row(
                     children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppColors.primary.withOpacity(0.1),
-                            width: 3,
+                      GestureDetector(
+                        onTap: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  EditProfileScreen(profile: profile!),
+                            ),
+                          );
+                          _fetchProfile(forceRefresh: true);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.primary.withOpacity(0.1),
+                              width: 3,
+                            ),
                           ),
-                        ),
-                        child: CircleAvatar(
-                          radius: 32,
-                          backgroundColor: Colors.grey[100],
-                          backgroundImage: pic != null
-                              ? CachedNetworkImageProvider(pic)
-                              : null,
-                          child: pic == null
-                              ? const Icon(
-                                  Icons.person,
-                                  color: Colors.grey,
-                                  size: 30,
-                                )
-                              : null,
+                          child: Stack(
+                            children: [
+                              CircleAvatar(
+                                radius: 32,
+                                backgroundColor: Colors.grey[100],
+                                backgroundImage: pic != null
+                                    ? CachedNetworkImageProvider(pic)
+                                    : null,
+                                child: pic == null
+                                    ? const Icon(
+                                        Icons.person,
+                                        color: Colors.grey,
+                                        size: 30,
+                                      )
+                                    : null,
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: Container(
+                                  width: 20,
+                                  height: 20,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.edit,
+                                    color: Colors.white,
+                                    size: 11,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -763,7 +833,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       EditProfileScreen(profile: profile!),
                                 ),
                               );
-                              _fetchProfile();
+                              _fetchProfile(forceRefresh: true);
                             },
                           ),
                           _buildToolItem(
@@ -843,7 +913,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   EditProfileScreen(profile: profile!),
                             ),
                           );
-                          _fetchProfile();
+                          _fetchProfile(forceRefresh: true);
                         },
                       ),
                       _buildDivider(),

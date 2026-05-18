@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'app_cache.dart';
 
 // ── Custom exceptions ──────────────────────────────────────────────────────
 class ApiException implements Exception {
@@ -392,7 +393,12 @@ class ApiService {
   // ===========================================================================
 
   Future<Map<String, dynamic>> getUserProfile() async {
-    return await _authenticatedGet('/users/profile');
+    const key = 'user_profile';
+    final cached = AppCache.instance.get<Map<String, dynamic>>(key);
+    if (cached != null) return cached;
+    final data = await _authenticatedGet('/users/profile');
+    AppCache.instance.set(key, data, ttl: AppCache.ttlLong);
+    return data;
   }
 
   Future<String> getCurrentSubscriptionTier() async {
@@ -417,6 +423,7 @@ class ApiService {
     if (bio != null) body['bio'] = bio;
     if (body.isEmpty) return;
     await _authenticatedPut('/users/profile', body);
+    AppCache.instance.invalidate('user_profile');
   }
 
   Future<void> uploadProfilePic(File imageFile) async {
@@ -439,6 +446,7 @@ class ApiService {
     var response = await http.Response.fromStream(streamedResponse);
     if (response.statusCode == 200) {
       final responseData = jsonDecode(response.body);
+      AppCache.instance.invalidate('user_profile');
       await updateProfile(imageUrl: responseData['url']);
     } else if (response.statusCode == 401) {
       // Manual retry for Multipart
@@ -452,7 +460,12 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> getUnreadCounts() async {
-    return await _authenticatedGet('/users/counts');
+    const key = 'unread_counts';
+    final cached = AppCache.instance.get<Map<String, dynamic>>(key);
+    if (cached != null) return cached;
+    final data = await _authenticatedGet('/users/counts');
+    AppCache.instance.set(key, data, ttl: AppCache.ttlShort);
+    return data;
   }
 
   Future<void> deleteAccount() async {
@@ -460,6 +473,7 @@ class ApiService {
     await storage.deleteAll();
     _cachedAccessToken = null;
     _cachedRefreshToken = null;
+    AppCache.instance.clear();
   }
 
   // ===========================================================================
@@ -504,9 +518,14 @@ class ApiService {
   }
 
   Future<List<dynamic>> getCategories() async {
+    const key = 'categories';
+    final cached = AppCache.instance.get<List<dynamic>>(key);
+    if (cached != null) return cached;
     final response = await http.get(Uri.parse('$baseUrl/home/categories'));
     final data = await _processResponse(response);
-    return data['categories'] ?? [];
+    final result = data['categories'] ?? [];
+    AppCache.instance.set(key, result, ttl: AppCache.ttlStatic);
+    return result;
   }
 
   Future<List<dynamic>> getPopularServices() async {
@@ -518,8 +537,13 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> getExplore() async {
+    const key = 'explore';
+    final cached = AppCache.instance.get<Map<String, dynamic>>(key);
+    if (cached != null) return cached;
     final response = await http.get(Uri.parse('$baseUrl/home/explore'));
-    return await _processResponse(response);
+    final data = await _processResponse(response);
+    AppCache.instance.set(key, data, ttl: AppCache.ttlMedium);
+    return data;
   }
 
   Future<List<dynamic>> getRecentSearches() async {
@@ -543,11 +567,16 @@ class ApiService {
   }
 
   Future<List<dynamic>> getSubCategories(String parentId) async {
+    final key = 'subcategories_$parentId';
+    final cached = AppCache.instance.get<List<dynamic>>(key);
+    if (cached != null) return cached;
     final response = await http.get(
       Uri.parse('$baseUrl/home/categories/children/$parentId'),
     );
     final data = await _processResponse(response);
-    return data['categories'] ?? [];
+    final result = data['categories'] ?? [];
+    AppCache.instance.set(key, result, ttl: AppCache.ttlStatic);
+    return result;
   }
 
   Future<Map<String, dynamic>> search(String query) async {
@@ -570,8 +599,13 @@ class ApiService {
   // ===========================================================================
 
   Future<List<dynamic>> getMyServices() async {
+    const key = 'my_services';
+    final cached = AppCache.instance.get<List<dynamic>>(key);
+    if (cached != null) return cached;
     final data = await _authenticatedGet('/services/my-services');
-    return data['services'] ?? [];
+    final result = data['services'] ?? [];
+    AppCache.instance.set(key, result, ttl: AppCache.ttlMedium);
+    return result;
   }
 
   Future<Map<String, dynamic>> createDraftServices(
@@ -588,10 +622,12 @@ class ApiService {
     Map<String, dynamic> data,
   ) async {
     await _authenticatedPut('/services/$serviceId', data);
+    AppCache.instance.invalidate('my_services');
   }
 
   Future<void> deleteService(String serviceId) async {
     await _authenticatedDelete('/services/$serviceId');
+    AppCache.instance.invalidate('my_services');
   }
 
   Future<Map<String, dynamic>> buySubscription(String tier) async {
@@ -638,7 +674,12 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> getProviderStats() async {
-    return await _authenticatedGet('/users/provider-stats');
+    const key = 'provider_stats';
+    final cached = AppCache.instance.get<Map<String, dynamic>>(key);
+    if (cached != null) return cached;
+    final data = await _authenticatedGet('/users/provider-stats');
+    AppCache.instance.set(key, data, ttl: AppCache.ttlMedium);
+    return data;
   }
 
   // ===========================================================================
@@ -664,19 +705,35 @@ class ApiService {
   }
 
   Future<List<dynamic>> getClientBookings() async {
-    return (await _authenticatedGet('/bookings/client'))['bookings'] ?? [];
+    const key = 'client_bookings';
+    final cached = AppCache.instance.get<List<dynamic>>(key);
+    if (cached != null) return cached;
+    final result =
+        (await _authenticatedGet('/bookings/client'))['bookings'] ?? [];
+    AppCache.instance.set(key, result, ttl: AppCache.ttlMedium);
+    return result;
   }
 
   Future<List<dynamic>> getProviderRequests() async {
-    return (await _authenticatedGet('/bookings/provider'))['requests'] ?? [];
+    const key = 'provider_requests';
+    final cached = AppCache.instance.get<List<dynamic>>(key);
+    if (cached != null) return cached;
+    final result =
+        (await _authenticatedGet('/bookings/provider'))['requests'] ?? [];
+    AppCache.instance.set(key, result, ttl: AppCache.ttlMedium);
+    return result;
   }
 
   Future<void> updateBookingStatus(String bookingId, String status) async {
     await _authenticatedPut('/bookings/$bookingId/status', {"status": status});
+    AppCache.instance.invalidate('client_bookings');
+    AppCache.instance.invalidate('provider_requests');
   }
 
   Future<void> completeBooking(String bookingId) async {
     await _authenticatedPut('/bookings/$bookingId/complete', {});
+    AppCache.instance.invalidate('client_bookings');
+    AppCache.instance.invalidate('provider_requests');
   }
 
   Future<void> openBookingDispute(String bookingId, String reason) async {
@@ -692,14 +749,16 @@ class ApiService {
   Future<void> submitReview({
     required String bookingId,
     required String serviceId,
-    required String providerId,
+    required String revieweeId,
+    required String reviewerRole, // 'client' or 'provider'
     required int rating,
     required String comment,
   }) async {
     await _authenticatedPost('/reviews', {
       "booking_id": bookingId,
       "service_id": serviceId,
-      "provider_id": providerId,
+      "reviewee_id": revieweeId,
+      "reviewer_role": reviewerRole,
       "rating": rating,
       "comment": comment,
     });
@@ -710,7 +769,12 @@ class ApiService {
   // ===========================================================================
 
   Future<Map<String, dynamic>> getWallet() async {
-    return await _authenticatedGet('/wallet');
+    const key = 'wallet';
+    final cached = AppCache.instance.get<Map<String, dynamic>>(key);
+    if (cached != null) return cached;
+    final data = await _authenticatedGet('/wallet');
+    AppCache.instance.set(key, data, ttl: AppCache.ttlLong);
+    return data;
   }
 
   Future<Map<String, dynamic>> onboardStripeConnect() async {
@@ -723,6 +787,7 @@ class ApiService {
 
   Future<void> withdrawFromWallet(double amount) async {
     await _authenticatedPost('/wallet/withdraw', {"amount": amount});
+    AppCache.instance.invalidate('wallet');
   }
 
   Future<Map<String, dynamic>> initDeposit(double amount) async {
@@ -733,6 +798,7 @@ class ApiService {
     await _authenticatedPost('/wallet/confirm-deposit', {
       "paymentIntentId": paymentIntentId,
     });
+    AppCache.instance.invalidate('wallet');
   }
 
   // ===========================================================================
@@ -740,20 +806,32 @@ class ApiService {
   // ===========================================================================
 
   Future<List<dynamic>> getNotifications() async {
-    return (await _authenticatedGet('/users/notifications'))['notifications'] ??
+    const key = 'notifications';
+    final cached = AppCache.instance.get<List<dynamic>>(key);
+    if (cached != null) return cached;
+    final result =
+        (await _authenticatedGet('/users/notifications'))['notifications'] ??
         [];
+    AppCache.instance.set(key, result, ttl: const Duration(seconds: 45));
+    return result;
   }
 
   Future<void> markNotificationRead(String id) async {
     await _authenticatedPut('/users/notifications/$id/read', {});
+    AppCache.instance.invalidate('notifications');
+    AppCache.instance.invalidate('unread_counts');
   }
 
   Future<void> markAllNotificationsRead() async {
     await _authenticatedPut('/users/notifications/read-all', {});
+    AppCache.instance.invalidate('notifications');
+    AppCache.instance.invalidate('unread_counts');
   }
 
   Future<void> deleteNotification(String id) async {
     await _authenticatedDelete('/users/notifications/$id');
+    AppCache.instance.invalidate('notifications');
+    AppCache.instance.invalidate('unread_counts');
   }
 
   // ===========================================================================
@@ -761,7 +839,12 @@ class ApiService {
   // ===========================================================================
 
   Future<List<dynamic>> getConversations() async {
-    return (await _authenticatedGet('/chats'))['conversations'] ?? [];
+    const key = 'conversations';
+    final cached = AppCache.instance.get<List<dynamic>>(key);
+    if (cached != null) return cached;
+    final result = (await _authenticatedGet('/chats'))['conversations'] ?? [];
+    AppCache.instance.set(key, result, ttl: AppCache.ttlShort);
+    return result;
   }
 
   Future<List<dynamic>> getMessages(String bookingId) async {
@@ -811,11 +894,23 @@ class ApiService {
   }
 
   Future<List<dynamic>> getIncomingSwaps() async {
-    return (await _authenticatedGet('/swap-requests/incoming'))['swaps'] ?? [];
+    const key = 'incoming_swaps';
+    final cached = AppCache.instance.get<List<dynamic>>(key);
+    if (cached != null) return cached;
+    final result =
+        (await _authenticatedGet('/swap-requests/incoming'))['swaps'] ?? [];
+    AppCache.instance.set(key, result, ttl: AppCache.ttlMedium);
+    return result;
   }
 
   Future<List<dynamic>> getOutgoingSwaps() async {
-    return (await _authenticatedGet('/swap-requests/outgoing'))['swaps'] ?? [];
+    const key = 'outgoing_swaps';
+    final cached = AppCache.instance.get<List<dynamic>>(key);
+    if (cached != null) return cached;
+    final result =
+        (await _authenticatedGet('/swap-requests/outgoing'))['swaps'] ?? [];
+    AppCache.instance.set(key, result, ttl: AppCache.ttlMedium);
+    return result;
   }
 
   Future<List<dynamic>> getSwapBoard() async {
@@ -840,23 +935,36 @@ class ApiService {
     return (await _authenticatedGet('/swap-requests/$swapId'))['swap'] ?? {};
   }
 
+  Future<Map<String, dynamic>> getBookingById(String bookingId) async {
+    return (await _authenticatedGet('/bookings/$bookingId'))['booking'] ?? {};
+  }
+
   Future<Map<String, dynamic>> acceptSwap(
     String swapId, {
     String? targetServiceId,
     String? scheduledTime,
   }) async {
-    return await _authenticatedPut('/swap-requests/$swapId/accept', {
+    final result = await _authenticatedPut('/swap-requests/$swapId/accept', {
       if (targetServiceId != null) 'target_service_id': targetServiceId,
       if (scheduledTime != null) 'scheduled_time': scheduledTime,
     });
+    AppCache.instance.invalidate('incoming_swaps');
+    AppCache.instance.invalidate('outgoing_swaps');
+    AppCache.instance.invalidate('client_bookings');
+    AppCache.instance.invalidate('provider_requests');
+    return result;
   }
 
   Future<void> declineSwap(String swapId) async {
     await _authenticatedPut('/swap-requests/$swapId/decline', {});
+    AppCache.instance.invalidate('incoming_swaps');
+    AppCache.instance.invalidate('outgoing_swaps');
   }
 
   Future<void> cancelSwap(String swapId) async {
     await _authenticatedPut('/swap-requests/$swapId/cancel', {});
+    AppCache.instance.invalidate('incoming_swaps');
+    AppCache.instance.invalidate('outgoing_swaps');
   }
 
   Future<List<dynamic>> getAiSkillSwapMatches({
@@ -871,13 +979,86 @@ class ApiService {
   }
 
   Future<List<dynamic>> getFeeds() async {
+    const key = 'feeds';
+    final cached = AppCache.instance.get<List<dynamic>>(key);
+    if (cached != null) return cached;
     final data = await _authenticatedGet('/feeds/posts');
-    return data is List ? data : [];
+    final result = data is List ? data : [];
+    AppCache.instance.set(key, result, ttl: AppCache.ttlMedium);
+    return result;
+  }
+
+  Future<String> uploadPostImage(File imageFile) async {
+    String? token = await storage.read(key: 'jwt_token');
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$baseUrl/storage/upload/posts'),
+    );
+    request.headers['Authorization'] = 'Bearer $token';
+    final mimeTypeData =
+        lookupMimeType(imageFile.path)?.split('/') ?? ['image', 'jpeg'];
+    request.files.add(
+      await http.MultipartFile.fromPath(
+        'file',
+        imageFile.path,
+        contentType: MediaType(mimeTypeData[0], mimeTypeData[1]),
+      ),
+    );
+    var streamedResponse = await request.send();
+    var response = await http.Response.fromStream(streamedResponse);
+    if (response.statusCode == 200) return jsonDecode(response.body)['url'];
+    throw Exception('Image upload failed');
+  }
+
+  Future<String> uploadGroupImage(File imageFile) async {
+    String? token = await storage.read(key: 'jwt_token');
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$baseUrl/storage/upload/groups'),
+    );
+    request.headers['Authorization'] = 'Bearer $token';
+    final mimeTypeData =
+        lookupMimeType(imageFile.path)?.split('/') ?? ['image', 'jpeg'];
+    request.files.add(
+      await http.MultipartFile.fromPath(
+        'file',
+        imageFile.path,
+        contentType: MediaType(mimeTypeData[0], mimeTypeData[1]),
+      ),
+    );
+    var streamedResponse = await request.send();
+    var response = await http.Response.fromStream(streamedResponse);
+    if (response.statusCode == 200) return jsonDecode(response.body)['url'];
+    throw Exception('Group image upload failed');
+  }
+
+  Future<Map<String, dynamic>> createPost({
+    required String content,
+    String? title,
+    List<String>? imageUrls,
+    String tag = 'general',
+  }) async {
+    final safeUrls = (imageUrls ?? []).take(3).toList();
+    final result = await _authenticatedPost('/feeds/posts', {
+      'content': content,
+      if (title != null && title.isNotEmpty) 'title': title,
+      if (safeUrls.isNotEmpty) 'image_url': safeUrls.first,
+      if (safeUrls.isNotEmpty) 'image_urls': safeUrls,
+      'tag': tag,
+    });
+    AppCache.instance.invalidate('feeds');
+    return result is Map<String, dynamic> ? result : {};
   }
 
   Future<List<dynamic>> getEvents() async {
+    const key = 'events';
+    final cached = AppCache.instance.get<List<dynamic>>(key);
+    if (cached != null) return cached;
     final response = await http.get(Uri.parse('$baseUrl/feeds/events'));
-    return await _processResponse(response); // Now returns the List correctly
+    final result = await _processResponse(response);
+    final list = result is List ? result : [];
+    AppCache.instance.set(key, list, ttl: AppCache.ttlMedium);
+    return list;
   }
 
   Future<Map<String, dynamic>> buyEventTicket({
@@ -963,6 +1144,17 @@ class ApiService {
     });
   }
 
+  Future<void> forgotPassword(String email) async {
+    await _withNetworkGuard(() async {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/forgot-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({"email": email}),
+      );
+      await _processResponse(response);
+    });
+  }
+
   // Get Nearby Places (Auto-fills from Google/OSM)
   Future<List<dynamic>> getNearbyPlaces(double lat, double lng) async {
     final response = await http.get(
@@ -981,12 +1173,19 @@ class ApiService {
   }
 
   Future<List<dynamic>> getGroups() async {
+    const key = 'groups';
+    final cached = AppCache.instance.get<List<dynamic>>(key);
+    if (cached != null) return cached;
     final response = await http.get(Uri.parse('$baseUrl/feeds/groups'));
-    return await _processResponse(response);
+    final result = await _processResponse(response);
+    final list = result is List ? result : [];
+    AppCache.instance.set(key, list, ttl: AppCache.ttlMedium);
+    return list;
   }
 
   Future<void> joinGroup(String groupId) async {
     await _authenticatedPost('/feeds/groups/$groupId/join', {});
+    AppCache.instance.invalidate('groups');
   }
 
   Future<void> createGroup({
@@ -1098,6 +1297,26 @@ class ApiService {
   // 2. Permanently delete a group (Creator only)
   Future<void> deleteGroup(String groupId) async {
     await _authenticatedDelete('/feeds/groups/$groupId');
+    AppCache.instance.invalidate('groups');
+  }
+
+  // 3. Update group profile (name, description, image_url, anyone_can_post, is_private)
+  Future<Map<String, dynamic>> updateGroup(
+    String groupId, {
+    String? name,
+    String? description,
+    String? imageUrl,
+    bool? anyoneCanPost,
+    bool? isPrivate,
+  }) async {
+    final body = <String, dynamic>{};
+    if (name != null) body['name'] = name;
+    if (description != null) body['description'] = description;
+    if (imageUrl != null) body['image_url'] = imageUrl;
+    if (anyoneCanPost != null) body['anyone_can_post'] = anyoneCanPost;
+    if (isPrivate != null) body['is_private'] = isPrivate;
+    final result = await _authenticatedPut('/feeds/groups/$groupId', body);
+    return result is Map<String, dynamic> ? result : {};
   }
 
   // Delete a group post
@@ -1108,6 +1327,7 @@ class ApiService {
   // Delete a feed post (owner or admin)
   Future<void> deletePost(String postId) async {
     await _authenticatedDelete('/feeds/posts/$postId');
+    AppCache.instance.invalidate('feeds');
   }
 
   // Delete own comment on a feed post
@@ -1217,7 +1437,12 @@ class ApiService {
 
   // Module 2.3 — AI Opportunity Engine
   Future<Map<String, dynamic>> getAiOpportunities() async {
-    return await _authenticatedGet('/ai/opportunities');
+    const key = 'ai_opportunities';
+    final cached = AppCache.instance.get<Map<String, dynamic>>(key);
+    if (cached != null) return cached;
+    final data = await _authenticatedGet('/ai/opportunities');
+    AppCache.instance.set(key, data, ttl: const Duration(minutes: 10));
+    return data;
   }
 
   // Module 2.5/2.6 — AI Discovery Engine

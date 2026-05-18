@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../auth/screens/forgot_password_screen.dart';
 import '../../auth/screens/login_screen.dart';
 
 // =============================================================================
@@ -220,6 +221,25 @@ class _SecurityScreenState extends State<SecurityScreen> {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Center(
+                    child: TextButton(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ForgotPasswordScreen(),
+                        ),
+                      ),
+                      child: Text(
+                        "Forgot your password?",
+                        style: GoogleFonts.poppins(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 13,
+                        ),
+                      ),
                     ),
                   ),
                 ],

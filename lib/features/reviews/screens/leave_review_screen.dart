@@ -7,15 +7,20 @@ import '../../../core/services/api_service.dart';
 class LeaveReviewScreen extends StatefulWidget {
   final String bookingId;
   final String serviceId;
-  final String providerId;
-  final String serviceTitle;
+  // Who is being rated (provider_id when client rates, client_id when provider rates)
+  final String revieweeId;
+  // 'client' = client rating provider, 'provider' = provider rating client
+  final String reviewerRole;
+  // Display name of the person being rated
+  final String revieweeName;
 
   const LeaveReviewScreen({
     super.key,
     required this.bookingId,
     required this.serviceId,
-    required this.providerId,
-    required this.serviceTitle,
+    required this.revieweeId,
+    required this.reviewerRole,
+    required this.revieweeName,
   });
 
   @override
@@ -34,7 +39,8 @@ class _LeaveReviewScreenState extends State<LeaveReviewScreen> {
       await _apiService.submitReview(
         bookingId: widget.bookingId,
         serviceId: widget.serviceId,
-        providerId: widget.providerId,
+        revieweeId: widget.revieweeId,
+        reviewerRole: widget.reviewerRole,
         rating: _rating.toInt(),
         comment: _commentController.text,
       );
@@ -45,7 +51,7 @@ class _LeaveReviewScreenState extends State<LeaveReviewScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pop(context); // Go back
+        Navigator.pop(context, true); // true = rated successfully
       }
     } catch (e) {
       if (mounted) {
@@ -59,11 +65,12 @@ class _LeaveReviewScreenState extends State<LeaveReviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isRatingProvider = widget.reviewerRole == 'client';
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          "Rate Service",
+          isRatingProvider ? "Rate Provider" : "Rate Client",
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -84,7 +91,7 @@ class _LeaveReviewScreenState extends State<LeaveReviewScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              widget.serviceTitle,
+              widget.revieweeName,
               style: GoogleFonts.poppins(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,

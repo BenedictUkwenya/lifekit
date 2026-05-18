@@ -99,6 +99,8 @@ flutter:
     - assets/images/background_bg.png
     - assets/images/home_bg.png
     - assets/images/forloading.png
+    - assets/ai/aifullpic.jpg
+    - assets/ai/aihalfpic.jpg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

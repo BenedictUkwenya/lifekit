@@ -90,8 +90,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
             .toList();
       case 'Showcase':
         return posts
-            .where(
-                (p) => p['image_url'] != null && p['service_id'] == null)
+            .where((p) => p['image_url'] != null && p['service_id'] == null)
             .toList();
       default:
         return posts;
@@ -656,16 +655,14 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                 duration: const Duration(milliseconds: 200),
                 margin: const EdgeInsets.only(right: 8),
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 14, vertical: 7),
+                  horizontal: 14,
+                  vertical: 7,
+                ),
                 decoration: BoxDecoration(
-                  color: isActive
-                      ? AppColors.primary
-                      : Colors.white,
+                  color: isActive ? AppColors.primary : Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: isActive
-                        ? AppColors.primary
-                        : _T.border,
+                    color: isActive ? AppColors.primary : _T.border,
                     width: 1.4,
                   ),
                   boxShadow: isActive
@@ -674,15 +671,14 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                             color: AppColors.primary.withOpacity(0.25),
                             blurRadius: 8,
                             offset: const Offset(0, 3),
-                          )
+                          ),
                         ]
                       : [],
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(f['emoji']!,
-                        style: const TextStyle(fontSize: 13)),
+                    Text(f['emoji']!, style: const TextStyle(fontSize: 13)),
                     const SizedBox(width: 5),
                     Text(
                       f['label']!,
@@ -752,8 +748,11 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                         ? () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  GroupSettingsScreen(group: groupData!),
+                              builder: (_) => GroupSettingsScreen(
+                                group: groupData!,
+                                isAdmin: isAdmin,
+                                myId: myId ?? '',
+                              ),
                             ),
                           ).then((_) => _loadData())
                         : null,
@@ -822,7 +821,9 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
             Text(
               'No ${_activeFilter} posts yet',
               style: GoogleFonts.nunito(
-                  color: _T.textSec, fontWeight: FontWeight.w700),
+                color: _T.textSec,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ],
         ),
@@ -930,10 +931,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
         color: color.withOpacity(0.12),
         borderRadius: BorderRadius.circular(6),
       ),
-      child: Text(
-        emoji,
-        style: const TextStyle(fontSize: 9),
-      ),
+      child: Text(emoji, style: const TextStyle(fontSize: 9)),
     );
   }
 
@@ -948,8 +946,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.star_rounded,
-              size: 9, color: Color(0xFFD97706)),
+          const Icon(Icons.star_rounded, size: 9, color: Color(0xFFD97706)),
           const SizedBox(width: 2),
           Text(
             rating.toStringAsFixed(1),
@@ -981,8 +978,9 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
 
     // Tier comes from the poster's profile; rating comes from the attached service
     // (average_rating does not exist on the profiles table).
-    final String posterTier =
-        (profile['subscription_tier'] ?? 'free').toString().toLowerCase();
+    final String posterTier = (profile['subscription_tier'] ?? 'free')
+        .toString()
+        .toLowerCase();
     final double? avgRating = service != null
         ? (service['average_rating'] as num?)?.toDouble()
         : null;
@@ -1200,8 +1198,10 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
 
   Widget _buildServiceCard(dynamic service) {
     // Services use provider_id; image may come as image_urls array or image_url string.
-    final String? rawImage = service['image_url']?.toString() ??
-        (service['image_urls'] is List && (service['image_urls'] as List).isNotEmpty
+    final String? rawImage =
+        service['image_url']?.toString() ??
+        (service['image_urls'] is List &&
+                (service['image_urls'] as List).isNotEmpty
             ? (service['image_urls'] as List).first?.toString()
             : null);
     final bool hasImage = rawImage != null && rawImage.isNotEmpty;
@@ -1290,8 +1290,8 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                           service: service,
                           providerName:
                               provider?['full_name']?.toString() ?? 'Provider',
-                          providerPic:
-                              provider?['profile_picture_url']?.toString(),
+                          providerPic: provider?['profile_picture_url']
+                              ?.toString(),
                           providerId: resolvedProviderId,
                         ),
                       ),
@@ -1802,7 +1802,10 @@ class _PlanLimitDetailSheet extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
-                colors: [AppColors.primary, AppColors.primary.withOpacity(0.65)],
+                colors: [
+                  AppColors.primary,
+                  AppColors.primary.withOpacity(0.65),
+                ],
               ),
               boxShadow: [
                 BoxShadow(
@@ -1812,7 +1815,11 @@ class _PlanLimitDetailSheet extends StatelessWidget {
                 ),
               ],
             ),
-            child: const Icon(Icons.lock_rounded, color: Colors.white, size: 32),
+            child: const Icon(
+              Icons.lock_rounded,
+              color: Colors.white,
+              size: 32,
+            ),
           ),
           const SizedBox(height: 18),
 
@@ -1831,7 +1838,10 @@ class _PlanLimitDetailSheet extends StatelessWidget {
               'Upgrade your plan to join "$groupName" and unlock access to more exclusive communities.',
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
-                  fontSize: 13, color: Colors.grey[600], height: 1.5),
+                fontSize: 13,
+                color: Colors.grey[600],
+                height: 1.5,
+              ),
             ),
           ),
           const SizedBox(height: 28),
@@ -1844,19 +1854,22 @@ class _PlanLimitDetailSheet extends StatelessWidget {
                 _TierCell(label: 'Free', detail: '1 hub', isCurrent: true),
                 const SizedBox(width: 8),
                 _TierCell(
-                    label: 'Plus',
-                    detail: '3 hubs',
-                    color: const Color(0xFF2563EB)),
+                  label: 'Plus',
+                  detail: '3 hubs',
+                  color: const Color(0xFF2563EB),
+                ),
                 const SizedBox(width: 8),
                 _TierCell(
-                    label: 'Pro',
-                    detail: '5 hubs',
-                    color: const Color(0xFFD97706)),
+                  label: 'Pro',
+                  detail: '5 hubs',
+                  color: const Color(0xFFD97706),
+                ),
                 const SizedBox(width: 8),
                 _TierCell(
-                    label: 'Business',
-                    detail: '∞ hubs',
-                    color: const Color(0xFF7C3AED)),
+                  label: 'Business',
+                  detail: '∞ hubs',
+                  color: const Color(0xFF7C3AED),
+                ),
               ],
             ),
           ),
@@ -1889,7 +1902,9 @@ class _PlanLimitDetailSheet extends StatelessWidget {
                     Text(
                       'Upgrade Now — Unlock More Hubs',
                       style: GoogleFonts.poppins(
-                          fontSize: 14, fontWeight: FontWeight.w700),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ],
                 ),
@@ -1901,8 +1916,7 @@ class _PlanLimitDetailSheet extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
             child: Text(
               'Maybe later',
-              style: GoogleFonts.poppins(
-                  color: Colors.grey[500], fontSize: 13),
+              style: GoogleFonts.poppins(color: Colors.grey[500], fontSize: 13),
             ),
           ),
         ],
@@ -1941,19 +1955,29 @@ class _TierCell extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text(label,
-                style: GoogleFonts.poppins(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: isCurrent ? Colors.grey : effectiveColor)),
-            Text(detail,
-                style: GoogleFonts.poppins(
-                    fontSize: 10,
-                    color: isCurrent ? Colors.grey[500] : effectiveColor)),
+            Text(
+              label,
+              style: GoogleFonts.poppins(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: isCurrent ? Colors.grey : effectiveColor,
+              ),
+            ),
+            Text(
+              detail,
+              style: GoogleFonts.poppins(
+                fontSize: 10,
+                color: isCurrent ? Colors.grey[500] : effectiveColor,
+              ),
+            ),
             if (isCurrent)
-              Text('Current',
-                  style: GoogleFonts.poppins(
-                      fontSize: 8.5, color: Colors.grey[400])),
+              Text(
+                'Current',
+                style: GoogleFonts.poppins(
+                  fontSize: 8.5,
+                  color: Colors.grey[400],
+                ),
+              ),
           ],
         ),
       ),

@@ -7,6 +7,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/widgets/service_action_sheet.dart';
+import '../../bookings/screens/booking_tracking_screen.dart';
+import '../../home/screens/chat_detail_screen.dart';
 import '../../profile/screens/provider_profile_screen.dart';
 import 'service_booking_detail_screen.dart';
 
@@ -182,21 +184,27 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
       'match_reason': 'Direct service selection',
       'average_rating': 0.0,
     };
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _SwapProposalSheet(
-        myService: selectedMyService!,
-        targetMatch: targetMatch,
-        targetCategoryName:
-            widget.initialTargetCategoryName ??
-            widget.initialTargetServiceTitle ??
-            'Service',
-        onSent: () {
-          Navigator.pop(context); // close proposal sheet
-          Navigator.pop(context); // close skill swap sheet
-        },
+    // Play the same AI animation, then land on proposal sheet
+    final nav = Navigator.of(context);
+    nav.pop(); // close this bottom sheet
+    nav.push(
+      PageRouteBuilder(
+        pageBuilder: (_, animation, __) => FindingMatchAnimationScreen(
+          myService: selectedMyService!,
+          targetCategoryId: widget.initialTargetCategoryId ?? '',
+          targetCategoryName:
+              widget.initialTargetCategoryName ??
+              widget.initialTargetServiceTitle ??
+              'Service',
+          serviceType: selectedServiceType,
+          directTarget: targetMatch,
+          directTargetCategoryName:
+              widget.initialTargetCategoryName ??
+              widget.initialTargetServiceTitle ??
+              'Service',
+        ),
+        transitionsBuilder: (_, animation, __, child) =>
+            FadeTransition(opacity: animation, child: child),
       ),
     );
   }
@@ -249,7 +257,7 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
                         ),
                       ),
                       Text(
-                        'Powered by LifeKit AI',
+                        'Powered by Gracia',
                         style: GoogleFonts.poppins(
                           fontSize: 11,
                           color: AppColors.primary,
@@ -1102,6 +1110,9 @@ class FindingMatchAnimationScreen extends StatefulWidget {
   final String targetCategoryId;
   final String targetCategoryName;
   final String serviceType;
+  // When set, the animation ends with a direct proposal sheet instead of AI results
+  final Map<String, dynamic>? directTarget;
+  final String? directTargetCategoryName;
 
   const FindingMatchAnimationScreen({
     super.key,
@@ -1109,6 +1120,8 @@ class FindingMatchAnimationScreen extends StatefulWidget {
     required this.targetCategoryId,
     required this.targetCategoryName,
     required this.serviceType,
+    this.directTarget,
+    this.directTargetCategoryName,
   });
 
   @override
@@ -1252,24 +1265,48 @@ class _FindingMatchAnimationScreenState
         }
         Timer(const Duration(milliseconds: 2000), () {
           if (mounted) {
-            Navigator.pushReplacement(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (_, animation, __) => SkillSwapResultsScreen(
+            if (widget.directTarget != null) {
+              // Direct proposal flow: show proposal sheet on top of animation
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                isDismissible: false,
+                builder: (_) => _SwapProposalSheet(
                   myService: widget.myService,
-                  targetCategoryId: widget.targetCategoryId,
-                  targetCategoryName: widget.targetCategoryName,
+                  targetMatch: widget.directTarget!,
+                  targetCategoryName:
+                      widget.directTargetCategoryName ??
+                      widget.targetCategoryName,
+                  onSent: () {
+                    Navigator.pop(context); // close proposal sheet
+                    Navigator.pop(context); // close animation screen
+                  },
                 ),
-                transitionsBuilder: (_, animation, __, child) =>
-                    SlideTransition(
-                      position:
-                          Tween(begin: const Offset(0.0, 1.0), end: Offset.zero)
-                              .chain(CurveTween(curve: Curves.easeOutQuart))
-                              .animate(animation),
-                      child: child,
-                    ),
-              ),
-            );
+              );
+            } else {
+              Navigator.pushReplacement(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (_, animation, __) => SkillSwapResultsScreen(
+                    myService: widget.myService,
+                    targetCategoryId: widget.targetCategoryId,
+                    targetCategoryName: widget.targetCategoryName,
+                  ),
+                  transitionsBuilder: (_, animation, __, child) =>
+                      SlideTransition(
+                        position:
+                            Tween(
+                                  begin: const Offset(0.0, 1.0),
+                                  end: Offset.zero,
+                                )
+                                .chain(CurveTween(curve: Curves.easeOutQuart))
+                                .animate(animation),
+                        child: child,
+                      ),
+                ),
+              );
+            }
           }
         });
       });
@@ -1675,7 +1712,7 @@ class _FindingMatchAnimationScreenState
     );
   }
 
-  Widget _buildCard(String? url, Color color, bool isQuestion) {
+  Widget _buildCard(String? url, Color color, bool isAi) {
     return Container(
       width: 105,
       height: 138,
@@ -1690,20 +1727,17 @@ class _FindingMatchAnimationScreenState
             offset: const Offset(0, 10),
           ),
         ],
-        image: url != null
+        image: (url != null && !isAi)
             ? DecorationImage(
                 image: CachedNetworkImageProvider(url),
                 fit: BoxFit.cover,
               )
             : null,
       ),
-      child: isQuestion
-          ? Center(
-              child: Icon(
-                Icons.auto_awesome,
-                color: Colors.white.withOpacity(0.8),
-                size: 48,
-              ),
+      child: isAi
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(15),
+              child: Image.asset('assets/ai/aihalfpic.jpg', fit: BoxFit.cover),
             )
           : null,
     );
@@ -2909,7 +2943,8 @@ class _SwapProposalSheetState extends State<_SwapProposalSheet> {
 // ═══════════════════════════════════════════════════════════
 
 class SwapBoardScreen extends StatefulWidget {
-  const SwapBoardScreen({super.key});
+  final int initialTab;
+  const SwapBoardScreen({super.key, this.initialTab = 0});
 
   @override
   State<SwapBoardScreen> createState() => _SwapBoardScreenState();
@@ -2922,6 +2957,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
 
   bool isLoadingBoard = true;
   bool isLoadingMine = true;
+  bool _mineLoadError = false;
   List<dynamic> boardItems = []; // posted swap proposals
   List<dynamic> availableServices = []; // services open for swap
   List<dynamic> incomingSwaps = [];
@@ -2931,7 +2967,11 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
   @override
   void initState() {
     super.initState();
-    _tabCtrl = TabController(length: 3, vsync: this);
+    _tabCtrl = TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: widget.initialTab,
+    );
     _loadAll();
   }
 
@@ -2966,6 +3006,11 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
   }
 
   Future<void> _loadMine() async {
+    if (mounted)
+      setState(() {
+        isLoadingMine = true;
+        _mineLoadError = false;
+      });
     try {
       final results = await Future.wait([
         _apiService.getIncomingSwaps(),
@@ -2976,10 +3021,15 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
           incomingSwaps = results[0] as List<dynamic>;
           outgoingSwaps = results[1] as List<dynamic>;
           isLoadingMine = false;
+          _mineLoadError = false;
         });
       }
-    } catch (_) {
-      if (mounted) setState(() => isLoadingMine = false);
+    } catch (e) {
+      if (mounted)
+        setState(() {
+          isLoadingMine = false;
+          _mineLoadError = true;
+        });
     }
   }
 
@@ -3010,6 +3060,56 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
       _loadMine();
     } catch (e) {
       _showSnack('Error: $e', isError: true);
+    }
+  }
+
+  /// Fetches the booking linked to an accepted swap and opens tracking or chat.
+  Future<void> _openSwapBooking(
+    dynamic swap, {
+    required bool openChat,
+    required bool isProposer,
+  }) async {
+    final bookingId = swap['booking_id']?.toString();
+    if (bookingId == null) {
+      _showSnack('Booking not found for this swap.', isError: true);
+      return;
+    }
+    try {
+      final booking = await _apiService.getBookingById(bookingId);
+      if (!mounted) return;
+      // proposer = provider_id on the booking, target = client_id
+      final isClient = !isProposer;
+      if (openChat) {
+        final otherId = isClient
+            ? booking['provider_id']
+            : booking['client_id'];
+        final otherProfile = booking['profiles'];
+        if (otherProfile != null) {
+          final chatUser = {
+            'id': otherId,
+            'full_name': otherProfile['full_name'],
+            'profile_picture_url': otherProfile['profile_picture_url'],
+          };
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  ChatDetailScreen(otherUser: chatUser, bookings: [booking]),
+            ),
+          );
+        }
+      } else {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                BookingTrackingScreen(booking: booking, isClient: isClient),
+          ),
+        );
+        _loadMine();
+      }
+    } catch (e) {
+      _showSnack('Could not load booking: $e', isError: true);
     }
   }
 
@@ -3155,6 +3255,8 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                 ? const Center(
                     child: CircularProgressIndicator(color: AppColors.primary),
                   )
+                : _mineLoadError
+                ? _buildRetry(_loadMine)
                 : incomingSwaps.isEmpty
                 ? _buildEmpty(
                     'No incoming proposals',
@@ -3174,6 +3276,8 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                 ? const Center(
                     child: CircularProgressIndicator(color: AppColors.primary),
                   )
+                : _mineLoadError
+                ? _buildRetry(_loadMine)
                 : outgoingSwaps.isEmpty
                 ? _buildEmpty(
                     'No outgoing proposals',
@@ -3864,6 +3968,67 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
               ],
             ),
           ],
+
+          // For accepted swaps: chat + mark done
+          if (status == 'accepted') ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _openSwapBooking(
+                      swap,
+                      openChat: true,
+                      isProposer: false,
+                    ),
+                    icon: const Icon(
+                      Icons.chat_bubble_outline_rounded,
+                      size: 15,
+                    ),
+                    label: Text(
+                      'Message',
+                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: BorderSide(
+                        color: AppColors.primary.withOpacity(0.5),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => _openSwapBooking(
+                      swap,
+                      openChat: false,
+                      isProposer: false,
+                    ),
+                    icon: const Icon(
+                      Icons.check_circle_outline_rounded,
+                      size: 15,
+                    ),
+                    label: Text(
+                      'Mark Done',
+                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE8A020),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -3974,6 +4139,67 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
               ),
             ),
           ],
+
+          // For accepted swaps: chat + mark done
+          if (status == 'accepted') ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _openSwapBooking(
+                      swap,
+                      openChat: true,
+                      isProposer: true,
+                    ),
+                    icon: const Icon(
+                      Icons.chat_bubble_outline_rounded,
+                      size: 15,
+                    ),
+                    label: Text(
+                      'Message',
+                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: BorderSide(
+                        color: AppColors.primary.withOpacity(0.5),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => _openSwapBooking(
+                      swap,
+                      openChat: false,
+                      isProposer: true,
+                    ),
+                    icon: const Icon(
+                      Icons.check_circle_outline_rounded,
+                      size: 15,
+                    ),
+                    label: Text(
+                      'Mark Done',
+                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE8A020),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -4017,6 +4243,44 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
           fontWeight: FontWeight.w700,
           color: fg,
         ),
+      ),
+    );
+  }
+
+  Widget _buildRetry(VoidCallback onRetry) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.wifi_off_rounded, size: 52, color: Colors.grey[300]),
+          const SizedBox(height: 12),
+          Text(
+            'Could not load',
+            style: GoogleFonts.poppins(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Check your connection and try again.',
+            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[400]),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh_rounded, size: 16),
+            label: const Text('Retry'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

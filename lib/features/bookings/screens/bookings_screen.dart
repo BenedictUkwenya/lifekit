@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/services/app_cache.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 
 // IMPORT THE TRACKING & CHAT SCREENS
@@ -29,6 +30,7 @@ class _BookingsScreenState extends State<BookingsScreen>
   List<dynamic> providerRequests = [];
   List<dynamic> swapBookings = [];
   List<dynamic> pendingSwaps = [];
+  int _incomingPendingCount = 0;
   bool isLoading = true;
 
   @override
@@ -42,6 +44,7 @@ class _BookingsScreenState extends State<BookingsScreen>
     _pulseAnimation = Tween<double>(begin: 0.9, end: 1.1).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
+    _loadFromCache();
     _fetchData();
   }
 
@@ -50,6 +53,19 @@ class _BookingsScreenState extends State<BookingsScreen>
     _pulseController.dispose();
     _tabController.dispose();
     super.dispose();
+  }
+
+  /// Paint from cache immediately so the screen never feels blank on return
+  void _loadFromCache() {
+    final cb = AppCache.instance.get<List<dynamic>>('client_bookings');
+    final pr = AppCache.instance.get<List<dynamic>>('provider_requests');
+    if ((cb != null || pr != null) && mounted) {
+      setState(() {
+        if (cb != null) clientBookings = List<dynamic>.from(cb);
+        if (pr != null) providerRequests = List<dynamic>.from(pr);
+        isLoading = false;
+      });
+    }
   }
 
   Future<void> _fetchData() async {
@@ -67,17 +83,50 @@ class _BookingsScreenState extends State<BookingsScreen>
 
       if (mounted) {
         setState(() {
-          // Swap bookings = $0 bookings from client side
-          swapBookings = cBookings
-              .where((b) => (b['total_price'] ?? 0) == 0)
+          bool _isSwap(b) =>
+              (double.tryParse(b['total_price']?.toString() ?? '0') ?? 0) == 0;
+
+          // Swap bookings = $0 bookings from BOTH sides
+          // - As client (acceptor): from getClientBookings
+          // - As provider (proposer): from getProviderRequests
+          final clientSwaps = (cBookings as List)
+              .where(_isSwap)
+              .map((b) => {...b, '_swap_role': 'client'})
               .toList();
+          final providerSwaps = (pRequests as List)
+              .where(_isSwap)
+              .map((b) => {...b, '_swap_role': 'provider'})
+              .toList();
+
+          // Merge, deduplicate by id
+          final seenIds = <String>{};
+          swapBookings =
+              [
+                  ...clientSwaps,
+                  ...providerSwaps,
+                ].where((b) => seenIds.add(b['id'].toString())).toList()
+                ..sort((a, b) {
+                  final ta =
+                      DateTime.tryParse(a['scheduled_time'] ?? '') ??
+                      DateTime(2000);
+                  final tb =
+                      DateTime.tryParse(b['scheduled_time'] ?? '') ??
+                      DateTime(2000);
+                  return tb.compareTo(ta);
+                });
+
           // Pending swap proposals (not yet accepted)
+          final incomingPending = incomingSwaps
+              .where((s) => s['status'] == 'pending')
+              .toList();
           pendingSwaps = [
-            ...incomingSwaps.where((s) => s['status'] == 'pending'),
+            ...incomingPending,
             ...outgoingSwaps.where((s) => s['status'] == 'pending'),
           ];
-          // Remove swaps from regular clientBookings view
-          cBookings.removeWhere((b) => (b['total_price'] ?? 0) == 0);
+          _incomingPendingCount = incomingPending.length;
+          // Remove swaps from regular client/provider views
+          cBookings.removeWhere(_isSwap);
+          pRequests.removeWhere(_isSwap);
           cBookings.sort((a, b) {
             final dateA = DateTime.parse(a['scheduled_time']);
             final dateB = DateTime.parse(b['scheduled_time']);
@@ -1153,7 +1202,11 @@ class _BookingsScreenState extends State<BookingsScreen>
           borderRadius: BorderRadius.circular(16),
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const SwapBoardScreen()),
+            MaterialPageRoute(
+              builder: (_) => SwapBoardScreen(
+                initialTab: _incomingPendingCount > 0 ? 1 : 2,
+              ),
+            ),
           ).then((_) => _fetchData()),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -1186,7 +1239,9 @@ class _BookingsScreenState extends State<BookingsScreen>
                         ),
                       ),
                       Text(
-                        'Tap to view and respond',
+                        _incomingPendingCount > 0
+                            ? 'Tap to view and respond'
+                            : 'Tap to view your sent proposals',
                         style: GoogleFonts.poppins(
                           color: Colors.white60,
                           fontSize: 12,
@@ -1209,13 +1264,17 @@ class _BookingsScreenState extends State<BookingsScreen>
   }
 
   Widget _buildSwapBookingCard(dynamic booking) {
-    final dateObj = DateTime.parse(booking['scheduled_time']);
+    final dateObj =
+        DateTime.tryParse(booking['scheduled_time'] ?? '') ?? DateTime.now();
     final dateStr = DateFormat('dd MMM, h:mm a').format(dateObj);
     final serviceName = booking['services']?['title'] ?? 'Service';
     final status = booking['status'] as String? ?? 'pending';
-    final provider = booking['profiles'];
-    final providerName = provider?['full_name'] ?? 'Partner';
-    final providerPic = provider?['profile_picture_url'];
+    // _swap_role = 'client' if I accepted (I'm client_id), 'provider' if I proposed (I'm provider_id)
+    final isClient = (booking['_swap_role'] ?? 'client') == 'client';
+    // Partner profile is stored differently depending on role
+    final partner = booking['profiles'];
+    final partnerName = partner?['full_name'] ?? 'Partner';
+    final partnerPic = partner?['profile_picture_url'];
 
     final Color statusColor;
     final String statusLabel;
@@ -1254,124 +1313,187 @@ class _BookingsScreenState extends State<BookingsScreen>
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => _goToChat(booking, true),
+          onTap: () => _goToTracking(booking, isClient),
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Stack(
+                Row(
                   children: [
-                    _buildAvatar(providerPic, providerName, radius: 26),
-                    Positioned(
-                      right: 0,
-                      bottom: 0,
-                      child: Container(
-                        width: 18,
-                        height: 18,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE8A020),
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
-                        ),
-                        child: const Icon(
-                          Icons.swap_horiz_rounded,
-                          color: Colors.white,
-                          size: 10,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        serviceName,
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                          color: Colors.black87,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'with $providerName',
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.schedule_rounded,
-                            size: 12,
-                            color: Colors.black38,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            dateStr,
-                            style: GoogleFonts.poppins(
-                              fontSize: 11,
-                              color: Colors.black45,
+                    Stack(
+                      children: [
+                        _buildAvatar(partnerPic, partnerName, radius: 26),
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: Container(
+                            width: 18,
+                            height: 18,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE8A020),
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 2),
                             ),
+                            child: const Icon(
+                              Icons.swap_horiz_rounded,
+                              color: Colors.white,
+                              size: 10,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            serviceName,
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'with $partnerName',
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.schedule_rounded,
+                                size: 12,
+                                color: Colors.black38,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                dateStr,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  color: Colors.black45,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        statusLabel,
-                        style: GoogleFonts.poppins(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: statusColor,
-                        ),
-                      ),
                     ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFE8A020), Color(0xFFD97706)],
+                    const SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusColor.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            statusLabel,
+                            style: GoogleFonts.poppins(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: statusColor,
+                            ),
+                          ),
                         ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Text(
-                        'SWAP',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1,
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFE8A020), Color(0xFFD97706)],
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Text(
+                            'SWAP',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
+                // Message + Mark Done buttons for active swaps
+                if (status == 'confirmed' || status == 'completed') ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _goToChat(booking, isClient),
+                          icon: const Icon(
+                            Icons.chat_bubble_outline_rounded,
+                            size: 15,
+                          ),
+                          label: const Text('Message'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            side: BorderSide(
+                              color: AppColors.primary.withOpacity(0.5),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            textStyle: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (status == 'confirmed') ...[
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () => _goToTracking(booking, isClient),
+                            icon: const Icon(
+                              Icons.check_circle_outline_rounded,
+                              size: 15,
+                            ),
+                            label: const Text('Mark Done'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFE8A020),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              textStyle: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              elevation: 0,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
               ],
             ),
           ),

@@ -14,6 +14,7 @@ import '../../../core/widgets/lifekit_loader.dart';
 import '../../../core/providers/cart_provider.dart';
 
 import '../../services/screens/services_list_screen.dart';
+import '../../services/screens/all_categories_screen.dart';
 import '../../services/screens/skill_swap_dashboard_screen.dart';
 import '../../services/screens/category_items_screen.dart';
 import '../../provider/screens/provider_onboarding_intro_screen.dart';
@@ -30,6 +31,7 @@ import '../../services/screens/service_booking_detail_screen.dart';
 import '../../bookings/screens/bookings_screen.dart';
 import '../../bookings/screens/cart_screen.dart';
 import '../../groups/screens/group_detail_screen.dart';
+import '../../groups/screens/communities_screen.dart';
 import 'ai_assistant_screen.dart';
 import '../../../core/widgets/service_action_sheet.dart';
 import '../../services/screens/skill_swap_screens.dart'
@@ -53,11 +55,11 @@ class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> popularServices = [];
   List<dynamic> swapOpportunities = [];
   List<dynamic> nearbyPlaces = [];
+  List<dynamic> homeGroups = [];
   bool isLoading = true;
 
   int _currentNavIndex = 0;
   int _currentBannerIndex = 0;
-  int _profileScreenRefreshSeed = 0;
 
   // Places filter
   final List<String> _placeFilters = [
@@ -84,6 +86,36 @@ class _HomeScreenState extends State<HomeScreen> {
   // AI Success Task
   bool _taskDoneToday = false;
 
+  // Draggable AI button position (right/bottom offsets from screen edge)
+  double _aiButtonRight = 16;
+  double _aiButtonBottom = 96;
+
+  // AI speech bubble
+  String? _aiBubbleMessage;
+  bool _showAiBubble = false;
+  bool _notifPopupShownThisSession = false;
+  String? _notifPopupText;
+  bool _showNotifPopup = false;
+
+  // Hardcoded fallback messages for when Gemini API fails
+  static const List<String> _fallbackMessages = [
+    '💡 Did you know? You can swap skills with other LifeKit users — no money needed!',
+    '🌟 Tip: Complete your profile to get 3x more bookings from clients.',
+    '🔄 Skill swaps are a great way to get services for free. Try the Swap Board!',
+    '📅 Pro tip: Set your availability in your service listing to get booked faster.',
+    '🤝 LifeKit connects 1000s of skilled people. Someone near you needs what you offer!',
+    '⭐ Fun fact: Providers with 5+ reviews earn 60% more on average.',
+    '🚀 Your next client could be searching for you right now. Keep your profile fresh!',
+    '💬 Respond to booking requests quickly — fast responses get more 5-star reviews.',
+    '🌍 LifeKit works globally. Your skills can earn you income anywhere in the world.',
+    '🎯 Set competitive prices — check what similar services charge on the Explore tab.',
+    '🏆 Fun fact: The world\'s first marketplace was in Ancient Greece, circa 500 BC!',
+    '🧠 Did you know? Learning a new skill for just 20 mins a day makes you an expert in a year.',
+    '🌱 Growth tip: Ask satisfied clients to leave a review — it helps more than you think!',
+    '⚡ LifeKit AI can help you write the perfect service description. Just ask me!',
+    '🎉 Welcome back! The best time to book or offer a service is right now.',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -93,12 +125,73 @@ class _HomeScreenState extends State<HomeScreen> {
     _fetchCounts();
     _checkTaskDone();
     _checkInactivityNudge();
+    // Trigger AI greeting shortly after home loads
+    Future.delayed(const Duration(milliseconds: 1200), _triggerAiGreeting);
   }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  // ── AI Greeting bubble ────────────────────────────────────────────────────
+  Future<void> _triggerAiGreeting() async {
+    if (!mounted) return;
+    String message;
+    try {
+      final firstName = (userProfile?['full_name'] ?? '')
+          .toString()
+          .split(' ')
+          .first;
+      final prompt = firstName.isNotEmpty
+          ? 'Give a short, friendly greeting or useful tip for a LifeKit app user named $firstName. '
+                'LifeKit is a service marketplace where people book services and swap skills. '
+                'Keep it under 20 words. Be warm, fun, and occasionally add an emoji.'
+          : 'Give a short fun fact or tip related to a service marketplace app called LifeKit '
+                'where people book services and swap skills. Under 20 words. Add an emoji.';
+      final result = await _apiService.sendAiChatMessage(prompt, []);
+      message = (result['reply'] ?? result['message'] ?? '').toString().trim();
+      if (message.isEmpty) throw Exception('empty');
+    } catch (_) {
+      // Fallback to a random hardcoded message
+      final idx =
+          DateTime.now().millisecondsSinceEpoch % _fallbackMessages.length;
+      message = _fallbackMessages[idx];
+    }
+    if (!mounted) return;
+    setState(() {
+      _aiBubbleMessage = message;
+      _showAiBubble = true;
+    });
+    // Auto-dismiss after 6 seconds
+    Future.delayed(const Duration(seconds: 6), () {
+      if (mounted) setState(() => _showAiBubble = false);
+    });
+    // Also show notification popup ~2s after AI bubble (if not shown yet)
+    Future.delayed(const Duration(seconds: 8), _tryShowNotifPopup);
+  }
+
+  Future<void> _tryShowNotifPopup() async {
+    if (!mounted || _notifPopupShownThisSession) return;
+    try {
+      final notifs = await _apiService.getNotifications();
+      if (notifs.isEmpty) return;
+      final latest = notifs.first;
+      final text = (latest['message'] ?? latest['title'] ?? '')
+          .toString()
+          .trim();
+      if (text.isEmpty) return;
+      _notifPopupShownThisSession = true;
+      if (!mounted) return;
+      setState(() {
+        _notifPopupText = text;
+        _showNotifPopup = true;
+      });
+      Future.delayed(const Duration(seconds: 5), () {
+        if (mounted) setState(() => _showNotifPopup = false);
+      });
+    } catch (_) {}
   }
 
   Future<void> _fetchCounts() async {
@@ -171,102 +264,129 @@ class _HomeScreenState extends State<HomeScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (_) => Container(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+        padding: EdgeInsets.fromLTRB(
+          20,
+          20,
+          20,
+          MediaQuery.of(context).padding.bottom + 20,
+        ),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(99),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF1E1B4B), Color(0xFF4C1D95)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(99),
                 ),
-                borderRadius: BorderRadius.circular(20),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('📈', style: TextStyle(fontSize: 32)),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Welcome back! ${daysSince}d of new opportunities',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF1E1B4B), Color(0xFF4C1D95)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Our AI has been tracking demand in your area. New service opportunities are waiting for you!',
-                    style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      color: Colors.white70,
-                      height: 1.45,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const ProviderDashboardScreen(),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Welcome back! ${daysSince}d of new opportunities',
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Our AI has been tracking demand in your area. New service opportunities are waiting for you!',
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: Colors.white70,
+                                height: 1.45,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(
+                          'assets/ai/aihalfpic.jpg',
+                          width: 80,
+                          height: 100,
+                          fit: BoxFit.cover,
+                          alignment: Alignment.topCenter,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ProviderDashboardScreen(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: Text(
+                    '✨ View AI Opportunity Radar',
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
                 child: Text(
-                  '✨ View AI Opportunity Radar',
+                  'Maybe later',
                   style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    fontSize: 13,
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 10),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                'Maybe later',
-                style: GoogleFonts.poppins(
-                  color: Colors.grey.shade600,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -420,6 +540,12 @@ class _HomeScreenState extends State<HomeScreen> {
         if (mounted) setState(() => aiRecommendations = recs);
       } catch (_) {}
 
+      // Non-critical: communities
+      try {
+        final groupsData = await _apiService.getGroups();
+        if (mounted) setState(() => homeGroups = groupsData ?? []);
+      } catch (_) {}
+
       // Non-critical: nearest confirmed booking for proactive banner
       try {
         final bookings = await _apiService.getClientBookings();
@@ -550,40 +676,185 @@ class _HomeScreenState extends State<HomeScreen> {
       const ServicesListScreen(),
       const FeedsScreen(),
       const ChatsListScreen(),
-      ProfileScreen(key: ValueKey('profile_$_profileScreenRefreshSeed')),
+      ProfileScreen(key: const ValueKey('profile')),
     ];
 
     return Scaffold(
       extendBodyBehindAppBar: _currentNavIndex == 0,
       extendBody:
           true, // IMPORTANT: Lets content scroll behind the floating nav bar
-      body: IndexedStack(index: _currentNavIndex, children: screens),
-      floatingActionButton: _currentNavIndex == 0
-          ? Padding(
-              padding: const EdgeInsets.only(bottom: 80),
-              child: FloatingActionButton(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AIAssistantScreen()),
-                ),
-                backgroundColor: AppColors.primary,
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                tooltip: 'LifeKit AI',
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Image.asset(
-                    'assets/images/logo_white2.png',
-                    fit: BoxFit.contain,
+      body: Stack(
+        children: [
+          IndexedStack(index: _currentNavIndex, children: screens),
+          // ── Notification popup ─────────────────────────────────────────
+          if (_showNotifPopup && _notifPopupText != null)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 8,
+              left: 16,
+              right: 16,
+              child: _buildNotifPopup(_notifPopupText!),
+            ),
+          // ── AI speech bubble ──────────────────────────────────────────
+          if (_currentNavIndex == 0 &&
+              _showAiBubble &&
+              _aiBubbleMessage != null)
+            Positioned(
+              right: _aiButtonRight + 68,
+              bottom: _aiButtonBottom - 2,
+              child: _buildAiBubble(_aiBubbleMessage!),
+            ),
+          // ── Draggable AI button — only visible on home tab ─────────────
+          if (_currentNavIndex == 0)
+            Positioned(
+              right: _aiButtonRight,
+              bottom: _aiButtonBottom,
+              child: GestureDetector(
+                onTap: () {
+                  if (_showAiBubble) {
+                    setState(() => _showAiBubble = false);
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AIAssistantScreen(),
+                      ),
+                    );
+                  }
+                },
+                onPanUpdate: (details) {
+                  final size = MediaQuery.of(context).size;
+                  setState(() {
+                    _aiButtonRight = (_aiButtonRight - details.delta.dx).clamp(
+                      8.0,
+                      size.width - 76.0,
+                    );
+                    _aiButtonBottom = (_aiButtonBottom - details.delta.dy)
+                        .clamp(8.0, size.height - 76.0);
+                  });
+                },
+                onPanEnd: (details) {
+                  // Snap to nearest horizontal edge
+                  final size = MediaQuery.of(context).size;
+                  final centerX = size.width - _aiButtonRight - 30;
+                  setState(() {
+                    _aiButtonRight = centerX < size.width / 2
+                        ? size.width -
+                              76.0 // snap to left edge
+                        : 16.0; // snap to right edge
+                  });
+                },
+                child: SizedBox(
+                  width: 60,
+                  height: 60,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(
+                      'assets/ai/aihalfpic.jpg',
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
-            )
-          : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+            ),
+        ],
+      ),
       bottomNavigationBar: _buildModernBottomNav(),
+    );
+  }
+
+  // ── AI speech bubble widget ───────────────────────────────────────────────
+  Widget _buildAiBubble(String message) {
+    return GestureDetector(
+      onTap: () => setState(() => _showAiBubble = false),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 220),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1B4B),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
+              bottomLeft: Radius.circular(16),
+              bottomRight: Radius.circular(4),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.25),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Text(
+            message,
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontSize: 12,
+              height: 1.4,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── Notification popup widget ─────────────────────────────────────────────
+  Widget _buildNotifPopup(String text) {
+    return GestureDetector(
+      onTap: () => setState(() => _showNotifPopup = false),
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.12),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.10),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.notifications_rounded,
+                  color: AppColors.primary,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  text,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => setState(() => _showNotifPopup = false),
+                child: const Icon(Icons.close, size: 16, color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -655,11 +926,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         if (i == 2) {
                           hasNewFeeds = false; // Clear feeds dot when clicked
                         }
-                        if (i == 4) {
-                          _profileScreenRefreshSeed += 1;
-                        }
                       });
                       _fetchCounts();
+                      // Re-trigger AI greeting every time user returns to home
+                      if (i == 0) {
+                        Future.delayed(
+                          const Duration(milliseconds: 600),
+                          _triggerAiGreeting,
+                        );
+                      }
                     },
                     behavior: HitTestBehavior.opaque,
                     child: AnimatedContainer(
@@ -808,7 +1083,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const ServicesListScreen(),
+                              builder: (_) => const AllCategoriesScreen(),
                             ),
                           ),
                         ),
@@ -819,6 +1094,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         // Top Swap Opportunities
                         if (swapOpportunities.isNotEmpty) ...[
                           _buildTopSwapOpportunities(),
+                          const SizedBox(height: 28),
+                        ],
+
+                        // Communities
+                        if (homeGroups.isNotEmpty) ...[
+                          _buildCommunitiesSection(),
                           const SizedBox(height: 28),
                         ],
 
@@ -978,13 +1259,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Row(
       children: [
-        CircleAvatar(
-          radius: 22,
-          backgroundColor: Colors.grey[300],
-          backgroundImage: profilePic != null
-              ? CachedNetworkImageProvider(profilePic)
-              : const AssetImage('assets/images/onboarding1.png')
-                    as ImageProvider,
+        GestureDetector(
+          onTap: () => setState(() => _currentNavIndex = 4),
+          child: CircleAvatar(
+            radius: 22,
+            backgroundColor: Colors.grey[300],
+            backgroundImage: profilePic != null
+                ? CachedNetworkImageProvider(profilePic)
+                : const AssetImage('assets/images/onboarding1.png')
+                      as ImageProvider,
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -1785,6 +2069,257 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // ── COMMUNITIES SECTION ───────────────────────────────────────
+  Widget _buildCommunitiesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(
+          'Communities',
+          () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CommunitiesScreen()),
+          ),
+        ),
+        const SizedBox(height: 14),
+        // Beautiful gradient banner card
+        GestureDetector(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CommunitiesScreen()),
+          ),
+          child: Container(
+            height: 130,
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [
+                  AppColors.primary,
+                  Color(0xFFB74B5C),
+                  Color(0xFF6B1225),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.35),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                // Decorative circles
+                Positioned(
+                  right: -20,
+                  top: -20,
+                  child: Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.08),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: 30,
+                  bottom: -30,
+                  child: Container(
+                    width: 90,
+                    height: 90,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.06),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${homeGroups.length} Communities',
+                              style: GoogleFonts.poppins(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Find your tribe, share your world',
+                              style: GoogleFonts.poppins(
+                                color: Colors.white.withOpacity(0.85),
+                                fontSize: 12.5,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.22),
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.35),
+                                ),
+                              ),
+                              child: Text(
+                                'Browse All →',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Overlapping avatars
+                      SizedBox(
+                        width: 88,
+                        height: 80,
+                        child: Stack(
+                          children: [
+                            for (int i = 0; i < homeGroups.take(3).length; i++)
+                              Positioned(
+                                top: i * 22.0,
+                                right: i * 8.0,
+                                child: Container(
+                                  width: 48,
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 2,
+                                    ),
+                                    color: Colors.white.withOpacity(0.2),
+                                  ),
+                                  child: ClipOval(
+                                    child: homeGroups[i]['image_url'] != null
+                                        ? Image.network(
+                                            homeGroups[i]['image_url'],
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (_, __, ___) =>
+                                                const Icon(
+                                                  Icons.groups_rounded,
+                                                  color: Colors.white,
+                                                  size: 22,
+                                                ),
+                                          )
+                                        : const Icon(
+                                            Icons.groups_rounded,
+                                            color: Colors.white,
+                                            size: 22,
+                                          ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        // Horizontal scrollable community chips
+        SizedBox(
+          height: 42,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: homeGroups.take(6).length,
+            padding: EdgeInsets.zero,
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (context, i) {
+              final g = homeGroups[i];
+              return GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CommunitiesScreen()),
+                ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(22),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.primary.withOpacity(0.12),
+                        ),
+                        child: ClipOval(
+                          child: g['image_url'] != null
+                              ? Image.network(
+                                  g['image_url'],
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => const Icon(
+                                    Icons.groups_rounded,
+                                    color: AppColors.primary,
+                                    size: 12,
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.groups_rounded,
+                                  color: AppColors.primary,
+                                  size: 12,
+                                ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        (g['name'] ?? 'Group').toString().length > 14
+                            ? '${(g['name'] ?? 'Group').toString().substring(0, 14)}…'
+                            : (g['name'] ?? 'Group').toString(),
+                        style: GoogleFonts.poppins(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   // ── NEW: POPULAR SERVICES ─────────────────
   // ── NEW: POPULAR SERVICES ─────────────────
   Widget _buildPopularServices() {
@@ -2221,7 +2756,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const Text('\uD83C\uDFAF', style: TextStyle(fontSize: 18)),
               const SizedBox(width: 8),
               Text(
-                'Your AI Success Task',
+                'Gracia\'s Daily Task',
                 style: GoogleFonts.poppins(
                   color: Colors.white70,
                   fontSize: 12,

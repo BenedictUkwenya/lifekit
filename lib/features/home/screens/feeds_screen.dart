@@ -1,18 +1,22 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/services/app_cache.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import '../widgets/comments_sheet.dart';
 import 'event_detail_screen.dart';
 import 'feed_detail_screen.dart';
 import 'notifications_screen.dart';
 import 'saved_posts_screen.dart';
-import '../../groups/widgets/all_groups_tab.dart';
-import '../../groups/screens/create_group_screen.dart';
+
+import '../../services/screens/service_booking_detail_screen.dart';
+import '../../services/screens/skill_swap_dashboard_screen.dart';
 
 // ─────────────────────────────────────────────
 // FEEDS SCREEN
@@ -31,7 +35,6 @@ class _FeedsScreenState extends State<FeedsScreen>
 
   List<dynamic> posts = [];
   List<dynamic> events = [];
-  List<dynamic> groups = [];
   bool isLoading = true;
   int unreadNotifications = 0;
 
@@ -52,11 +55,25 @@ class _FeedsScreenState extends State<FeedsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
       if (mounted) setState(() {});
     });
+    // SWR: paint from cache immediately, then revalidate in background
+    _loadFromCache();
     _fetchData();
+  }
+
+  void _loadFromCache() {
+    final cachedPosts = AppCache.instance.get<List<dynamic>>('feeds');
+    final cachedEvents = AppCache.instance.get<List<dynamic>>('events');
+    if ((cachedPosts != null || cachedEvents != null) && mounted) {
+      setState(() {
+        if (cachedPosts != null) posts = cachedPosts;
+        if (cachedEvents != null) events = cachedEvents;
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -70,14 +87,12 @@ class _FeedsScreenState extends State<FeedsScreen>
     try {
       final postsData = await _apiService.getFeeds();
       final eventsData = await _apiService.getEvents();
-      final groupsData = await _apiService.getGroups();
       final counts = await _apiService.getUnreadCounts();
 
       if (mounted) {
         setState(() {
-          posts = postsData ?? [];
-          events = eventsData ?? [];
-          groups = groupsData ?? [];
+          posts = postsData;
+          events = eventsData;
           unreadNotifications = counts['notifications'] ?? 0;
           isLoading = false;
         });
@@ -116,13 +131,15 @@ class _FeedsScreenState extends State<FeedsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: const Color(0xFFEEEEF3),
       body: SafeArea(
         child: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
             SliverAppBar(
               backgroundColor: Colors.white,
+              surfaceTintColor: Colors.white,
               elevation: 0,
+              shadowColor: Colors.black12,
               pinned: true,
               floating: true,
               centerTitle: false,
@@ -140,8 +157,8 @@ class _FeedsScreenState extends State<FeedsScreen>
                   children: [
                     IconButton(
                       icon: const Icon(
-                        Icons.bookmark_border,
-                        color: Colors.black,
+                        Icons.bookmark_border_rounded,
+                        color: Colors.black87,
                       ),
                       onPressed: () => Navigator.push(
                         context,
@@ -150,60 +167,59 @@ class _FeedsScreenState extends State<FeedsScreen>
                         ),
                       ),
                     ),
-                    Container(
-                      margin: const EdgeInsets.only(right: 16),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF2F2F7),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Stack(
-                        children: [
-                          IconButton(
-                            icon: const Icon(
-                              Icons.notifications_outlined,
-                              color: Colors.black,
-                            ),
-                            onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const NotificationsScreen(),
-                              ),
-                            ).then((_) => _fetchData()),
+                    Stack(
+                      children: [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.notifications_outlined,
+                            color: Colors.black87,
                           ),
-                          if (unreadNotifications > 0)
-                            Positioned(
-                              right: 8,
-                              top: 8,
-                              child: Container(
-                                width: 10,
-                                height: 10,
-                                decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Colors.white,
-                                    width: 1.5,
-                                  ),
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const NotificationsScreen(),
+                            ),
+                          ).then((_) => _fetchData()),
+                        ),
+                        if (unreadNotifications > 0)
+                          Positioned(
+                            right: 10,
+                            top: 10,
+                            child: Container(
+                              width: 9,
+                              height: 9,
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 1.5,
                                 ),
                               ),
                             ),
-                        ],
-                      ),
+                          ),
+                      ],
                     ),
+                    const SizedBox(width: 8),
                   ],
                 ),
               ],
               bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(52),
                 child: Container(
-                  color: Colors.white,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                      bottom: BorderSide(color: Color(0xFFEEEEF3), width: 1),
+                    ),
+                  ),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 8,
                   ),
                   child: Row(
-                    children: List.generate(3, (i) {
-                      final labels = ['Feeds', 'Events', 'Communities'];
+                    children: List.generate(2, (i) {
+                      final labels = ['Feeds', 'Events'];
                       final isSelected = _tabController.index == i;
                       return GestureDetector(
                         onTap: () {
@@ -225,14 +241,16 @@ class _FeedsScreenState extends State<FeedsScreen>
                             border: isSelected
                                 ? null
                                 : Border.all(
-                                    color: Colors.grey.shade300,
+                                    color: const Color(0xFFDDDDE5),
                                     width: 1,
                                   ),
                           ),
                           child: Text(
                             labels[i],
                             style: GoogleFonts.poppins(
-                              color: isSelected ? Colors.white : Colors.grey,
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.grey[600],
                               fontWeight: FontWeight.w600,
                               fontSize: 13,
                             ),
@@ -252,11 +270,7 @@ class _FeedsScreenState extends State<FeedsScreen>
                     Expanded(
                       child: TabBarView(
                         controller: _tabController,
-                        children: [
-                          _buildFeedsList(),
-                          _buildEventsTab(),
-                          _buildGroupsList(),
-                        ],
+                        children: [_buildFeedsList(), _buildEventsTab()],
                       ),
                     ),
                   ],
@@ -267,36 +281,139 @@ class _FeedsScreenState extends State<FeedsScreen>
   }
 
   // ─── TAB 1: FEEDS ───────────────────────────
+  void _openComposeSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _ComposePostSheet(
+        onPosted: (newPost) {
+          setState(() => posts.insert(0, newPost));
+        },
+      ),
+    );
+  }
+
   Widget _buildFeedsList() {
-    if (posts.isEmpty) {
-      return RefreshIndicator(
-        onRefresh: _fetchData,
-        color: AppColors.primary,
-        child: ListView(
+    return RefreshIndicator(
+      onRefresh: _fetchData,
+      color: AppColors.primary,
+      child: ListView.builder(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        itemCount: posts.length + 2,
+        itemBuilder: (context, index) {
+          // index 0 = compose box
+          if (index == 0) return _buildComposeBox();
+          // index 1 = trending tags strip
+          if (index == 1) return _buildTrendingStrip();
+          final post = posts[index - 2];
+          return _FeedCard(
+            key: ValueKey(post['id']),
+            post: post,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => FeedDetailScreen(post: post)),
+            ),
+            onDeleted: () {
+              final deletedId = post['id'];
+              setState(() => posts.removeWhere((p) => p['id'] == deletedId));
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildComposeBox() {
+    return GestureDetector(
+      onTap: _openComposeSheet,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: MediaQuery.of(context).size.height * 0.3),
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+              child: Row(
                 children: [
-                  Icon(
-                    Icons.dynamic_feed_outlined,
-                    size: 60,
-                    color: Colors.grey.shade300,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    "No feeds yet",
-                    style: GoogleFonts.poppins(
-                      color: Colors.grey,
-                      fontWeight: FontWeight.w600,
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: AppColors.primary.withOpacity(0.10),
+                    child: const Icon(
+                      Icons.person_rounded,
+                      color: AppColors.primary,
+                      size: 20,
                     ),
                   ),
-                  Text(
-                    "Be the first to post something!",
-                    style: GoogleFonts.poppins(
-                      color: Colors.grey,
-                      fontSize: 12,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 11,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0F0F5),
+                        borderRadius: BorderRadius.circular(26),
+                      ),
+                      child: Text(
+                        "What's on your mind?",
+                        style: GoogleFonts.poppins(
+                          color: Colors.grey[400],
+                          fontSize: 13.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(height: 1, color: const Color(0xFFF0F0F5)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                children: [
+                  _ComposeQuickBtn(
+                    icon: Icons.photo_library_rounded,
+                    label: 'Photo',
+                    color: const Color(0xFF22C55E),
+                  ),
+                  const SizedBox(width: 16),
+                  _ComposeQuickBtn(
+                    icon: Icons.sell_rounded,
+                    label: 'Tag',
+                    color: const Color(0xFF3B82F6),
+                  ),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [AppColors.primary, Color(0xFFB74B5C)],
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      'Post',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -304,27 +421,94 @@ class _FeedsScreenState extends State<FeedsScreen>
             ),
           ],
         ),
-      );
-    }
-    return RefreshIndicator(
-      onRefresh: _fetchData,
-      color: AppColors.primary,
-      child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        itemCount: posts.length,
-        itemBuilder: (context, index) => _FeedCard(
-          post: posts[index],
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => FeedDetailScreen(post: posts[index]),
+      ),
+    );
+  }
+
+  Widget _buildTrendingStrip() {
+    final trending = [
+      ('🔥', 'Trending', const Color(0xFFFF6B6B)),
+      ('🔧', 'Skill Offer', const Color(0xFF3B82F6)),
+      ('💡', 'Tips', const Color(0xFFA855F7)),
+      ('🤝', 'Swap', AppColors.primary),
+      ('🔍', 'Looking For', const Color(0xFFF97316)),
+      ('💼', 'Services', const Color(0xFF22C55E)),
+    ];
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'Trending',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13.5,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF6B6B).withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'LIVE',
+                  style: GoogleFonts.poppins(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFFFF6B6B),
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: trending.map((t) {
+                final (emoji, label, color) = t;
+                return Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.10),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: color.withOpacity(0.25),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(emoji, style: const TextStyle(fontSize: 13)),
+                      const SizedBox(width: 5),
+                      Text(
+                        label,
+                        style: GoogleFonts.poppins(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: color,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
             ),
           ),
-          onDeleted: () {
-            final deletedId = posts[index]['id'];
-            setState(() => posts.removeWhere((p) => p['id'] == deletedId));
-          },
-        ),
+        ],
       ),
     );
   }
@@ -470,71 +654,6 @@ class _FeedsScreenState extends State<FeedsScreen>
   }
 
   // ─── TAB 3: GROUPS ──────────────────────────
-  Widget _buildGroupsList() {
-    return Column(
-      children: [
-        _buildCreateGroupBanner(),
-        Expanded(
-          child: AllGroupsTab(groups: groups, onRefresh: _fetchData),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCreateGroupBanner() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [AppColors.primary, Color(0xFFB74B5C)],
-          ),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Start a Community",
-                    style: GoogleFonts.poppins(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  Text(
-                    "Connect with people who share your interests.",
-                    style: GoogleFonts.poppins(
-                      color: Colors.white70,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            IconButton(
-              onPressed: () async {
-                final bool? created = await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const CreateGroupScreen()),
-                );
-                if (created == true) _fetchData();
-              },
-              icon: const CircleAvatar(
-                backgroundColor: Colors.white,
-                child: Icon(Icons.add, color: AppColors.primary),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 // ─────────────────────────────────────────────
@@ -544,13 +663,13 @@ class _FeedCard extends StatefulWidget {
   final dynamic post;
   final VoidCallback? onTap;
   final VoidCallback? onDeleted;
-  const _FeedCard({required this.post, this.onTap, this.onDeleted});
+  const _FeedCard({super.key, required this.post, this.onTap, this.onDeleted});
 
   @override
   State<_FeedCard> createState() => _FeedCardState();
 }
 
-class _FeedCardState extends State<_FeedCard> with SingleTickerProviderStateMixin {
+class _FeedCardState extends State<_FeedCard> with TickerProviderStateMixin {
   final ApiService _apiService = ApiService();
   bool isLiked = false;
   int likeCount = 0;
@@ -560,6 +679,11 @@ class _FeedCardState extends State<_FeedCard> with SingleTickerProviderStateMixi
   late AnimationController _heartController;
   late Animation<double> _heartScale;
   bool _showHeart = false;
+
+  // Entrance animation
+  late AnimationController _entranceController;
+  late Animation<double> _entranceFade;
+  late Animation<Offset> _entranceSlide;
 
   @override
   void initState() {
@@ -575,12 +699,30 @@ class _FeedCardState extends State<_FeedCard> with SingleTickerProviderStateMixi
       parent: _heartController,
       curve: Curves.easeOutBack,
     );
+    // Entrance
+    _entranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 420),
+    );
+    _entranceFade = CurvedAnimation(
+      parent: _entranceController,
+      curve: Curves.easeOut,
+    );
+    _entranceSlide =
+        Tween<Offset>(begin: const Offset(0, 0.12), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _entranceController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
+    _entranceController.forward();
     _loadMyId();
   }
 
   @override
   void dispose() {
     _heartController.dispose();
+    _entranceController.dispose();
     super.dispose();
   }
 
@@ -730,120 +872,134 @@ class _FeedCardState extends State<_FeedCard> with SingleTickerProviderStateMixi
     final name = profile['full_name'] ?? 'User';
     final handle = profile['username'] ?? 'user';
     final pic = profile['profile_picture_url'];
-    final title = widget.post['title'] ?? '';
-    final content = widget.post['content'] ?? '';
-    final image = widget.post['image_url'];
+    final title = widget.post['title'] as String? ?? '';
+    final content = widget.post['content'] as String? ?? '';
+    final tag = widget.post['tag'] as String? ?? 'general';
     final createdAt = widget.post['created_at'];
+
+    // Collect image URLs — prefer image_urls array, fall back to image_url
+    final rawUrls = widget.post['image_urls'];
+    List<String> images = [];
+    if (rawUrls is List && rawUrls.isNotEmpty) {
+      images = rawUrls.whereType<String>().toList();
+    } else if (widget.post['image_url'] is String &&
+        (widget.post['image_url'] as String).isNotEmpty) {
+      images = [widget.post['image_url'] as String];
+    }
 
     String dateLabel = '';
     if (createdAt != null) {
       try {
         final dt = DateTime.parse(createdAt);
-        dateLabel = DateFormat("d'th,' MMMM yyyy").format(dt);
+        final now = DateTime.now();
+        final diff = now.difference(dt);
+        if (diff.inMinutes < 1) {
+          dateLabel = 'Just now';
+        } else if (diff.inMinutes < 60) {
+          dateLabel = '${diff.inMinutes}m ago';
+        } else if (diff.inHours < 24) {
+          dateLabel = '${diff.inHours}h ago';
+        } else if (diff.inDays < 7) {
+          dateLabel = '${diff.inDays}d ago';
+        } else {
+          dateLabel = DateFormat('MMM d').format(dt);
+        }
       } catch (_) {}
     }
 
-    return GestureDetector(
-      onTap: widget.onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header: avatar + name + more
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.grey[100],
-                    backgroundImage: pic != null
-                        ? CachedNetworkImageProvider(pic)
-                        : null,
-                    child: pic == null
-                        ? const Icon(Icons.person, color: Colors.grey, size: 18)
-                        : null,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          name,
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                        Text(
-                          "@$handle",
-                          style: GoogleFonts.poppins(
-                            color: Colors.grey,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.more_horiz),
-                    color: Colors.grey[400],
-                    onPressed: _showPostOptions,
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 12),
-
-              // Body: thumbnail left + text right
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (image != null)
-                    GestureDetector(
-                      onDoubleTap: _handleImageDoubleTapLike,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Stack(
-                          alignment: Alignment.center,
+    return FadeTransition(
+      opacity: _entranceFade,
+      child: SlideTransition(
+        position: _entranceSlide,
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ── Header ──
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 14, 8, 0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      CircleAvatar(
+                        radius: 21,
+                        backgroundColor: const Color(0xFFF0F0F5),
+                        backgroundImage: pic != null
+                            ? CachedNetworkImageProvider(pic)
+                            : null,
+                        child: pic == null
+                            ? const Icon(
+                                Icons.person_rounded,
+                                color: Colors.grey,
+                                size: 21,
+                              )
+                            : null,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            CachedNetworkImage(
-                              imageUrl: image,
-                              width: 100,
-                              height: 90,
-                              fit: BoxFit.cover,
-                              errorWidget: (_, __, ___) => Container(
-                                width: 100,
-                                height: 90,
-                                color: Colors.grey[200],
-                                child: const Icon(
-                                  Icons.image_not_supported,
-                                  color: Colors.grey,
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    name,
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 14.5,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
+                                const SizedBox(width: 6),
+                                _TagChip(tag: tag),
+                              ],
+                            ),
+                            Text(
+                              '@$handle · $dateLabel',
+                              style: GoogleFonts.poppins(
+                                color: Colors.grey[400],
+                                fontSize: 11.5,
                               ),
                             ),
-                            if (_showHeart)
-                              ScaleTransition(
-                                scale: _heartScale,
-                                child: const Icon(
-                                  Icons.favorite,
-                                  color: Colors.white,
-                                  size: 34,
-                                ),
-                              ),
                           ],
                         ),
                       ),
+                      IconButton(
+                        icon: Icon(
+                          Icons.more_horiz_rounded,
+                          color: Colors.grey[400],
+                        ),
+                        onPressed: _showPostOptions,
+                      ),
+                    ],
+                  ),
+                ),
+
+                // ── Text body ──
+                if (title.isNotEmpty || content.isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      14,
+                      10,
+                      14,
+                      images.isEmpty ? 14 : 10,
                     ),
-                  SizedBox(width: image != null ? 12 : 0),
-                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -851,114 +1007,439 @@ class _FeedCardState extends State<_FeedCard> with SingleTickerProviderStateMixi
                           Text(
                             title,
                             style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
                               height: 1.3,
                             ),
                           ),
                         if (content.isNotEmpty) ...[
-                          SizedBox(height: title.isNotEmpty ? 4 : 0),
+                          if (title.isNotEmpty) const SizedBox(height: 4),
                           Text(
                             content,
-                            maxLines: 3,
+                            maxLines: images.isNotEmpty ? 2 : 5,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.poppins(
-                              color: Colors.grey[600],
-                              fontSize: 12,
-                              height: 1.4,
+                              color: Colors.black87,
+                              fontSize: 13.5,
+                              height: 1.5,
                             ),
                           ),
                         ],
                       ],
                     ),
                   ),
-                ],
-              ),
 
-              const SizedBox(height: 12),
-
-              // Footer: like / comment / bookmark  +  date
-              Row(
-                children: [
-                  // Like
+                // ── Images ──
+                if (images.isNotEmpty)
                   GestureDetector(
-                    onTap: _handleLike,
-                    child: Row(
-                      children: [
-                        Icon(
-                          isLiked ? Icons.favorite : Icons.favorite_border,
-                          color: isLiked ? Colors.red : Colors.grey,
-                          size: 20,
+                    onDoubleTap: _handleImageDoubleTapLike,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        14,
+                        title.isEmpty && content.isEmpty ? 10 : 0,
+                        14,
+                        12,
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: _PostImageGrid(
+                          images: images,
+                          showHeart: _showHeart,
+                          heartScale: _heartScale,
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          "$likeCount",
-                          style: GoogleFonts.poppins(
-                            color: Colors.grey[700],
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  // Comment
-                  GestureDetector(
-                    onTap: () => showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      builder: (_) => CommentsSheet(
-                        postId: widget.post['id'],
-                        onCommentPosted: () {
-                          setState(() {
-                            commentsCount++;
-                          });
+
+                // ── Service CTA (only for service posts) ──
+                if (widget.post['service_id'] != null)
+                  _ServiceCTABlock(post: widget.post),
+
+                // ── Divider ──
+                Container(
+                  height: 1,
+                  color: const Color(0xFFF0F0F5),
+                  margin: const EdgeInsets.symmetric(horizontal: 14),
+                ),
+
+                // ── Footer ──
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 8, 14, 12),
+                  child: Row(
+                    children: [
+                      _ActionBtn(
+                        icon: isLiked
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
+                        label: '$likeCount',
+                        color: isLiked ? Colors.red : Colors.grey[500]!,
+                        active: isLiked,
+                        onTap: _handleLike,
+                      ),
+                      const SizedBox(width: 6),
+                      _ActionBtn(
+                        icon: Icons.chat_bubble_outline_rounded,
+                        label: '$commentsCount',
+                        color: Colors.grey[500]!,
+                        active: false,
+                        onTap: () => showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (_) => CommentsSheet(
+                            postId: widget.post['id'],
+                            onCommentPosted: () =>
+                                setState(() => commentsCount++),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      _ActionBtn(
+                        icon: Icons.repeat_rounded,
+                        label: 'Share',
+                        color: Colors.grey[500]!,
+                        active: false,
+                        onTap: () {
+                          final text =
+                              '${title.isNotEmpty ? '$title\n\n' : ''}$content\n\nShared from LifeKit'
+                                  .trim();
+                          Share.share(text);
                         },
                       ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.chat_bubble_outline,
-                          color: Colors.grey,
-                          size: 20,
+                      const Spacer(),
+                      GestureDetector(
+                        onTap: _handleBookmark,
+                        child: Icon(
+                          isBookmarked
+                              ? Icons.bookmark_rounded
+                              : Icons.bookmark_border_rounded,
+                          color: isBookmarked
+                              ? AppColors.primary
+                              : Colors.grey[400],
+                          size: 22,
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          "$commentsCount",
-                          style: GoogleFonts.poppins(
-                            color: Colors.grey[700],
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  // Bookmark
-                  GestureDetector(
-                    onTap: _handleBookmark,
-                    child: Icon(
-                      isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                      color: isBookmarked ? AppColors.primary : Colors.grey,
-                      size: 20,
-                    ),
-                  ),
-                  const Spacer(),
-                  if (dateLabel.isNotEmpty)
-                    Text(
-                      dateLabel,
-                      style: GoogleFonts.poppins(
-                        color: Colors.grey,
-                        fontSize: 11,
                       ),
-                    ),
-                ],
-              ),
-            ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-      ), // end GestureDetector
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// SERVICE CTA BLOCK  (Book / Swap buttons on service posts)
+// ─────────────────────────────────────────────
+class _ServiceCTABlock extends StatelessWidget {
+  final dynamic post;
+  const _ServiceCTABlock({required this.post});
+
+  // Parse price label from title: "Title • ₦5000" → "₦5,000"
+  String _priceLabel() {
+    final title = post['title'] as String? ?? '';
+    final parts = title.split(' • ');
+    return parts.length > 1 ? parts.last.trim() : '';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final serviceId = post['service_id'] as String;
+    final providerId = post['user_id'] as String? ?? '';
+    final titleParts = (post['title'] as String? ?? '').split(' • ');
+    final serviceTitle = titleParts.first.trim();
+    final priceLabel = _priceLabel();
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(14, 10, 14, 6),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primary.withOpacity(0.06),
+            const Color(0xFF3B82F6).withOpacity(0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.primary.withOpacity(0.15)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        'SERVICE',
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    if (priceLabel.isNotEmpty) ...[
+                      const SizedBox(width: 8),
+                      Text(
+                        priceLabel,
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                if (serviceTitle.isNotEmpty) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    serviceTitle,
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.black54,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          // Book button
+          GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ServiceBookingDetailScreen(
+                  providerId: providerId,
+                  serviceId: serviceId,
+                  serviceTitle: serviceTitle.isNotEmpty
+                      ? serviceTitle
+                      : 'Service',
+                ),
+              ),
+            ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [AppColors.primary, Color(0xFFB74B5C)],
+                ),
+                borderRadius: BorderRadius.circular(22),
+              ),
+              child: Text(
+                '📅 Book',
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Swap button
+          GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const SkillSwapDashboardScreen(),
+              ),
+            ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+              decoration: BoxDecoration(
+                color: const Color(0xFF3B82F6).withOpacity(0.12),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: const Color(0xFF3B82F6), width: 1.2),
+              ),
+              child: Text(
+                '🤝 Swap',
+                style: GoogleFonts.poppins(
+                  color: Color(0xFF3B82F6),
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// COMPOSE QUICK BUTTON
+// ─────────────────────────────────────────────
+class _ComposeQuickBtn extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  const _ComposeQuickBtn({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: color),
+        const SizedBox(width: 5),
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            color: color,
+            fontSize: 12.5,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// ACTION BUTTON (footer of feed card)
+// ─────────────────────────────────────────────
+class _ActionBtn extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final bool active;
+  final VoidCallback onTap;
+  const _ActionBtn({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.active,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: active ? color.withOpacity(0.10) : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 19, color: color),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: GoogleFonts.poppins(
+                color: color,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// POST IMAGE GRID  (1, 2, or 3 images)
+// ─────────────────────────────────────────────
+class _PostImageGrid extends StatelessWidget {
+  final List<String> images;
+  final bool showHeart;
+  final Animation<double> heartScale;
+  const _PostImageGrid({
+    required this.images,
+    required this.showHeart,
+    required this.heartScale,
+  });
+
+  Widget _img(String url, {double? height, double? width}) {
+    return CachedNetworkImage(
+      imageUrl: url,
+      height: height,
+      width: width ?? double.infinity,
+      fit: BoxFit.cover,
+      errorWidget: (_, __, ___) => Container(
+        height: height,
+        color: Colors.grey[200],
+        child: const Icon(Icons.image_not_supported, color: Colors.grey),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget grid;
+    if (images.length == 1) {
+      grid = _img(images[0], height: 200);
+    } else if (images.length == 2) {
+      grid = Row(
+        children: [
+          Expanded(child: _img(images[0], height: 180)),
+          const SizedBox(width: 3),
+          Expanded(child: _img(images[1], height: 180)),
+        ],
+      );
+    } else {
+      // 3 images: one large left, two stacked right
+      grid = Row(
+        children: [
+          Expanded(flex: 3, child: _img(images[0], height: 200)),
+          const SizedBox(width: 3),
+          Expanded(
+            flex: 2,
+            child: Column(
+              children: [
+                _img(images[1], height: 98.5),
+                const SizedBox(height: 3),
+                _img(images[2], height: 98.5),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        grid,
+        if (showHeart)
+          ScaleTransition(
+            scale: heartScale,
+            child: const Icon(
+              Icons.favorite_rounded,
+              color: Colors.white,
+              size: 56,
+            ),
+          ),
+      ],
     );
   }
 }
@@ -1281,6 +1762,421 @@ class _ActionPill extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// TAG CHIP
+// ─────────────────────────────────────────────
+class _TagChip extends StatelessWidget {
+  final String tag;
+  const _TagChip({required this.tag});
+
+  static const _labels = {
+    'general': '✦ General',
+    'skill_offer': '🔧 Skill Offer',
+    'service': '💼 Service',
+    'looking_for': '🔍 Looking For',
+    'tip': '💡 Tip',
+    'swap': '🤝 Swap',
+  };
+
+  static const _colors = {
+    'general': Color(0xFF9E9E9E),
+    'skill_offer': Color(0xFF3B82F6),
+    'service': Color(0xFF22C55E),
+    'looking_for': Color(0xFFF97316),
+    'tip': Color(0xFFA855F7),
+    'swap': AppColors.primary,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    if (tag == 'general') return const SizedBox.shrink();
+    final label = _labels[tag] ?? tag;
+    final color = _colors[tag] ?? Colors.grey;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.poppins(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// COMPOSE POST SHEET
+// ─────────────────────────────────────────────
+class _ComposePostSheet extends StatefulWidget {
+  final void Function(Map<String, dynamic> newPost) onPosted;
+  const _ComposePostSheet({required this.onPosted});
+
+  @override
+  State<_ComposePostSheet> createState() => _ComposePostSheetState();
+}
+
+class _ComposePostSheetState extends State<_ComposePostSheet> {
+  final _contentController = TextEditingController();
+  final _titleController = TextEditingController();
+  final _apiService = ApiService();
+  String _selectedTag = 'general';
+  bool _isPosting = false;
+  String? _errorMessage;
+  final List<XFile> _pickedImages = [];
+  final ImagePicker _picker = ImagePicker();
+
+  static const _tags = [
+    ('general', '✦ General', Color(0xFF9E9E9E)),
+    ('skill_offer', '🔧 Skill Offer', Color(0xFF3B82F6)),
+    ('service', '💼 Service', Color(0xFF22C55E)),
+    ('looking_for', '🔍 Looking For', Color(0xFFF97316)),
+    ('tip', '💡 Tip', Color(0xFFA855F7)),
+    ('swap', '🤝 Swap', AppColors.primary),
+  ];
+
+  Future<void> _pickImages() async {
+    final remaining = 3 - _pickedImages.length;
+    if (remaining <= 0) return;
+    final picked = await _picker.pickMultiImage(imageQuality: 80);
+    if (!mounted) return;
+    setState(() {
+      final toAdd = picked.take(remaining).toList();
+      _pickedImages.addAll(toAdd);
+    });
+  }
+
+  Future<void> _submit() async {
+    final content = _contentController.text.trim();
+    if (content.isEmpty) return;
+    setState(() {
+      _isPosting = true;
+      _errorMessage = null;
+    });
+    try {
+      // Upload images first
+      final List<String> uploadedUrls = [];
+      for (final xfile in _pickedImages) {
+        final url = await _apiService.uploadPostImage(File(xfile.path));
+        uploadedUrls.add(url);
+      }
+
+      final newPost = await _apiService.createPost(
+        content: content,
+        title: _titleController.text.trim(),
+        imageUrls: uploadedUrls,
+        tag: _selectedTag,
+      );
+      if (mounted) {
+        widget.onPosted(newPost);
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      debugPrint('[ComposePost] ERROR: $e');
+      if (mounted) {
+        setState(() {
+          _isPosting = false;
+          _errorMessage = e.toString().replaceFirst('Exception: ', '');
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _contentController.dispose();
+    _titleController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottom = MediaQuery.of(context).viewInsets.bottom;
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      padding: EdgeInsets.fromLTRB(20, 14, 20, 20 + bottom),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Handle
+          // Error banner
+          if (_errorMessage != null)
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFEBEB),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.red.shade200),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _errorMessage!,
+                      style: GoogleFonts.poppins(
+                        color: Colors.red.shade700,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => setState(() => _errorMessage = null),
+                    child: const Icon(Icons.close, color: Colors.red, size: 16),
+                  ),
+                ],
+              ),
+            ),
+          Center(
+            child: Container(
+              width: 38,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Top row: title + post button
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Create Post',
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: _isPosting ? null : _submit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 22,
+                    vertical: 10,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(22),
+                  ),
+                  elevation: 0,
+                ),
+                child: _isPosting
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        'Post',
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Title field
+          TextField(
+            controller: _titleController,
+            style: GoogleFonts.poppins(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+            decoration: InputDecoration(
+              hintText: 'Add a title (optional)',
+              hintStyle: GoogleFonts.poppins(
+                color: Colors.grey[350],
+                fontSize: 15,
+              ),
+              border: InputBorder.none,
+              isDense: true,
+              contentPadding: EdgeInsets.zero,
+            ),
+          ),
+          const SizedBox(height: 6),
+
+          // Content field
+          TextField(
+            controller: _contentController,
+            maxLines: 4,
+            minLines: 2,
+            autofocus: true,
+            style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
+            decoration: InputDecoration(
+              hintText: "What's on your mind?",
+              hintStyle: GoogleFonts.poppins(
+                color: Colors.grey[400],
+                fontSize: 14,
+              ),
+              border: InputBorder.none,
+              isDense: true,
+              contentPadding: EdgeInsets.zero,
+            ),
+          ),
+
+          // Image previews
+          if (_pickedImages.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 86,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: _pickedImages.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (context, i) => Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.file(
+                        File(_pickedImages[i].path),
+                        width: 86,
+                        height: 86,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: GestureDetector(
+                        onTap: () => setState(() => _pickedImages.removeAt(i)),
+                        child: Container(
+                          width: 20,
+                          height: 20,
+                          decoration: const BoxDecoration(
+                            color: Colors.black54,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            color: Colors.white,
+                            size: 13,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+
+          const SizedBox(height: 12),
+          Container(height: 1, color: const Color(0xFFF0F0F5)),
+          const SizedBox(height: 12),
+
+          // Bottom toolbar: image picker + tag label
+          Row(
+            children: [
+              // Image picker button
+              GestureDetector(
+                onTap: _pickedImages.length < 3 ? _pickImages : null,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.photo_library_rounded,
+                      color: _pickedImages.length < 3
+                          ? const Color(0xFF22C55E)
+                          : Colors.grey[300],
+                      size: 22,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      _pickedImages.isEmpty
+                          ? 'Add Photos'
+                          : '${_pickedImages.length}/3',
+                      style: GoogleFonts.poppins(
+                        color: _pickedImages.length < 3
+                            ? const Color(0xFF22C55E)
+                            : Colors.grey[400],
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Spacer(),
+              // Tag label
+              Text(
+                'Tag:',
+                style: GoogleFonts.poppins(
+                  color: Colors.grey[400],
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          // Tag chips
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _tags.map((t) {
+              final (value, label, color) = t;
+              final selected = _selectedTag == value;
+              return GestureDetector(
+                onTap: () => setState(() => _selectedTag = value),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 7,
+                  ),
+                  decoration: BoxDecoration(
+                    color: selected
+                        ? color.withOpacity(0.12)
+                        : const Color(0xFFF0F0F5),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: selected ? color : Colors.transparent,
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Text(
+                    label,
+                    style: GoogleFonts.poppins(
+                      color: selected ? color : Colors.grey[500],
+                      fontSize: 12.5,
+                      fontWeight: selected
+                          ? FontWeight.w700
+                          : FontWeight.normal,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }

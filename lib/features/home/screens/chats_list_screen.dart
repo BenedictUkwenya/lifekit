@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/services/app_cache.dart';
 import 'chat_detail_screen.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 
@@ -30,6 +31,13 @@ class _ChatsListScreenState extends State<ChatsListScreen>
     _tabController.addListener(() {
       if (mounted) setState(() {});
     });
+    // SWR: paint cached data immediately, then revalidate
+    final cached = AppCache.instance.get<List<dynamic>>('conversations');
+    if (cached != null) {
+      allConversations = cached;
+      filteredConversations = cached;
+      isLoading = false;
+    }
     _fetchChats();
     _searchController.addListener(_onSearchChanged);
   }
@@ -452,8 +460,7 @@ class _ChatsListScreenState extends State<ChatsListScreen>
                                   color: Colors.grey,
                                 ),
                               ),
-                            if (lastActive.isNotEmpty)
-                              const SizedBox(width: 6),
+                            if (lastActive.isNotEmpty) const SizedBox(width: 6),
                             // Hard cap so a long title can't overflow.
                             ConstrainedBox(
                               constraints: const BoxConstraints(maxWidth: 90),

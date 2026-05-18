@@ -606,6 +606,17 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
         ],
       ),
       actions: [
+        if (_hasBooking &&
+            (currentBooking['status'] == 'confirmed' ||
+                currentBooking['status'] == 'accepted'))
+          IconButton(
+            icon: const Icon(
+              Icons.check_circle_outline_rounded,
+              color: Color(0xFF22C55E),
+            ),
+            tooltip: 'Mark as Done',
+            onPressed: _markAsDone,
+          ),
         IconButton(
           icon: const Icon(Icons.report_outlined, color: Colors.black),
           onPressed: () {
@@ -1058,6 +1069,69 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
     _messageController.selection = TextSelection.fromPosition(
       TextPosition(offset: _messageController.text.length),
     );
+  }
+
+  Future<void> _markAsDone() async {
+    if (!_hasBooking) return;
+    final bookingId = currentBooking['id']?.toString();
+    if (bookingId == null) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          'Mark as Done?',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'This will mark the booking as completed.',
+          style: GoogleFonts.poppins(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('Cancel', style: GoogleFonts.poppins()),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF22C55E),
+            ),
+            child: Text(
+              'Mark Done',
+              style: GoogleFonts.poppins(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      await _apiService.completeBooking(bookingId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Booking marked as done!',
+            style: GoogleFonts.poppins(),
+          ),
+          backgroundColor: const Color(0xFF22C55E),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+      _fetchMessages(isPolling: true); // refreshes booking status
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e', style: GoogleFonts.poppins())),
+      );
+    }
   }
 
   Widget _buildQuickActionBar() {

@@ -32,7 +32,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
     _messages.add({
       'role': 'ai',
       'text':
-          "Hello! I'm your LifeKit assistant — here to help you discover services, find your community, and make the most of your day. What can I do for you?",
+          "Hello! I'm Gracia, your LifeKit assistant — here to help you discover services, find your community, and make the most of your day. What can I do for you?",
       'actions': <dynamic>[],
     });
     _loadProfile();
@@ -150,7 +150,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
           ],
         ),
         content: Text(
-          'The LifeKit AI Assistant is available on Pro and Business plans. Upgrade to unlock AI chat, smart recommendations, and more.',
+          'Gracia is available on Pro and Business plans. Upgrade to unlock AI chat, smart recommendations, and more.',
           style: GoogleFonts.poppins(
             fontSize: 13,
             color: Colors.black87,
@@ -250,18 +250,17 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
       ),
       title: Row(
         children: [
-          // Logo avatar on subtle tinted circle
+          // AI character avatar
           Container(
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.09),
+              color: AppColors.primary,
               shape: BoxShape.circle,
+              border: Border.all(color: AppColors.primary, width: 2),
             ),
-            padding: const EdgeInsets.all(9),
-            child: Image.asset(
-              'assets/images/logo_black.png',
-              fit: BoxFit.contain,
+            child: ClipOval(
+              child: Image.asset('assets/ai/aihalfpic.jpg', fit: BoxFit.cover),
             ),
           ),
           const SizedBox(width: 10),
@@ -269,7 +268,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'LifeKit AI',
+                'Gracia',
                 style: GoogleFonts.poppins(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
@@ -391,11 +390,13 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.09),
+        color: AppColors.primary,
         shape: BoxShape.circle,
+        border: Border.all(color: AppColors.primary, width: 1.5),
       ),
-      padding: EdgeInsets.all(size * 0.22),
-      child: Image.asset('assets/images/logo_black.png', fit: BoxFit.contain),
+      child: ClipOval(
+        child: Image.asset('assets/ai/aihalfpic.jpg', fit: BoxFit.cover),
+      ),
     );
   }
 
@@ -564,7 +565,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
                 textCapitalization: TextCapitalization.sentences,
                 onSubmitted: (_) => _sendMessage(),
                 decoration: InputDecoration(
-                  hintText: 'Message LifeKit AI…',
+                  hintText: 'Message Gracia…',
                   hintStyle: GoogleFonts.poppins(
                     color: Colors.black38,
                     fontSize: 14,

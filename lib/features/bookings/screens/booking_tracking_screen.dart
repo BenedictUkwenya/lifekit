@@ -26,6 +26,7 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
   late dynamic _currentBooking;
   bool _isLoading = false;
   bool _isDisputeSubmitting = false;
+  bool _hasRated = false;
   final TextEditingController _disputeReasonController =
       TextEditingController();
 
@@ -214,19 +215,15 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
         ? (_currentBooking['provider_confirmed'] ?? false)
         : (_currentBooking['client_confirmed'] ?? false);
 
-    final DateTime scheduledTime = DateTime.parse(
-      _currentBooking['scheduled_time'],
-    );
+    // Report/dispute is always available while the booking is still active
     final bool canReportIssue =
-        (status == 'confirmed' || status == 'pending') &&
-        (DateTime.now().difference(scheduledTime).inHours >= 24 || isOverdue);
+        status == 'confirmed' || status == 'pending' || status == 'accepted';
 
     // True when the provider has confirmed but the client hasn't yet acted —
     // the 48-hour auto-release clock is now running.
     final bool providerConfirmed =
         _currentBooking['provider_confirmed'] == true;
-    final bool clientConfirmed =
-        _currentBooking['client_confirmed'] == true;
+    final bool clientConfirmed = _currentBooking['client_confirmed'] == true;
     final bool showEscrowWarning =
         widget.isClient &&
         providerConfirmed &&
@@ -476,9 +473,11 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
                     children: [
                       const Icon(Icons.check, color: Colors.green),
                       const SizedBox(width: 8),
-                      Text(
-                        "You have confirmed. Waiting for $otherName...",
-                        style: GoogleFonts.poppins(),
+                      Flexible(
+                        child: Text(
+                          "You have confirmed. Waiting for $otherName...",
+                          style: GoogleFonts.poppins(),
+                        ),
                       ),
                     ],
                   ),
@@ -554,26 +553,35 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
               ],
             ],
 
-            // 4. RATE PROVIDER BUTTON (Added Section)
-            // This displays when the status is finally completed
-            if (status == 'completed') ...[
+            // 4. RATE button — visible once you've confirmed your side (or fully completed), hidden after rating
+            if (!_hasRated && (iHaveConfirmed || status == 'completed')) ...[
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 height: 55,
                 child: OutlinedButton(
-                  onPressed: () {
-                    Navigator.push(
+                  onPressed: () async {
+                    final revieweeId = widget.isClient
+                        ? _currentBooking['provider_id']?.toString() ?? ''
+                        : _currentBooking['client_id']?.toString() ?? '';
+                    final reviewerRole = widget.isClient
+                        ? 'client'
+                        : 'provider';
+                    final rated = await Navigator.push<bool>(
                       context,
                       MaterialPageRoute(
                         builder: (_) => LeaveReviewScreen(
                           bookingId: _currentBooking['id'],
-                          serviceId: _currentBooking['service_id'],
-                          providerId: _currentBooking['provider_id'],
-                          serviceTitle: _currentBooking['services']['title'],
+                          serviceId: _currentBooking['service_id'] ?? '',
+                          revieweeId: revieweeId,
+                          reviewerRole: reviewerRole,
+                          revieweeName: otherName,
                         ),
                       ),
                     );
+                    if (rated == true && mounted) {
+                      setState(() => _hasRated = true);
+                    }
                   },
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: AppColors.primary),
@@ -582,7 +590,7 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
                     ),
                   ),
                   child: Text(
-                    "Rate Provider",
+                    widget.isClient ? "Rate Provider" : "Rate Client",
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -594,50 +602,34 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
             ],
 
             if (canReportIssue) ...[
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
-                height: 55,
-                child: isOverdue
-                    ? ElevatedButton.icon(
-                        onPressed: _openDisputeSheet,
-                        icon: const Icon(
-                          Icons.report_problem_rounded,
-                          color: Colors.white,
-                        ),
-                        label: Text(
-                          "Report Issue",
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          elevation: 0,
-                        ),
-                      )
-                    : OutlinedButton(
-                        onPressed: _openDisputeSheet,
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.red),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        child: Text(
-                          "Report Issue",
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red,
-                          ),
-                        ),
-                      ),
+                height: 50,
+                child: OutlinedButton.icon(
+                  onPressed: _openDisputeSheet,
+                  icon: Icon(
+                    isOverdue
+                        ? Icons.report_problem_rounded
+                        : Icons.flag_outlined,
+                    color: Colors.red,
+                    size: 18,
+                  ),
+                  label: Text(
+                    "Report an Issue",
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.red,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.red),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
               ),
             ],
           ],

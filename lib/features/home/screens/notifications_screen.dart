@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/services/app_cache.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 
 // Navigation Targets
@@ -28,6 +29,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   @override
   void initState() {
     super.initState();
+    // Paint cached notifications instantly, then revalidate
+    final cached = AppCache.instance.get<List<dynamic>>('notifications');
+    if (cached != null) {
+      notifications = cached;
+      isLoading = false;
+    }
     _fetchNotifications();
   }
 

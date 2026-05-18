@@ -10,6 +10,7 @@ import '../../profile/screens/edit_profile_screen.dart';
 import '../../profile/screens/wallet_screen.dart';
 import '../../provider/screens/select_main_category_screen.dart';
 import '../../services/screens/services_list_screen.dart';
+import '../../home/screens/home_screen.dart';
 
 class AIOnboardingScreen extends StatefulWidget {
   const AIOnboardingScreen({super.key});
@@ -93,7 +94,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
           color: Colors.black87,
           size: 18,
         ),
-        onPressed: () => Navigator.pop(context),
+        onPressed: () => _goHome(),
       ),
       title: Text(
         'AI Setup Guide',
@@ -103,6 +104,27 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
           color: Colors.black87,
         ),
       ),
+      actions: [
+        TextButton(
+          onPressed: _goHome,
+          child: Text(
+            'Skip',
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _goHome() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+      (route) => false,
     );
   }
 
@@ -141,7 +163,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
           // Hero header
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(24),
+            height: 160,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [AppColors.primary, Color(0xFF7C3AED)],
@@ -150,30 +172,52 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
               ),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('✨', style: TextStyle(fontSize: 36)),
-                const SizedBox(height: 12),
-                Text(
-                  'Let AI Guide Your\nLifeKit Journey',
-                  style: GoogleFonts.poppins(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    height: 1.3,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Text section
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(22),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Let AI Guide Your\nLifeKit Journey',
+                            style: GoogleFonts.poppins(
+                              fontSize: 19,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              height: 1.3,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Get a personalised 7-Day\nSuccess Plan in seconds.',
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.white.withOpacity(0.85),
+                              height: 1.45,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Tell us about yourself and get a personalised\n7-Day Success Plan in seconds.',
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    color: Colors.white.withOpacity(0.85),
-                    height: 1.5,
+                  // AI character image
+                  SizedBox(
+                    width: 120,
+                    child: Image.asset(
+                      'assets/ai/aifullpic.jpg',
+                      fit: BoxFit.cover,
+                      alignment: Alignment.topCenter,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -354,7 +398,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
           // Success header
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(20),
+            height: 130,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [AppColors.primary, Color(0xFF7C3AED)],
@@ -363,35 +407,51 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
               ),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Row(
-              children: [
-                const Text('🎉', style: TextStyle(fontSize: 32)),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Your Personalized\n7-Day Plan',
-                        style: GoogleFonts.poppins(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          height: 1.3,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Follow these steps to hit the ground running!',
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: Colors.white.withOpacity(0.85),
-                        ),
-                      ),
-                    ],
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // AI character image
+                  SizedBox(
+                    width: 100,
+                    child: Image.asset(
+                      'assets/ai/aifullpic.jpg',
+                      fit: BoxFit.cover,
+                      alignment: Alignment.topCenter,
+                    ),
                   ),
-                ),
-              ],
+                  // Text section
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(18),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Your Personalized\n7-Day Plan',
+                            style: GoogleFonts.poppins(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              height: 1.3,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Follow these steps to hit the\nground running!',
+                            style: GoogleFonts.poppins(
+                              fontSize: 11,
+                              color: Colors.white.withOpacity(0.85),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
 
@@ -438,7 +498,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: _goHome,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
