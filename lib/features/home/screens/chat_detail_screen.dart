@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/error_handler.dart';
 import 'dart:async';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -196,7 +197,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+      ).showSnackBar(SnackBar(content: Text(appErrorMessage(context, e))));
     }
   }
 
@@ -1129,7 +1130,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e', style: GoogleFonts.poppins())),
+        SnackBar(content: Text(appErrorMessage(context, e), style: GoogleFonts.poppins())),
       );
     }
   }

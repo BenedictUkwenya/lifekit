@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/motion.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -6,12 +7,14 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/providers/cart_provider.dart';
 import 'payment_screen.dart';
 import '../../services/screens/provider_full_detail_screen.dart';
+import '../../../l10n/app_localizations.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
@@ -20,7 +23,7 @@ class CartScreen extends StatelessWidget {
         leading: const BackButton(color: Colors.black),
         centerTitle: true,
         title: Text(
-          "Cart Details",
+          l10n.cartTitle,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -61,7 +64,7 @@ class CartScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    "Your cart is empty",
+                    l10n.cartEmpty,
                     style: GoogleFonts.poppins(color: Colors.grey),
                   ),
                 ],
@@ -167,7 +170,7 @@ class CartScreen extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      "Confirm bookings",
+                      l10n.cartCheckout,
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -258,9 +261,9 @@ class CartScreen extends StatelessWidget {
                           color: Colors.grey,
                         ),
                       ),
-                      Text(
-                        // Total
-                        "\$${(item.price * item.quantity).toStringAsFixed(2)}",
+                      AnimatedCount(
+                        value: item.price * item.quantity,
+                        format: (v) => "\$${v.toStringAsFixed(2)}",
                         style: GoogleFonts.poppins(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/error_handler.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -128,7 +129,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(appErrorMessage(context, e)), backgroundColor: Colors.red),
         );
       }
     }
@@ -1089,7 +1090,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
               });
             } catch (e) {
               setDialogState(() => isGenerating = false);
-              if (e is UpgradeRequiredException && mounted) {
+              if (e is UpgradeRequiredException && ctx.mounted && mounted) {
                 Navigator.pop(ctx);
                 Navigator.push(
                   context,

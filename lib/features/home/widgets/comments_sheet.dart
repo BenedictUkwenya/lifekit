@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
@@ -110,10 +111,10 @@ class _CommentsSheetState extends State<CommentsSheet> {
       widget.onCommentPosted?.call();
       _fetchComments(); // Refresh the list
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Failed to post comment: $e',
+          content: Text(appErrorMessage(context, e),
           ),
         ),
       );
@@ -137,7 +138,7 @@ class _CommentsSheetState extends State<CommentsSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete comment: $e')),
+          SnackBar(content: Text(appErrorMessage(context, e))),
         );
       }
     }

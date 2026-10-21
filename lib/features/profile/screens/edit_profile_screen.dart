@@ -1,4 +1,5 @@
 import 'dart:io'; // Needed for File
+import '../../../core/utils/error_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -77,7 +78,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (mounted) {
         setState(() => isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+          SnackBar(content: Text(appErrorMessage(context, e)), backgroundColor: Colors.red),
         );
       }
     }

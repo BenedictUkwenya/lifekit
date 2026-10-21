@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/services/api_service.dart';
 import '../../services/screens/service_booking_detail_screen.dart';
 import '../../groups/screens/group_detail_screen.dart';
@@ -26,16 +27,25 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
   String? _userAvatarUrl;
   String _userInitial = '?';
 
+  bool _greetingSeeded = false;
+
   @override
   void initState() {
     super.initState();
-    _messages.add({
-      'role': 'ai',
-      'text':
-          "Hello! I'm Gracia, your LifeKit assistant — here to help you discover services, find your community, and make the most of your day. What can I do for you?",
-      'actions': <dynamic>[],
-    });
     _loadProfile();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_greetingSeeded) {
+      _greetingSeeded = true;
+      _messages.add({
+        'role': 'ai',
+        'text': AppLocalizations.of(context)!.aiGraciaGreeting,
+        'actions': <dynamic>[],
+      });
+    }
   }
 
   Future<void> _loadProfile() async {
@@ -96,10 +106,10 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
     });
     _scrollToBottom();
 
+    final l10n = AppLocalizations.of(context)!;
     try {
       final response = await _apiService.sendAiChatMessage(text, history);
-      final String reply =
-          response['reply'] ?? 'Sorry, I could not get a response.';
+      final String reply = response['reply'] ?? l10n.aiFallbackReply;
       final List<dynamic> actions = response['actions'] ?? [];
 
       if (mounted) {
@@ -122,7 +132,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
           _isThinking = false;
           _messages.add({
             'role': 'ai',
-            'text': 'Something went wrong. Please try again.',
+            'text': l10n.aiGenericError,
             'actions': <dynamic>[],
           });
         });
@@ -132,6 +142,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
   }
 
   void _showUpgradeDialog() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -140,17 +151,19 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
           children: [
             const Text('🔒', style: TextStyle(fontSize: 22)),
             const SizedBox(width: 8),
-            Text(
-              'Pro Feature',
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
+            Flexible(
+              child: Text(
+                l10n.aiProFeatureTitle,
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                ),
               ),
             ),
           ],
         ),
         content: Text(
-          'Gracia is available on Pro and Business plans. Upgrade to unlock AI chat, smart recommendations, and more.',
+          l10n.aiProFeatureBody,
           style: GoogleFonts.poppins(
             fontSize: 13,
             color: Colors.black87,
@@ -161,7 +174,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Maybe Later',
+              l10n.aiMaybeLater,
               style: GoogleFonts.poppins(color: Colors.grey),
             ),
           ),
@@ -183,7 +196,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
               ),
             ),
             child: Text(
-              'Upgrade Now ⚡',
+              l10n.aiUpgradeNow,
               style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
             ),
           ),
@@ -287,7 +300,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
                     ),
                   ),
                   Text(
-                    'Always here for you',
+                    AppLocalizations.of(context)!.aiAlwaysHereForYou,
                     style: GoogleFonts.poppins(
                       fontSize: 11,
                       color: Colors.black45,
@@ -479,7 +492,8 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
                               ),
                               const SizedBox(width: 5),
                               Text(
-                                action['label']?.toString() ?? 'View',
+                                action['label']?.toString() ??
+                                    AppLocalizations.of(context)!.aiActionViewFallback,
                                 style: GoogleFonts.poppins(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -565,7 +579,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
                 textCapitalization: TextCapitalization.sentences,
                 onSubmitted: (_) => _sendMessage(),
                 decoration: InputDecoration(
-                  hintText: 'Message Gracia…',
+                  hintText: AppLocalizations.of(context)!.aiMessageHint,
                   hintStyle: GoogleFonts.poppins(
                     color: Colors.black38,
                     fontSize: 14,

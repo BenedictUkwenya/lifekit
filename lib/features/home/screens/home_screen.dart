@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../../core/widgets/motion.dart';
+import '../../../core/services/push_service.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -36,6 +39,7 @@ import 'ai_assistant_screen.dart';
 import '../../../core/widgets/service_action_sheet.dart';
 import '../../services/screens/skill_swap_screens.dart'
     show SkillSwapBottomSheet;
+import '../../../l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -70,6 +74,9 @@ class _HomeScreenState extends State<HomeScreen> {
     'Central',
   ];
   String _selectedPlaceFilter = 'Nearby';
+
+  // Country flag (resolved from IP, defaults to Georgia)
+  String _countryCode = 'GE';
 
   // Badge counts & Indicators
   int unreadNotifications = 0;
@@ -119,7 +126,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    // Signed in: ask for push permission (first time) and register this device.
+    PushService.instance.registerForUser();
     _loadLocalRecents();
+    _fetchCountryFromIp();
     // SWR: paint from cache immediately, then revalidate in background
     _loadHomeCache().then((_) => _fetchAllData());
     _fetchCounts();
@@ -309,7 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Welcome back! ${daysSince}d of new opportunities',
+                              AppLocalizations.of(context)!.homeWelcomeBackOpportunities(daysSince),
                               style: GoogleFonts.poppins(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
@@ -495,12 +505,14 @@ class _HomeScreenState extends State<HomeScreen> {
       final popData = results[3] as List<dynamic>;
 
       if (offersData.isEmpty) {
+        // Use null titles/descriptions so the UI falls back to the localised
+        // defaults from the ARB file (homeOfferTitle, homeOfferValidUntil).
         offersData = [
           {
-            'title': 'Get 20% off your\nfirst booking!',
+            'title': null,
             'image_url':
                 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
-            'description': 'Valid until Oct 30',
+            'description': null,
           },
         ];
       }
@@ -574,14 +586,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ── Local Flag Helpers ────────────────────
 
-  // Gets the country code from the user's physical phone settings (e.g., 'en_GE' -> 'GE')
-  String _getLocalCountryCode() {
-    final profileCountry = userProfile?['country']?.toString();
-    if (profileCountry != null && profileCountry.trim().length == 2) {
-      return profileCountry.trim().toUpperCase();
-    }
-    return 'NG';
+  // Fetches the user's country from their IP address; falls back to 'GE' (Georgia)
+  Future<void> _fetchCountryFromIp() async {
+    try {
+      final res = await http
+          .get(Uri.parse('https://ipapi.co/json/?fields=country_code'))
+          .timeout(const Duration(seconds: 5));
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body) as Map<String, dynamic>;
+        final code =
+            data['country_code']?.toString().toUpperCase().trim() ?? '';
+        if (code.length == 2 && mounted) {
+          setState(() => _countryCode = code);
+          return;
+        }
+      }
+    } catch (_) {}
+    // Keep default 'GE'
   }
+
+  // Returns the resolved country code
+  String _getLocalCountryCode() => _countryCode;
 
   // Converts the 2-letter country code into a Flag Emoji
   String _getFlagEmoji(String countryCode) {
@@ -589,7 +614,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final isValid =
         normalized.length == 2 &&
         normalized.codeUnits.every((c) => c >= 0x41 && c <= 0x5A);
-    final safeCode = isValid ? normalized : 'NG';
+    final safeCode = isValid ? normalized : 'GE';
     const int flagOffset = 0x1F1E6;
     const int asciiOffset = 0x41;
     final int firstChar = safeCode.codeUnitAt(0) - asciiOffset + flagOffset;
@@ -764,7 +789,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ── AI speech bubble widget ───────────────────────────────────────────────
   Widget _buildAiBubble(String message) {
-    return GestureDetector(
+    return Pressable(
       onTap: () => setState(() => _showAiBubble = false),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 220),
@@ -801,7 +826,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ── Notification popup widget ─────────────────────────────────────────────
   Widget _buildNotifPopup(String text) {
-    return GestureDetector(
+    return Pressable(
       onTap: () => setState(() => _showNotifPopup = false),
       child: Material(
         color: Colors.transparent,
@@ -847,7 +872,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              GestureDetector(
+              Pressable(
                 onTap: () => setState(() => _showNotifPopup = false),
                 child: const Icon(Icons.close, size: 16, color: Colors.grey),
               ),
@@ -860,33 +885,34 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ── FLOATING MODERN BOTTOM NAV ────────────────────────────
   Widget _buildModernBottomNav() {
+    final l10n = AppLocalizations.of(context)!;
     final items = [
       _NavItem(
         icon: Icons.home_outlined,
         activeIcon: Icons.home_rounded,
-        label: 'Home',
+        label: l10n.homeTabDiscover,
       ),
       _NavItem(
         icon: Icons.explore_outlined,
         activeIcon: Icons.explore,
-        label: 'Explore',
+        label: l10n.explore,
       ),
       _NavItem(
         icon: Icons.grid_view_outlined,
         activeIcon: Icons.grid_view_rounded,
-        label: 'Feeds',
+        label: l10n.homeTabFeed,
         showDot: hasNewFeeds,
       ), // <-- Feeds Dot
       _NavItem(
         icon: Icons.chat_bubble_outline,
         activeIcon: Icons.chat_bubble_rounded,
-        label: 'Chats',
+        label: l10n.navChats,
         badge: unreadChats,
       ),
       _NavItem(
         icon: Icons.person_outline,
         activeIcon: Icons.person_rounded,
-        label: 'Profile',
+        label: l10n.homeTabProfile,
       ),
     ];
 
@@ -914,100 +940,102 @@ class _HomeScreenState extends State<HomeScreen> {
             child: SizedBox(
               height: 70,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: items.asMap().entries.map((entry) {
                   final i = entry.key;
                   final item = entry.value;
                   final active = _currentNavIndex == i;
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _currentNavIndex = i;
-                        if (i == 2) {
-                          hasNewFeeds = false; // Clear feeds dot when clicked
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _currentNavIndex = i;
+                          if (i == 2) {
+                            hasNewFeeds = false; // Clear feeds dot when clicked
+                          }
+                        });
+                        _fetchCounts();
+                        // Re-trigger AI greeting every time user returns to home
+                        if (i == 0) {
+                          Future.delayed(
+                            const Duration(milliseconds: 600),
+                            _triggerAiGreeting,
+                          );
                         }
-                      });
-                      _fetchCounts();
-                      // Re-trigger AI greeting every time user returns to home
-                      if (i == 0) {
-                        Future.delayed(
-                          const Duration(milliseconds: 600),
-                          _triggerAiGreeting,
-                        );
-                      }
-                    },
-                    behavior: HitTestBehavior.opaque,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 250),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Icon(
-                                active ? item.activeIcon : item.icon,
-                                color: active
-                                    ? AppColors.primary
-                                    : Colors.grey[400],
-                                size: active ? 26 : 24, // Slight pop effect
-                              ),
-                              // Number Badge
-                              if (item.badge != null && item.badge! > 0)
-                                Positioned(
-                                  right: -6,
-                                  top: -4,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(4),
-                                    decoration: const BoxDecoration(
-                                      color: Colors.red,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Text(
-                                      '${item.badge}',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 8,
-                                        fontWeight: FontWeight.bold,
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 8,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Icon(
+                                  active ? item.activeIcon : item.icon,
+                                  color: active
+                                      ? AppColors.primary
+                                      : Colors.grey[400],
+                                  size: active ? 26 : 24,
+                                ),
+                                if (item.badge != null && item.badge! > 0)
+                                  Positioned(
+                                    right: -6,
+                                    top: -4,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.red,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Text(
+                                        '${item.badge}',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 8,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              // Simple Dot Indicator (For Feeds)
-                              if (item.showDot && !active)
-                                Positioned(
-                                  right: 0,
-                                  top: -2,
-                                  child: Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                      color: Colors.red,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: Colors.white,
-                                        width: 1.5,
+                                if (item.showDot && !active)
+                                  Positioned(
+                                    right: 0,
+                                    top: -2,
+                                    child: Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: Colors.white,
+                                          width: 1.5,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          if (active) // Only show text when active for cleaner look, or show all if you prefer
-                            Text(
-                              item.label,
-                              style: GoogleFonts.poppins(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primary,
-                              ),
+                              ],
                             ),
-                        ],
+                            const SizedBox(height: 4),
+                            if (active)
+                              Text(
+                                item.label,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -1048,38 +1076,38 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildHeader(),
+                        _buildHeader().fadeSlideIn(index: 0),
                         const SizedBox(height: 22),
-                        _buildSearchBar(),
+                        _buildSearchBar().fadeSlideIn(index: 1),
                         const SizedBox(height: 16),
-                        _buildQuickActionBar(),
+                        _buildQuickActionBar().fadeSlideIn(index: 2),
                         if (_nearestBooking != null) ...[
                           const SizedBox(height: 16),
-                          _buildUpcomingBanner(),
+                          _buildUpcomingBanner().fadeSlideIn(index: 3),
                         ],
                         const SizedBox(height: 22),
 
                         // AI Success Task
                         if (_getTodayTask() != null && !_taskDoneToday) ...[
-                          _buildSuccessTaskCard(),
+                          _buildSuccessTaskCard().fadeSlideIn(index: 4),
                           const SizedBox(height: 20),
                         ],
 
                         // AI Recommendations
                         if (aiRecommendations.isNotEmpty) ...[
-                          _buildAiRecommendations(),
+                          _buildAiRecommendations().fadeSlideIn(index: 5),
                           const SizedBox(height: 28),
                         ],
 
                         // Offers
                         if (offers.isNotEmpty) ...[
-                          _buildOffersCard(),
+                          _buildOffersCard().fadeSlideIn(index: 6),
                           const SizedBox(height: 28),
                         ],
 
                         // Services
                         _buildSectionHeader(
-                          'Services',
+                          AppLocalizations.of(context)!.servicesTitle,
                           () => Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -1088,36 +1116,36 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         const SizedBox(height: 14),
-                        _buildServicesRow(),
+                        _buildServicesRow().fadeSlideIn(index: 7),
                         const SizedBox(height: 28),
 
                         // Top Swap Opportunities
                         if (swapOpportunities.isNotEmpty) ...[
-                          _buildTopSwapOpportunities(),
+                          _buildTopSwapOpportunities().fadeSlideIn(index: 8),
                           const SizedBox(height: 28),
                         ],
 
                         // Communities
                         if (homeGroups.isNotEmpty) ...[
-                          _buildCommunitiesSection(),
+                          _buildCommunitiesSection().fadeSlideIn(index: 9),
                           const SizedBox(height: 28),
                         ],
 
                         // Popular services
-                        _buildPopularServices(),
+                        _buildPopularServices().fadeSlideIn(index: 10),
                         const SizedBox(height: 28),
 
                         // Recent Searches
                         if (recentSearches.isNotEmpty) ...[
-                          _buildRecentSearchesHeader(),
+                          _buildRecentSearchesHeader().fadeSlideIn(index: 11),
                           const SizedBox(height: 14),
-                          _buildRecentSearchCards(),
+                          _buildRecentSearchCards().fadeSlideIn(index: 12),
                           const SizedBox(height: 28),
                         ],
 
                         // Places
                         _buildSectionHeader(
-                          'Places',
+                          AppLocalizations.of(context)!.placesTitle,
                           () => Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -1126,9 +1154,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         const SizedBox(height: 14),
-                        _buildPlaceFilterChips(),
+                        _buildPlaceFilterChips().fadeSlideIn(index: 13),
                         const SizedBox(height: 14),
-                        _buildPlacesList(),
+                        _buildPlacesList().fadeSlideIn(index: 14),
                       ],
                     ),
                   ),
@@ -1190,7 +1218,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ? [AppColors.primary, const Color(0xFFFF5C5C)]
         : [const Color(0xFFFF8C42), const Color(0xFFFFBF69)];
 
-    return GestureDetector(
+    return Pressable(
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const BookingsScreen()),
@@ -1259,7 +1287,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Row(
       children: [
-        GestureDetector(
+        Pressable(
           onTap: () => setState(() => _currentNavIndex = 4),
           child: CircleAvatar(
             radius: 22,
@@ -1276,7 +1304,7 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Hello $firstName 👋',
+                AppLocalizations.of(context)!.homeHelloGreeting(firstName),
                 style: GoogleFonts.poppins(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
@@ -1284,7 +1312,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               Text(
-                'Explore the soars of delfa oceans',
+                AppLocalizations.of(context)!.homeWelcomeTagline,
                 style: GoogleFonts.poppins(fontSize: 11, color: Colors.black54),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -1292,7 +1320,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         const SizedBox(width: 8),
-        GestureDetector(
+        Pressable(
           onTap: () async {
             await Navigator.push(
               context,
@@ -1308,7 +1336,7 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(width: 10),
         // ── Cart shortcut with live badge ──────
         Consumer<CartProvider>(
-          builder: (context, cart, _) => GestureDetector(
+          builder: (context, cart, _) => Pressable(
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const CartScreen()),
@@ -1350,6 +1378,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ── Search Bar ────────────────────────────
   Widget _buildSearchBar() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -1368,7 +1397,7 @@ class _HomeScreenState extends State<HomeScreen> {
         textInputAction: TextInputAction.search,
         style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
         decoration: InputDecoration(
-          hintText: 'Search services, providers...',
+          hintText: l10n.search,
           hintStyle: GoogleFonts.poppins(color: Colors.grey[400], fontSize: 14),
           prefixIcon: const Icon(Icons.search, color: Colors.black45, size: 20),
           suffixIcon: Padding(
@@ -1390,6 +1419,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ── Quick Action Bar ──────────────────────
   Widget _buildQuickActionBar() {
+    final l10n = AppLocalizations.of(context)!;
     return SizedBox(
       height: 44,
       child: ListView(
@@ -1398,7 +1428,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           _buildQuickChip(
             icon: Icons.calendar_today_outlined,
-            label: 'My Bookings',
+            label: l10n.myBookings,
             badge: activeBookingsCount > 0 ? activeBookingsCount : null,
             onTap: () => Navigator.push(
               context,
@@ -1408,7 +1438,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(width: 10),
           _buildQuickChip(
             icon: Icons.place_outlined,
-            label: 'Places',
+            label: l10n.placesTitle,
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const PlacesListScreen()),
@@ -1417,7 +1447,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(width: 10),
           _buildQuickChip(
             icon: Icons.card_giftcard_outlined,
-            label: 'Rewards',
+            label: l10n.rewards,
             onTap: () {},
           ),
         ],
@@ -1431,7 +1461,7 @@ class _HomeScreenState extends State<HomeScreen> {
     int? badge,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
+    return Pressable(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -1518,7 +1548,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${userProfile?['full_name']?.toString().split(' ')[0] ?? 'Hey'}, a special offer awaits!',
+                      AppLocalizations.of(context)!.homeSpecialOfferAwaits(
+                        userProfile?['full_name']?.toString().split(' ')[0] ?? 'Hey',
+                      ),
                       style: GoogleFonts.poppins(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -1526,7 +1558,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     Text(
-                      offer['description'] ?? 'Limited time offer',
+                      offer['description'] ?? AppLocalizations.of(context)!.homeOfferValidUntil,
                       style: GoogleFonts.poppins(
                         fontSize: 11,
                         color: Colors.grey[500],
@@ -1536,7 +1568,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(width: 10),
-              GestureDetector(
+              Pressable(
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const ServicesListScreen()),
@@ -1551,7 +1583,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    'Explore',
+                    AppLocalizations.of(context)!.explore,
                     style: GoogleFonts.poppins(
                       color: Colors.white,
                       fontSize: 12,
@@ -1564,7 +1596,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            offer['title'] ?? 'Special Offer',
+            offer['title'] ?? AppLocalizations.of(context)!.homeOfferTitle,
             style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -1608,7 +1640,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   items: offers
                       .map(
-                        (o) => GestureDetector(
+                        (o) => Pressable(
                           // Make the image tappable!
                           onTap: () => Navigator.push(
                             context,
@@ -1657,7 +1689,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Popular',
+                          AppLocalizations.of(context)!.popular,
                           style: GoogleFonts.poppins(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
@@ -1680,20 +1712,26 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildSectionHeader(String title, VoidCallback? onTap) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          title,
-          style: GoogleFonts.poppins(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: Colors.black87,
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: Colors.black87,
+            ),
           ),
         ),
-        if (onTap != null)
-          GestureDetector(
+        if (onTap != null) ...[
+          const SizedBox(width: 8),
+          Pressable(
             onTap: onTap,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
@@ -1705,7 +1743,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               child: Text(
-                'See all',
+                AppLocalizations.of(context)!.seeAll,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.poppins(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -1714,17 +1754,19 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
+        ],
       ],
     );
   }
 
   // ── Services Row ──────────────────────────
   Widget _buildServicesRow() {
+    final l10n = AppLocalizations.of(context)!;
     List<Widget> items = [
       _ServiceItem(
         color: Colors.green,
         icon: Icons.add,
-        label: 'Create\nService',
+        label: l10n.createService,
         isIconWhite: true,
         onTap: () {
           final isProvider = userProfile?['is_service_provider'] == true;
@@ -1764,7 +1806,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _ServiceItem(
         color: const Color(0xFFF3E5F5),
         icon: Icons.grid_view_rounded,
-        label: 'More\nServices',
+        label: l10n.homeMoreServices,
         iconColor: Colors.purple,
         onTap: () => Navigator.push(
           context,
@@ -1840,35 +1882,42 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildYourServiceBadge() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF6366F1).withOpacity(0.45),
-            blurRadius: 8,
-            spreadRadius: 1,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 120),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
           ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.person_rounded, color: Colors.white, size: 10),
-          const SizedBox(width: 3),
-          Text(
-            'Your Service',
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 9,
-              fontWeight: FontWeight.w700,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF6366F1).withOpacity(0.45),
+              blurRadius: 8,
+              spreadRadius: 1,
             ),
-          ),
-        ],
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.person_rounded, color: Colors.white, size: 10),
+            const SizedBox(width: 3),
+            Flexible(
+              child: Text(
+                AppLocalizations.of(context)!.homeYourServiceBadge,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1880,7 +1929,7 @@ class _HomeScreenState extends State<HomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader(
-          '🔄 Top Swap Opportunities',
+          AppLocalizations.of(context)!.homeTopSwapOpportunities,
           () => Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const SkillSwapDashboardScreen()),
@@ -1907,13 +1956,13 @@ class _HomeScreenState extends State<HomeScreen> {
               final isOwn =
                   pId != null && pId == userProfile?['id']?.toString();
 
-              return GestureDetector(
+              return Pressable(
                 onTap: () {
                   if (isOwn) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          'This is your service. Manage it from My Services.',
+                          AppLocalizations.of(context)!.homeMyServiceBadge,
                           style: GoogleFonts.poppins(fontSize: 13),
                         ),
                         backgroundColor: const Color(0xFF4F46E5),
@@ -2075,7 +2124,7 @@ class _HomeScreenState extends State<HomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader(
-          'Communities',
+          AppLocalizations.of(context)!.communities,
           () => Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const CommunitiesScreen()),
@@ -2083,7 +2132,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 14),
         // Beautiful gradient banner card
-        GestureDetector(
+        Pressable(
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const CommunitiesScreen()),
@@ -2138,7 +2187,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -2146,51 +2195,62 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              '${homeGroups.length} Communities',
+                              AppLocalizations.of(context)!.homeCommunitiesCount(homeGroups.length),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.poppins(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 20,
+                                fontSize: 18,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Find your tribe, share your world',
+                              AppLocalizations.of(context)!.findYourTribe,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.poppins(
                                 color: Colors.white.withOpacity(0.85),
-                                fontSize: 12.5,
+                                fontSize: 12,
+                                height: 1.25,
                               ),
                             ),
-                            const SizedBox(height: 12),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.22),
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.35),
+                            const SizedBox(height: 10),
+                            IntrinsicWidth(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
                                 ),
-                              ),
-                              child: Text(
-                                'Browse All →',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.22),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.35),
+                                  ),
+                                ),
+                                child: Text(
+                                  AppLocalizations.of(context)!.homeBrowseAll,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
                                 ),
                               ),
                             ),
                           ],
                         ),
                       ),
+                      const SizedBox(width: 8),
                       // Overlapping avatars
                       SizedBox(
-                        width: 88,
+                        width: 78,
                         height: 80,
                         child: Stack(
                           children: [
@@ -2249,7 +2309,7 @@ class _HomeScreenState extends State<HomeScreen> {
             separatorBuilder: (_, __) => const SizedBox(width: 8),
             itemBuilder: (context, i) {
               final g = homeGroups[i];
-              return GestureDetector(
+              return Pressable(
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const CommunitiesScreen()),
@@ -2328,7 +2388,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('Popular Providers', () {
+        _buildSectionHeader(AppLocalizations.of(context)!.popularProviders, () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const ServicesListScreen()),
@@ -2360,13 +2420,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   pId != null &&
                   pId.toString() == userProfile?['id']?.toString();
 
-              return GestureDetector(
+              return Pressable(
                 onTap: () {
                   if (isOwn) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          'This is your service. Manage it from My Services.',
+                          AppLocalizations.of(context)!.homeMyServiceBadge,
                           style: GoogleFonts.poppins(fontSize: 13),
                         ),
                         backgroundColor: const Color(0xFF4F46E5),
@@ -2565,7 +2625,7 @@ class _HomeScreenState extends State<HomeScreen> {
             color: Colors.black87,
           ),
         ),
-        GestureDetector(
+        Pressable(
           onTap: _clearAllRecents,
           child: Container(
             padding: const EdgeInsets.all(6),
@@ -2603,7 +2663,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ? _getCategoryColor(matchingCat['name'])
               : Colors.grey[100]!;
 
-          return GestureDetector(
+          return Pressable(
             onTap: () => _onSearch(term),
             child: Container(
               width: 150,
@@ -2643,7 +2703,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       const Spacer(),
-                      GestureDetector(
+                      Pressable(
                         onTap: () => _clearRecent(term),
                         child: Icon(
                           Icons.close,
@@ -2682,6 +2742,18 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // ── Places Filter Chips ───────────────────
+  String _localisedFilter(String id) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (id) {
+      case 'Nearby':     return l10n.homeCategoryNearby;
+      case 'Popular':    return l10n.popular;
+      case 'Local':      return l10n.homeCategoryLocal;
+      case 'Convenient': return l10n.homeCategoryConvenient;
+      case 'Central':    return l10n.homeCategoryCentral;
+      default:           return id;
+    }
+  }
+
   Widget _buildPlaceFilterChips() {
     return SizedBox(
       height: 36,
@@ -2693,7 +2765,7 @@ class _HomeScreenState extends State<HomeScreen> {
         itemBuilder: (_, i) {
           final filter = _placeFilters[i];
           final selected = _selectedPlaceFilter == filter;
-          return GestureDetector(
+          return Pressable(
             onTap: () => setState(() => _selectedPlaceFilter = filter),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
@@ -2709,7 +2781,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               child: Text(
-                filter,
+                _localisedFilter(filter),
                 style: GoogleFonts.poppins(
                   fontSize: 13,
                   fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
@@ -2756,7 +2828,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const Text('\uD83C\uDFAF', style: TextStyle(fontSize: 18)),
               const SizedBox(width: 8),
               Text(
-                'Gracia\'s Daily Task',
+                AppLocalizations.of(context)!.homeDailyTaskTitle,
                 style: GoogleFonts.poppins(
                   color: Colors.white70,
                   fontSize: 12,
@@ -2771,7 +2843,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  'Day $dayNum',
+                  AppLocalizations.of(context)!.homeDailyTaskDay(dayNum is int ? dayNum : (int.tryParse(dayNum.toString()) ?? 1)),
                   style: GoogleFonts.poppins(
                     color: Colors.white,
                     fontSize: 11,
@@ -2794,7 +2866,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 14),
           Align(
             alignment: Alignment.centerRight,
-            child: GestureDetector(
+            child: Pressable(
               onTap: () async {
                 HapticFeedback.mediumImpact();
                 final prefs = await SharedPreferences.getInstance();
@@ -2821,7 +2893,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'Mark Done',
+                      AppLocalizations.of(context)!.homeDailyTaskMarkDone,
                       style: GoogleFonts.poppins(
                         color: AppColors.primary,
                         fontSize: 13,
@@ -2840,6 +2912,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ── AI Recommendations ────────────────────
   Widget _buildAiRecommendations() {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -2857,7 +2930,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(width: 8),
             Text(
-              'Recommended for You',
+              l10n.homeAIRecommended,
               style: GoogleFonts.poppins(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -2881,7 +2954,7 @@ class _HomeScreenState extends State<HomeScreen> {
               final imageUrl = rec['image_url'] as String? ?? '';
               final id = rec['id'] as String? ?? '';
 
-              return GestureDetector(
+              return Pressable(
                 onTap: () {
                   if (type == 'service' && id.isNotEmpty) {
                     final providerId = rec['provider_id']?.toString() ?? '';
@@ -3062,7 +3135,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           final distance = '${(i + 1) * 34} km';
 
-          return GestureDetector(
+          return Pressable(
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
@@ -3253,7 +3326,7 @@ class _ServiceItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Pressable(
       onTap: onTap,
       child: Column(
         children: [

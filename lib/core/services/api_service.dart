@@ -1,11 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show Supabase;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'app_cache.dart';
+
+part 'admin_api.dart';
 
 // ── Custom exceptions ──────────────────────────────────────────────────────
 class ApiException implements Exception {
@@ -39,22 +44,83 @@ class UpgradeRequiredException implements Exception {
 // ── Timeout constants ──────────────────────────────────────────────────────
 const _kRequestTimeout = Duration(seconds: 30);
 
+/// package:http with the standard timeout applied to every call.
+class _TimedHttp {
+  const _TimedHttp();
+
+  Future<http.Response> get(Uri url, {Map<String, String>? headers}) =>
+      http.get(url, headers: headers).timeout(_kRequestTimeout);
+
+  Future<http.Response> post(Uri url, {Map<String, String>? headers, Object? body}) =>
+      http.post(url, headers: headers, body: body).timeout(_kRequestTimeout);
+
+  Future<http.Response> put(Uri url, {Map<String, String>? headers, Object? body}) =>
+      http.put(url, headers: headers, body: body).timeout(_kRequestTimeout);
+}
+
+const _net = _TimedHttp();
+
 class ApiService {
-  // ── Production backend ───────────────────────────────────────────────────
-  // To switch back to production, replace with:
-  final String baseUrl = "https://lifekitbackend.vercel.app";
-  //final String baseUrl = Platform.isAndroid
-  //  ? "http://10.0.2.2:3000"
-  //: "http://localhost:3000";
+  // ── Backend URL ──────────────────────────────────────────────────────────
+  // Resolution order:
+  //   1. --dart-define=API_BASE_URL=...   (CI / store builds)
+  //   2. API_BASE_URL in .env
+  //   3. Release builds → production; debug builds → local dev server
+  //      (Android emulator reaches the host's localhost via 10.0.2.2).
+  static const String _prodBaseUrl = 'https://lifekitbackend.vercel.app';
+  static final String _resolvedBaseUrl = _resolveBaseUrl();
+
+  static String _resolveBaseUrl() {
+    const fromDefine = String.fromEnvironment('API_BASE_URL');
+    if (fromDefine.isNotEmpty) return fromDefine;
+    final fromEnv = dotenv.isInitialized ? dotenv.env['API_BASE_URL'] : null;
+    if (fromEnv != null && fromEnv.isNotEmpty) return fromEnv;
+    if (kReleaseMode) return _prodBaseUrl;
+    return Platform.isAndroid ? 'http://10.0.2.2:3000' : 'http://localhost:3000';
+  }
+
+  String get baseUrl => _resolvedBaseUrl;
+
+  // ── Language for Accept-Language header ──────────────────────────────────
+  static String _lang = 'en';
+
+  /// Call this whenever the user changes language (e.g. from LocaleProvider).
+  /// Also clears any cached responses so the next fetch returns localised data.
+  static void setLang(String languageCode) {
+    _lang = ['en', 'ka', 'ru'].contains(languageCode) ? languageCode : 'en';
+    AppCache.instance.clear();
+  }
+
+  /// Public getter so callers (cache keys, etc) can read the current language.
+  static String get currentLang => _lang;
+
+  /// Header used for public (unauthenticated) GETs to send the language hint.
+  Map<String, String> _langHeader() => {'Accept-Language': _lang};
+
+  /// Bearer-only header (GET / DELETE)
+  Map<String, String> _authHeaders(String token) => {
+    'Authorization': 'Bearer $token',
+    'Accept-Language': _lang,
+  };
+
+  /// Bearer + JSON header (POST / PUT)
+  Map<String, String> _authJsonHeaders(String token) => {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $token',
+    'Accept-Language': _lang,
+  };
 
   // ── Secure storage with encryptedSharedPreferences for hardware compat ───
   final storage = const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
   );
 
-  String? _cachedAccessToken;
-  String? _cachedRefreshToken;
-  Future<String?>? _refreshingToken;
+  // Token state is static: the app creates many ApiService instances, and
+  // Supabase refresh tokens are single-use — per-instance caches let two
+  // screens refresh concurrently and the loser would log the user out.
+  static String? _cachedAccessToken;
+  static String? _cachedRefreshToken;
+  static Future<String?>? _refreshingToken;
 
   Future<void> _saveTokens(String access, String refresh) async {
     _cachedAccessToken = access;
@@ -63,14 +129,46 @@ class ApiService {
     await storage.write(key: 'refresh_token', value: refresh);
   }
 
+  /// Optional async hook run at the start of [clearSession]; set by PushService.
+  static Future<void> Function()? beforeSessionCleared;
+
+  Future<void> registerPushToken(String token, String platform) =>
+      _authenticatedPost('/push/register', {'token': token, 'platform': platform});
+
+  Future<void> unregisterPushToken(String token) =>
+      _authenticatedPost('/push/unregister', {'token': token});
+
+  /// True when a stored access token exists (doesn't validate it).
+  Future<bool> hasSession() async {
+    final token = _cachedAccessToken ?? await storage.read(key: 'jwt_token');
+    return token != null && token.isNotEmpty;
+  }
+
+  /// Wipes the session everywhere (secure storage, in-memory tokens, cache,
+  /// and any Supabase OAuth session so social sign-in can't silently resume).
+  Future<void> clearSession() async {
+    // Runs while we're still authenticated (e.g. push unregister).
+    final hook = beforeSessionCleared;
+    if (hook != null) {
+      try {
+        await hook().timeout(const Duration(seconds: 6));
+      } catch (_) {}
+    }
+    _cachedAccessToken = null;
+    _cachedRefreshToken = null;
+    await storage.deleteAll();
+    AppCache.instance.clear();
+    try {
+      await Supabase.instance.client.auth.signOut();
+    } catch (_) {}
+  }
+
   Future<String?> _performTokenRefresh() async {
     try {
       final refresh =
           _cachedRefreshToken ?? await storage.read(key: 'refresh_token');
       if (refresh == null) {
-        await storage.deleteAll();
-        _cachedAccessToken = null;
-        _cachedRefreshToken = null;
+        await clearSession();
         return null;
       }
 
@@ -88,9 +186,11 @@ class ApiService {
         return data['access_token'];
       }
 
-      await storage.deleteAll();
-      _cachedAccessToken = null;
-      _cachedRefreshToken = null;
+      // Only wipe tokens when the server explicitly rejects the refresh (401/403).
+      // A 5xx server error is transient — keep tokens so the next launch can retry.
+      if (response.statusCode == 401 || response.statusCode == 403) {
+        await clearSession();
+      }
       return null;
     } on SocketException {
       throw Exception('NO_INTERNET');
@@ -113,187 +213,140 @@ class ApiService {
     }
   }
 
-  Future<String?> _refreshToken() async {
-    if (_refreshingToken != null) {
-      return _refreshingToken!;
-    }
-    _refreshingToken = _performTokenRefresh();
-    try {
-      return await _refreshingToken;
-    } finally {
-      _refreshingToken = null;
-    }
+  Future<String?> _refreshToken() {
+    return _refreshingToken ??= _performTokenRefresh().whenComplete(
+      () => _refreshingToken = null,
+    );
   }
 
-  Future<dynamic> _authenticatedGet(String endpoint) async {
-    return _withNetworkGuard(() async {
-      String? token =
-          _cachedAccessToken ?? await storage.read(key: 'jwt_token');
-      if (token == null) {
-        token = await _refreshToken();
-        if (token == null) {
-          throw Exception("Session Expired. Please login again.");
-        }
-      }
-      var response = await http
-          .get(
-            Uri.parse('$baseUrl$endpoint'),
-            headers: {'Authorization': 'Bearer $token'},
-          )
-          .timeout(_kRequestTimeout);
+  Future<String> _requireToken() async {
+    final token =
+        _cachedAccessToken ??
+        await storage.read(key: 'jwt_token') ??
+        await _refreshToken();
+    if (token == null) throw Exception("Session Expired. Please login again.");
+    _cachedAccessToken = token;
+    return token;
+  }
 
-      if (response.statusCode == 401) {
-        String? newToken = await _refreshToken();
-        if (newToken != null) {
-          response = await http
-              .get(
-                Uri.parse('$baseUrl$endpoint'),
-                headers: {'Authorization': 'Bearer $newToken'},
-              )
-              .timeout(_kRequestTimeout);
-        } else {
-          throw Exception("Session Expired");
+  /// Sends an authenticated request, transparently refreshing the access
+  /// token once on a 401.
+  Future<dynamic> _authenticatedRequest(
+    String method,
+    String endpoint, [
+    Map<String, dynamic>? body,
+  ]) {
+    return _withNetworkGuard(() async {
+      Future<http.Response> send(String token) {
+        final uri = Uri.parse('$baseUrl$endpoint');
+        final Future<http.Response> request;
+        switch (method) {
+          case 'GET':
+            request = http.get(uri, headers: _authHeaders(token));
+          case 'DELETE':
+            request = http.delete(uri, headers: _authHeaders(token));
+          case 'PUT':
+            request = http.put(
+              uri,
+              headers: _authJsonHeaders(token),
+              body: jsonEncode(body ?? const {}),
+            );
+          default:
+            request = http.post(
+              uri,
+              headers: _authJsonHeaders(token),
+              body: jsonEncode(body ?? const {}),
+            );
         }
+        return request.timeout(_kRequestTimeout);
       }
-      return await _processResponse(response);
+
+      var response = await send(await _requireToken());
+      if (response.statusCode == 401) {
+        final newToken = await _refreshToken();
+        if (newToken == null) throw Exception("Session Expired");
+        response = await send(newToken);
+      }
+      return _processResponse(response);
     });
   }
+
+  Future<dynamic> _authenticatedGet(String endpoint) =>
+      _authenticatedRequest('GET', endpoint);
 
   Future<dynamic> _authenticatedPost(
     String endpoint,
     Map<String, dynamic> body,
-  ) async {
-    return _withNetworkGuard(() async {
-      String? token =
-          _cachedAccessToken ?? await storage.read(key: 'jwt_token');
-      if (token == null) {
-        token = await _refreshToken();
-        if (token == null) {
-          throw Exception("Session Expired. Please login again.");
-        }
-      }
-      var response = await http
-          .post(
-            Uri.parse('$baseUrl$endpoint'),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $token',
-            },
-            body: jsonEncode(body),
-          )
-          .timeout(_kRequestTimeout);
-
-      if (response.statusCode == 401) {
-        String? newToken = await _refreshToken();
-        if (newToken != null) {
-          response = await http
-              .post(
-                Uri.parse('$baseUrl$endpoint'),
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': 'Bearer $newToken',
-                },
-                body: jsonEncode(body),
-              )
-              .timeout(_kRequestTimeout);
-        } else {
-          throw Exception("Session Expired");
-        }
-      }
-      return await _processResponse(response);
-    });
-  }
+  ) => _authenticatedRequest('POST', endpoint, body);
 
   Future<dynamic> _authenticatedPut(
     String endpoint,
     Map<String, dynamic> body,
-  ) async {
+  ) => _authenticatedRequest('PUT', endpoint, body);
+
+  Future<dynamic> _authenticatedDelete(String endpoint) =>
+      _authenticatedRequest('DELETE', endpoint);
+
+  /// Uploads an image to `/storage/upload/<folder>` and returns its public URL.
+  Future<String> _uploadFile(String folder, File file) {
     return _withNetworkGuard(() async {
-      String? token =
-          _cachedAccessToken ?? await storage.read(key: 'jwt_token');
-      if (token == null) {
-        token = await _refreshToken();
-        if (token == null) {
-          throw Exception("Session Expired. Please login again.");
-        }
+      Future<http.Response> send(String token) async {
+        final request = http.MultipartRequest(
+          'POST',
+          Uri.parse('$baseUrl/storage/upload/$folder'),
+        )..headers.addAll(_authHeaders(token));
+        final mimeTypeData =
+            lookupMimeType(file.path)?.split('/') ?? ['image', 'jpeg'];
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'file',
+            file.path,
+            contentType: MediaType(mimeTypeData[0], mimeTypeData[1]),
+          ),
+        );
+        final streamed = await request.send().timeout(
+          const Duration(seconds: 60),
+        );
+        return http.Response.fromStream(streamed);
       }
-      var response = await http
-          .put(
-            Uri.parse('$baseUrl$endpoint'),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $token',
-            },
-            body: jsonEncode(body),
-          )
-          .timeout(_kRequestTimeout);
 
+      var response = await send(await _requireToken());
       if (response.statusCode == 401) {
-        String? newToken = await _refreshToken();
-        if (newToken != null) {
-          response = await http
-              .put(
-                Uri.parse('$baseUrl$endpoint'),
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': 'Bearer $newToken',
-                },
-                body: jsonEncode(body),
-              )
-              .timeout(_kRequestTimeout);
-        } else {
-          throw Exception("Session Expired");
-        }
+        final newToken = await _refreshToken();
+        if (newToken == null) throw Exception("Session Expired");
+        response = await send(newToken);
       }
-      return await _processResponse(response);
-    });
-  }
-
-  Future<dynamic> _authenticatedDelete(String endpoint) async {
-    return _withNetworkGuard(() async {
-      String? token =
-          _cachedAccessToken ?? await storage.read(key: 'jwt_token');
-      if (token == null) {
-        token = await _refreshToken();
-        if (token == null) {
-          throw Exception("Session Expired. Please login again.");
-        }
-      }
-      var response = await http
-          .delete(
-            Uri.parse('$baseUrl$endpoint'),
-            headers: {'Authorization': 'Bearer $token'},
-          )
-          .timeout(_kRequestTimeout);
-
-      if (response.statusCode == 401) {
-        String? newToken = await _refreshToken();
-        if (newToken != null) {
-          response = await http
-              .delete(
-                Uri.parse('$baseUrl$endpoint'),
-                headers: {'Authorization': 'Bearer $newToken'},
-              )
-              .timeout(_kRequestTimeout);
-        } else {
-          throw Exception("Session Expired");
-        }
-      }
-      return await _processResponse(response);
+      final data = await _processResponse(response);
+      final url = data is Map ? data['url'] : null;
+      if (url is! String) throw Exception('Upload failed');
+      return url;
     });
   }
 
   Future<dynamic> _processResponse(http.Response response) async {
-    print("SERVER RESPONSE [${response.statusCode}]: ${response.body}");
+    if (kDebugMode) {
+      final body = response.body;
+      debugPrint(
+        "SERVER RESPONSE [${response.statusCode}]: "
+        "${body.length > 500 ? '${body.substring(0, 500)}…' : body}",
+      );
+    }
 
-    final decoded = jsonDecode(response.body);
+    // Proxies / cold starts can return HTML or an empty body — never let a
+    // FormatException leak to the UI.
+    dynamic decoded;
+    try {
+      decoded = response.body.isEmpty ? null : jsonDecode(response.body);
+    } on FormatException {
+      decoded = null;
+    }
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      return decoded;
+      return decoded ?? <String, dynamic>{};
     }
 
     String errorMessage = "Server Error: ${response.statusCode}";
-    if (decoded is Map && decoded.containsKey('error')) {
+    if (decoded is Map && decoded['error'] is String) {
       errorMessage = decoded['error'];
     }
 
@@ -317,35 +370,33 @@ class ApiService {
           lowerError.contains("jwt") ||
           lowerError.contains("not authenticated");
       if (isAuthRelated) {
-        await storage.deleteAll();
-        _cachedAccessToken = null;
-        _cachedRefreshToken = null;
+        await clearSession();
         throw Exception("Session Expired. Please login again.");
       }
     }
 
-    if (response.statusCode == 401 || response.statusCode == 403) {
-      throw ApiException(response.statusCode, errorMessage);
-    }
-
     throw ApiException(response.statusCode, errorMessage);
-  } // ===========================================================================
+  }
+
+  // ===========================================================================
   // AUTHENTICATION
   // ===========================================================================
 
   Future<Map<String, dynamic>> signup(
     String name,
     String email,
-    String password,
-  ) async {
+    String password, {
+    String? language,
+  }) async {
     return _withNetworkGuard(() async {
-      final response = await http.post(
+      final response = await _net.post(
         Uri.parse('$baseUrl/auth/signup'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           "full_name": name,
           "email": email,
           "password": password,
+          if (language != null) "language": language,
         }),
       );
       return await _processResponse(response);
@@ -354,7 +405,7 @@ class ApiService {
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     return _withNetworkGuard(() async {
-      final response = await http.post(
+      final response = await _net.post(
         Uri.parse('$baseUrl/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({"email": email, "password": password}),
@@ -372,7 +423,7 @@ class ApiService {
 
   Future<Map<String, dynamic>> verifyOtp(String email, String token) async {
     return _withNetworkGuard(() async {
-      final response = await http.post(
+      final response = await _net.post(
         Uri.parse('$baseUrl/auth/verify-otp'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({"email": email, "token": token}),
@@ -427,32 +478,9 @@ class ApiService {
   }
 
   Future<void> uploadProfilePic(File imageFile) async {
-    String? token = await storage.read(key: 'jwt_token');
-    var request = http.MultipartRequest(
-      'POST',
-      Uri.parse('$baseUrl/storage/upload/profiles'),
-    );
-    request.headers['Authorization'] = 'Bearer $token';
-    final mimeTypeData =
-        lookupMimeType(imageFile.path)?.split('/') ?? ['image', 'jpeg'];
-    request.files.add(
-      await http.MultipartFile.fromPath(
-        'file',
-        imageFile.path,
-        contentType: MediaType(mimeTypeData[0], mimeTypeData[1]),
-      ),
-    );
-    var streamedResponse = await request.send();
-    var response = await http.Response.fromStream(streamedResponse);
-    if (response.statusCode == 200) {
-      final responseData = jsonDecode(response.body);
-      AppCache.instance.invalidate('user_profile');
-      await updateProfile(imageUrl: responseData['url']);
-    } else if (response.statusCode == 401) {
-      // Manual retry for Multipart
-      String? newToken = await _refreshToken();
-      if (newToken != null) await uploadProfilePic(imageFile);
-    }
+    final url = await _uploadFile('profiles', imageFile);
+    AppCache.instance.invalidate('user_profile');
+    await updateProfile(imageUrl: url);
   }
 
   Future<void> onboardAsProvider() async {
@@ -470,10 +498,7 @@ class ApiService {
 
   Future<void> deleteAccount() async {
     await _authenticatedDelete('/users/profile');
-    await storage.deleteAll();
-    _cachedAccessToken = null;
-    _cachedRefreshToken = null;
-    AppCache.instance.clear();
+    await clearSession();
   }
 
   // ===========================================================================
@@ -507,21 +532,43 @@ class ApiService {
     });
   }
 
+  /// Blocks [userId]: their posts disappear from my feed and mine from theirs.
+  Future<void> blockUser(String userId) async {
+    await _authenticatedPost('/users/blocks/$userId', {});
+    AppCache.instance.invalidate('feeds');
+  }
+
+  Future<List<Map<String, dynamic>>> getBlockedUsers() async {
+    final data = await _authenticatedGet('/users/blocks');
+    return data is List ? data.whereType<Map<String, dynamic>>().toList() : [];
+  }
+
+  Future<void> unblockUser(String userId) async {
+    await _authenticatedDelete('/users/blocks/$userId');
+    AppCache.instance.invalidate('feeds');
+  }
+
   // ===========================================================================
   // HOME & SERVICES (PUBLIC & SEARCH)
   // ===========================================================================
 
   Future<List<dynamic>> getOffers() async {
-    final response = await http.get(Uri.parse('$baseUrl/home/offers'));
+    final response = await _net.get(
+      Uri.parse('$baseUrl/home/offers'),
+      headers: _langHeader(),
+    );
     final data = await _processResponse(response);
     return data['offers'] ?? [];
   }
 
   Future<List<dynamic>> getCategories() async {
-    const key = 'categories';
+    final key = 'categories_${_lang}';
     final cached = AppCache.instance.get<List<dynamic>>(key);
     if (cached != null) return cached;
-    final response = await http.get(Uri.parse('$baseUrl/home/categories'));
+    final response = await _net.get(
+      Uri.parse('$baseUrl/home/categories'),
+      headers: _langHeader(),
+    );
     final data = await _processResponse(response);
     final result = data['categories'] ?? [];
     AppCache.instance.set(key, result, ttl: AppCache.ttlStatic);
@@ -529,18 +576,22 @@ class ApiService {
   }
 
   Future<List<dynamic>> getPopularServices() async {
-    final response = await http.get(
+    final response = await _net.get(
       Uri.parse('$baseUrl/home/popular-services'),
+      headers: _langHeader(),
     );
     final data = await _processResponse(response);
     return data['services'] ?? [];
   }
 
   Future<Map<String, dynamic>> getExplore() async {
-    const key = 'explore';
+    final key = 'explore_${_lang}';
     final cached = AppCache.instance.get<Map<String, dynamic>>(key);
     if (cached != null) return cached;
-    final response = await http.get(Uri.parse('$baseUrl/home/explore'));
+    final response = await _net.get(
+      Uri.parse('$baseUrl/home/explore'),
+      headers: _langHeader(),
+    );
     final data = await _processResponse(response);
     AppCache.instance.set(key, data, ttl: AppCache.ttlMedium);
     return data;
@@ -552,26 +603,29 @@ class ApiService {
   }
 
   Future<List<dynamic>> getServicesByCategory(String categoryId) async {
-    final response = await http.get(
+    final response = await _net.get(
       Uri.parse('$baseUrl/services/category/$categoryId'),
+      headers: _langHeader(),
     );
     final data = await _processResponse(response);
     return data['services'] ?? [];
   }
 
   Future<Map<String, dynamic>> getProviderServices(String providerId) async {
-    final response = await http.get(
+    final response = await _net.get(
       Uri.parse('$baseUrl/services/provider/$providerId'),
+      headers: _langHeader(),
     );
     return await _processResponse(response);
   }
 
   Future<List<dynamic>> getSubCategories(String parentId) async {
-    final key = 'subcategories_$parentId';
+    final key = 'subcategories_${_lang}_$parentId';
     final cached = AppCache.instance.get<List<dynamic>>(key);
     if (cached != null) return cached;
-    final response = await http.get(
+    final response = await _net.get(
       Uri.parse('$baseUrl/home/categories/children/$parentId'),
+      headers: _langHeader(),
     );
     final data = await _processResponse(response);
     final result = data['categories'] ?? [];
@@ -580,15 +634,17 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> search(String query) async {
-    final response = await http.get(
+    final response = await _net.get(
       Uri.parse('$baseUrl/home/search?query=$query'),
+      headers: _langHeader(),
     );
     return await _processResponse(response);
   }
 
   Future<List<dynamic>> searchCategories(String query) async {
-    final response = await http.get(
+    final response = await _net.get(
       Uri.parse('$baseUrl/home/categories/search/dropdown?query=$query'),
+      headers: _langHeader(),
     );
     final data = await _processResponse(response);
     return data['categories'] ?? [];
@@ -644,27 +700,7 @@ class ApiService {
     });
   }
 
-  Future<String> uploadServiceImage(File imageFile) async {
-    String? token = await storage.read(key: 'jwt_token');
-    var request = http.MultipartRequest(
-      'POST',
-      Uri.parse('$baseUrl/storage/upload/services'),
-    );
-    request.headers['Authorization'] = 'Bearer $token';
-    final mimeTypeData =
-        lookupMimeType(imageFile.path)?.split('/') ?? ['image', 'jpeg'];
-    request.files.add(
-      await http.MultipartFile.fromPath(
-        'file',
-        imageFile.path,
-        contentType: MediaType(mimeTypeData[0], mimeTypeData[1]),
-      ),
-    );
-    var streamedResponse = await request.send();
-    var response = await http.Response.fromStream(streamedResponse);
-    if (response.statusCode == 200) return jsonDecode(response.body)['url'];
-    throw Exception('Upload Failed');
-  }
+  Future<String> uploadServiceImage(File imageFile) => _uploadFile('services', imageFile);
 
   Future<List<dynamic>> getProviderSchedule(String providerId) async {
     return (await _authenticatedGet(
@@ -988,49 +1024,9 @@ class ApiService {
     return result;
   }
 
-  Future<String> uploadPostImage(File imageFile) async {
-    String? token = await storage.read(key: 'jwt_token');
-    var request = http.MultipartRequest(
-      'POST',
-      Uri.parse('$baseUrl/storage/upload/posts'),
-    );
-    request.headers['Authorization'] = 'Bearer $token';
-    final mimeTypeData =
-        lookupMimeType(imageFile.path)?.split('/') ?? ['image', 'jpeg'];
-    request.files.add(
-      await http.MultipartFile.fromPath(
-        'file',
-        imageFile.path,
-        contentType: MediaType(mimeTypeData[0], mimeTypeData[1]),
-      ),
-    );
-    var streamedResponse = await request.send();
-    var response = await http.Response.fromStream(streamedResponse);
-    if (response.statusCode == 200) return jsonDecode(response.body)['url'];
-    throw Exception('Image upload failed');
-  }
+  Future<String> uploadPostImage(File imageFile) => _uploadFile('posts', imageFile);
 
-  Future<String> uploadGroupImage(File imageFile) async {
-    String? token = await storage.read(key: 'jwt_token');
-    var request = http.MultipartRequest(
-      'POST',
-      Uri.parse('$baseUrl/storage/upload/groups'),
-    );
-    request.headers['Authorization'] = 'Bearer $token';
-    final mimeTypeData =
-        lookupMimeType(imageFile.path)?.split('/') ?? ['image', 'jpeg'];
-    request.files.add(
-      await http.MultipartFile.fromPath(
-        'file',
-        imageFile.path,
-        contentType: MediaType(mimeTypeData[0], mimeTypeData[1]),
-      ),
-    );
-    var streamedResponse = await request.send();
-    var response = await http.Response.fromStream(streamedResponse);
-    if (response.statusCode == 200) return jsonDecode(response.body)['url'];
-    throw Exception('Group image upload failed');
-  }
+  Future<String> uploadGroupImage(File imageFile) => _uploadFile('groups', imageFile);
 
   Future<Map<String, dynamic>> createPost({
     required String content,
@@ -1054,7 +1050,7 @@ class ApiService {
     const key = 'events';
     final cached = AppCache.instance.get<List<dynamic>>(key);
     if (cached != null) return cached;
-    final response = await http.get(Uri.parse('$baseUrl/feeds/events'));
+    final response = await _net.get(Uri.parse('$baseUrl/feeds/events'));
     final result = await _processResponse(response);
     final list = result is List ? result : [];
     AppCache.instance.set(key, list, ttl: AppCache.ttlMedium);
@@ -1087,7 +1083,7 @@ class ApiService {
   }
 
   Future<List<dynamic>> getComments(String postId) async {
-    final response = await http.get(
+    final response = await _net.get(
       Uri.parse('$baseUrl/feeds/posts/$postId/comments'),
     );
     return await _processResponse(response);
@@ -1122,42 +1118,53 @@ class ApiService {
     });
   }
 
-  // Inside ApiService class...
-
   Future<void> changePassword(String oldPassword, String newPassword) async {
-    await _withNetworkGuard(() async {
-      String? token = await storage.read(key: 'jwt_token');
+    await _authenticatedPut('/auth/update-password', {
+      "current_password": oldPassword,
+      "new_password": newPassword,
+    });
+  }
 
-      final response = await http.put(
-        Uri.parse('$baseUrl/auth/update-password'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
+  Future<void> forgotPassword(String email, {String? language}) async {
+    await _withNetworkGuard(() async {
+      final response = await _net.post(
+        Uri.parse('$baseUrl/auth/forgot-password'),
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          "current_password": oldPassword,
-          "new_password": newPassword,
+          "email": email,
+          "source": "mobile",
+          if (language != null) "language": language,
         }),
       );
-
       await _processResponse(response);
     });
   }
 
-  Future<void> forgotPassword(String email) async {
-    await _withNetworkGuard(() async {
-      final response = await http.post(
-        Uri.parse('$baseUrl/auth/forgot-password'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({"email": email}),
-      );
-      await _processResponse(response);
-    });
+  /// Saves OAuth tokens from a Supabase social sign-in.
+  Future<void> saveOAuthTokens(String accessToken, String refreshToken) async {
+    await _saveTokens(accessToken, refreshToken);
+  }
+
+  /// Upserts the profile row for a social (OAuth) user.
+  Future<void> ensureSocialProfile(String accessToken) async {
+    try {
+      await http
+          .post(
+            Uri.parse('$baseUrl/auth/ensure-social-profile'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 15));
+    } catch (_) {
+      // Non-blocking — profile creation failures don't stop sign-in
+    }
   }
 
   // Get Nearby Places (Auto-fills from Google/OSM)
   Future<List<dynamic>> getNearbyPlaces(double lat, double lng) async {
-    final response = await http.get(
+    final response = await _net.get(
       Uri.parse('$baseUrl/places/nearby?lat=$lat&lng=$lng'),
     );
     final data = await _processResponse(response);
@@ -1165,7 +1172,7 @@ class ApiService {
   }
 
   Future<List<dynamic>> getPopularPlaces(double lat, double lng) async {
-    final response = await http.get(
+    final response = await _net.get(
       Uri.parse('$baseUrl/places/popular?lat=$lat&lng=$lng'),
     );
     final data = await _processResponse(response);
@@ -1176,7 +1183,7 @@ class ApiService {
     const key = 'groups';
     final cached = AppCache.instance.get<List<dynamic>>(key);
     if (cached != null) return cached;
-    final response = await http.get(Uri.parse('$baseUrl/feeds/groups'));
+    final response = await _net.get(Uri.parse('$baseUrl/feeds/groups'));
     final result = await _processResponse(response);
     final list = result is List ? result : [];
     AppCache.instance.set(key, list, ttl: AppCache.ttlMedium);
@@ -1202,7 +1209,7 @@ class ApiService {
     });
   }
   // Future<List<dynamic>> getGroupPosts(String groupId) async {
-  //   final response = await http.get(
+  //   final response = await _net.get(
   //     Uri.parse('$baseUrl/feeds/groups/$groupId/posts'),
   //   );
   //   return _processResponse(response);
@@ -1361,25 +1368,9 @@ class ApiService {
       final profileData = await getUserProfile();
       return profileData['profile']['id'];
     } catch (e) {
-      print("Error getting current user ID: $e");
+      debugPrint("Error getting current user ID: $e");
       return null;
     }
-  }
-
-  // ADD THIS METHOD to your ApiService class in api_service.dart
-  // Place it right next to your existing buyEventTicket method
-  // (around line 290 in your file, in the SOCIAL FEEDS & EVENTS section)
-
-  Future<Map<String, dynamic>> buyTicket({
-    required String eventId,
-    required int quantity,
-    required double totalPrice,
-  }) async {
-    return await _authenticatedPost('/feeds/events/buy-ticket', {
-      "event_id": eventId,
-      "quantity": quantity,
-      "total_price": totalPrice,
-    });
   }
 
   Future<void> requestNewCategory(String name, String description) async {

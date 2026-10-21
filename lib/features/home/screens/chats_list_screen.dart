@@ -6,6 +6,7 @@ import '../../../core/services/api_service.dart';
 import '../../../core/services/app_cache.dart';
 import 'chat_detail_screen.dart';
 import '../../../core/widgets/lifekit_loader.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ChatsListScreen extends StatefulWidget {
   const ChatsListScreen({super.key});
@@ -86,14 +87,15 @@ class _ChatsListScreenState extends State<ChatsListScreen>
     final parsed = DateTime.tryParse(rawTime.toString());
     if (parsed == null) return '';
 
+    final l10n = AppLocalizations.of(context);
     final now = DateTime.now();
     final localTime = parsed.toLocal();
     final diff = now.difference(localTime);
 
-    if (diff.inSeconds < 60) return 'Just now';
+    if (diff.inSeconds < 60) return l10n.chatsJustNow;
     if (diff.inMinutes < 60) return '${diff.inMinutes}m';
     if (diff.inHours < 24) return '${diff.inHours}h';
-    if (diff.inHours < 48) return 'Yesterday';
+    if (diff.inHours < 48) return l10n.chatsYesterday;
     if (diff.inDays < 7) return '${diff.inDays}d';
     return '${localTime.day}/${localTime.month}';
   }
@@ -133,6 +135,7 @@ class _ChatsListScreenState extends State<ChatsListScreen>
       );
     }
 
+    final l10n = AppLocalizations.of(context);
     final currentList = _tabController.index == 0
         ? _activeConversations
         : _finishedConversations;
@@ -148,7 +151,7 @@ class _ChatsListScreenState extends State<ChatsListScreen>
         title: Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: Text(
-            "Messages",
+            l10n.chatsTitle,
             style: GoogleFonts.poppins(
               color: Colors.black,
               fontWeight: FontWeight.bold,
@@ -162,7 +165,7 @@ class _ChatsListScreenState extends State<ChatsListScreen>
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    "Starting a new conversation is coming soon!",
+                    l10n.chatsStartingNewComingSoon,
                     style: GoogleFonts.poppins(),
                   ),
                   behavior: SnackBarBehavior.floating,
@@ -218,7 +221,7 @@ class _ChatsListScreenState extends State<ChatsListScreen>
                 controller: _searchController,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                  hintText: "Search for chats or services...",
+                  hintText: l10n.chatsSearchHint,
                   hintStyle: GoogleFonts.poppins(
                     color: Colors.grey,
                     fontSize: 13,
@@ -231,7 +234,7 @@ class _ChatsListScreenState extends State<ChatsListScreen>
             const SizedBox(height: 24),
             if (allConversations.isNotEmpty) ...[
               Text(
-                "Recent Contacts",
+                l10n.chatsRecentContacts,
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -265,9 +268,9 @@ class _ChatsListScreenState extends State<ChatsListScreen>
                 unselectedLabelStyle: GoogleFonts.poppins(
                   fontWeight: FontWeight.w500,
                 ),
-                tabs: const [
-                  Tab(text: 'Active'),
-                  Tab(text: 'Finished'),
+                tabs: [
+                  Tab(text: l10n.chatsTabActive),
+                  Tab(text: l10n.chatsTabFinished),
                 ],
               ),
             ),
@@ -283,6 +286,7 @@ class _ChatsListScreenState extends State<ChatsListScreen>
   }
 
   Widget _buildTabEmptyState(bool isActiveTab) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.only(top: 40),
@@ -298,8 +302,8 @@ class _ChatsListScreenState extends State<ChatsListScreen>
             const SizedBox(height: 10),
             Text(
               isActiveTab
-                  ? "No active conversations right now"
-                  : "Your past chats will appear here",
+                  ? l10n.chatsNoActive
+                  : l10n.chatsPastWillAppear,
               style: GoogleFonts.poppins(color: Colors.grey),
             ),
           ],
@@ -357,6 +361,7 @@ class _ChatsListScreenState extends State<ChatsListScreen>
   }
 
   Widget _buildModernChatTile(dynamic chat) {
+    final l10n = AppLocalizations.of(context);
     final otherUser = chat['other_user'];
     final bookings = chat['bookings'] as List;
     final unreadCount = int.tryParse('${chat['unread_count'] ?? 0}') ?? 0;
@@ -364,10 +369,10 @@ class _ChatsListScreenState extends State<ChatsListScreen>
     final String lastActive = _formatRelativeTime(chat['last_message_time']);
     final String lastMessage =
         (chat['last_message'] ?? '').toString().trim().isEmpty
-        ? "No messages yet"
+        ? l10n.chatsNoMessagesYet
         : chat['last_message'].toString();
 
-    String serviceContext = "General";
+    String serviceContext = l10n.chatsGeneral;
     if (bookings.isNotEmpty) {
       serviceContext = bookings[0]['services']['title'];
       if (bookings.length > 1) serviceContext += " +${bookings.length - 1}";

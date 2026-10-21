@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../constants/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Shows a beautiful bottom sheet asking the user to Book or Skill Swap.
 ///
@@ -161,7 +162,7 @@ class _ServiceActionSheet extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 6),
             child: Text(
-              'What would you like to do?',
+              AppLocalizations.of(context)!.actionSheetWhatToDo,
               style: GoogleFonts.poppins(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -252,6 +253,7 @@ class _BookCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -275,12 +277,16 @@ class _BookCard extends StatelessWidget {
                     size: 18,
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    'Book Service',
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primary,
+                  Flexible(
+                    child: Text(
+                      l10n.actionBookService,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
                     ),
                   ),
                 ],
@@ -303,7 +309,9 @@ class _BookCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Book Service',
+                    l10n.actionBookService,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
@@ -311,7 +319,9 @@ class _BookCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Pay & schedule',
+                    l10n.actionBookServiceSubtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
                       fontSize: 10,
                       color: Colors.grey[500],
@@ -331,6 +341,7 @@ class _SwapCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -369,21 +380,25 @@ class _SwapCard extends StatelessWidget {
                     size: 18,
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 7,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.25),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    '✨ No cash',
-                    style: GoogleFonts.poppins(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 7,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.25),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      l10n.actionNoCash,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -391,7 +406,9 @@ class _SwapCard extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'Skill Swap',
+              l10n.actionSkillSwap,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: GoogleFonts.poppins(
                 fontSize: 13,
                 fontWeight: FontWeight.w800,
@@ -399,7 +416,9 @@ class _SwapCard extends StatelessWidget {
               ),
             ),
             Text(
-              'Trade skills, no money',
+              l10n.actionSkillSwapSubtitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: GoogleFonts.poppins(
                 fontSize: 10,
                 color: Colors.white.withOpacity(0.85),

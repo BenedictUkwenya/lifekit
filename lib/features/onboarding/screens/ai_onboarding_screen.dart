@@ -160,7 +160,8 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Hero header
+          // Hero header — fixed height required: Row(stretch) inside a
+          // scroll view gets unbounded vertical constraints and crashes layout.
           Container(
             width: double.infinity,
             height: 160,
@@ -184,6 +185,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             'Let AI Guide Your\nLifeKit Journey',
@@ -561,11 +563,10 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
     required String actionRoute,
     required bool isLast,
   }) {
-    return IntrinsicHeight(
-      child: Row(
+    return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Left: badge + vertical line
+          // Left: badge + vertical connector (no Expanded — avoids flex in scroll)
           SizedBox(
             width: 44,
             child: Column(
@@ -600,12 +601,11 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
                   ),
                 ),
                 if (!isLast)
-                  Expanded(
-                    child: Container(
-                      width: 2,
-                      margin: const EdgeInsets.symmetric(vertical: 4),
-                      color: AppColors.primary.withOpacity(0.15),
-                    ),
+                  Container(
+                    width: 2,
+                    height: 48,
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    color: AppColors.primary.withOpacity(0.15),
                   ),
               ],
             ),
@@ -680,7 +680,6 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
             ),
           ),
         ],
-      ),
     );
   }
 

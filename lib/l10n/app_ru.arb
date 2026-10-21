@@ -1,0 +1,1781 @@
+{
+  "@@locale": "ru",
+  "@appName": {
+    "description": "The application name"
+  },
+  "@loading": {
+    "description": "Generic loading state"
+  },
+  "@errorGeneric": {
+    "description": "Generic error message"
+  },
+  "@retry": {
+    "description": "Retry button label"
+  },
+  "@cancel": {
+    "description": "Cancel button label"
+  },
+  "@save": {
+    "description": "Save button label"
+  },
+  "@delete": {
+    "description": "Delete button label"
+  },
+  "@edit": {
+    "description": "Edit button label"
+  },
+  "@done": {
+    "description": "Done button label"
+  },
+  "@confirm": {
+    "description": "Confirm button label"
+  },
+  "@close": {
+    "description": "Close button label"
+  },
+  "@back": {
+    "description": "Back button label"
+  },
+  "@next": {
+    "description": "Next button label"
+  },
+  "@skip": {
+    "description": "Skip button label"
+  },
+  "@search": {
+    "description": "Search placeholder / button"
+  },
+  "@noResults": {
+    "description": "Empty search results"
+  },
+  "@seeAll": {
+    "description": "See all items link"
+  },
+  "@submit": {
+    "description": "Submit button label"
+  },
+  "@yes": {
+    "description": "Confirmation yes"
+  },
+  "@no": {
+    "description": "Confirmation no"
+  },
+  "@or": {
+    "description": "Divider word"
+  },
+  "@optional": {
+    "description": "Optional field label"
+  },
+  "@signIn": {
+    "description": "Sign in button"
+  },
+  "@signOut": {
+    "description": "Sign out button"
+  },
+  "@signUp": {
+    "description": "Sign up link label"
+  },
+  "@createAccount": {
+    "description": "Create account button"
+  },
+  "@forgotPassword": {
+    "description": "Forgot password link"
+  },
+  "@emailLabel": {
+    "description": "Email field label"
+  },
+  "@emailAddressLabel": {
+    "description": "Email field label on signup"
+  },
+  "@emailPlaceholder": {
+    "description": "Email field placeholder"
+  },
+  "@passwordLabel": {
+    "description": "Password field label"
+  },
+  "@passwordPlaceholder": {
+    "description": "Password field placeholder"
+  },
+  "@confirmPasswordLabel": {
+    "description": "Confirm password field label"
+  },
+  "@fullNameLabel": {
+    "description": "Full name field label"
+  },
+  "@phoneLabel": {
+    "description": "Phone number field label"
+  },
+  "@loginTitle": {
+    "description": "Login screen title"
+  },
+  "@loginSubtitle": {
+    "description": "Login screen subtitle"
+  },
+  "@loginButton": {
+    "description": "Login submit button"
+  },
+  "@noAccountPrompt": {
+    "description": "Prompt to sign up on login screen"
+  },
+  "@registerTitle": {
+    "description": "Register screen title"
+  },
+  "@registerSubtitle": {
+    "description": "Register screen subtitle"
+  },
+  "@registerButton": {
+    "description": "Register submit button"
+  },
+  "@haveAccountPrompt": {
+    "description": "Prompt to sign in on register screen"
+  },
+  "@continueButton": {
+    "description": "Continue to next signup step"
+  },
+  "@finish": {
+    "description": "Complete signup button"
+  },
+  "@errorEmailRequired": {
+    "description": "Email required validation error"
+  },
+  "@errorEmailInvalid": {
+    "description": "Email invalid validation error"
+  },
+  "@errorPasswordRequired": {
+    "description": "Password required validation error"
+  },
+  "@errorPasswordShort": {
+    "description": "Password too short validation error"
+  },
+  "@errorPasswordMatch": {
+    "description": "Passwords don't match validation error"
+  },
+  "@errorNameRequired": {
+    "description": "Name required validation error"
+  },
+  "@loginSlideWelcomeBackTitle": {
+    "description": "Login header carousel slide title"
+  },
+  "@loginSlideWelcomeBackSubtitle": {
+    "description": "Login header carousel slide subtitle"
+  },
+  "@welcomeBackToast": {
+    "description": "Success toast after login"
+  },
+  "@signInFailed": {
+    "description": "OAuth sign-in error toast"
+  },
+  "@verifyYourEmail": {
+    "description": "OTP verification step title"
+  },
+  "@didntGetCodeResend": {
+    "description": "Resend OTP link"
+  },
+  "@almostDone": {
+    "description": "Profile photo step title"
+  },
+  "@addProfilePictureOptional": {
+    "description": "Profile photo step subtitle"
+  },
+  "@welcomeToLifeKit": {
+    "description": "Signup success toast"
+  },
+  "@allSetWelcome": {
+    "description": "Signup completion success toast"
+  },
+  "@signupWelcomeTitle": {
+    "description": "Signup step 1 screen title"
+  },
+  "@choosePasswordTitle": {
+    "description": "Signup password step title"
+  },
+  "@choosePasswordSubtitle": {
+    "description": "Signup password step subtitle"
+  },
+  "@splashTagline": {
+    "description": "Splash screen tagline"
+  },
+  "@onboardingOfferSkillsTitle": {
+    "description": "Onboarding slide 1 title"
+  },
+  "@onboardingOfferSkillsDesc": {
+    "description": "Onboarding slide 1 description"
+  },
+  "@onboardingBookServicesTitle": {
+    "description": "Onboarding slide 2 title"
+  },
+  "@onboardingBookServicesDesc": {
+    "description": "Onboarding slide 2 description"
+  },
+  "@onboardingCommunityTitle": {
+    "description": "Onboarding slide 3 title"
+  },
+  "@onboardingCommunityDesc": {
+    "description": "Onboarding slide 3 description"
+  },
+  "@getStarted": {
+    "description": "Get started button on onboarding"
+  },
+  "@resetYourPassword": {
+    "description": "Forgot password screen title"
+  },
+  "@resetPasswordInstructions": {
+    "description": "Forgot password instructions"
+  },
+  "@sendResetLink": {
+    "description": "Forgot password submit button"
+  },
+  "@checkYourEmail": {
+    "description": "Forgot password success title"
+  },
+  "@checkSpamFolder": {
+    "description": "Forgot password spam hint"
+  },
+  "@backToLogin": {
+    "description": "Return to login from forgot password"
+  },
+  "@setNewPasswordTitle": {
+    "description": "Reset password screen title"
+  },
+  "@setNewPasswordSubtitle": {
+    "description": "Reset password screen subtitle"
+  },
+  "@updatePasswordButton": {
+    "description": "Reset password submit button"
+  },
+  "@passwordUpdatedTitle": {
+    "description": "Reset password success title"
+  },
+  "@passwordUpdatedMessage": {
+    "description": "Reset password success message"
+  },
+  "@resetLinkInvalidTitle": {
+    "description": "Invalid reset link title"
+  },
+  "@resetLinkInvalidMessage": {
+    "description": "Invalid reset link message"
+  },
+  "@emailSentTo": {
+    "description": "Forgot password success body with email",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "@tryDifferentEmail": {
+    "description": "Retry forgot password with another email"
+  },
+  "@aiSetupGuide": {
+    "description": "AI onboarding screen title"
+  },
+  "@aiAnalyzingProfile": {
+    "description": "AI onboarding loading message"
+  },
+  "@yourGoals": {
+    "description": "AI onboarding field label"
+  },
+  "@yourGoalsHint": {
+    "description": "AI onboarding goals placeholder"
+  },
+  "@yourSkills": {
+    "description": "AI onboarding field label"
+  },
+  "@yourSkillsHint": {
+    "description": "AI onboarding skills placeholder"
+  },
+  "@yourInterests": {
+    "description": "AI onboarding field label"
+  },
+  "@yourInterestsHint": {
+    "description": "AI onboarding interests placeholder"
+  },
+  "@generateMySevenDayPlan": {
+    "description": "AI onboarding CTA button"
+  },
+  "@finishAndGoToHome": {
+    "description": "AI onboarding completion button"
+  },
+  "@takeAction": {
+    "description": "AI plan day card action button"
+  },
+  "@failedToGeneratePlan": {
+    "description": "AI plan generation error"
+  },
+  "@navHome": {
+    "description": "Bottom navigation label"
+  },
+  "@navExplore": {
+    "description": "Bottom navigation label"
+  },
+  "@navFeeds": {
+    "description": "Bottom navigation label"
+  },
+  "@navChats": {
+    "description": "Bottom navigation label"
+  },
+  "@navProfile": {
+    "description": "Bottom navigation label"
+  },
+  "@homeTabDiscover": {
+    "description": "Home tab label"
+  },
+  "@homeTabFeed": {
+    "description": "Feed tab label"
+  },
+  "@homeTabBookings": {
+    "description": "Bookings tab label"
+  },
+  "@homeTabGroups": {
+    "description": "Groups tab label"
+  },
+  "@homeTabProfile": {
+    "description": "Profile tab label"
+  },
+  "@homeAIRecommended": {
+    "description": "AI recommended section header"
+  },
+  "@homeTrending": {
+    "description": "Trending section header"
+  },
+  "@homeNearYou": {
+    "description": "Near you section header"
+  },
+  "@searchServicesProviders": {
+    "description": "Home search hint"
+  },
+  "@myBookings": {
+    "description": "Quick action and settings label"
+  },
+  "@rewards": {
+    "description": "Quick action label"
+  },
+  "@explore": {
+    "description": "Explore section CTA"
+  },
+  "@popular": {
+    "description": "Popular badge and tab label"
+  },
+  "@communities": {
+    "description": "Home and groups screen title"
+  },
+  "@findYourTribe": {
+    "description": "Communities section tagline"
+  },
+  "@popularProviders": {
+    "description": "Home section header"
+  },
+  "@recentSearches": {
+    "description": "Recent searches section header"
+  },
+  "@maybeLater": {
+    "description": "Dismiss dialog button"
+  },
+  "@bookingTitle": {
+    "description": "Bookings screen app bar title"
+  },
+  "@bookingUpcoming": {
+    "description": "Upcoming bookings tab"
+  },
+  "@bookingPast": {
+    "description": "Past bookings tab"
+  },
+  "@bookingPending": {
+    "description": "Pending bookings tab"
+  },
+  "@clientRequests": {
+    "description": "Bookings tab label"
+  },
+  "@mySwaps": {
+    "description": "Bookings tab label"
+  },
+  "@bookingStatusPending": {
+    "description": "Booking status: pending"
+  },
+  "@bookingStatusConfirmed": {
+    "description": "Booking status: confirmed"
+  },
+  "@bookingStatusCompleted": {
+    "description": "Booking status: completed"
+  },
+  "@bookingStatusCancelled": {
+    "description": "Booking status: cancelled"
+  },
+  "@bookingCancelButton": {
+    "description": "Cancel booking button"
+  },
+  "@bookingConfirmCancel": {
+    "description": "Confirm booking cancellation dialog"
+  },
+  "@bookingNoUpcoming": {
+    "description": "Empty upcoming bookings state"
+  },
+  "@bookingNoPast": {
+    "description": "Empty past bookings state"
+  },
+  "@filterOngoing": {
+    "description": "Booking filter chip"
+  },
+  "@filterCompleted": {
+    "description": "Booking filter chip"
+  },
+  "@filterUpcoming": {
+    "description": "Booking filter chip"
+  },
+  "@requestAccepted": {
+    "description": "Provider accept booking snackbar"
+  },
+  "@requestRejected": {
+    "description": "Provider reject booking snackbar"
+  },
+  "@reject": {
+    "description": "Reject booking request button"
+  },
+  "@accept": {
+    "description": "Accept booking request button"
+  },
+  "@trackStatus": {
+    "description": "Open booking tracking button"
+  },
+  "@happeningNow": {
+    "description": "Urgent booking time badge"
+  },
+  "@tomorrow": {
+    "description": "Relative time next day"
+  },
+  "@waitingApproval": {
+    "description": "Booking status label"
+  },
+  "@skillSwap": {
+    "description": "Zero-price booking label"
+  },
+  "@noSwapsYet": {
+    "description": "Swaps empty state title"
+  },
+  "@noSwapsYetDescription": {
+    "description": "Swaps empty state body"
+  },
+  "@browseSwapBoard": {
+    "description": "Swaps empty state CTA"
+  },
+  "@swapActive": {
+    "description": "Confirmed swap status"
+  },
+  "@markDone": {
+    "description": "Complete swap/task button"
+  },
+  "@servicesTitle": {
+    "description": "Services screen title"
+  },
+  "@servicePrice": {
+    "description": "Price label on service card"
+  },
+  "@serviceHourlyRate": {
+    "description": "Hourly rate suffix"
+  },
+  "@serviceAddToCart": {
+    "description": "Add to cart button"
+  },
+  "@serviceBookNow": {
+    "description": "Book now button"
+  },
+  "@serviceAbout": {
+    "description": "About section on service detail"
+  },
+  "@serviceProvider": {
+    "description": "Provider section label"
+  },
+  "@serviceReviews": {
+    "description": "Reviews section label"
+  },
+  "@noServicesFound": {
+    "description": "Explore empty state title"
+  },
+  "@noServicesFoundSubtitle": {
+    "description": "Explore empty state subtitle"
+  },
+  "@createService": {
+    "description": "Create service button"
+  },
+  "@addService": {
+    "description": "Dashboard quick action"
+  },
+  "@myServices": {
+    "description": "Dashboard quick action"
+  },
+  "@cartTitle": {
+    "description": "Cart screen title"
+  },
+  "@cartEmpty": {
+    "description": "Empty cart message"
+  },
+  "@cartTotal": {
+    "description": "Cart total label"
+  },
+  "@cartCheckout": {
+    "description": "Checkout button"
+  },
+  "@cartRemoveItem": {
+    "description": "Remove item from cart"
+  },
+  "@paymentTitle": {
+    "description": "Payment screen title"
+  },
+  "@paymentConfirm": {
+    "description": "Confirm payment button"
+  },
+  "@paymentSuccess": {
+    "description": "Payment success message"
+  },
+  "@paymentFailed": {
+    "description": "Payment failed message"
+  },
+  "@paymentCancelled": {
+    "description": "Stripe cancel snackbar"
+  },
+  "@profileTitle": {
+    "description": "Profile screen title"
+  },
+  "@profileEdit": {
+    "description": "Edit profile button"
+  },
+  "@profileBookings": {
+    "description": "Bookings menu item in profile"
+  },
+  "@profileLogout": {
+    "description": "Logout button in profile"
+  },
+  "@profileLogoutConfirm": {
+    "description": "Logout confirmation dialog"
+  },
+  "@profileReviews": {
+    "description": "Reviews section on profile"
+  },
+  "@profileFollowers": {
+    "description": "Followers count label"
+  },
+  "@profileFollowing": {
+    "description": "Following count label"
+  },
+  "@profileFollow": {
+    "description": "Follow button"
+  },
+  "@profileUnfollow": {
+    "description": "Unfollow button"
+  },
+  "@failedToLoadProfile": {
+    "description": "Profile load error"
+  },
+  "@noBioAdded": {
+    "description": "Empty profile bio"
+  },
+  "@walletBalance": {
+    "description": "Profile wallet card label"
+  },
+  "@launchOfferProTrial": {
+    "description": "Trial banner title"
+  },
+  "@accountUsage": {
+    "description": "Subscription usage section"
+  },
+  "@upgradePlan": {
+    "description": "Open subscription plans button"
+  },
+  "@foundingMember": {
+    "description": "Founding member badge"
+  },
+  "@businessTools": {
+    "description": "Profile business tools section"
+  },
+  "@editProfile": {
+    "description": "Business tool and settings label"
+  },
+  "@generalSettings": {
+    "description": "Settings section header"
+  },
+  "@personalInformation": {
+    "description": "Settings item"
+  },
+  "@settingsTitle": {
+    "description": "Settings screen title"
+  },
+  "@settingsLanguage": {
+    "description": "Language setting item"
+  },
+  "@settingsNotifications": {
+    "description": "Notifications setting item"
+  },
+  "@settingsSecurity": {
+    "description": "Security setting item"
+  },
+  "@settingsHelp": {
+    "description": "Help & support setting item"
+  },
+  "@settingsAbout": {
+    "description": "About setting item"
+  },
+  "@settingsDeleteAccount": {
+    "description": "Delete account setting item"
+  },
+  "@helpCenter": {
+    "description": "Settings item"
+  },
+  "@support": {
+    "description": "Support section header"
+  },
+  "@logOut": {
+    "description": "Logout settings item"
+  },
+  "@walletTitle": {
+    "description": "Wallet screen title"
+  },
+  "@walletTopUp": {
+    "description": "Top up wallet button"
+  },
+  "@walletWithdraw": {
+    "description": "Withdraw from wallet button"
+  },
+  "@walletTransactions": {
+    "description": "Transaction history section"
+  },
+  "@walletNoTransactions": {
+    "description": "Empty wallet transactions state"
+  },
+  "@walletSettingsComingSoon": {
+    "description": "Wallet settings snackbar"
+  },
+  "@withdraw": {
+    "description": "Withdraw dialog title"
+  },
+  "@enterAmount": {
+    "description": "Amount input hint"
+  },
+  "@enterValidAmount": {
+    "description": "Withdraw validation"
+  },
+  "@amountExceedsBalance": {
+    "description": "Withdraw validation"
+  },
+  "@withdrawalCompleted": {
+    "description": "Withdraw success snackbar"
+  },
+  "@weeklyIncome": {
+    "description": "Wallet stats label"
+  },
+  "@points": {
+    "description": "Wallet points label"
+  },
+  "@addMoney": {
+    "description": "Wallet action button"
+  },
+  "@setupPayouts": {
+    "description": "Stripe connect CTA"
+  },
+  "@scan": {
+    "description": "Wallet QR scan button"
+  },
+  "@qrScanComingSoon": {
+    "description": "QR scan snackbar"
+  },
+  "@fundWallet": {
+    "description": "Add money screen title"
+  },
+  "@minimumDepositFive": {
+    "description": "Deposit minimum validation"
+  },
+  "@walletFundedSuccessfully": {
+    "description": "Deposit success snackbar"
+  },
+  "@minimumDepositAmount": {
+    "description": "Add money helper text"
+  },
+  "@payWithCard": {
+    "description": "Stripe payment button"
+  },
+  "@securedByStripe": {
+    "description": "Payment security badge"
+  },
+  "@groupsTitle": {
+    "description": "Groups screen title"
+  },
+  "@groupsJoin": {
+    "description": "Join group button"
+  },
+  "@groupsLeave": {
+    "description": "Leave group button"
+  },
+  "@groupsMembers": {
+    "description": "Members count label"
+  },
+  "@groupsCreateGroup": {
+    "description": "Create group button"
+  },
+  "@groupsNoGroups": {
+    "description": "Empty groups state"
+  },
+  "@findYourPeople": {
+    "description": "Communities screen subtitle"
+  },
+  "@feedTitle": {
+    "description": "Feed screen title"
+  },
+  "@feedNewPost": {
+    "description": "Feed new post placeholder"
+  },
+  "@feedLike": {
+    "description": "Like post button"
+  },
+  "@feedComment": {
+    "description": "Comment on post button"
+  },
+  "@feedShare": {
+    "description": "Share post button"
+  },
+  "@feedNoPost": {
+    "description": "Empty feed state"
+  },
+  "@placesTitle": {
+    "description": "Places screen title"
+  },
+  "@searchPlacesHint": {
+    "description": "Places search field hint"
+  },
+  "@noPlacesNearby": {
+    "description": "Empty places state"
+  },
+  "@locatingYou": {
+    "description": "Places loading status"
+  },
+  "@findingPlacesNearYou": {
+    "description": "Places fetch status"
+  },
+  "@categoryAll": {
+    "description": "Places category filter"
+  },
+  "@categoryRestaurant": {
+    "description": "Places category filter"
+  },
+  "@categoryCafe": {
+    "description": "Places category filter"
+  },
+  "@categoryHotel": {
+    "description": "Places category filter"
+  },
+  "@notificationsTitle": {
+    "description": "Notifications screen title"
+  },
+  "@notificationsEmpty": {
+    "description": "Empty notifications state"
+  },
+  "@notificationsMarkAllRead": {
+    "description": "Mark all notifications as read"
+  },
+  "@languageTitle": {
+    "description": "Language settings screen title"
+  },
+  "@languageEnglish": {
+    "description": "English language option"
+  },
+  "@languageGeorgian": {
+    "description": "Georgian language option"
+  },
+  "@languageRussian": {
+    "description": "Russian language option"
+  },
+  "@languageNativeGeorgian": {
+    "description": "Georgian language native name"
+  },
+  "@languageNativeRussian": {
+    "description": "Russian language native name"
+  },
+  "@subscriptionPlanFree": {
+    "description": "Free subscription plan"
+  },
+  "@subscriptionPlanPro": {
+    "description": "Pro subscription plan"
+  },
+  "@subscriptionPlanBusiness": {
+    "description": "Business subscription plan"
+  },
+  "@subscriptionUpgrade": {
+    "description": "Upgrade plan button"
+  },
+  "@chatTitle": {
+    "description": "Chat screen title"
+  },
+  "@chatInputPlaceholder": {
+    "description": "Chat input placeholder"
+  },
+  "@chatSend": {
+    "description": "Chat send button"
+  },
+  "@chatNoMessages": {
+    "description": "Empty chat state"
+  },
+  "@providerDashboard": {
+    "description": "Provider dashboard title"
+  },
+  "@quickActions": {
+    "description": "Dashboard section label"
+  },
+  "@totalEarnings": {
+    "description": "Dashboard earnings label"
+  },
+  "@thisWeek": {
+    "description": "Dashboard period label"
+  },
+  "@jobsDone": {
+    "description": "Dashboard stat label"
+  },
+  "@avgRating": {
+    "description": "Dashboard stat label"
+  },
+  "@aiOpportunityRadar": {
+    "description": "Dashboard AI section title"
+  },
+  "@servicesYouCouldOffer": {
+    "description": "AI opportunities subtitle"
+  },
+  "@noOpportunitiesFound": {
+    "description": "AI opportunities empty"
+  },
+  "@createServiceButton": {
+    "description": "AI opportunity CTA"
+  },
+  "@reviewsTitle": {
+    "description": "Reviews screen title"
+  },
+  "@reviewsWriteReview": {
+    "description": "Write review button"
+  },
+  "@reviewsNoReviews": {
+    "description": "Empty reviews state"
+  },
+  "@reviewsRatePlaceholder": {
+    "description": "Review text placeholder"
+  },
+  "@reviewsSubmit": {
+    "description": "Submit review button"
+  },
+  "@reviewSubmitted": {
+    "description": "Leave review success snackbar"
+  },
+  "@anonymous": {
+    "description": "Reviewer name fallback"
+  },
+  "@skillSwapTitle": {
+    "description": "Skill swap screen title"
+  },
+  "@skillSwapDiscover": {
+    "description": "Discover swaps tab"
+  },
+  "@skillSwapPropose": {
+    "description": "Propose swap button"
+  },
+  "@skillSwapAccept": {
+    "description": "Accept swap button"
+  },
+  "@skillSwapDecline": {
+    "description": "Decline swap button"
+  },
+  "@skillSwapNoSwaps": {
+    "description": "Empty skill swap state"
+  },
+  "@aiAssistantTitle": {
+    "description": "AI assistant screen title"
+  },
+  "@aiAssistantPlaceholder": {
+    "description": "AI assistant input placeholder"
+  },
+  "@aiAssistantSend": {
+    "description": "AI assistant send button"
+  },
+  "@providerFallback": {
+    "description": "Fallback provider name"
+  },
+  "@userFallback": {
+    "description": "Fallback display name"
+  },
+  "@unknown": {
+    "description": "Fallback unknown entity"
+  },
+  "@untitled": {
+    "description": "Fallback untitled service"
+  },
+  "@completed": {
+    "description": "Status label"
+  },
+  "@cancelled": {
+    "description": "Status label"
+  },
+  "@pending": {
+    "description": "Status label"
+  },
+  "@confirmed": {
+    "description": "Status label"
+  },
+  "@success": {
+    "description": "Transaction status label"
+  },
+  "@noDataYet": {
+    "description": "Chart empty state"
+  },
+  "@refresh": {
+    "description": "Refresh button tooltip"
+  },
+  "appName": "LifeKit",
+  "loading": "Загрузка…",
+  "errorGeneric": "Что-то пошло не так. Пожалуйста, попробуйте еще раз.",
+  "retry": "Повторить попытку",
+  "cancel": "Отмена",
+  "save": "Сохранить",
+  "delete": "Удалить",
+  "edit": "Правка",
+  "done": "Готово",
+  "confirm": "Подтвердить",
+  "close": "Закрыть",
+  "back": "Назад",
+  "next": "Далее",
+  "skip": "Skip",
+  "search": "Search",
+  "noResults": "Результаты не найдены.",
+  "seeAll": "Смотреть все",
+  "submit": "Отправить",
+  "yes": "Да",
+  "no": "Нет",
+  "or": "или",
+  "optional": "Опционально",
+  "signIn": "Войти",
+  "signOut": "Выход",
+  "signUp": "Регистрация",
+  "createAccount": "Создать счет",
+  "forgotPassword": "Забыли пароль?",
+  "emailLabel": "E-mail",
+  "emailAddressLabel": "Адрес электронной почты",
+  "emailPlaceholder": "Укажите адрес вашей электронной почты",
+  "passwordLabel": "Пароль",
+  "passwordPlaceholder": "Введите пароль",
+  "confirmPasswordLabel": "Подтвердите пароль",
+  "fullNameLabel": "Имя и фамилия",
+  "phoneLabel": "Тел. &#8470;",
+  "loginTitle": "С возвращением!",
+  "loginSubtitle": "Войдите, чтобы продолжить",
+  "loginButton": "Войти",
+  "noAccountPrompt": "Нет учетной записи?",
+  "registerTitle": "Создайте учетную запись",
+  "registerSubtitle": "Заполните форму ниже, чтобы создать аккаунт",
+  "registerButton": "Создать счет",
+  "haveAccountPrompt": "У вас уже есть учетная запись?",
+  "continueButton": "Продолжить",
+  "finish": "Готово",
+  "errorEmailRequired": "Пожалуйста укажите ваш Email адрес",
+  "errorEmailInvalid": "Введите действительный email-адрес.",
+  "errorPasswordRequired": "Введите пароль.",
+  "errorPasswordShort": "Password must be at least 6 characters.",
+  "errorPasswordMatch": "Пароли не совпадают, попробуйте еще раз.",
+  "errorNameRequired": "Пожалуйста, введите ваше ФИО.",
+  "loginSlideWelcomeBackTitle": "C возвращением!",
+  "loginSlideWelcomeBackSubtitle": "Рад видеть вас снова 👋",
+  "welcomeBackToast": "Привет! С возвращением!",
+  "signInFailed": "Не удалось войти. Повторите попытку.",
+  "verifyYourEmail": "Подтвердите свой e-mail",
+  "didntGetCodeResend": "Не получили код? Отправить еще раз",
+  "almostDone": "Почти готово!",
+  "addProfilePictureOptional": "Добавьте фото в профиль — вы всегда можете его пропустить",
+  "welcomeToLifeKit": "Добро пожаловать в LifeKit! 🎉",
+  "allSetWelcome": "Все готово! Добро пожаловать в LifeKit 🎉",
+  "signupWelcomeTitle": "Здравствуйте,! Добро пожаловать в LifeKit",
+  "choosePasswordTitle": "Выберите пароль",
+  "choosePasswordSubtitle": "Выберите что-то безопасное — не менее 6 символов",
+  "splashTagline": "...Изучайте разнообразие, создавайте новые облигации",
+  "onboardingOfferSkillsTitle": "Предложите свои навыки.\nЗарабатывайте на своих условиях",
+  "onboardingOfferSkillsDesc": "Превратите свой талант в доход, предлагая свои услуги активному сообществу, которое ценит то, что вы делаете.",
+  "onboardingBookServicesTitle": "Забронировать надежно\nУслуги в любое время,\nГде угодно",
+  "onboardingBookServicesDesc": "Получите доступ к надежным услугам рядом с вами, от красоты до ремонта дома, хорошего самочувствия, личной гигиены и многого другого - и все это в одном приложении.",
+  "onboardingCommunityTitle": "Где сообщество\nОтвечает возможностям",
+  "onboardingCommunityDesc": "Общайтесь, делитесь и развивайтесь с людьми, которые помогают вам.",
+  "getStarted": "Начало работы",
+  "resetYourPassword": "Сбросить пароль",
+  "resetPasswordInstructions": "Введите адрес эл. почты, связанный с вашей учетной записью, и мы отправим вам ссылку для сброса пароля.",
+  "sendResetLink": "Отправить ссылку сброса",
+  "checkYourEmail": "Проверьте вашу почту",
+  "checkSpamFolder": "Не получили? Проверьте папку со спамом.",
+  "backToLogin": "Вернуться к логину",
+  "setNewPasswordTitle": "Новый пароль",
+  "setNewPasswordSubtitle": "Выберите надёжный пароль для вашего аккаунта.",
+  "updatePasswordButton": "Обновить пароль",
+  "passwordUpdatedTitle": "Пароль обновлён",
+  "passwordUpdatedMessage": "Пароль изменён. Теперь можно войти с новым паролем.",
+  "resetLinkInvalidTitle": "Ссылка недействительна",
+  "resetLinkInvalidMessage": "Ссылка для сброса пароля недействительна или просрочена. Запросите новую.",
+  "emailSentTo": "Мы отправили ссылку для сброса пароля на\n{email}",
+  "tryDifferentEmail": "Попробовать другой email",
+  "aiSetupGuide": "Инструкция по установке",
+  "aiAnalyzingProfile": "ИИ анализирует ваш профиль...",
+  "yourGoals": "Ваши цели",
+  "yourGoalsHint": "например, заработать дополнительный доход, найти надежных поставщиков услуг",
+  "yourSkills": "Ваши навыки",
+  "yourSkillsHint": "например, приготовление пищи, сантехника, обучение, графический дизайн",
+  "yourInterests": "СФЕРА ВАШИХ ИНТЕРЕСОВ",
+  "yourInterestsHint": "например, музыка, еда, фитнес, технологии",
+  "generateMySevenDayPlan": "Создать мой 7-дневный план",
+  "finishAndGoToHome": "Завершить и вернуться на главную",
+  "takeAction": "Принять меры",
+  "failedToGeneratePlan": "Не удалось сгенерировать план. Повторите попытку.",
+  "navHome": "Домой",
+  "navExplore": "Исследовать",
+  "navFeeds": "Новости",
+  "navChats": "Чаты",
+  "navProfile": "Профиль",
+  "homeTabDiscover": "Домой",
+  "homeTabFeed": "Новости",
+  "homeTabBookings": "Бронирование",
+  "homeTabGroups": "группах Microsoft 365",
+  "homeTabProfile": "Профиль",
+  "homeAIRecommended": "Recommended for You",
+  "homeTrending": "Популярное",
+  "homeNearYou": "около меня",
+  "searchServicesProviders": "Поисковые сервисы, провайдеры...",
+  "myBookings": "Мои заказы",
+  "rewards": "Вознаграждения",
+  "explore": "Исследовать",
+  "popular": "Популярные",
+  "communities": "Наименование населенного пункта",
+  "findYourTribe": "Найдите свое племя, поделитесь своим миром",
+  "popularProviders": "Популярные провайдеры",
+  "recentSearches": "Недавние поисковые запросы",
+  "maybeLater": "Может быть позже",
+  "bookingTitle": "Бронирование",
+  "bookingUpcoming": "Предстоящие",
+  "bookingPast": "Прошедшие",
+  "bookingPending": "В процессе",
+  "clientRequests": "Запросы клиентов",
+  "mySwaps": "Мои свопы",
+  "bookingStatusPending": "В процессе",
+  "bookingStatusConfirmed": "Договор подтвержден",
+  "bookingStatusCompleted": "Завершено",
+  "bookingStatusCancelled": "Отменён",
+  "bookingCancelButton": "Отменить букинг",
+  "bookingConfirmCancel": "Вы уверены, что хотите отменить бронь?",
+  "bookingNoUpcoming": "Услуга еще не забронирована.",
+  "bookingNoPast": "Просьб не поступало",
+  "filterOngoing": "В процессе",
+  "filterCompleted": "Завершено",
+  "filterUpcoming": "Предстоящие",
+  "requestAccepted": "Запрос принят! Клиент уведомлен.",
+  "requestRejected": "Новый запрос получен",
+  "reject": "Отклонить",
+  "accept": "Принять",
+  "trackStatus": "·∙ флаг состояние трека",
+  "happeningNow": "🔴 Происходит сейчас!",
+  "tomorrow": "завтра",
+  "waitingApproval": "Ожидает согласования",
+  "skillSwap": "Обмен навыками",
+  "noSwapsYet": "Пока нет свопов",
+  "noSwapsYetDescription": "Обменивайтесь навыками с другими.\nПросмотрите своп доску, чтобы найти свой первый матч.",
+  "browseSwapBoard": "Обзор доски подкачки",
+  "swapActive": "Замена активна",
+  "markDone": "Отметка Готово",
+  "servicesTitle": "Услуги",
+  "servicePrice": "Цена",
+  "serviceHourlyRate": "/ час",
+  "serviceAddToCart": "В корзину",
+  "serviceBookNow": "Забронировать сейчас",
+  "serviceAbout": "about this service",
+  "serviceProvider": "Врач",
+  "serviceReviews": "Отзывы",
+  "noServicesFound": "Результатов не найдено",
+  "noServicesFoundSubtitle": "Новые сервисы появятся здесь, как только они станут доступны.",
+  "createService": "Создать услугу",
+  "addService": "Добавление услуги",
+  "myServices": "Мои услуги",
+  "cartTitle": "Моя Корзина",
+  "cartEmpty": "Ваша корзина пуста.",
+  "cartTotal": "Итого",
+  "cartCheckout": "Подтвердить бронирование",
+  "cartRemoveItem": "Снимите",
+  "paymentTitle": "Наз.",
+  "paymentConfirm": "Подтвердить оплату",
+  "paymentSuccess": "Подтвержденное бронирование",
+  "paymentFailed": "Оплата не удалась, пожалуйста, повторите попытку.",
+  "paymentCancelled": "Платеж отменен",
+  "profileTitle": "Профиль",
+  "profileEdit": "Редактировать профиль",
+  "profileBookings": "Мои заказы",
+  "profileLogout": "Выйти",
+  "profileLogoutConfirm": "Действительно выйти?",
+  "profileReviews": "Отзывы",
+  "profileFollowers": "Подписчики",
+  "profileFollowing": "Подписка",
+  "profileFollow": "Следить за публикациями",
+  "profileUnfollow": "Отменить подписку",
+  "failedToLoadProfile": "Не удалось загрузить профиль",
+  "noBioAdded": "Биография не добавлена",
+  "walletBalance": "Баланс кошелька",
+  "launchOfferProTrial": "Предложение запуска: Пробный период Pro активен",
+  "accountUsage": "Пользование счетом",
+  "upgradePlan": "Повысить тариф",
+  "foundingMember": "Учредитель",
+  "businessTools": "бизнес-инструменты",
+  "editProfile": "Редактировать профиль",
+  "generalSettings": "Общие настройки",
+  "personalInformation": "Личные данные",
+  "settingsTitle": "Настройки",
+  "settingsLanguage": "Язык",
+  "settingsNotifications": "Уведомления",
+  "settingsSecurity": "Безопасность пароля",
+  "settingsHelp": "Центр помощи",
+  "settingsAbout": "О LifeKit",
+  "settingsDeleteAccount": "Удалить учетную запись",
+  "helpCenter": "Центр помощи",
+  "support": "Сопровождение",
+  "logOut": "Выйти",
+  "walletTitle": "Кошелек",
+  "walletTopUp": "Пополнить",
+  "walletWithdraw": "Вывести",
+  "walletTransactions": "История транзакций",
+  "walletNoTransactions": "Нет операций за прошедший период.",
+  "walletSettingsComingSoon": "Настройки кошелька скоро появятся!",
+  "withdraw": "Вывести",
+  "enterAmount": "Укажите сумму",
+  "enterValidAmount": "Введите действительную сумму.",
+  "amountExceedsBalance": "Сумма превышает баланс.",
+  "withdrawalCompleted": "Вывод средств завершен.",
+  "weeklyIncome": "Доход в неделю",
+  "points": "Баллы",
+  "addMoney": "Добавить денег",
+  "setupPayouts": "Настроить выплаты",
+  "scan": "Сканировать",
+  "qrScanComingSoon": "Платежи с помощью QR-сканирования скоро поступят!",
+  "fundWallet": "Кошелек фонда",
+  "minimumDepositFive": "Минимальный депозит - $ 5",
+  "walletFundedSuccessfully": "Кошелек успешно пополнен!",
+  "minimumDepositAmount": "Минимальный депозит: $ 5.00",
+  "payWithCard": "Оплатить картой",
+  "securedByStripe": "Защищено Stripe",
+  "groupsTitle": "Наименование населенного пункта",
+  "groupsJoin": "Вступить",
+  "groupsLeave": "Выйти",
+  "groupsMembers": "Члены",
+  "groupsCreateGroup": "Создать",
+  "groupsNoGroups": "Группы не найдены.",
+  "findYourPeople": "Найдите своих людей, поделитесь своим миром",
+  "feedTitle": "Новости",
+  "feedNewPost": "Поделись чем-нибудь!",
+  "feedLike": "Нравится",
+  "feedComment": "Комментарий",
+  "feedShare": "Поделиться",
+  "feedNoPost": "Пока нет публикаций. Поделитесь первыми!",
+  "placesTitle": "Места",
+  "searchPlacesHint": "Поиск ресторанов, кафе, отелей...",
+  "noPlacesNearby": "Рядом с отелем>",
+  "locatingYou": "Находим вас...",
+  "findingPlacesNearYou": "Поиск жилья поблизости...",
+  "categoryAll": "Все",
+  "categoryRestaurant": "Ресторан",
+  "categoryCafe": "Кафе",
+  "categoryHotel": "Гостиница",
+  "notificationsTitle": "Уведомления",
+  "notificationsEmpty": "Еще нет уведомлений",
+  "notificationsMarkAllRead": "Отметить всё как прочитанное",
+  "languageTitle": "Язык",
+  "languageEnglish": "Великобритания",
+  "languageGeorgian": "Грузинский",
+  "languageRussian": "Русский",
+  "languageNativeGeorgian": "ქართული",
+  "languageNativeRussian": "Русский",
+  "subscriptionPlanFree": "Без оплаты",
+  "subscriptionPlanPro": "Pro",
+  "subscriptionPlanBusiness": "Бизнес",
+  "subscriptionUpgrade": "Повысить тариф",
+  "chatTitle": "Сообщения",
+  "chatInputPlaceholder": "Введите сообщение",
+  "chatSend": "Отправить",
+  "chatNoMessages": "Сообщений пока нет. Начните разговор!",
+  "providerDashboard": "Bнформационная панель",
+  "quickActions": "Быстрые действия",
+  "totalEarnings": "Общий доход",
+  "thisWeek": "На этой неделе",
+  "jobsDone": "Выполненные проекты",
+  "avgRating": "Средн. Оценивание",
+  "aiOpportunityRadar": "Радар возможностей ИИ",
+  "servicesYouCouldOffer": "Услуги, которые вы можете предложить прямо сейчас",
+  "noOpportunitiesFound": "На данный момент возможностей не найдено.",
+  "createServiceButton": "Создать услугу",
+  "reviewsTitle": "Отзывы",
+  "reviewsWriteReview": "Написать отзыв",
+  "reviewsNoReviews": "Пока нет отзывов.",
+  "reviewsRatePlaceholder": "Написать комментарий (необязательно)...",
+  "reviewsSubmit": "Отправить отзыв",
+  "reviewSubmitted": "Отзыв отправлен.",
+  "anonymous": "Анонимный_автор",
+  "skillSwapTitle": "Обмен навыками",
+  "skillSwapDiscover": "Откройте для себя свопы",
+  "skillSwapPropose": "Предложить обмен",
+  "skillSwapAccept": "Принять",
+  "skillSwapDecline": "Отклонить",
+  "skillSwapNoSwaps": "Нет доступных предложений.",
+  "aiAssistantTitle": "AI-помощник",
+  "aiAssistantPlaceholder": "Спросите меня о LifeKit...",
+  "aiAssistantSend": "Отправить",
+  "providerFallback": "Врач",
+  "userFallback": "Пользователь",
+  "unknown": "Неизвестно",
+  "untitled": "Безымянный",
+  "completed": "Завершено",
+  "cancelled": "Отменён",
+  "pending": "В процессе",
+  "confirmed": "Договор подтвержден",
+  "success": "Успешно",
+  "noDataYet": "Еще нет данных",
+  "refresh": "Обновление",
+
+  "loginSlideProgressTitle": "Ваш прогресс ждёт вас",
+  "loginSlideProgressSubtitle": "Продолжайте двигаться вперёд",
+  "loginSlideAITitle": "ИИ-аналитика готова",
+  "loginSlideAISubtitle": "Свежие персонализированные рекомендации",
+  "loginSlideCommunityTitle": "Ваше сообщество",
+  "loginSlideCommunitySubtitle": "Посмотрите, что происходит в вашем кругу",
+
+  "signupSlideWelcomeSubtitle": "Ваш универсальный помощник в личностном росте",
+  "signupSlideHabitsTitle": "Сформируйте лучшие привычки",
+  "signupSlideHabitsSubtitle": "Отслеживайте цели, серии и ежедневный прогресс",
+  "signupSlideAITitle": "Коучинг на базе ИИ",
+  "signupSlideAISubtitle": "Персонализированные советы, которые помогают вам расти",
+  "signupSlideCommunityTitle": "Яркое сообщество",
+  "signupSlideCommunitySubtitle": "Общайтесь, делитесь и вдохновляйтесь вместе",
+
+  "homeHelloGreeting": "Привет, {name} 👋",
+  "@homeHelloGreeting": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "homeWelcomeTagline": "Откройте для себя берега океанов дельты",
+  "homeSpecialOfferAwaits": "{name}, вас ждёт специальное предложение!",
+  "@homeSpecialOfferAwaits": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "homeOfferTitle": "Получите скидку 20%\nна первое бронирование!",
+  "homeOfferValidUntil": "Действует до 30 октября",
+  "homeTopSwapOpportunities": "🔄 Лучшие возможности обмена",
+  "homeCommunitiesCount": "{count} сообществ",
+  "@homeCommunitiesCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "homeBrowseAll": "Все →",
+  "homeMoreServices": "Больше\nуслуг",
+  "homeMyServiceBadge": "Это ваша услуга. Управляйте ею из «Мои услуги».",
+  "homeDailyTaskTitle": "Ежедневное задание от Gracia",
+  "homeDailyTaskDay": "День {dayNum}",
+  "@homeDailyTaskDay": {
+    "placeholders": { "dayNum": { "type": "int" } }
+  },
+  "homeDailyTaskMarkDone": "Отметить выполненным",
+  "homeWelcomeBackOpportunities": "С возвращением! {days} дн. новых возможностей",
+  "@homeWelcomeBackOpportunities": {
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "homeCategoryNearby": "Рядом",
+  "homeCategoryLocal": "Локальные",
+  "homeCategoryConvenient": "Удобные",
+  "homeCategoryCentral": "Центральные",
+
+  "exploreDiscoverBadge": "✦ Открыть",
+  "exploreFindBest": "Найдите лучшие\nуслуги рядом с вами",
+  "exploreServicesAvailable": "{count}+ доступных услуг",
+  "@exploreServicesAvailable": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "exploreFeaturedProfessionals": "Рекомендуемые специалисты",
+  "exploreFeaturedProfessional": "Рекомендуемый специалист",
+  "exploreBrowseCategories": "Просмотр категорий",
+  "exploreAllServices": "Все услуги",
+  "exploreCityPulse": "Пульс города",
+  "exploreTapToExplore": "Нажмите, чтобы открыть: {category} →",
+  "@exploreTapToExplore": {
+    "placeholders": { "category": { "type": "String" } }
+  },
+  "skillSwap": "Обмен навыками",
+
+  "categoryYourListing": "Ваше объявление",
+  "homeYourServiceBadge": "Ваш сервис",
+  "categoryMoreProviders": "Больше исполнителей",
+  "categoryShowingResults": "Найдено {count} результатов",
+  "@categoryShowingResults": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "categorySearchHint": "Поиск {category}...",
+  "@categorySearchHint": {
+    "placeholders": { "category": { "type": "String" } }
+  },
+
+  "profileNoBio": "Биография не добавлена",
+  "profileBusinessTools": "Бизнес-инструменты",
+  "profileToolDashboard": "Панель",
+  "profileToolServices": "Услуги",
+  "profileToolAIPremium": "AI Премиум",
+  "profileToolRewards": "Награды",
+  "profileAIPremiumComingSoon": "Премиум-инструменты AI скоро будут доступны!",
+  "profileRewardsComingSoon": "Награды скоро будут доступны!",
+  "profileGeneralSettings": "Общие настройки",
+  "profileAISetupGuide": "Руководство по настройке AI",
+  "profileAISetupSubtitle": "Создайте свой 7-дневный план успеха",
+  "profilePersonalInfo": "Личная информация",
+  "profileSupport": "Поддержка",
+
+  "tierFree": "Бесплатный",
+  "tierPlus": "Плюс",
+  "tierPro": "Про",
+  "tierBusiness": "Бизнес",
+
+  "securityLoginDetails": "Данные для входа",
+  "securityCurrentPassword": "Текущий пароль",
+  "securityNewPassword": "Новый пароль",
+  "securityConfirmPassword": "Подтвердите новый пароль",
+  "securityChangePassword": "Изменить пароль",
+  "securityForgotPassword": "Забыли пароль?",
+  "securityAdvanced": "Расширенная безопасность",
+  "securityBiometric": "Биометрический вход",
+  "securityBiometricSubtitle": "FaceID / TouchID",
+  "securityTwoFactor": "Двухфакторная аутентификация",
+  "security2FAComingSoon": "Настройка 2FA скоро будет доступна",
+  "securityDeleteAccount": "Удалить аккаунт",
+  "securityDeleteWarning": "Это действие необратимо. Все ваши данные будут потеряны.",
+  "securityDelete": "Удалить",
+  "securityCancel": "Отмена",
+  "securityPasswordMismatch": "Новые пароли не совпадают",
+  "securityPasswordTooShort": "Новый пароль должен содержать не менее 6 символов",
+  "securityEnterCurrent": "Пожалуйста, введите текущий пароль",
+  "securityPasswordUpdated": "Пароль успешно обновлён!",
+
+  "notifPush": "Push-уведомления",
+  "notifPushSubtitle": "Получайте сообщения и обновления бронирований",
+  "notifEmail": "Email-уведомления",
+  "notifEmailSubtitle": "Получайте чеки и дайджесты",
+  "notifPromo": "Рекламные предложения",
+  "notifPromoSubtitle": "Купоны и новости",
+
+  "langEnglish": "Английский",
+  "langGeorgian": "Грузинский",
+  "langRussian": "Русский",
+
+  "helpMyTickets": "Мои тикеты",
+  "helpNoTickets": "Тикетов пока нет",
+  "helpContactSupport": "Связаться с поддержкой",
+  "helpSubject": "Тема",
+  "helpMessage": "Сообщение",
+  "helpSubmitTicket": "Отправить тикет",
+  "helpFillBoth": "Пожалуйста, заполните тему и сообщение",
+  "helpTicketSubmitted": "Тикет успешно отправлен!",
+  "helpSupportTicketDefault": "Тикет поддержки",
+  "helpFaqCancelQuestion": "Как отменить бронирование?",
+  "helpFaqCancelAnswer": "Перейдите на вкладку бронирований, выберите активное бронирование и нажмите кнопку «Отменить».",
+  "helpFaqRefundQuestion": "Как работает возврат средств?",
+  "helpFaqRefundAnswer": "Возврат поступает на ваш кошелёк сразу после подтверждения отмены.",
+
+  "walletWeeklyIncome": "Доход за неделю",
+  "walletPoints": "Баллы",
+  "walletPointsOf": "из {total}",
+  "@walletPointsOf": {
+    "placeholders": { "total": { "type": "String" } }
+  },
+  "walletAddMoney": "Пополнить",
+  "walletWithdraw": "Вывод",
+  "walletSetupPayouts": "Настроить выплаты",
+  "walletScan": "Сканировать",
+  "walletTransactionHistory": "История транзакций",
+  "walletSuccess": "Успех",
+  "walletEnterAmount": "Введите сумму",
+  "walletEnterValidAmount": "Введите корректную сумму.",
+  "walletAmountExceeds": "Сумма превышает баланс.",
+  "walletWithdrawalCompleted": "Вывод выполнен.",
+  "walletSetupFailed": "Не удалось настроить: {error}",
+  "@walletSetupFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "walletWithdrawFailed": "Не удалось вывести: {error}",
+  "@walletWithdrawFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "feedsTabFeeds": "Лента",
+  "feedsTabEvents": "События",
+  "feedsWhatsOnYourMind": "Что у вас на уме?",
+  "feedsPhoto": "Фото",
+  "feedsTag": "Тег",
+  "feedsPost": "Опубликовать",
+  "feedsCreatePost": "Новый пост",
+  "feedsAddTitleOptional": "Добавьте заголовок (необязательно)",
+  "feedsTrending": "В тренде",
+  "feedsLive": "LIVE",
+  "feedsTrendingSkillOffer": "Предложение",
+  "feedsTrendingTips": "Советы",
+  "feedsTrendingSwap": "Обмен",
+  "feedsTrendingLookingFor": "Ищу",
+  "feedsTrendingServices": "Услуги",
+  "feedsReportPost": "Пожаловаться",
+  "feedsPostReported": "Пост отправлен на проверку. Спасибо.",
+  "profilePrivacyPolicy": "Политика конфиденциальности",
+  "profileTermsOfService": "Условия использования",
+  "feedsBlockUser": "Заблокировать",
+  "feedsBlockUserConfirm": "Вы не будете видеть посты друг друга. Разблокировать можно в любой момент: Профиль → Безопасность → Заблокированные.",
+  "feedsUserBlocked": "Пользователь заблокирован.",
+  "feedsActionFailed": "Что-то пошло не так. Попробуйте ещё раз.",
+  "feedsShare": "Поделиться",
+  "feedsSharedFromLifeKit": "Поделено из LifeKit",
+  "feedsDelete": "Удалить",
+  "feedsPostDeleted": "Пост удалён",
+  "feedsDeleteFailed": "Не удалось удалить пост: {error}",
+  "@feedsDeleteFailed": { "placeholders": { "error": { "type": "String" } } },
+  "feedsLikeFailed": "Не удалось обновить лайк: {error}",
+  "@feedsLikeFailed": { "placeholders": { "error": { "type": "String" } } },
+  "feedsBookmarkFailed": "Не удалось обновить закладку: {error}",
+  "@feedsBookmarkFailed": { "placeholders": { "error": { "type": "String" } } },
+  "feedsJustNow": "Только что",
+  "feedsMinAgo": "{count} мин назад",
+  "@feedsMinAgo": { "placeholders": { "count": { "type": "int" } } },
+  "feedsHourAgo": "{count} ч назад",
+  "@feedsHourAgo": { "placeholders": { "count": { "type": "int" } } },
+  "feedsDayAgo": "{count} дн назад",
+  "@feedsDayAgo": { "placeholders": { "count": { "type": "int" } } },
+
+  "eventsSearchHint": "Поиск событий...",
+  "eventsPopularToday": "Популярное сегодня",
+  "eventsSearchResults": "Результаты поиска",
+  "eventsNoFoundFor": "По запросу «{query}» событий не найдено",
+  "@eventsNoFoundFor": { "placeholders": { "query": { "type": "String" } } },
+  "eventsNoInCategory": "В этой категории событий нет",
+  "eventsCatAll": "Все",
+  "eventsCatTheatre": "Театр",
+  "eventsCatSport": "Спорт",
+  "eventsCatFestival": "Фестиваль",
+  "eventsCatTourism": "Туризм",
+  "eventsCatMusic": "Музыка",
+  "eventsCatFood": "Еда",
+
+  "chatsTitle": "Сообщения",
+  "chatsSearchHint": "Поиск чатов или услуг...",
+  "chatsRecentContacts": "Недавние контакты",
+  "chatsTabActive": "Активные",
+  "chatsTabFinished": "Завершённые",
+  "chatsNoActive": "Активных бесед пока нет",
+  "chatsPastWillAppear": "Прошлые чаты появятся здесь",
+  "chatsStartingNewComingSoon": "Возможность начать новый чат скоро появится!",
+  "chatsNoMessagesYet": "Сообщений пока нет",
+  "chatsGeneral": "Общее",
+  "chatsJustNow": "Только что",
+  "chatsYesterday": "Вчера",
+
+  "actionSheetWhatToDo": "Что вы хотите сделать?",
+  "actionBookService": "Забронировать услугу",
+  "actionBookServiceSubtitle": "Оплата и планирование",
+  "actionSkillSwap": "Обмен навыками",
+  "actionSkillSwapSubtitle": "Обменивайтесь навыками без денег",
+  "actionNoCash": "✨ Без денег",
+  "badgeSwappable": "Доступен обмен",
+
+  "providerDescription": "Описание услуги",
+  "providerNoDescription": "Описание недоступно.",
+  "providerAboutProvider": "О поставщике",
+  "providerDefaultBio": "Профессиональный поставщик услуг на LifeKit.",
+  "providerInstantConfirmation": "Мгновенное подтверждение",
+  "providerVerifiedProvider": "Проверенный поставщик",
+  "providerTabAbout": "О нас",
+  "providerTabReviews": "Отзывы",
+  "providerTabAvailability": "Доступность",
+  "providerTabServices": "Услуги",
+  "providerSearchServicesHint": "Поиск услуг...",
+  "providerBookThisService": "Забронировать услугу",
+  "providerRestrictedTitle": "Ограничено",
+  "providerRestrictedBody": "Вы не можете забронировать свою собственную услугу.",
+  "providerOk": "OK",
+  "providerOnlineRemote": "Онлайн/Удалённо",
+  "providerProviderFallback": "Поставщик",
+  "providerSharedToFeed": "Услуга опубликована в ленте",
+  "providerShareFailed": "Не удалось поделиться услугой",
+  "providerPriceVaries": "Цена варьируется",
+  "providerBookNow": "Забронировать",
+  "providerRatingsSummary": "Сводка по оценкам",
+  "providerUserFallback": "Пользователь",
+  "providerVerifiedService": "Проверенная услуга",
+  "providerNoReviews": "Отзывов пока нет",
+  "providerBeFirstReview": "Будьте первым, кто оставит отзыв, и получите {points} баллов",
+  "@providerBeFirstReview": { "placeholders": { "points": { "type": "int" } } },
+
+  "bookTitle": "Забронировать услугу",
+  "bookQuickSelect": "Быстрый выбор",
+  "bookToday": "Сегодня",
+  "bookTomorrow": "Завтра",
+  "bookThisWeekend": "В эти выходные",
+  "bookTotal": "Итого",
+  "bookNow": "Забронировать",
+  "bookLoadingAvailability": "Загрузка доступности...",
+  "bookSelectDate": "Пожалуйста, выберите дату",
+  "bookSelectAtLeastOneOption": "Пожалуйста, выберите хотя бы одну опцию услуги.",
+  "bookNoUpcomingAvailability": "Ближайшая доступность отсутствует",
+  "bookProviderOffDay": "Поставщик не работает в этот день. Следующая доступная дата: {date}",
+  "@bookProviderOffDay": { "placeholders": { "date": { "type": "String" } } },
+  "bookUseNext": "Использовать следующую",
+  "bookTimeConflict": "Это время уже занято.",
+  "bookSelectTime": "Выберите время",
+  "bookCancel": "Отмена",
+  "bookDone": "Готово",
+  "bookGotIt": "Понятно",
+  "bookNoTimeSlots": "Нет доступных временных слотов",
+  "bookHoldOn": "Подождите",
+  "bookSuccess": "Успешно",
+  "bookCommentSaved": "Комментарий сохранён!",
+  "bookServiceType": "Тип услуги",
+  "bookTypeDefault": "По умолчанию",
+  "bookTypeHome": "Дом",
+  "bookTypeOutdoor": "На улице",
+  "bookFixed": "Фиксированный",
+  "bookSelectServiceOptions": "Выберите опции услуги",
+  "bookMoreServices": "Больше услуг",
+  "bookServiceTime": "Время услуги",
+  "bookAddInstructions": "Добавьте особые инструкции...",
+
+  "swapTitle": "Обмен навыками",
+  "swapPoweredBy": "Работает на Gracia",
+  "swapSelectServiceType": "Выберите тип услуги",
+  "swapBiDirectional": "Двусторонний AI-подбор ",
+  "swapBiDirectionalDesc": "находит поставщиков, которые хотят то, что вы предлагаете, И предлагают то, что хотите вы.",
+  "swapSelectYours": "Выбрать своё",
+  "swapSelectTarget": "Выбрать цель",
+  "swapLookingForSkill": "Ищу навык",
+  "swapProposeTo": "Предложить обмен {name}",
+  "@swapProposeTo": { "placeholders": { "name": { "type": "String" } } },
+  "swapFindOtherMatches": "Найти другие AI-совпадения",
+  "swapFindMatch": "Найти AI-совпадение",
+  "swapBrowseBoard": "Открыть доску обменов",
+  "swapSelectSkillToOffer": "Выберите навык для обмена",
+  "swapNoServicesCreateFirst": "Услуги не найдены. Сначала создайте услугу.",
+  "swapSelectSkillCategory": "Выберите категорию навыка",
+  "swapMatchFound": "Совпадение найдено!",
+  "swapAiMatchingFor": "AI ищет совпадение для",
+  "swapMeLabel": "Я",
+  "swapNoProvidersFound": "Поставщики не найдены",
+  "swapTryDifferentCategory": "Попробуйте другую категорию навыков",
+  "swapAiMatched": "Подобрано AI",
+  "swapMatchTag": "Совпадение",
+  "swapRatingNew": "Новый",
+  "swapOtherAiMatches": "Другие AI-совпадения",
+  "swapUserFallback": "Пользователь",
+  "swapSendProposal": "Отправить предложение",
+  "swapYouOffer": "Вы предлагаете",
+  "swapYouReceive": "Вы получаете",
+  "swapPreferredDate": "Желаемая дата",
+  "swapMessagePlaceholder": "Напр. «Готов(а) подстроиться по времени, дайте знать!»",
+  "swapSendProposalBtn": "Отправить предложение",
+  "swapProposalSent": "Предложение обмена отправлено!",
+  "swapAcceptedToast": "Обмен принят! Проверьте свои бронирования.",
+  "swapDeclinedToast": "Обмен отклонён.",
+  "swapCancelledToast": "Предложение обмена отменено.",
+  "swapBookingNotFound": "Бронирование для этого обмена не найдено.",
+  "swapSelectServiceToOffer": "Пожалуйста, выберите услугу, которую хотите предложить.",
+  "swapSelectSkillLookingFor": "Пожалуйста, выберите навык, который вы ищете.",
+  "swapServiceFallback": "Услуга",
+  "swapProviderFallback": "Поставщик",
+  "swapDirectSelection": "Прямой выбор услуги",
+  "swapPotentialMatch": "Возможное совпадение",
+  "swapGoodMatch": "Хорошее дополняющее совпадение",
+  "swapUnknown": "Неизвестно",
+  "swapBoardTitle": "Доска обменов",
+  "swapBoardSubtitle": "AI-ранжированные совпадения для вас",
+  "swapTabDiscover": "Обзор",
+  "swapTabIncoming": "Входящие",
+  "swapTabOutgoing": "Исходящие",
+  "swapNoSwapsYet": "Обменов пока нет",
+  "swapEnableHint": "Включите обмен навыками в своих услугах, и здесь появятся другие!",
+  "swapPeopleLookingToTrade": "Люди, активно ищущие обмен навыками",
+  "swapServicesFromProviders": "Услуги от поставщиков, готовых к обмену",
+  "swapNoIncoming": "Входящих предложений нет",
+  "swapIncomingHint": "Предложения появятся здесь",
+  "swapNoOutgoing": "Исходящих предложений нет",
+  "swapOutgoingHint": "Начните с поиска совпадения!",
+  "swapPriceOnRequest": "Цена по запросу",
+  "swapMyServiceMessage": "Это ваша услуга. Управляйте ею в «Моих услугах».",
+  "swapUntitled": "Без названия",
+  "swapDecline": "Отклонить",
+  "swapYoursLabel": "Ваше",
+  "swapYourServiceBadge": "Ваша услуга",
+
+  "bookingsMyBookings": "Мои бронирования",
+  "bookingsClientRequests": "Запросы клиентов",
+  "bookingsMySwaps": "Мои обмены",
+  "bookingsNoneYet": "Услуги ещё не забронированы.",
+  "bookingsFilterOngoing": "Текущие",
+  "bookingsFilterCompleted": "Завершённые",
+  "bookingsFilterUpcoming": "Предстоящие",
+  "bookingsNoRequestsYet": "Запросов пока не получено.",
+  "bookingsProviderFallback": "Поставщик",
+  "bookingsClientFallback": "Клиент",
+  "bookingsUpcomingDue": "Предстоящие",
+  "bookingsWaitingApproval": "Ожидает одобрения",
+  "bookingsSkillSwap": "Обмен навыками",
+  "bookingsMessageForDetails": "Напишите поставщику для уточнения деталей",
+  "bookingsTrackStatus": "Отследить статус",
+  "bookingsReject": "Отклонить",
+  "bookingsAccept": "Принять",
+  "bookingsRequestAccepted": "Запрос принят! Клиент уведомлён.",
+  "bookingsRequestRejected": "Запрос отклонён.",
+  "bookingsOverdue": "ПРОСРОЧЕНО",
+  "bookingsActiveAndPastSwaps": "Активные и прошедшие обмены",
+  "bookingsPendingSwap": "{count} ожидающее предложение обмена",
+  "@bookingsPendingSwap": { "placeholders": { "count": { "type": "int" } } },
+  "bookingsPendingSwaps": "{count} ожидающих предложений обмена",
+  "@bookingsPendingSwaps": { "placeholders": { "count": { "type": "int" } } },
+  "bookingsTapToView": "Нажмите, чтобы посмотреть и ответить",
+  "bookingsTapToViewSent": "Нажмите, чтобы посмотреть отправленные предложения",
+  "bookingsServiceFallback": "Услуга",
+  "bookingsPartnerFallback": "Партнёр",
+  "bookingsSwapActive": "Обмен активен",
+  "bookingsAwaiting": "Ожидание",
+  "bookingsSwapBadge": "ОБМЕН",
+  "bookingsMessage": "Сообщение",
+  "bookingsMarkDone": "Отметить выполненным",
+  "bookingsNoSwapsYet": "Обменов пока нет",
+  "bookingsBrowseSwapBoard": "Открыть доску обменов",
+  "aiGraciaGreeting": "Привет! Я Gracia, твой ассистент в LifeKit — помогу найти услуги, твоё сообщество и максимально использовать день. Чем могу помочь?",
+  "aiAlwaysHereForYou": "Всегда на связи",
+  "aiMessageHint": "Сообщение для Gracia…",
+  "aiGenericError": "Что-то пошло не так. Попробуй ещё раз.",
+  "aiFallbackReply": "Извини, не удалось получить ответ.",
+  "aiProFeatureTitle": "Pro-функция",
+  "aiProFeatureBody": "Gracia доступна на тарифах Pro и Business. Обнови подписку, чтобы открыть AI-чат, умные рекомендации и многое другое.",
+  "aiMaybeLater": "Может быть, позже",
+  "aiUpgradeNow": "Обновить сейчас ⚡",
+  "aiActionViewFallback": "Открыть",
+  "walletLoadingWallet": "Загрузка кошелька...",
+  "walletAccountUsage": "Использование аккаунта",
+  "walletLoadingUsage": "Загрузка данных...",
+  "walletSlotsUsedUnlimited": "Использовано слотов: {count}/∞ (включая черновики и ожидающие)",
+  "@walletSlotsUsedUnlimited": { "placeholders": { "count": { "type": "int" } } },
+  "walletSlotsUsedLimited": "Использовано слотов: {count}/{limit} (включая черновики и ожидающие)",
+  "@walletSlotsUsedLimited": { "placeholders": { "count": { "type": "int" }, "limit": { "type": "int" } } },
+  "walletRenewsInDays": "Продление через {days} дн.",
+  "@walletRenewsInDays": { "placeholders": { "days": { "type": "int" } } },
+  "walletUpgradePlan": "Улучшить план",
+  "trialBannerTitle": "Стартовое предложение: Pro-пробный активен",
+  "trialBannerSubtitle": "Продление через {days} дн. • Заканчивается {date}",
+  "@trialBannerSubtitle": { "placeholders": { "days": { "type": "int" }, "date": { "type": "String" } } },
+  "trialPerkServices": "✔ 5 услуг",
+  "trialPerkCommission": "✔ 3% комиссии",
+  "trialPerkAI": "✔ Pro AI",
+  "subscriptionPlansTitle": "Тарифные планы",
+  "subscriptionGoPremium": "Перейти на Premium",
+  "subscriptionGoPremiumSubtitle": "Открой больше услуг, больше сообществ и быстрый рост.",
+  "subscriptionPopular": "Популярный",
+  "subscriptionCurrentPlan": "Текущий план",
+  "subscriptionFreePlan": "Бесплатный план",
+  "subscriptionUpgrade": "Улучшить",
+  "subscriptionPerMonth": "{price}/мес",
+  "@subscriptionPerMonth": { "placeholders": { "price": { "type": "String" } } },
+  "subscriptionActiveUntil": "Подписка активна до {date}",
+  "@subscriptionActiveUntil": { "placeholders": { "date": { "type": "String" } } },
+  "subscriptionInsufficientFundsTitle": "Недостаточно средств",
+  "subscriptionInsufficientFundsBody": "Баланс кошелька слишком низкий для этой покупки. Пополни счёт, чтобы продолжить.",
+  "subscriptionCancel": "Отмена",
+  "subscriptionAddMoney": "Пополнить",
+  "planNameFree": "Бесплатный",
+  "planNamePlus": "Plus",
+  "planNamePro": "Pro",
+  "planNameBusiness": "Business",
+  "planFreeFeature1": "0 услуг",
+  "planFreeFeature2": "Максимум 1 сообщество",
+  "planFreeFeature3": "Базовая видимость",
+  "planPlusFeature1": "1 услуга",
+  "planPlusFeature2": "Максимум 3 сообщества",
+  "planPlusFeature3": "Готовность к продвижению",
+  "planProFeature1": "5 услуг",
+  "planProFeature2": "Максимум 5 сообществ",
+  "planProFeature3": "Лучшее для растущих провайдеров",
+  "planBusinessFeature1": "Безлимит услуг",
+  "planBusinessFeature2": "Безлимит сообществ",
+  "planBusinessFeature3": "Доступ к топ-монетизации",
+  "errNoInternet": "Нет подключения к интернету. Проверьте сеть и попробуйте снова.",
+  "errTimeout": "Это заняло слишком много времени. Попробуйте ещё раз.",
+  "errWrongCredentials": "Неверный email или пароль. Попробуйте ещё раз.",
+  "errEmailTaken": "Этот email уже зарегистрирован. Попробуйте войти.",
+  "errUserNotFound": "Аккаунт с таким email не найден.",
+  "errInvalidEmail": "Введите корректный email.",
+  "errWeakPassword": "Слишком простой пароль. Попробуйте длиннее.",
+  "errSessionExpired": "Сессия истекла. Пожалуйста, войдите снова.",
+  "errInvalidCode": "Код неверный или устарел. Запросите новый.",
+  "errInsufficientFunds": "Недостаточно средств в кошельке. Пополните и попробуйте снова.",
+  "errServer": "У нас что-то пошло не так. Попробуйте чуть позже.",
+  "errGeneric": "Что-то пошло не так. Попробуйте ещё раз.",
+  "confirmationSent": "Подтверждение отправлено!",
+  "disputeSubmitted": "Спор отправлен. Наша команда его рассмотрит.",
+  "actionDone": "Готово!",
+  "signupPasswordTitle": "Придумайте пароль",
+  "signupPasswordSubtitle": "Надёжный пароль — не менее 6 символов",
+  "errorConfirmPassword": "Пожалуйста, подтвердите пароль.",
+  "signupAgreePrefix": "Создавая аккаунт, вы соглашаетесь с нашими",
+  "signupAgreeAnd": "и",
+  "blockedUsersTitle": "Заблокированные",
+  "blockedUsersSubtitle": "Люди, чьи посты вы скрыли",
+  "blockedUsersEmpty": "Вы никого не блокировали",
+  "blockedUsersEmptySub": "Когда вы заблокируете кого-то из поста, он появится здесь.",
+  "blockedUserFallbackName": "Пользователь LifeKit",
+  "unblock": "Разблокировать",
+  "userUnblocked": "{name} разблокирован(а)",
+  "trackTitle": "Детали бронирования",
+  "trackStepRequested": "Запрошено",
+  "trackStepRequestedSub": "Запрос на бронирование отправлен",
+  "trackStepConfirmed": "Принято",
+  "trackStepConfirmedSub": "Исполнитель принял бронирование",
+  "trackStepConfirmedPending": "Ждём, пока исполнитель примет",
+  "trackStepServiceDay": "День услуги",
+  "trackStepBothConfirm": "Подтверждение сторон",
+  "trackStepBothConfirmDone": "Обе стороны подтвердили",
+  "trackStepWaitingYou": "Ждём вашего подтверждения",
+  "trackStepWaitingOther": "Ждём: {name}",
+  "trackStepPaidOut": "Выплачено",
+  "trackStepPaidOutSub": "Средства переданы исполнителю",
+  "trackStepSwapDone": "Обмен завершён",
+  "trackStepSwapDoneSub": "Оба навыка обменяны",
+  "trackHdrRequestedTitle": "Ждём исполнителя",
+  "trackHdrRequestedSub": "Скоро он примет или отклонит запрос. Ваши деньги надёжно удерживаются.",
+  "trackHdrNewRequestTitle": "Новый запрос",
+  "trackHdrNewRequestSub": "Примите или отклоните его во вкладке «Запросы».",
+  "trackHdrUpcomingTitle": "Скоро",
+  "trackHdrUpcomingSub": "Всё готово ко дню услуги.",
+  "trackHdrActionTitle": "Нужно ваше подтверждение",
+  "trackHdrActionClientSub": "Подтвердите получение услуги, чтобы средства были переведены.",
+  "trackHdrActionProviderSub": "Отметьте работу выполненной, когда закончите.",
+  "trackHdrWaitingTitle": "Ждём: {name}",
+  "trackHdrWaitingSub": "Вы подтвердили — мы сообщим, когда подтвердит вторая сторона.",
+  "trackHdrCompletedTitle": "Всё готово!",
+  "trackHdrCompletedSub": "Средства переведены. Спасибо, что пользуетесь LifeKit.",
+  "trackHdrSwapCompletedSub": "Обмен навыками завершён.",
+  "trackHdrOverdueTitle": "Время услуги прошло",
+  "trackHdrOverdueSub": "Подтвердите выполнение или сообщите о проблеме, чтобы средства остались удержанными.",
+  "trackHdrDisputedTitle": "На рассмотрении",
+  "trackHdrDisputedSub": "Наша команда рассматривает спор. Средства удерживаются до решения.",
+  "trackHdrCancelledTitle": "Отменено",
+  "trackHdrCancelledSub": "Бронирование отменено. Удержанные средства возвращены в кошелёк.",
+  "trackInDays": "через {d} д {h} ч",
+  "trackInHours": "через {h} ч {m} мин",
+  "trackInMinutes": "через {m} мин",
+  "trackEscrowTitle": "Требуется действие",
+  "trackEscrowBody": "Исполнитель отметил работу выполненной. Если вы не подтвердите и не сообщите о проблеме, средства будут переведены автоматически через 48 часов.",
+  "trackMarkReceived": "Услуга получена",
+  "trackMarkDone": "Работа выполнена",
+  "trackYouConfirmed": "Вы подтвердили. Ждём: {name}…",
+  "trackSwapInfo": "Это обмен навыками — подтверждение отметит его успешным.",
+  "trackEscrowInfo": "Средства надёжно удерживаются, пока вы оба не подтвердите.",
+  "trackReportIssue": "Сообщить о проблеме",
+  "trackRateProvider": "Оценить исполнителя",
+  "trackRateClient": "Оценить клиента",
+  "trackScheduled": "Запланировано",
+  "trackAmount": "Сумма",
+  "trackWith": "С кем",
+  "trackSkillSwap": "Обмен навыками",
+  "trackFallbackProvider": "исполнитель",
+  "trackFallbackClient": "клиент",
+  "bookingsFilterAll": "Все",
+  "bookingsFilterEmpty": "Здесь пока ничего нет.",
+  "bookingSuccessSub": "Услуга забронирована. Исполнитель скоро подтвердит — мы будем держать вас в курсе.",
+  "viewMyBookings": "Мои бронирования",
+  "backToHome": "На главную"
+}

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
@@ -29,8 +30,9 @@ class _ProviderOnboardingIntroScreenState
         );
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+        SnackBar(content: Text(appErrorMessage(context, e)), backgroundColor: Colors.red),
       );
     } finally {
       if (mounted) setState(() => isLoading = false);

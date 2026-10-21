@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
@@ -70,7 +71,7 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
           if (!mounted) return;
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('Failed to update like: $e')));
+          ).showSnackBar(SnackBar(content: Text(appErrorMessage(context, e))));
         });
   }
 

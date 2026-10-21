@@ -9,6 +9,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../bookings/screens/book_service_screen.dart';
 import '../../home/screens/chats_list_screen.dart';
 
@@ -197,23 +198,24 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
   }
 
   void _attemptBooking(dynamic service) {
+    final l10n = AppLocalizations.of(context)!;
     if (widget.providerId == currentUserId) {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
           title: Text(
-            "Restricted",
+            l10n.providerRestrictedTitle,
             style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
           ),
           content: Text(
-            "You cannot book your own service.",
+            l10n.providerRestrictedBody,
             style: GoogleFonts.poppins(),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
-                "OK",
+                l10n.providerOk,
                 style: GoogleFonts.poppins(color: AppColors.primary),
               ),
             ),
@@ -226,7 +228,8 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
         MaterialPageRoute(
           builder: (_) => BookServiceScreen(
             service: service,
-            providerName: providerProfile?['full_name'] ?? "Provider",
+            providerName:
+                providerProfile?['full_name'] ?? l10n.providerProviderFallback,
           ),
         ),
       );
@@ -235,6 +238,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
 
   Future<void> _shareServiceToFeed() async {
     if (_isSharingToFeed) return;
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _isSharingToFeed = true);
     try {
       await _apiService.shareServiceToFeed(widget.serviceId);
@@ -242,7 +246,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            "Service shared to feed",
+            l10n.providerSharedToFeed,
             style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
           ),
           behavior: SnackBarBehavior.floating,
@@ -254,7 +258,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            "Unable to share service",
+            l10n.providerShareFailed,
             style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
           ),
           behavior: SnackBarBehavior.floating,
@@ -270,13 +274,14 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
   @override
   Widget build(BuildContext context) {
     const Color brandColor = Color(0xFF89273B); // Use consistent brand color
+    final l10n = AppLocalizations.of(context)!;
 
     final String name = providerProfile?['full_name'] ?? widget.providerName;
     final String pic =
         providerProfile?['profile_picture_url'] ?? widget.providerPic ?? "";
-    final String bio =
-        providerProfile?['bio'] ?? "Professional service provider on LifeKit.";
-    String location = currentService?['location_text'] ?? "Online/Remote";
+    final String bio = providerProfile?['bio'] ?? l10n.providerDefaultBio;
+    String location =
+        currentService?['location_text'] ?? l10n.providerOnlineRemote;
 
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
@@ -484,11 +489,11 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
                       labelPadding: const EdgeInsets.symmetric(horizontal: 20),
                       tabAlignment: TabAlignment.start,
                       dividerColor: Colors.transparent,
-                      tabs: const [
-                        Tab(text: "About"),
-                        Tab(text: "Reviews"),
-                        Tab(text: "Availability"),
-                        Tab(text: "Services"),
+                      tabs: [
+                        Tab(text: l10n.providerTabAbout),
+                        Tab(text: l10n.providerTabReviews),
+                        Tab(text: l10n.providerTabAvailability),
+                        Tab(text: l10n.providerTabServices),
                       ],
                     ),
                   ),
@@ -508,7 +513,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
                         children: [
                           if (currentService != null) ...[
                             Text(
-                              "Service Description",
+                              l10n.providerDescription,
                               style: GoogleFonts.poppins(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
@@ -517,7 +522,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
                             const SizedBox(height: 5),
                             Text(
                               currentService['description'] ??
-                                  "No description available.",
+                                  l10n.providerNoDescription,
                               style: GoogleFonts.poppins(
                                 fontSize: 14,
                                 height: 1.6,
@@ -529,7 +534,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
                             const SizedBox(height: 20),
                           ],
                           Text(
-                            "About Provider",
+                            l10n.providerAboutProvider,
                             style: GoogleFonts.poppins(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
@@ -549,8 +554,8 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
                             spacing: 8,
                             runSpacing: 8,
                             children: [
-                              _buildTag("Instant Confirmation"),
-                              _buildTag("Verified Provider"),
+                              _buildTag(l10n.providerInstantConfirmation),
+                              _buildTag(l10n.providerVerifiedProvider),
                             ],
                           ),
                         ],
@@ -624,7 +629,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
                             child: TextField(
                               onChanged: _onSearch,
                               decoration: InputDecoration(
-                                hintText: "Search services...",
+                                hintText: l10n.providerSearchServicesHint,
                                 hintStyle: GoogleFonts.poppins(
                                   color: Colors.grey,
                                   fontSize: 13,
@@ -677,7 +682,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
                   ),
                 ),
                 child: Text(
-                  "Book This Service",
+                  l10n.providerBookThisService,
                   style: GoogleFonts.poppins(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -693,6 +698,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
   // --- WIDGET HELPER: Service Card with Standalone Options ---
   Widget _buildBookableServiceCard(dynamic service) {
     const Color brandColor = Color(0xFF89273B);
+    final l10n = AppLocalizations.of(context)!;
     String currency = service['currency'] == 'NGN' ? '₦' : '\$';
 
     // Highlight if it's the current service
@@ -819,7 +825,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
                 // If standalone, show "Price Varies", else show Price
                 Text(
                   isStandalone
-                      ? "Price Varies"
+                      ? l10n.providerPriceVaries
                       : "$currency${service['price']}",
                   style: GoogleFonts.poppins(
                     fontSize: 16,
@@ -841,7 +847,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
                     ),
                   ),
                   child: Text(
-                    "Book Now",
+                    l10n.providerBookNow,
                     style: GoogleFonts.poppins(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
@@ -857,6 +863,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
   }
 
   Widget _buildRatingsSummary() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -874,7 +881,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Ratings Summary",
+            l10n.providerRatingsSummary,
             style: GoogleFonts.poppins(
               fontWeight: FontWeight.bold,
               fontSize: 14,
@@ -1038,7 +1045,8 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      user?['full_name'] ?? "User",
+                      user?['full_name'] ??
+                          AppLocalizations.of(context)!.providerUserFallback,
                       style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
                     ),
                     if (isVerified)
@@ -1062,7 +1070,9 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              "Verified Service",
+                              AppLocalizations.of(
+                                context,
+                              )!.providerVerifiedService,
                               style: GoogleFonts.poppins(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w600,
@@ -1093,6 +1103,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
   }
 
   Widget _buildEmptyReviewsState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Container(
         margin: const EdgeInsets.all(20),
@@ -1125,7 +1136,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
             ),
             const SizedBox(height: 12),
             Text(
-              "No reviews yet",
+              l10n.providerNoReviews,
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
@@ -1133,7 +1144,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
             ),
             const SizedBox(height: 6),
             Text(
-              "Be the first to review and get $firstReviewRewardPoints reward points",
+              l10n.providerBeFirstReview(firstReviewRewardPoints),
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
             ),

@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/providers/cart_provider.dart';
 import '../../../core/services/api_service.dart';
 import '../../home/screens/home_screen.dart';
+import '../../../core/widgets/success_screen.dart';
+import 'bookings_screen.dart';
 import '../../wallet/screens/add_money_screen.dart';
 import '../../../core/widgets/lifekit_loader.dart';
+import '../../../l10n/app_localizations.dart';
 
 class PaymentScreen extends StatefulWidget {
   final List<CartItem> itemsToBook;
@@ -80,8 +84,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
         _showSuccessDialog();
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+        SnackBar(content: Text(appErrorMessage(context, e)), backgroundColor: Colors.red),
       );
     } finally {
       if (mounted) setState(() => isLoading = false);
@@ -90,6 +95,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   // --- MODERN INSUFFICIENT FUNDS POPUP ---
   void _showInsufficientFundsDialog(double requiredTotal) {
+    final l10n = AppLocalizations.of(context)!;
     double missingAmount = requiredTotal - walletBalance;
 
     showDialog(
@@ -173,8 +179,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     ),
                     elevation: 0,
                   ),
-                  child: Text(
-                    "Top Up Wallet",
+                    child: Text(
+                    l10n.walletTopUp,
                     style: GoogleFonts.poppins(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
@@ -187,7 +193,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: Text(
-                  "Cancel",
+                  l10n.cancel,
                   style: GoogleFonts.poppins(
                     color: Colors.grey[500],
                     fontWeight: FontWeight.w500,
@@ -202,80 +208,38 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
   }
 
-  // --- SUCCESS DIALOG ---
+  // --- SUCCESS ---
   void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        backgroundColor: Colors.white,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                height: 70,
-                width: 70,
-                decoration: BoxDecoration(
-                  color: Colors.green[50],
-                  shape: BoxShape.circle,
-                ),
-                child: const Center(
-                  child: Icon(Icons.check, size: 32, color: Colors.green),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                "Booking Confirmed!",
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                "Your service has been booked successfully.",
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey),
-              ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (_) => const HomeScreen()),
-                    (route) => false,
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    "Go Home",
-                    style: GoogleFonts.poppins(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+    final l10n = AppLocalizations.of(context)!;
+    // Capture the NavigatorState: the success screen's own context is
+    // disposed once it's removed, so it can't be used to push afterwards.
+    void goHome(BuildContext ctx) => Navigator.of(ctx).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          (route) => false,
+        );
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (ctx) => SuccessScreen(
+          title: l10n.paymentSuccess,
+          subtitle: l10n.bookingSuccessSub,
+          primaryLabel: l10n.viewMyBookings,
+          onPrimary: () {
+            final nav = Navigator.of(ctx);
+            goHome(ctx);
+            nav.push(MaterialPageRoute(builder: (_) => const BookingsScreen()));
+          },
+          secondaryLabel: l10n.backToHome,
+          onSecondary: () => goHome(ctx),
         ),
       ),
+      (route) => false,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     double totalAmount = _calculateTotal();
 
     return Scaffold(
@@ -286,7 +250,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         leading: const BackButton(color: Colors.black),
         centerTitle: true,
         title: Text(
-          "Payment",
+          l10n.paymentTitle,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -317,7 +281,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Total to Pay",
+                          l10n.cartTotal,
                           style: GoogleFonts.poppins(
                             color: Colors.white70,
                             fontSize: 12,
@@ -465,14 +429,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         elevation: 5,
                         shadowColor: AppColors.primary.withOpacity(0.4),
                       ),
-                      child: Text(
-                        "Confirm Payment",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
+                    child: Text(
+                      l10n.paymentConfirm,
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
                       ),
+                    ),
                     ),
                   ),
                 ],

@@ -5,6 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import 'service_booking_detail_screen.dart';
 import '../../../core/widgets/lifekit_loader.dart';
+import '../../../l10n/app_localizations.dart';
 
 class CategoryItemsScreen extends StatefulWidget {
   final String categoryId;
@@ -143,6 +144,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final bool hasTierInfo = filteredServices.any((service) {
       final tier = service['profiles']?['subscription_tier'];
       return tier != null && tier.toString().trim().isNotEmpty;
@@ -210,7 +212,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
                       controller: _searchController,
                       onChanged: _onSearchChanged,
                       decoration: InputDecoration(
-                        hintText: "Search ${widget.categoryName}...",
+                        hintText: l10n.categorySearchHint(widget.categoryName),
                         hintStyle: GoogleFonts.poppins(
                           color: Colors.grey[400],
                           fontSize: 14,
@@ -269,7 +271,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
                   child: Text(
-                    "Showing ${filteredServices.length} results",
+                    l10n.categoryShowingResults(filteredServices.length),
                     style: GoogleFonts.poppins(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -296,7 +298,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
                               ),
                             ],
                             if (standardServices.isNotEmpty) ...[
-                              _buildSectionHeader("More Providers"),
+                              _buildSectionHeader(l10n.categoryMoreProviders),
                               ...standardServices.map(
                                 (service) => _buildProviderCard(
                                   service,
@@ -331,6 +333,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
   }
 
   Widget _buildProviderCard(dynamic service, {required bool isPremium}) {
+    final l10n = AppLocalizations.of(context)!;
     final Map<String, dynamic> provider = service['profiles'] ?? {};
     final String providerName = provider['full_name'] ?? "Unknown Provider";
     final String? providerPic = provider['profile_picture_url'];
@@ -481,21 +484,30 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
                     Positioned(
                       top: 12,
                       right: 12,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          "Your Listing",
-                          style: GoogleFonts.poppins(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                      left: 12,
+                      child: Align(
+                        alignment: Alignment.topRight,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 140),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              l10n.categoryYourListing,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.poppins(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         ),
                       ),

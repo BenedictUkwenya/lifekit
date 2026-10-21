@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:table_calendar/table_calendar.dart';
 
-import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import '../../bookings/screens/book_service_screen.dart';
 import '../../home/screens/chats_list_screen.dart';

@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../../../core/widgets/motion.dart';
+import '../../../core/widgets/skeleton.dart';
 import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -21,6 +23,7 @@ import 'all_categories_screen.dart';
 import '../../../core/widgets/service_action_sheet.dart';
 import 'skill_swap_screens.dart' show SkillSwapBottomSheet;
 import '../../bookings/screens/cart_screen.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ServicesListScreen extends StatefulWidget {
   const ServicesListScreen({super.key});
@@ -321,7 +324,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
                 ],
               ),
               label: Text(
-                "Skill Swap",
+                AppLocalizations.of(context).skillSwap,
                 style: GoogleFonts.poppins(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
@@ -373,7 +376,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
                     color: Colors.black87,
                   ),
                   decoration: InputDecoration(
-                    hintText: "Search services, providers...",
+                    hintText: AppLocalizations.of(context).searchServicesProviders,
                     hintStyle: GoogleFonts.poppins(
                       color: Colors.grey[400],
                       fontSize: 13,
@@ -400,7 +403,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
               ),
               actions: [
                 // ── Notification Bell ──────────────────
-                GestureDetector(
+                Pressable(
                   onTap: () async {
                     await Navigator.push(
                       context,
@@ -456,7 +459,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
                 Consumer<CartProvider>(
                   builder: (context, cart, _) => Padding(
                     padding: const EdgeInsets.only(right: 16),
-                    child: GestureDetector(
+                    child: Pressable(
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const CartScreen()),
@@ -513,9 +516,8 @@ class _ServicesListScreenState extends State<ServicesListScreen>
             ),
             if (isLoading)
               const SliverFillRemaining(
-                child: Center(
-                  child: CircularProgressIndicator(color: AppColors.primary),
-                ),
+                hasScrollBody: false,
+                child: SizedBox(height: 600, child: SkeletonList(count: 5)),
               )
             else ...[
               // ── GRADIENT HERO HEADER ──────────────────────────────
@@ -590,7 +592,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
                                     ),
                                   ),
                                   child: Text(
-                                    '✦ Discover',
+                                    AppLocalizations.of(context).exploreDiscoverBadge,
                                     style: GoogleFonts.poppins(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600,
@@ -602,7 +604,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
                             ),
                             const SizedBox(height: 10),
                             Text(
-                              'Find the best\nservices near you',
+                              AppLocalizations.of(context).exploreFindBest,
                               style: GoogleFonts.poppins(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -612,7 +614,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              '${allServices.length}+ services available',
+                              AppLocalizations.of(context).exploreServicesAvailable(allServices.length),
                               style: GoogleFonts.poppins(
                                 color: Colors.white.withOpacity(0.7),
                                 fontSize: 12,
@@ -636,7 +638,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
                           _buildCityPulseBanner(),
                           const SizedBox(height: 16),
                         ],
-                        _buildSectionHeader("Featured Professionals"),
+                        _buildSectionHeader(AppLocalizations.of(context).exploreFeaturedProfessionals),
                         const SizedBox(height: 12),
                         SizedBox(
                           height: 170,
@@ -648,7 +650,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
                             itemBuilder: (context, index) =>
                                 _buildFeaturedProviderCard(
                                   featuredProviders[index],
-                                ),
+                                ).fadeSlideIn(index: index, dy: 0.15),
                           ),
                         ),
                       ],
@@ -658,14 +660,18 @@ class _ServicesListScreenState extends State<ServicesListScreen>
               if (categories.isNotEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 28, 0, 0),
+                    padding: const EdgeInsets.fromLTRB(20, 28, 12, 0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            _buildSectionHeader("Browse Categories"),
-                            const Spacer(),
+                            Expanded(
+                              child: _buildSectionHeader(
+                                AppLocalizations.of(context).exploreBrowseCategories,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
                             TextButton(
                               onPressed: () {
                                 Navigator.push(
@@ -676,7 +682,9 @@ class _ServicesListScreenState extends State<ServicesListScreen>
                                 );
                               },
                               child: Text(
-                                "See all",
+                                AppLocalizations.of(context).seeAll,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.primary,
@@ -695,7 +703,8 @@ class _ServicesListScreenState extends State<ServicesListScreen>
                             separatorBuilder: (_, __) =>
                                 const SizedBox(width: 10),
                             itemBuilder: (context, index) =>
-                                _buildCategoryChip(categories[index]),
+                                _buildCategoryChip(categories[index])
+                                    .fadeSlideIn(index: index),
                           ),
                         ),
                       ],
@@ -705,7 +714,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 28, 20, 8),
-                  child: _buildSectionHeader("All Services"),
+                  child: _buildSectionHeader(AppLocalizations.of(context).exploreAllServices),
                 ),
               ),
               if (allServices.isEmpty)
@@ -714,8 +723,8 @@ class _ServicesListScreenState extends State<ServicesListScreen>
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: _buildEmptyState(
                       icon: Icons.storefront_outlined,
-                      title: "No services found",
-                      subtitle: "New services will appear here once available.",
+                      title: AppLocalizations.of(context).noServicesFound,
+                      subtitle: AppLocalizations.of(context).noServicesFoundSubtitle,
                     ),
                   ),
                 )
@@ -736,7 +745,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
 
   // ── AI City Pulse Banner ──────────────────────────────────────────────────
   Widget _buildCityPulseBanner() {
-    return GestureDetector(
+    return Pressable(
       onTap: () {
         final suggestion = _cityPulseCategorySuggestion;
         if (suggestion != null && suggestion.isNotEmpty) {
@@ -777,7 +786,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'City Pulse',
+                    AppLocalizations.of(context).exploreCityPulse,
                     style: GoogleFonts.poppins(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
@@ -797,7 +806,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
                   if (_cityPulseCategorySuggestion != null) ...[
                     const SizedBox(height: 6),
                     Text(
-                      'Tap to explore: $_cityPulseCategorySuggestion →',
+                      AppLocalizations.of(context).exploreTapToExplore(_cityPulseCategorySuggestion!),
                       style: GoogleFonts.poppins(
                         fontSize: 11,
                         color: const Color(0xFF1A78C2),
@@ -817,6 +826,8 @@ class _ServicesListScreenState extends State<ServicesListScreen>
   Widget _buildSectionHeader(String title) {
     return Text(
       title,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
       style: GoogleFonts.poppins(
         fontSize: 16,
         fontWeight: FontWeight.w700,
@@ -863,7 +874,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
         .toString()
         .toUpperCase();
 
-    return GestureDetector(
+    return Pressable(
       onTap: () {
         if (providerId.isEmpty) return;
         Navigator.push(
@@ -940,7 +951,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
               ),
               const SizedBox(height: 4),
               Text(
-                "Featured Professional",
+                AppLocalizations.of(context).exploreFeaturedProfessional,
                 style: GoogleFonts.poppins(
                   fontSize: 11,
                   color: Colors.grey.shade700,
@@ -955,7 +966,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
   }
 
   Widget _buildCategoryChip(dynamic category) {
-    return GestureDetector(
+    return Pressable(
       onTap: () => _openCategory(category),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -1010,7 +1021,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
     final providerId = (service['provider_id'] ?? '').toString();
     final isOwn = _currentUserId != null && providerId == _currentUserId;
 
-    return GestureDetector(
+    return Pressable(
       onTap: () {
         if (isOwn) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -1190,35 +1201,42 @@ class _ServicesListScreenState extends State<ServicesListScreen>
   }
 
   Widget _buildYourServiceBadge() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF6366F1).withOpacity(0.45),
-            blurRadius: 8,
-            spreadRadius: 1,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 130),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
           ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.person_rounded, color: Colors.white, size: 10),
-          const SizedBox(width: 4),
-          Text(
-            'Your Service',
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF6366F1).withOpacity(0.45),
+              blurRadius: 8,
+              spreadRadius: 1,
             ),
-          ),
-        ],
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.person_rounded, color: Colors.white, size: 10),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                AppLocalizations.of(context).homeYourServiceBadge,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

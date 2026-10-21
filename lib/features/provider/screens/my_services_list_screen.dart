@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
@@ -241,7 +242,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to delete: $e'),
+            content: Text(appErrorMessage(context, e)),
             backgroundColor: Colors.red,
           ),
         );
@@ -438,8 +439,9 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                               targetId: serviceId,
                               boostDuration: selectedDuration!,
                             );
-                            if (!mounted) return;
+                            if (!context.mounted) return;
                             Navigator.pop(context);
+                            if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text("Boost activated successfully."),
@@ -449,14 +451,15 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                             _fetchMyServices();
                           } catch (e) {
                             if (e is ApiException && e.statusCode == 402) {
+                              if (!context.mounted) return;
                               if (mounted) Navigator.pop(context);
                               if (mounted) await _showAddMoneyPrompt();
                             } else {
                               setSheetState(() => isSubmitting = false);
-                              if (mounted) {
+                              if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text(e.toString()),
+                                    content: Text(appErrorMessage(context, e)),
                                     backgroundColor: Colors.red,
                                   ),
                                 );

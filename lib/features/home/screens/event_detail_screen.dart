@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import 'event_booking_screen.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final dynamic event;
@@ -96,42 +97,14 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   }
 
   Future<void> _handleBuyTicket() async {
-    final price = widget.event['price'] ?? 0;
-    final eventId = widget.event['id'];
-
+    // Checkout screen handles quantity, the service fee, wallet payment and
+    // the receipt (the old inline purchase hit a non-existent endpoint).
     setState(() => _isBuying = true);
-
-    try {
-      await _apiService.buyTicket(
-        eventId: eventId,
-        quantity: 1,
-        totalPrice: price.toDouble(),
-      );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "🎟️ Ticket purchased successfully!",
-              style: GoogleFonts.poppins(),
-            ),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Purchase failed: $e", style: GoogleFonts.poppins()),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isBuying = false);
-    }
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => EventBookingScreen(event: widget.event)),
+    );
+    if (mounted) setState(() => _isBuying = false);
   }
 
   void _handleToggleLike() {

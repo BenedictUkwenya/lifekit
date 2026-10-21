@@ -6,7 +6,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/utils/error_handler.dart';
 import '../../../core/widgets/service_action_sheet.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../bookings/screens/booking_tracking_screen.dart';
 import '../../home/screens/chat_detail_screen.dart';
 import '../../profile/screens/provider_profile_screen.dart';
@@ -138,12 +140,13 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
   }
 
   void _startSearch() {
+    final l10n = AppLocalizations.of(context)!;
     if (selectedMyService == null) {
-      _showSnack('Please select a service you want to offer.', isError: true);
+      _showSnack(l10n.swapSelectServiceToOffer, isError: true);
       return;
     }
     if (selectedTargetSubCategory == null) {
-      _showSnack('Please select a skill you are looking for.', isError: true);
+      _showSnack(l10n.swapSelectSkillLookingFor, isError: true);
       return;
     }
     Navigator.push(
@@ -162,8 +165,9 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
   }
 
   void _startDirectProposal() {
+    final l10n = AppLocalizations.of(context)!;
     if (selectedMyService == null) {
-      _showSnack('Please select a service you want to offer.', isError: true);
+      _showSnack(l10n.swapSelectServiceToOffer, isError: true);
       return;
     }
     final targetMatch = {
@@ -172,16 +176,17 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
       'title':
           widget.initialTargetServiceTitle ??
           widget.initialTargetCategoryName ??
-          'Service',
+          l10n.swapServiceFallback,
       'profiles': {
-        'full_name': widget.initialTargetProviderName ?? 'Provider',
+        'full_name':
+            widget.initialTargetProviderName ?? l10n.swapProviderFallback,
         'profile_picture_url': widget.initialTargetProviderPic,
       },
       'image_urls': widget.initialTargetCoverImageUrl != null
           ? [widget.initialTargetCoverImageUrl!]
           : [],
       'match_score': 100.0,
-      'match_reason': 'Direct service selection',
+      'match_reason': l10n.swapDirectSelection,
       'average_rating': 0.0,
     };
     // Play the same AI animation, then land on proposal sheet
@@ -195,13 +200,13 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
           targetCategoryName:
               widget.initialTargetCategoryName ??
               widget.initialTargetServiceTitle ??
-              'Service',
+              l10n.swapServiceFallback,
           serviceType: selectedServiceType,
           directTarget: targetMatch,
           directTargetCategoryName:
               widget.initialTargetCategoryName ??
               widget.initialTargetServiceTitle ??
-              'Service',
+              l10n.swapServiceFallback,
         ),
         transitionsBuilder: (_, animation, __, child) =>
             FadeTransition(opacity: animation, child: child),
@@ -211,6 +216,7 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (isLoadingData) {
       return Container(
         height: 400,
@@ -250,14 +256,14 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
                   child: Column(
                     children: [
                       Text(
-                        'Skill Swap',
+                        l10n.swapTitle,
                         style: GoogleFonts.poppins(
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        'Powered by Gracia',
+                        l10n.swapPoweredBy,
                         style: GoogleFonts.poppins(
                           fontSize: 11,
                           color: AppColors.primary,
@@ -374,7 +380,8 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
                     children: [
                       Flexible(
                         child: _buildSelectionChip(
-                          label: selectedMyService?['title'] ?? 'Select Yours',
+                          label:
+                              selectedMyService?['title'] ?? l10n.swapSelectYours,
                           filled: true,
                           onTap: _showMyServicesPicker,
                         ),
@@ -399,7 +406,7 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
                         child: _buildSelectionChip(
                           label:
                               selectedTargetSubCategory?['name'] ??
-                              'Select Target',
+                              l10n.swapSelectTarget,
                           filled: false,
                           onTap: _showCategoryPicker,
                         ),
@@ -410,7 +417,7 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
                   const SizedBox(height: 28),
 
                   Text(
-                    'Looking for a skill',
+                    l10n.swapLookingForSkill,
                     style: GoogleFonts.poppins(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -484,7 +491,7 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
                   const SizedBox(height: 28),
 
                   Text(
-                    'Select service type',
+                    l10n.swapSelectServiceType,
                     style: GoogleFonts.poppins(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -494,11 +501,23 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      _serviceTypeBtn('Default', Icons.fingerprint),
+                      _serviceTypeBtn(
+                        'Default',
+                        l10n.bookTypeDefault,
+                        Icons.fingerprint,
+                      ),
                       const SizedBox(width: 10),
-                      _serviceTypeBtn('Home', Icons.home_rounded),
+                      _serviceTypeBtn(
+                        'Home',
+                        l10n.bookTypeHome,
+                        Icons.home_rounded,
+                      ),
                       const SizedBox(width: 10),
-                      _serviceTypeBtn('Outdoor', Icons.chair_alt_outlined),
+                      _serviceTypeBtn(
+                        'Outdoor',
+                        l10n.bookTypeOutdoor,
+                        Icons.chair_alt_outlined,
+                      ),
                     ],
                   ),
 
@@ -535,18 +554,15 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
                                 color: Colors.black54,
                                 height: 1.55,
                               ),
-                              children: const [
+                              children: [
                                 TextSpan(
-                                  text: 'Bi-directional AI matching ',
-                                  style: TextStyle(
+                                  text: l10n.swapBiDirectional,
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.primary,
                                   ),
                                 ),
-                                TextSpan(
-                                  text:
-                                      'finds providers who want what you offer AND offer what you want.',
-                                ),
+                                TextSpan(text: l10n.swapBiDirectionalDesc),
                               ],
                             ),
                           ),
@@ -598,7 +614,10 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
                           const SizedBox(width: 8),
                           Flexible(
                             child: Text(
-                              'Propose Swap to ${widget.initialTargetProviderName ?? 'Provider'}',
+                              l10n.swapProposeTo(
+                                widget.initialTargetProviderName ??
+                                    l10n.swapProviderFallback,
+                              ),
                               style: GoogleFonts.poppins(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
@@ -636,7 +655,7 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Find Other AI Matches',
+                            l10n.swapFindOtherMatches,
                             style: GoogleFonts.poppins(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
@@ -670,7 +689,7 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Find AI Match',
+                            l10n.swapFindMatch,
                             style: GoogleFonts.poppins(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
@@ -715,7 +734,7 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Browse Swap Board',
+                            l10n.swapBrowseBoard,
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -809,11 +828,11 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
     );
   }
 
-  Widget _serviceTypeBtn(String label, IconData icon) {
-    final bool selected = selectedServiceType == label;
+  Widget _serviceTypeBtn(String value, String label, IconData icon) {
+    final bool selected = selectedServiceType == value;
     return Expanded(
       child: GestureDetector(
-        onTap: () => setState(() => selectedServiceType = label),
+        onTap: () => setState(() => selectedServiceType = value),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 14),
@@ -834,6 +853,9 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
               const SizedBox(height: 6),
               Text(
                 label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
@@ -848,6 +870,7 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
   }
 
   void _showMyServicesPicker() {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -873,7 +896,7 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
             ),
             const SizedBox(height: 16),
             Text(
-              'Select a skill to offer',
+              l10n.swapSelectSkillToOffer,
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
@@ -884,7 +907,7 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
               child: myServices.isEmpty
                   ? Center(
                       child: Text(
-                        'No services found. Create a service first.',
+                        l10n.swapNoServicesCreateFirst,
                         style: GoogleFonts.poppins(
                           color: Colors.grey,
                           fontSize: 13,
@@ -976,7 +999,7 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Select Skill Category',
+                  AppLocalizations.of(context)!.swapSelectSkillCategory,
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -1616,7 +1639,7 @@ class _FindingMatchAnimationScreenState
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Match Found!',
+                          AppLocalizations.of(context)!.swapMatchFound,
                           style: GoogleFonts.poppins(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -1671,7 +1694,7 @@ class _FindingMatchAnimationScreenState
             child: Column(
               children: [
                 Text(
-                  'AI matching for',
+                  AppLocalizations.of(context)!.swapAiMatchingFor,
                   style: GoogleFonts.poppins(
                     fontSize: 12,
                     color: Colors.white.withOpacity(0.5),
@@ -1860,7 +1883,10 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
         targetCategoryName: widget.targetCategoryName,
         onSent: () {
           Navigator.pop(context);
-          _showSnack('Swap Proposal Sent!', isSuccess: true);
+          _showSnack(
+            AppLocalizations.of(context)!.swapProposalSent,
+            isSuccess: true,
+          );
         },
       ),
     );
@@ -1877,6 +1903,7 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
       );
     }
 
+    final l10n = AppLocalizations.of(context)!;
     if (primaryMatch == null) {
       return Scaffold(
         backgroundColor: Colors.white,
@@ -1892,7 +1919,7 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
               Icon(Icons.search_off_rounded, size: 56, color: Colors.grey[300]),
               const SizedBox(height: 16),
               Text(
-                'No providers found',
+                l10n.swapNoProvidersFound,
                 style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -1901,7 +1928,7 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Try a different skill category',
+                l10n.swapTryDifferentCategory,
                 style: GoogleFonts.poppins(
                   fontSize: 13,
                   color: Colors.grey[400],
@@ -1913,7 +1940,8 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
       );
     }
 
-    final providerName = primaryMatch!['profiles']?['full_name'] ?? 'Unknown';
+    final providerName =
+        primaryMatch!['profiles']?['full_name'] ?? l10n.swapUnknown;
     final providerPic = primaryMatch!['profiles']?['profile_picture_url'];
     final providerId = primaryMatch!['provider_id'];
     final double rating = (primaryMatch!['average_rating'] is int)
@@ -1923,7 +1951,7 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
         ? (primaryMatch!['match_score'] as int).toDouble()
         : (primaryMatch!['match_score'] ?? 50.0);
     final String matchReason =
-        primaryMatch!['match_reason'] ?? 'Good complementary match';
+        primaryMatch!['match_reason'] ?? l10n.swapGoodMatch;
     final similarList = allMatches
         .where((s) => s['id'] != primaryMatch!['id'])
         .toList();
@@ -1940,7 +1968,7 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
           title: Column(
             children: [
               Text(
-                'AI Matched',
+                l10n.swapAiMatched,
                 style: GoogleFonts.poppins(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
@@ -2124,7 +2152,7 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
                       pic: currentUserPic,
                       name: currentUserName,
                       serviceTitle: widget.myService['title'],
-                      tag: 'Me',
+                      tag: l10n.swapMeLabel,
                       tagColor: Colors.grey[100]!,
                     ),
 
@@ -2156,7 +2184,7 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
                       pic: providerPic,
                       name: providerName,
                       serviceTitle: primaryMatch!['title'],
-                      tag: 'Match',
+                      tag: l10n.swapMatchTag,
                       tagColor: AppColors.primary.withOpacity(0.1),
                       tagTextColor: AppColors.primary,
                       onTap: () => Navigator.push(
@@ -2178,7 +2206,9 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
                           ),
                           const SizedBox(width: 2),
                           Text(
-                            rating == 0 ? 'New' : rating.toStringAsFixed(1),
+                            rating == 0
+                                ? l10n.swapRatingNew
+                                : rating.toStringAsFixed(1),
                             style: GoogleFonts.poppins(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
@@ -2213,7 +2243,7 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Other AI Matches',
+                            l10n.swapOtherAiMatches,
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -2239,7 +2269,9 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
                               const SizedBox(width: 14),
                           itemBuilder: (_, i) {
                             final s = similarList[i];
-                            final name = s['profiles']?['full_name'] ?? 'User';
+                            final name =
+                                s['profiles']?['full_name'] ??
+                                l10n.swapUserFallback;
                             final pic =
                                 s['profiles']?['profile_picture_url'] ??
                                 ((s['image_urls'] as List).isNotEmpty
@@ -2336,7 +2368,7 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
                       const Icon(Icons.handshake_outlined, size: 20),
                       const SizedBox(width: 8),
                       Text(
-                        'Send Swap Proposal',
+                        l10n.swapSendProposal,
                         style: GoogleFonts.poppins(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
@@ -2608,7 +2640,7 @@ class _SwapProposalSheetState extends State<_SwapProposalSheet> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: $e'),
+          content: Text(appErrorMessage(context, e)),
           backgroundColor: Colors.red.shade600,
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.all(16),
@@ -2624,8 +2656,9 @@ class _SwapProposalSheetState extends State<_SwapProposalSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final providerName =
-        widget.targetMatch['profiles']?['full_name'] ?? 'Unknown';
+        widget.targetMatch['profiles']?['full_name'] ?? l10n.swapUnknown;
     return Container(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -2677,7 +2710,7 @@ class _SwapProposalSheetState extends State<_SwapProposalSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Send Swap Proposal',
+                          l10n.swapSendProposal,
                           style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -2711,7 +2744,7 @@ class _SwapProposalSheetState extends State<_SwapProposalSheet> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'You offer',
+                            l10n.swapYouOffer,
                             style: GoogleFonts.poppins(
                               fontSize: 10,
                               color: Colors.grey,
@@ -2745,7 +2778,7 @@ class _SwapProposalSheetState extends State<_SwapProposalSheet> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            'You receive',
+                            l10n.swapYouReceive,
                             style: GoogleFonts.poppins(
                               fontSize: 10,
                               color: Colors.grey,
@@ -2771,7 +2804,7 @@ class _SwapProposalSheetState extends State<_SwapProposalSheet> {
               const SizedBox(height: 20),
 
               Text(
-                'Preferred Date',
+                l10n.swapPreferredDate,
                 style: GoogleFonts.poppins(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -2872,8 +2905,7 @@ class _SwapProposalSheetState extends State<_SwapProposalSheet> {
                 maxLines: 3,
                 maxLength: 250,
                 decoration: InputDecoration(
-                  hintText:
-                      'E.g. "Happy to be flexible on timing, let me know!"',
+                  hintText: l10n.swapMessagePlaceholder,
                   hintStyle: GoogleFonts.poppins(
                     fontSize: 12,
                     color: Colors.grey[400],
@@ -2920,7 +2952,7 @@ class _SwapProposalSheetState extends State<_SwapProposalSheet> {
                             const Icon(Icons.send_rounded, size: 18),
                             const SizedBox(width: 8),
                             Text(
-                              'Send Proposal',
+                              l10n.swapSendProposalBtn,
                               style: GoogleFonts.poppins(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
@@ -3034,9 +3066,10 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
   }
 
   Future<void> _acceptSwap(String swapId) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       await _apiService.acceptSwap(swapId);
-      _showSnack('Swap Accepted! Check your bookings.', isSuccess: true);
+      _showSnack(l10n.swapAcceptedToast, isSuccess: true);
       _loadMine();
     } catch (e) {
       _showSnack('Error: $e', isError: true);
@@ -3044,9 +3077,10 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
   }
 
   Future<void> _declineSwap(String swapId) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       await _apiService.declineSwap(swapId);
-      _showSnack('Swap declined.');
+      _showSnack(l10n.swapDeclinedToast);
       _loadMine();
     } catch (e) {
       _showSnack('Error: $e', isError: true);
@@ -3054,9 +3088,10 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
   }
 
   Future<void> _cancelSwap(String swapId) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       await _apiService.cancelSwap(swapId);
-      _showSnack('Swap proposal cancelled.');
+      _showSnack(l10n.swapCancelledToast);
       _loadMine();
     } catch (e) {
       _showSnack('Error: $e', isError: true);
@@ -3069,9 +3104,10 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
     required bool openChat,
     required bool isProposer,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
     final bookingId = swap['booking_id']?.toString();
     if (bookingId == null) {
-      _showSnack('Booking not found for this swap.', isError: true);
+      _showSnack(l10n.swapBookingNotFound, isError: true);
       return;
     }
     try {
@@ -3131,6 +3167,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final pendingCount = incomingSwaps
         .where((s) => s['status'] == 'pending')
         .length;
@@ -3146,7 +3183,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Swap Board',
+              l10n.swapBoardTitle,
               style: GoogleFonts.poppins(
                 fontSize: 17,
                 fontWeight: FontWeight.bold,
@@ -3154,7 +3191,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
               ),
             ),
             Text(
-              'AI-ranked matches for you',
+              l10n.swapBoardSubtitle,
               style: GoogleFonts.poppins(
                 fontSize: 11,
                 color: AppColors.primary,
@@ -3176,12 +3213,12 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
             fontSize: 13,
           ),
           tabs: [
-            const Tab(text: 'Discover'),
+            Tab(text: l10n.swapTabDiscover),
             Tab(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Incoming'),
+                  Text(l10n.swapTabIncoming),
                   if (pendingCount > 0) ...[
                     const SizedBox(width: 5),
                     Container(
@@ -3203,7 +3240,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                 ],
               ),
             ),
-            const Tab(text: 'Outgoing'),
+            Tab(text: l10n.swapTabOutgoing),
           ],
         ),
       ),
@@ -3219,8 +3256,8 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                   )
                 : (boardItems.isEmpty && availableServices.isEmpty)
                 ? _buildEmpty(
-                    'No swaps yet',
-                    'Enable Skill Swap on your services and others will appear here!',
+                    l10n.swapNoSwapsYet,
+                    l10n.swapEnableHint,
                     Icons.dashboard_customize_outlined,
                   )
                 : ListView(
@@ -3229,8 +3266,8 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                       // ── Posted proposals ──────────────────────────
                       if (boardItems.isNotEmpty) ...[
                         _buildSectionHeader(
-                          '📋 Swap Proposals',
-                          'People actively looking to trade skills',
+                          '📋 ${l10n.swapTitle}',
+                          l10n.swapPeopleLookingToTrade,
                         ),
                         ...boardItems.map((item) => _buildBoardCard(item)),
                         const SizedBox(height: 8),
@@ -3238,8 +3275,8 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                       // ── Services open for swap ────────────────────
                       if (availableServices.isNotEmpty) ...[
                         _buildSectionHeader(
-                          '🔄 Open for Swap',
-                          'Services from providers willing to trade',
+                          '🔄 ${l10n.actionSkillSwap}',
+                          l10n.swapServicesFromProviders,
                         ),
                         ...availableServices.map(
                           (s) => _buildAvailableServiceCard(s),
@@ -3259,8 +3296,8 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                 ? _buildRetry(_loadMine)
                 : incomingSwaps.isEmpty
                 ? _buildEmpty(
-                    'No incoming proposals',
-                    'Proposals will appear here',
+                    l10n.swapNoIncoming,
+                    l10n.swapIncomingHint,
                     Icons.inbox_outlined,
                   )
                 : ListView.builder(
@@ -3280,8 +3317,8 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                 ? _buildRetry(_loadMine)
                 : outgoingSwaps.isEmpty
                 ? _buildEmpty(
-                    'No outgoing proposals',
-                    'Start by finding a match!',
+                    l10n.swapNoOutgoing,
+                    l10n.swapOutgoingHint,
                     Icons.send_outlined,
                   )
                 : ListView.builder(
@@ -3319,6 +3356,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
   }
 
   Widget _buildAvailableServiceCard(dynamic service) {
+    final l10n = AppLocalizations.of(context)!;
     final provider = service['provider'] ?? {};
     final images = service['image_urls'] as List? ?? [];
     final img = images.isNotEmpty ? images.first.toString() : null;
@@ -3327,7 +3365,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
     final pricingType = service['pricing_type']?.toString() ?? 'fixed';
     final priceLabel = price != null
         ? '\$${price.toString()}${pricingType == 'hourly' ? '/hr' : ''}'
-        : 'Price on request';
+        : l10n.swapPriceOnRequest;
     final pId = provider['id']?.toString();
     final isOwn = _currentUserId != null && pId == _currentUserId;
 
@@ -3337,7 +3375,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'This is your service. Manage it from My Services.',
+                l10n.swapMyServiceMessage,
                 style: GoogleFonts.poppins(fontSize: 13),
               ),
               backgroundColor: const Color(0xFF4F46E5),
@@ -3351,11 +3389,12 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
           return;
         }
         final sId = service['id']?.toString();
-        final providerName = (service['provider']?['full_name'] ?? 'Provider')
-            .toString();
+        final providerName =
+            (service['provider']?['full_name'] ?? l10n.swapProviderFallback)
+                .toString();
         showServiceActionSheet(
           context: context,
-          serviceTitle: service['title'] ?? 'Service',
+          serviceTitle: service['title'] ?? l10n.swapServiceFallback,
           providerName: providerName,
           coverImageUrl: img,
           isSwappable: true,
@@ -3370,7 +3409,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                   providerId: pId,
                   providerName: providerName,
                   providerPic: service['provider']?['profile_picture_url'],
-                  serviceTitle: service['title'] ?? 'Service',
+                  serviceTitle: service['title'] ?? l10n.swapServiceFallback,
                 ),
               ),
             );
@@ -3386,15 +3425,17 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
               initialTargetCategoryName:
                   (service['category']?['name'] ??
                           service['title'] ??
-                          'Service')
+                          l10n.swapServiceFallback)
                       .toString(),
               initialTargetCoverImageUrl: img,
               initialTargetServiceId: service['id']?.toString(),
               initialTargetProviderId: pId,
               initialTargetProviderName:
-                  (service['provider']?['full_name'] ?? 'Provider').toString(),
-              initialTargetServiceTitle: (service['title'] ?? 'Service')
-                  .toString(),
+                  (service['provider']?['full_name'] ??
+                          l10n.swapProviderFallback)
+                      .toString(),
+              initialTargetServiceTitle:
+                  (service['title'] ?? l10n.swapServiceFallback).toString(),
               initialTargetProviderPic:
                   service['provider']?['profile_picture_url']?.toString(),
             ),
@@ -3457,7 +3498,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          'Yours',
+                          l10n.swapYoursLabel,
                           style: GoogleFonts.poppins(
                             color: Colors.white,
                             fontSize: 8,
@@ -3493,7 +3534,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
-                                'Your Service',
+                                l10n.swapYourServiceBadge,
                                 style: GoogleFonts.poppins(
                                   fontSize: 9,
                                   fontWeight: FontWeight.w600,
@@ -3526,7 +3567,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        service['title'] ?? 'Untitled',
+                        service['title'] ?? l10n.swapUntitled,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.poppins(
@@ -3600,15 +3641,16 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
   }
 
   Widget _buildBoardCard(dynamic item) {
+    final l10n = AppLocalizations.of(context)!;
     final proposer = item['proposer'] ?? {};
     final service = item['proposer_service'] ?? {};
-    final name = proposer['full_name'] ?? 'Unknown';
+    final name = proposer['full_name'] ?? l10n.swapUnknown;
     final pic = proposer['profile_picture_url'];
     final images = service['image_urls'] as List? ?? [];
     final double relevance = (item['ai_relevance_score'] is int)
         ? (item['ai_relevance_score'] as int).toDouble()
         : (item['ai_relevance_score'] ?? 50.0);
-    final String reason = item['ai_relevance_reason'] ?? 'Potential match';
+    final String reason = item['ai_relevance_reason'] ?? l10n.swapPotentialMatch;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -3823,9 +3865,10 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
   }
 
   Widget _buildIncomingCard(dynamic swap) {
+    final l10n = AppLocalizations.of(context)!;
     final proposer = swap['proposer'] ?? {};
     final service = swap['proposer_service'] ?? {};
-    final name = proposer['full_name'] ?? 'Unknown';
+    final name = proposer['full_name'] ?? l10n.swapUnknown;
     final pic = proposer['profile_picture_url'];
     final status = swap['status'] ?? 'pending';
     final isPending = status == 'pending';
@@ -3940,7 +3983,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                       ),
                     ),
                     child: Text(
-                      'Decline',
+                      l10n.swapDecline,
                       style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                     ),
                   ),
@@ -3957,7 +4000,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                       ),
                     ),
                     child: Text(
-                      'Accept',
+                      l10n.bookingsAccept,
                       style: GoogleFonts.poppins(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,

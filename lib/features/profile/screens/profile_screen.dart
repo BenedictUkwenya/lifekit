@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:lifekit_frontend/features/provider/screens/my_services_list_screen.dart';
 import 'package:lifekit_frontend/features/provider/screens/provider_dashboard_screen.dart';
 import 'package:lifekit_frontend/features/provider/screens/subscription_plans_screen.dart';
 
 // --- CORE ---
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/legal_links.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/app_cache.dart';
 import '../../../core/widgets/lifekit_loader.dart';
@@ -20,6 +21,9 @@ import 'wallet_screen.dart';
 import 'share_profile_screen.dart';
 import 'settings_sub_screens.dart';
 import '../../onboarding/screens/ai_onboarding_screen.dart';
+import '../../admin/admin_strings.dart';
+import '../../admin/screens/admin_home_screen.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -42,6 +46,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _fetchProfile();
+    // Wallet + usage are independent of the profile fetch — kick them off
+    // immediately so the cards never sit on a spinner if the profile fetch
+    // path didn't trigger them (e.g. first load with no cache, or right after
+    // a language change cleared the cache).
+    _fetchMonetizationData();
   }
 
   Map<String, dynamic>? _parseProfile(Map<String, dynamic> data) {
@@ -153,6 +162,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     String endsOnFormatted,
     String tierKey,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
@@ -184,7 +194,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Launch Offer: Pro Trial Active',
+                  l10n.trialBannerTitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -193,7 +205,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Renews in $daysLeft days \u2022 Ends $endsOnFormatted',
+                  l10n.trialBannerSubtitle(daysLeft, endsOnFormatted),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(
                     fontSize: 10,
                     fontWeight: FontWeight.w500,
@@ -201,13 +215,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Row(
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
                   children: [
-                    _buildTrialPerk('\u2714 5 Services'),
-                    const SizedBox(width: 8),
-                    _buildTrialPerk('\u2714 3% Commission'),
-                    const SizedBox(width: 8),
-                    _buildTrialPerk('\u2714 Pro AI'),
+                    _buildTrialPerk(l10n.trialPerkServices),
+                    _buildTrialPerk(l10n.trialPerkCommission),
+                    _buildTrialPerk(l10n.trialPerkAI),
                   ],
                 ),
               ],
@@ -237,9 +251,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _logout() async {
-    const storage = FlutterSecureStorage();
-    await storage.deleteAll();
-    AppCache.instance.clear();
+    await _apiService.clearSession();
     if (mounted) {
       Navigator.pushAndRemoveUntil(
         context,
@@ -251,6 +263,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (isLoading) return const Scaffold(body: Center(child: LifeKitLoader()));
 
     if (profile == null) {
@@ -276,13 +289,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     final String name = profile!['full_name'] ?? 'User';
-    final String bio = profile!['bio'] ?? 'No bio added';
+    final String bio = profile!['bio'] ?? l10n.profileNoBio;
     final String? pic = profile!['profile_picture_url'];
     final String tierKey = (profile!['subscription_tier'] ?? 'free')
         .toString()
         .toLowerCase();
-    final String tierLabel =
-        "${tierKey.isNotEmpty ? tierKey[0].toUpperCase() : 'F'}${tierKey.length > 1 ? tierKey.substring(1) : ''}";
+    final String tierLabel = switch (tierKey) {
+      'plus' => l10n.tierPlus,
+      'pro' => l10n.tierPro,
+      'business' => l10n.tierBusiness,
+      _ => l10n.tierFree,
+    };
     final bool isBusinessTier = tierKey == 'business';
     final DateTime? subscriptionExpiry = DateTime.tryParse(
       (profile!['subscription_expiry'] ?? '').toString(),
@@ -303,10 +320,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _ => 0,
     };
     final String usageText = _isUsageLoading
-        ? "Loading usage..."
+        ? l10n.walletLoadingUsage
         : tierServiceLimit == null
-        ? "Slots Used: $_activeServicesCount/∞ (Includes Drafts & Pending)"
-        : "Slots Used: $_activeServicesCount/$tierServiceLimit (Includes Drafts & Pending)";
+        ? l10n.walletSlotsUsedUnlimited(_activeServicesCount)
+        : l10n.walletSlotsUsedLimited(_activeServicesCount, tierServiceLimit);
 
     // Trial & founding member
     final String? trialEndDateStr = profile!['trial_end_date']?.toString();
@@ -354,7 +371,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Text(
-                    "Profile",
+                    l10n.profileTitle,
                     style: GoogleFonts.poppins(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -383,7 +400,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Row(
                         children: [
                           Text(
-                            "Wallet Balance",
+                            l10n.walletBalance,
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -422,11 +439,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 ),
                                 const SizedBox(width: 10),
-                                Text(
-                                  "Loading wallet...",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 14,
-                                    color: Colors.grey[600],
+                                Flexible(
+                                  child: Text(
+                                    l10n.walletLoadingWallet,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 14,
+                                      color: Colors.grey[600],
+                                    ),
                                   ),
                                 ),
                               ],
@@ -463,7 +484,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          "Account Usage",
+                                          l10n.walletAccountUsage,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                           style: GoogleFonts.poppins(
                                             fontSize: 12,
                                             fontWeight: FontWeight.w600,
@@ -482,7 +505,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         if (showRenewalCountdown) ...[
                                           const SizedBox(height: 2),
                                           Text(
-                                            "Renews in $renewalDays days",
+                                            l10n.walletRenewsInDays(renewalDays),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
                                             style: GoogleFonts.poppins(
                                               fontSize: 11,
                                               color: renewalDays <= 3
@@ -535,7 +560,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         ],
                                       ),
                                       child: Text(
-                                        "Upgrade Plan",
+                                        l10n.walletUpgradePlan,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                         style: GoogleFonts.poppins(
                                           fontSize: 12,
                                           color: Colors.white,
@@ -754,6 +781,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 const SizedBox(height: 25),
 
+                // ADMIN DASHBOARD — only for platform admins
+                if (profile!['role'] == 'admin') ...[
+                  _buildAdminEntry(name),
+                  const SizedBox(height: 25),
+                ],
+
                 // 2. BUSINESS TOOLS (Redesigned with Grid)
                 Container(
                   width: double.infinity,
@@ -777,7 +810,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Business Tools",
+                        l10n.profileBusinessTools,
                         style: GoogleFonts.poppins(
                           color: Colors.white,
                           fontSize: 16,
@@ -794,7 +827,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           _buildToolItem(
                             Icons.dashboard_outlined,
-                            "Dashboard",
+                            l10n.profileToolDashboard,
                             () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -804,7 +837,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           _buildToolItem(
                             Icons.add_circle_outline,
-                            "Services",
+                            l10n.profileToolServices,
                             () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -814,7 +847,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           _buildToolItem(
                             Icons.account_balance_wallet_outlined,
-                            "Wallet",
+                            l10n.walletTitle,
                             () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -824,7 +857,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           _buildToolItem(
                             Icons.edit_outlined,
-                            "Edit Profile",
+                            l10n.profileEdit,
                             () async {
                               await Navigator.push(
                                 context,
@@ -838,19 +871,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           _buildToolItem(
                             Icons.auto_awesome_rounded,
-                            "AI Premium",
+                            l10n.profileToolAIPremium,
                             () => ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("AI Premium Tools coming soon!"),
+                              SnackBar(
+                                content: Text(l10n.profileAIPremiumComingSoon),
                               ),
                             ),
                           ),
                           _buildToolItem(
                             Icons.card_giftcard,
-                            "Rewards",
+                            l10n.profileToolRewards,
                             () => ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Rewards coming soon!"),
+                              SnackBar(
+                                content: Text(l10n.profileRewardsComingSoon),
                               ),
                             ),
                           ),
@@ -863,7 +896,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 30),
 
                 // 3. SETTINGS SECTION
-                _buildSectionHeader("General Settings"),
+                _buildSectionHeader(l10n.profileGeneralSettings),
                 const SizedBox(height: 10),
                 Container(
                   decoration: BoxDecoration(
@@ -880,7 +913,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       _buildSettingTile(
                         Icons.calendar_month_rounded,
-                        "My Bookings",
+                        l10n.profileBookings,
                         () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -891,7 +924,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildDivider(),
                       _buildSettingTile(
                         Icons.auto_awesome,
-                        "AI Setup Guide",
+                        l10n.profileAISetupGuide,
                         () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -899,12 +932,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         iconColor: AppColors.primary,
-                        subtitle: "Generate your 7-Day Success Plan",
+                        subtitle: l10n.profileAISetupSubtitle,
                       ),
                       _buildDivider(),
                       _buildSettingTile(
                         Icons.person_outline,
-                        "Personal Information",
+                        l10n.profilePersonalInfo,
                         () async {
                           await Navigator.push(
                             context,
@@ -919,7 +952,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildDivider(),
                       _buildSettingTile(
                         Icons.lock_outline,
-                        "Password & Security",
+                        l10n.settingsSecurity,
                         () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -930,7 +963,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildDivider(),
                       _buildSettingTile(
                         Icons.notifications_none_rounded,
-                        "Notifications",
+                        l10n.settingsNotifications,
                         () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -941,7 +974,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildDivider(),
                       _buildSettingTile(
                         Icons.language,
-                        "Language",
+                        l10n.settingsLanguage,
                         () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -955,7 +988,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 const SizedBox(height: 25),
 
-                _buildSectionHeader("Support"),
+                _buildSectionHeader(l10n.profileSupport),
                 const SizedBox(height: 10),
                 Container(
                   decoration: BoxDecoration(
@@ -972,7 +1005,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       _buildSettingTile(
                         Icons.help_outline_rounded,
-                        "Help Center",
+                        l10n.settingsHelp,
                         () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -982,8 +1015,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       _buildDivider(),
                       _buildSettingTile(
+                        Icons.privacy_tip_outlined,
+                        l10n.profilePrivacyPolicy,
+                        () => launchUrl(
+                          Uri.parse(LegalLinks.privacyPolicy),
+                          mode: LaunchMode.inAppBrowserView,
+                        ),
+                      ),
+                      _buildDivider(),
+                      _buildSettingTile(
+                        Icons.description_outlined,
+                        l10n.profileTermsOfService,
+                        () => launchUrl(
+                          Uri.parse(LegalLinks.termsOfService),
+                          mode: LaunchMode.inAppBrowserView,
+                        ),
+                      ),
+                      _buildDivider(),
+                      _buildSettingTile(
                         Icons.logout_rounded,
-                        "Log Out",
+                        l10n.profileLogout,
                         _logout,
                         isDestructive: true,
                       ),
@@ -1000,6 +1051,65 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   // --- WIDGET HELPERS ---
+
+  Widget _buildAdminEntry(String name) {
+    final t = AdminStrings.of(context);
+    return Material(
+      color: const Color(0xFF1F2937),
+      borderRadius: BorderRadius.circular(24),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => AdminHomeScreen(adminName: name)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.admin_panel_settings_rounded,
+                  color: Colors.white,
+                  size: 26,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      t('adminDashboard'),
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      t('adminDashboardSubtitle'),
+                      style: GoogleFonts.poppins(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: Colors.white70),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _buildSectionHeader(String title) {
     return Padding(

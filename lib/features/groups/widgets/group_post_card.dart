@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
@@ -120,7 +121,7 @@ class _GroupPostCardState extends State<GroupPostCard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error deleting post: $e'),
+            content: Text(appErrorMessage(context, e)),
             backgroundColor: Colors.redAccent,
             behavior: SnackBarBehavior.floating,
           ),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -29,7 +31,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await _apiService.forgotPassword(_emailController.text.trim());
+      await _apiService.forgotPassword(
+        _emailController.text.trim(),
+        language: Localizations.localeOf(context).languageCode,
+      );
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -42,7 +47,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              e.toString().replaceAll('Exception: ', ''),
+              appErrorMessage(context, e),
               style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
             ),
             backgroundColor: Colors.redAccent,
@@ -59,6 +64,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -69,19 +76,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
-          child: _emailSent ? _buildSuccessView() : _buildFormView(),
+          child: _emailSent ? _buildSuccessView(l10n) : _buildFormView(l10n),
         ),
       ),
     );
   }
 
-  Widget _buildFormView() {
+  Widget _buildFormView(AppLocalizations l10n) {
     return Form(
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Icon
           Container(
             width: 64,
             height: 64,
@@ -97,7 +103,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
           const SizedBox(height: 28),
           Text(
-            'Reset your\npassword',
+            l10n.resetYourPassword,
             style: GoogleFonts.poppins(
               fontSize: 28,
               fontWeight: FontWeight.w700,
@@ -107,7 +113,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            "Enter the email associated with your account. We'll send you a link to reset your password.",
+            l10n.resetPasswordInstructions,
             style: GoogleFonts.poppins(
               fontSize: 14,
               color: Colors.grey[600],
@@ -121,7 +127,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             autofillHints: const [AutofillHints.email],
             style: GoogleFonts.poppins(fontSize: 15),
             decoration: InputDecoration(
-              labelText: 'Email address',
+              labelText: l10n.emailLabel,
               labelStyle: GoogleFonts.poppins(
                 color: Colors.grey[500],
                 fontSize: 14,
@@ -150,10 +156,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             ),
             validator: (v) {
               if (v == null || v.trim().isEmpty) {
-                return 'Please enter your email address';
+                return l10n.errorEmailRequired;
               }
               if (!v.contains('@') || !v.contains('.')) {
-                return 'Please enter a valid email address';
+                return l10n.errorEmailInvalid;
               }
               return null;
             },
@@ -182,7 +188,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                     )
                   : Text(
-                      'Send Reset Link',
+                      l10n.sendResetLink,
                       style: GoogleFonts.poppins(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
@@ -196,7 +202,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
   }
 
-  Widget _buildSuccessView() {
+  Widget _buildSuccessView(AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -216,7 +222,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
         const SizedBox(height: 28),
         Text(
-          'Check your email',
+          l10n.checkYourEmail,
           style: GoogleFonts.poppins(
             fontSize: 24,
             fontWeight: FontWeight.w700,
@@ -226,7 +232,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
         const SizedBox(height: 12),
         Text(
-          "We sent a password reset link to\n${_emailController.text.trim()}",
+          l10n.emailSentTo(_emailController.text.trim()),
           style: GoogleFonts.poppins(
             fontSize: 14,
             color: Colors.grey[600],
@@ -236,7 +242,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          "Didn't receive it? Check your spam folder.",
+          l10n.checkSpamFolder,
           style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[400]),
           textAlign: TextAlign.center,
         ),
@@ -254,7 +260,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               elevation: 0,
             ),
             child: Text(
-              'Back to Login',
+              l10n.backToLogin,
               style: GoogleFonts.poppins(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
@@ -272,7 +278,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             });
           },
           child: Text(
-            'Try a different email',
+            l10n.tryDifferentEmail,
             style: GoogleFonts.poppins(
               color: AppColors.primary,
               fontWeight: FontWeight.w500,

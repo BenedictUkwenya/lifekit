@@ -1,11 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/services/api_service.dart';
 import '../../reviews/screens/leave_review_screen.dart';
-// TODO: Import your LeaveReviewScreen here
-// import 'path/to/leave_review_screen.dart';
+import '../../../core/widgets/motion.dart';
+import '../booking_progress.dart';
 
 class BookingTrackingScreen extends StatefulWidget {
   final dynamic booking;
@@ -108,7 +112,7 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
                                   _currentBooking['id'],
                                   reason,
                                 );
-                                if (mounted) {
+                                if (context.mounted) {
                                   setSheetState(
                                     () => _isDisputeSubmitting = false,
                                   );
@@ -116,9 +120,10 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
                                     _currentBooking['status'] = 'disputed';
                                   });
                                   Navigator.pop(context);
+                                  if (!context.mounted) return;
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text("Dispute submitted."),
+                                    SnackBar(
+                                      content: Text(AppLocalizations.of(context).disputeSubmitted),
                                       backgroundColor: Colors.green,
                                     ),
                                   );
@@ -127,9 +132,10 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
                                 setSheetState(
                                   () => _isDisputeSubmitting = false,
                                 );
+                                if (!context.mounted) return;
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text("Error: $e"),
+                                    content: Text(appErrorMessage(context, e)),
                                     backgroundColor: Colors.red,
                                   ),
                                 );
@@ -184,389 +190,163 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
         _isLoading = false;
       });
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Confirmation Sent!"),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).confirmationSent),
           backgroundColor: Colors.green,
         ),
       );
     } catch (e) {
       setState(() => _isLoading = false);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+        SnackBar(content: Text(appErrorMessage(context, e)), backgroundColor: Colors.red),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final status = _currentBooking['status'];
-    final isSwap = (_currentBooking['total_price'] == 0);
-    final bool isOverdue = _isOverdueBooking(_currentBooking);
-    final otherName = widget.isClient
-        ? (_currentBooking['profiles']?['full_name'] ?? "Provider")
-        : (_currentBooking['profiles']?['full_name'] ?? "Client");
-
-    final bool iHaveConfirmed = widget.isClient
-        ? (_currentBooking['client_confirmed'] ?? false)
-        : (_currentBooking['provider_confirmed'] ?? false);
-
-    final bool otherHasConfirmed = widget.isClient
-        ? (_currentBooking['provider_confirmed'] ?? false)
-        : (_currentBooking['client_confirmed'] ?? false);
+    final l10n = AppLocalizations.of(context);
+    final status = '${_currentBooking['status'] ?? ''}';
+    final progress = computeBookingProgress(
+      _currentBooking as Map,
+      isClient: widget.isClient,
+    );
+    final otherName = (_currentBooking['profiles']?['full_name'] ??
+            (widget.isClient ? l10n.trackFallbackProvider : l10n.trackFallbackClient))
+        .toString();
+    final iHaveConfirmed = progress.iConfirmed;
 
     // Report/dispute is always available while the booking is still active
     final bool canReportIssue =
         status == 'confirmed' || status == 'pending' || status == 'accepted';
 
-    // True when the provider has confirmed but the client hasn't yet acted —
-    // the 48-hour auto-release clock is now running.
-    final bool providerConfirmed =
-        _currentBooking['provider_confirmed'] == true;
-    final bool clientConfirmed = _currentBooking['client_confirmed'] == true;
-    final bool showEscrowWarning =
-        widget.isClient &&
-        providerConfirmed &&
-        !clientConfirmed &&
+    // Provider confirmed but the client hasn't acted — 48h auto-release clock.
+    final bool showEscrowWarning = widget.isClient &&
+        _currentBooking['provider_confirmed'] == true &&
+        _currentBooking['client_confirmed'] != true &&
         (status == 'confirmed' || status == 'pending');
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text(
-          "Booking Details",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: const BackButton(color: Colors.black),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            // ── 48-hour auto-release warning (provider confirmed, client hasn't) ──
-            if (showEscrowWarning) ...[
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFFF3E0), Color(0xFFFFEBEE)],
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.orange.shade400),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(
-                      Icons.access_time_filled_rounded,
-                      color: Colors.orange,
-                      size: 22,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "⚠️ Action Required",
-                            style: GoogleFonts.poppins(
-                              color: Colors.orange[900],
-                              fontWeight: FontWeight.w800,
-                              fontSize: 13,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            "The provider marked this job as done. If you do not confirm or report an issue, funds will be automatically released in 48 hours.",
-                            style: GoogleFonts.poppins(
-                              color: Colors.orange[900],
-                              fontWeight: FontWeight.w500,
-                              fontSize: 12,
-                              height: 1.4,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
+    final bool canConfirm = !iHaveConfirmed &&
+        (progress.phase == BookingPhase.upcoming ||
+            progress.phase == BookingPhase.awaitingConfirmation ||
+            progress.phase == BookingPhase.overdue);
+    final bool waitingOnOther = iHaveConfirmed &&
+        progress.phase != BookingPhase.completed &&
+        progress.phase != BookingPhase.disputed &&
+        progress.phase != BookingPhase.cancelled;
 
-            if (isOverdue) ...[
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.red[50],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.red),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.warning_amber_rounded, color: Colors.red),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        "This service is past its deadline. Please confirm if the work was completed or report a dispute to hold the funds.",
-                        style: GoogleFonts.poppins(
-                          color: Colors.red[900],
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
+    return Scaffold(
+      backgroundColor: const Color(0xFFFAFAFA),
+      appBar: AppBar(title: Text(l10n.trackTitle)),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _StatusHero(
+              progress: progress,
+              isClient: widget.isClient,
+              otherName: otherName,
+            ),
+            if (showEscrowWarning) ...[
+              const SizedBox(height: 14),
+              _Banner(
+                color: Colors.orange,
+                icon: Icons.access_time_filled_rounded,
+                title: l10n.trackEscrowTitle,
+                body: l10n.trackEscrowBody,
+              ).fadeSlideIn(index: 1),
             ],
-            // 1. STATUS HEADER
-            Container(
-              padding: const EdgeInsets.all(20),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: status == 'completed'
-                    ? Colors.green[50]
-                    : isOverdue
-                    ? Colors.red[50]
-                    : Colors.orange[50],
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: status == 'completed'
-                      ? Colors.green
-                      : isOverdue
-                      ? Colors.red
-                      : Colors.orange,
-                ),
+            const SizedBox(height: 14),
+            _FactsCard(
+              otherName: otherName,
+              scheduledAt: progress.scheduledAt,
+              amount: num.tryParse('${_currentBooking['total_price']}') ?? 0,
+              isSwap: progress.isSwap,
+            ).fadeSlideIn(index: 2),
+            const SizedBox(height: 14),
+            _Timeline(progress: progress, otherName: otherName).fadeSlideIn(index: 3),
+            const SizedBox(height: 24),
+
+            // ── Primary action ────────────────────────────────────────────
+            AnimatedSwitcher(
+              duration: Motion.medium,
+              switchInCurve: Motion.curve,
+              transitionBuilder: (child, anim) => FadeTransition(
+                opacity: anim,
+                child: ScaleTransition(scale: Tween(begin: 0.96, end: 1.0).animate(anim), child: child),
               ),
-              child: Column(
+              child: canConfirm
+                  ? SizedBox(
+                      key: const ValueKey('confirm'),
+                      height: 56,
+                      child: ElevatedButton.icon(
+                        onPressed: _isLoading ? null : _markAsComplete,
+                        icon: _isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              )
+                            : const Icon(Icons.task_alt_rounded),
+                        label: Text(widget.isClient ? l10n.trackMarkReceived : l10n.trackMarkDone),
+                      ),
+                    )
+                  : waitingOnOther
+                      ? Container(
+                          key: const ValueKey('waiting'),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEFF6FF),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.hourglass_top_rounded, color: Color(0xFF1D4ED8)),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  l10n.trackYouConfirmed(otherName),
+                                  style: GoogleFonts.poppins(color: const Color(0xFF1E3A8A), fontWeight: FontWeight.w500),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : const SizedBox.shrink(key: ValueKey('none')),
+            ),
+            if (canConfirm || waitingOnOther) ...[
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    status == 'completed'
-                        ? Icons.check_circle
-                        : isOverdue
-                        ? Icons.warning_amber_rounded
-                        : Icons.pending,
-                    size: 40,
-                    color: status == 'completed'
-                        ? Colors.green
-                        : isOverdue
-                        ? Colors.red
-                        : Colors.orange,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    status == 'completed'
-                        ? "Service Completed"
-                        : isOverdue
-                        ? "Service Overdue"
-                        : "In Progress",
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                  Icon(Icons.lock_outline_rounded, size: 14, color: Colors.grey[500]),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      progress.isSwap ? l10n.trackSwapInfo : l10n.trackEscrowInfo,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(fontSize: 11.5, color: Colors.grey[600]),
                     ),
-                  ),
-                  Text(
-                    status == 'completed'
-                        ? "Funds have been released."
-                        : isOverdue
-                        ? "Resolution needed before releasing funds."
-                        : "Waiting for confirmation.",
-                    style: GoogleFonts.poppins(color: Colors.grey),
                   ),
                 ],
               ),
-            ),
-
-            if (status == 'disputed') ...[
-              const SizedBox(height: 16),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.red[50],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.red),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.warning, color: Colors.red),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        "Under Admin Review",
-                        style: GoogleFonts.poppins(
-                          color: Colors.red,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ],
 
-            const SizedBox(height: 30),
-
-            // 2. TRACKING STEPS
-            _buildStep(
-              title: "Booking Confirmed",
-              subtitle: "Request accepted by provider",
-              isActive: true,
-              isDone: true,
-            ),
-            _buildLine(true),
-            _buildStep(
-              title: "Service Delivery",
-              subtitle:
-                  "Date: ${DateFormat('MMM dd, hh:mm a').format(DateTime.parse(_currentBooking['scheduled_time']))}",
-              isActive: true,
-              isDone: true,
-            ),
-            _buildLine(true),
-            _buildStep(
-              title: "Client Confirmation",
-              subtitle: widget.isClient
-                  ? (iHaveConfirmed
-                        ? "You confirmed receipt"
-                        : "Tap button below to confirm")
-                  : (otherHasConfirmed
-                        ? "Client confirmed receipt"
-                        : "Waiting for client"),
-              isActive: true,
-              isDone: widget.isClient ? iHaveConfirmed : otherHasConfirmed,
-            ),
-            _buildLine(widget.isClient ? iHaveConfirmed : otherHasConfirmed),
-            _buildStep(
-              title: "Provider Confirmation",
-              subtitle: !widget.isClient
-                  ? (iHaveConfirmed
-                        ? "You confirmed work done"
-                        : "Tap button below to confirm")
-                  : (otherHasConfirmed
-                        ? "Provider confirmed work done"
-                        : "Waiting for provider"),
-              isActive: true,
-              isDone: !widget.isClient ? iHaveConfirmed : otherHasConfirmed,
-            ),
-
-            const SizedBox(height: 40),
-
-            // 3. ACTION BUTTON (Only show if not completed yet)
-            if (status != 'completed') ...[
-              if (iHaveConfirmed)
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.check, color: Colors.green),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          "You have confirmed. Waiting for $otherName...",
-                          style: GoogleFonts.poppins(),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else
-                SizedBox(
-                  width: double.infinity,
-                  height: 55,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _markAsComplete,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : Text(
-                            widget.isClient
-                                ? "Mark Service Received"
-                                : "Mark Job Done",
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                  ),
-                ),
-
-              const SizedBox(height: 10),
-              if (isSwap)
-                Text(
-                  "ℹ️ This is a Skill Swap. Confirming marks it as successful.",
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey),
-                )
-              else
-                Text(
-                  "ℹ️ Funds will be held until both parties confirm.",
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey),
-                ),
-
-              // ── Dispute shortcut (visible when escrow clock is ticking) ──
-              if (showEscrowWarning && !iHaveConfirmed) ...[
-                const SizedBox(height: 14),
-                GestureDetector(
-                  onTap: _openDisputeSheet,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.flag_outlined,
-                        color: Colors.red,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        "Report an Issue (Dispute)",
-                        style: GoogleFonts.poppins(
-                          color: Colors.red,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
-                          decoration: TextDecoration.underline,
-                          decorationColor: Colors.red,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ],
-
-            // 4. RATE button — visible once you've confirmed your side (or fully completed), hidden after rating
+            // ── Rate (once you've confirmed your side or it's completed) ──
             if (!_hasRated && (iHaveConfirmed || status == 'completed')) ...[
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: OutlinedButton(
+                height: 52,
+                child: OutlinedButton.icon(
                   onPressed: () async {
                     final revieweeId = widget.isClient
                         ? _currentBooking['provider_id']?.toString() ?? ''
                         : _currentBooking['client_id']?.toString() ?? '';
-                    final reviewerRole = widget.isClient
-                        ? 'client'
-                        : 'provider';
+                    final reviewerRole = widget.isClient ? 'client' : 'provider';
                     final rated = await Navigator.push<bool>(
                       context,
                       MaterialPageRoute(
@@ -583,53 +363,24 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
                       setState(() => _hasRated = true);
                     }
                   },
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.primary),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: Text(
-                    widget.isClient ? "Rate Provider" : "Rate Client",
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                    ),
-                  ),
+                  icon: const Icon(Icons.star_rounded, color: Color(0xFFF59E0B)),
+                  label: Text(widget.isClient ? l10n.trackRateProvider : l10n.trackRateClient),
                 ),
-              ),
+              ).fadeSlideIn(index: 4),
             ],
 
             if (canReportIssue) ...[
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: OutlinedButton.icon(
-                  onPressed: _openDisputeSheet,
-                  icon: Icon(
-                    isOverdue
-                        ? Icons.report_problem_rounded
-                        : Icons.flag_outlined,
-                    color: Colors.red,
-                    size: 18,
-                  ),
-                  label: Text(
-                    "Report an Issue",
-                    style: GoogleFonts.poppins(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.red,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.red),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
+              const SizedBox(height: 12),
+              TextButton.icon(
+                onPressed: _openDisputeSheet,
+                style: TextButton.styleFrom(foregroundColor: Colors.red[700]),
+                icon: Icon(
+                  progress.phase == BookingPhase.overdue
+                      ? Icons.report_problem_rounded
+                      : Icons.flag_outlined,
+                  size: 18,
                 ),
+                label: Text(l10n.trackReportIssue),
               ),
             ],
           ],
@@ -637,73 +388,504 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
       ),
     );
   }
+}
 
-  Widget _buildStep({
-    required String title,
-    required String subtitle,
-    required bool isActive,
-    required bool isDone,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Column(
-          children: [
-            Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                color: isDone
-                    ? Colors.green
-                    : (isActive ? AppColors.primary : Colors.grey[300]),
-                shape: BoxShape.circle,
-              ),
-              child: isDone
-                  ? const Icon(Icons.check, size: 16, color: Colors.white)
-                  : null,
+// ═══════════════════════════════════════════════════════════════════════════
+// Status hero — the big coloured card that says where things stand.
+// ═══════════════════════════════════════════════════════════════════════════
+class _HeroStyle {
+  final List<Color> colors;
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  const _HeroStyle(this.colors, this.icon, this.title, this.subtitle);
+}
+
+class _StatusHero extends StatelessWidget {
+  final BookingProgress progress;
+  final bool isClient;
+  final String otherName;
+
+  const _StatusHero({required this.progress, required this.isClient, required this.otherName});
+
+  _HeroStyle _style(AppLocalizations l10n) {
+    switch (progress.phase) {
+      case BookingPhase.requested:
+        return isClient
+            ? _HeroStyle(const [Color(0xFFF59E0B), Color(0xFFEA580C)], Icons.hourglass_top_rounded,
+                l10n.trackHdrRequestedTitle, l10n.trackHdrRequestedSub)
+            : _HeroStyle(const [Color(0xFF89273B), Color(0xFFB4405A)], Icons.mark_email_unread_rounded,
+                l10n.trackHdrNewRequestTitle, l10n.trackHdrNewRequestSub);
+      case BookingPhase.upcoming:
+        return _HeroStyle(const [Color(0xFF4F46E5), Color(0xFF7C3AED)], Icons.event_available_rounded,
+            l10n.trackHdrUpcomingTitle, l10n.trackHdrUpcomingSub);
+      case BookingPhase.awaitingConfirmation:
+        return progress.iConfirmed
+            ? _HeroStyle(const [Color(0xFF2563EB), Color(0xFF0EA5E9)], Icons.hourglass_bottom_rounded,
+                l10n.trackHdrWaitingTitle(otherName), l10n.trackHdrWaitingSub)
+            : _HeroStyle(const [Color(0xFF89273B), Color(0xFFB4405A)], Icons.touch_app_rounded,
+                l10n.trackHdrActionTitle,
+                isClient ? l10n.trackHdrActionClientSub : l10n.trackHdrActionProviderSub);
+      case BookingPhase.overdue:
+        return _HeroStyle(const [Color(0xFFDC2626), Color(0xFFF97316)], Icons.warning_amber_rounded,
+            l10n.trackHdrOverdueTitle, l10n.trackHdrOverdueSub);
+      case BookingPhase.completed:
+        return _HeroStyle(const [Color(0xFF059669), Color(0xFF10B981)], Icons.check_circle_rounded,
+            l10n.trackHdrCompletedTitle,
+            progress.isSwap ? l10n.trackHdrSwapCompletedSub : l10n.trackHdrCompletedSub);
+      case BookingPhase.disputed:
+        return _HeroStyle(const [Color(0xFFB91C1C), Color(0xFF7F1D1D)], Icons.gavel_rounded,
+            l10n.trackHdrDisputedTitle, l10n.trackHdrDisputedSub);
+      case BookingPhase.cancelled:
+        return _HeroStyle(const [Color(0xFF6B7280), Color(0xFF374151)], Icons.cancel_rounded,
+            l10n.trackHdrCancelledTitle, l10n.trackHdrCancelledSub);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final s = _style(l10n);
+    final showCountdown = progress.phase == BookingPhase.upcoming && progress.scheduledAt != null;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: s.colors, begin: Alignment.topLeft, end: Alignment.bottomRight),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(color: s.colors.first.withValues(alpha: 0.35), blurRadius: 24, offset: const Offset(0, 12)),
+        ],
+      ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Soft decorative circles for depth
+          Positioned(
+            right: -30,
+            top: -40,
+            child: Container(
+              width: 130,
+              height: 130,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.08)),
             ),
-          ],
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
+          ),
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.bold,
-                  color: isActive ? Colors.black : Colors.grey,
+              Pulse(
+                active: progress.myActionNeeded,
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(s.icon, color: Colors.white, size: 30),
                 ),
-              ),
-              Text(
-                subtitle,
-                style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+              ).popIn(),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(s.title,
+                        style: GoogleFonts.poppins(fontSize: 19, fontWeight: FontWeight.w700, color: Colors.white, height: 1.25)),
+                    const SizedBox(height: 6),
+                    Text(s.subtitle,
+                        style: GoogleFonts.poppins(fontSize: 13, color: Colors.white.withValues(alpha: 0.9), height: 1.4)),
+                    if (showCountdown) ...[
+                      const SizedBox(height: 12),
+                      _Countdown(target: progress.scheduledAt!),
+                    ],
+                  ],
+                ).fadeSlideIn(index: 1),
               ),
             ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
+}
 
-  Widget _buildLine(bool isActive) {
+/// "in 2d 4h" chip that refreshes every 30 seconds.
+class _Countdown extends StatefulWidget {
+  final DateTime target;
+
+  const _Countdown({required this.target});
+
+  @override
+  State<_Countdown> createState() => _CountdownState();
+}
+
+class _CountdownState extends State<_Countdown> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final left = widget.target.difference(DateTime.now());
+    if (left.isNegative) return const SizedBox.shrink();
+    final text = left.inDays >= 1
+        ? l10n.trackInDays(left.inDays, left.inHours % 24)
+        : left.inHours >= 1
+            ? l10n.trackInHours(left.inHours, left.inMinutes % 60)
+            : l10n.trackInMinutes(left.inMinutes.clamp(1, 59));
     return Container(
-      margin: const EdgeInsets.only(left: 11),
-      height: 30,
-      width: 2,
-      color: isActive ? Colors.green : Colors.grey[300],
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.22),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.timer_outlined, size: 15, color: Colors.white),
+          const SizedBox(width: 6),
+          AnimatedSwitcher(
+            duration: Motion.medium,
+            child: Text(text,
+                key: ValueKey(text),
+                style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white)),
+          ),
+        ],
+      ),
     );
   }
+}
 
-  bool _isOverdueBooking(dynamic booking) {
-    if (booking['is_overdue'] == true) return true;
-    final status = (booking['status'] ?? '').toString().toLowerCase();
-    if (status != 'confirmed') return false;
-    final rawTime = booking['scheduled_time'];
-    if (rawTime == null) return false;
-    final scheduledTime = DateTime.tryParse(rawTime.toString());
-    if (scheduledTime == null) return false;
-    return scheduledTime.isBefore(DateTime.now());
+// ═══════════════════════════════════════════════════════════════════════════
+// Facts: who, when, how much.
+// ═══════════════════════════════════════════════════════════════════════════
+class _FactsCard extends StatelessWidget {
+  final String otherName;
+  final DateTime? scheduledAt;
+  final num amount;
+  final bool isSwap;
+
+  const _FactsCard({
+    required this.otherName,
+    required this.scheduledAt,
+    required this.amount,
+    required this.isSwap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final lang = Localizations.localeOf(context).languageCode;
+    Widget fact(IconData icon, String label, Widget value) => Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: [
+                Icon(icon, size: 14, color: Colors.grey[500]),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(label.toUpperCase(),
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(fontSize: 10, letterSpacing: 0.5, fontWeight: FontWeight.w600, color: Colors.grey[500])),
+                ),
+              ]),
+              const SizedBox(height: 4),
+              value,
+            ],
+          ),
+        );
+    final valueStyle = GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textDark);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: _cardDecoration,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          fact(Icons.person_outline_rounded, l10n.trackWith,
+              Text(otherName, maxLines: 1, overflow: TextOverflow.ellipsis, style: valueStyle)),
+          fact(Icons.event_outlined, l10n.trackScheduled,
+              Text(scheduledAt == null ? '—' : DateFormat('d MMM, HH:mm', lang).format(scheduledAt!), style: valueStyle)),
+          fact(isSwap ? Icons.swap_horiz_rounded : Icons.payments_outlined, l10n.trackAmount,
+              isSwap
+                  ? Text(l10n.trackSkillSwap, style: valueStyle.copyWith(color: AppColors.primary))
+                  : AnimatedCount(
+                      value: amount.toDouble(),
+                      format: (v) => '\$${v.toStringAsFixed(2)}',
+                      style: valueStyle.copyWith(color: AppColors.primary),
+                    )),
+        ],
+      ),
+    );
+  }
+}
+
+final _cardDecoration = BoxDecoration(
+  color: Colors.white,
+  borderRadius: BorderRadius.circular(22),
+  boxShadow: [
+    BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 18, offset: const Offset(0, 6)),
+  ],
+);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Animated vertical timeline.
+// ═══════════════════════════════════════════════════════════════════════════
+class _Timeline extends StatelessWidget {
+  final BookingProgress progress;
+  final String otherName;
+
+  const _Timeline({required this.progress, required this.otherName});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final lang = Localizations.localeOf(context).languageCode;
+    final p = progress;
+
+    (String, String) text(BookingStep s) {
+      switch (s) {
+        case BookingStep.requested:
+          return (l10n.trackStepRequested, l10n.trackStepRequestedSub);
+        case BookingStep.confirmed:
+          return (l10n.trackStepConfirmed, p.isDone(s) ? l10n.trackStepConfirmedSub : l10n.trackStepConfirmedPending);
+        case BookingStep.serviceDay:
+          return (
+            l10n.trackStepServiceDay,
+            p.scheduledAt == null ? '—' : DateFormat('EEE, d MMM · HH:mm', lang).format(p.scheduledAt!),
+          );
+        case BookingStep.bothConfirm:
+          return (
+            l10n.trackStepBothConfirm,
+            p.isDone(s)
+                ? l10n.trackStepBothConfirmDone
+                : !p.iConfirmed
+                    ? l10n.trackStepWaitingYou
+                    : l10n.trackStepWaitingOther(otherName),
+          );
+        case BookingStep.paidOut:
+          return p.isSwap
+              ? (l10n.trackStepSwapDone, l10n.trackStepSwapDoneSub)
+              : (l10n.trackStepPaidOut, l10n.trackStepPaidOutSub);
+      }
+    }
+
+    final steps = BookingStep.values;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(18, 20, 18, 8),
+      decoration: _cardDecoration,
+      child: Column(
+        children: [
+          for (var i = 0; i < steps.length; i++)
+            _TimelineRow(
+              index: i,
+              title: text(steps[i]).$1,
+              subtitle: text(steps[i]).$2,
+              state: p.isDone(steps[i])
+                  ? _StepState.done
+                  : p.isCurrent(steps[i])
+                      ? (p.phase == BookingPhase.disputed || p.phase == BookingPhase.cancelled
+                          ? _StepState.blocked
+                          : _StepState.current)
+                      : _StepState.upcoming,
+              blockedIcon: p.phase == BookingPhase.disputed ? Icons.gavel_rounded : Icons.close_rounded,
+              isLast: i == steps.length - 1,
+              lineFilled: p.isDone(steps[i]),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+enum _StepState { done, current, upcoming, blocked }
+
+class _TimelineRow extends StatelessWidget {
+  final int index;
+  final String title;
+  final String subtitle;
+  final _StepState state;
+  final IconData blockedIcon;
+  final bool isLast;
+  final bool lineFilled;
+
+  const _TimelineRow({
+    required this.index,
+    required this.title,
+    required this.subtitle,
+    required this.state,
+    required this.blockedIcon,
+    required this.isLast,
+    required this.lineFilled,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const green = Color(0xFF10B981);
+    const red = Color(0xFFDC2626);
+    final delay = Duration(milliseconds: 150 + index * 140);
+
+    Widget dot;
+    switch (state) {
+      case _StepState.done:
+        dot = Container(
+          width: 28,
+          height: 28,
+          decoration: const BoxDecoration(color: green, shape: BoxShape.circle),
+          child: const Icon(Icons.check_rounded, size: 18, color: Colors.white),
+        ).popIn(delay: delay);
+      case _StepState.current:
+        dot = Pulse(
+          child: Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              shape: BoxShape.circle,
+              boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.4), blurRadius: 12)],
+            ),
+            child: Center(
+              child: Container(width: 9, height: 9, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
+            ),
+          ),
+        );
+      case _StepState.blocked:
+        dot = Container(
+          width: 28,
+          height: 28,
+          decoration: const BoxDecoration(color: red, shape: BoxShape.circle),
+          child: Icon(blockedIcon, size: 16, color: Colors.white),
+        ).popIn(delay: delay);
+      case _StepState.upcoming:
+        dot = Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.grey.shade300, width: 2),
+          ),
+        );
+    }
+
+    final titleColor = state == _StepState.upcoming ? Colors.grey[400] : AppColors.textDark;
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: 28,
+            child: Column(
+              children: [
+                dot,
+                if (!isLast)
+                  Expanded(
+                    child: Container(
+                      width: 3,
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(2)),
+                      alignment: Alignment.topCenter,
+                      child: lineFilled
+                          ? TweenAnimationBuilder<double>(
+                              tween: Tween(begin: 0, end: 1),
+                              duration: Duration(milliseconds: 420 + index * 140),
+                              curve: Motion.curve,
+                              builder: (_, v, _) => FractionallySizedBox(
+                                heightFactor: v,
+                                alignment: Alignment.topCenter,
+                                child: Container(
+                                  decoration: BoxDecoration(color: green, borderRadius: BorderRadius.circular(2)),
+                                ),
+                              ),
+                            )
+                          : null,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: isLast ? 12 : 22, top: 2),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14.5,
+                        fontWeight: state == _StepState.current ? FontWeight.w700 : FontWeight.w600,
+                        color: titleColor,
+                      )),
+                  const SizedBox(height: 2),
+                  Text(subtitle,
+                      style: GoogleFonts.poppins(
+                        fontSize: 12.5,
+                        color: state == _StepState.current
+                            ? AppColors.primary
+                            : state == _StepState.blocked
+                                ? red
+                                : Colors.grey[500],
+                        fontWeight: state == _StepState.current ? FontWeight.w500 : FontWeight.w400,
+                      )),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    ).fadeSlideIn(index: index);
+  }
+}
+
+class _Banner extends StatelessWidget {
+  final MaterialColor color;
+  final IconData icon;
+  final String title;
+  final String body;
+
+  const _Banner({required this.color, required this.icon, required this.title, required this.body});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color.shade50,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: color.shade200),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color.shade700, size: 22),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: GoogleFonts.poppins(color: color.shade900, fontWeight: FontWeight.w700, fontSize: 13)),
+                const SizedBox(height: 4),
+                Text(body, style: GoogleFonts.poppins(color: color.shade900, fontSize: 12, height: 1.4)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

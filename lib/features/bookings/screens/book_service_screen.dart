@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../../core/widgets/motion.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -11,6 +12,7 @@ import 'package:http/http.dart' as http;
 import '../../../core/constants/app_colors.dart';
 import '../../../core/providers/cart_provider.dart';
 import '../../../core/services/api_service.dart';
+import '../../../l10n/app_localizations.dart';
 import 'cart_screen.dart';
 
 // PREMIUM POLISHED VERSION
@@ -158,10 +160,13 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
   }
 
   void _showNextAvailableToast(DateTime fromDate) {
+    final l10n = AppLocalizations.of(context)!;
     final nextAvailable = _findNextAvailableDate(fromDate);
     final message = nextAvailable == null
-        ? "No upcoming availability yet"
-        : "Provider is off that day. Next available: ${DateFormat('EEE, MMM d').format(nextAvailable)}";
+        ? l10n.bookNoUpcomingAvailability
+        : l10n.bookProviderOffDay(
+            DateFormat('EEE, MMM d').format(nextAvailable),
+          );
 
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
@@ -175,7 +180,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
         action: nextAvailable == null
             ? null
             : SnackBarAction(
-                label: "Use Next",
+                label: l10n.bookUseNext,
                 textColor: AppColors.primary,
                 onPressed: () {
                   setState(() {
@@ -196,7 +201,8 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
   }
 
   String? _validateSelection() {
-    if (_selectedDay == null) return "Please select a date";
+    final l10n = AppLocalizations.of(context)!;
+    if (_selectedDay == null) return l10n.bookSelectDate;
 
     String dayName = DateFormat('EEEE').format(_selectedDay!);
     var scheduleDay = _weeklySchedule.firstWhere(
@@ -235,7 +241,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
       return false;
     });
 
-    if (isConflict) return "This time slot is already booked.";
+    if (isConflict) return l10n.bookTimeConflict;
 
     return null;
   }
@@ -276,7 +282,9 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
+          AnimatedContainer(
+            duration: Motion.fast,
+            curve: Motion.curve,
             width: 36,
             height: 36,
             decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
@@ -330,6 +338,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
 
   void _saveComment() {
     FocusScope.of(context).unfocus();
+    final l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -337,7 +346,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
             const Icon(Icons.check_circle, color: Colors.white, size: 20),
             const SizedBox(width: 12),
             Text(
-              "Comment saved!",
+              l10n.bookCommentSaved,
               style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
             ),
           ],
@@ -364,7 +373,10 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
         (widget.service['service_options'] as List).isNotEmpty;
 
     if (hasOptions && _selectedOptions.isEmpty) {
-      _showModernAlert("Please select at least one service option.", true);
+      _showModernAlert(
+        AppLocalizations.of(context)!.bookSelectAtLeastOneOption,
+        true,
+      );
       return;
     }
 
@@ -497,7 +509,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                     TextButton(
                       onPressed: () => Navigator.pop(context),
                       child: Text(
-                        "Cancel",
+                        AppLocalizations.of(context)!.bookCancel,
                         style: GoogleFonts.poppins(
                           color: Colors.black54,
                           fontSize: 16,
@@ -505,7 +517,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                       ),
                     ),
                     Text(
-                      "Select Time",
+                      AppLocalizations.of(context)!.bookSelectTime,
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
@@ -521,7 +533,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                 child: slots.isEmpty
                     ? Center(
                         child: Text(
-                          "No available time slots",
+                          AppLocalizations.of(context)!.bookNoTimeSlots,
                           style: GoogleFonts.poppins(color: Colors.grey[600]),
                         ),
                       )
@@ -602,7 +614,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                     TextButton(
                       onPressed: () => Navigator.pop(context),
                       child: Text(
-                        "Cancel",
+                        AppLocalizations.of(context)!.bookCancel,
                         style: GoogleFonts.poppins(
                           color: Colors.black54,
                           fontSize: 16,
@@ -610,7 +622,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                       ),
                     ),
                     Text(
-                      "Select Time",
+                      AppLocalizations.of(context)!.bookSelectTime,
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
@@ -655,7 +667,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                         Navigator.pop(context);
                       },
                       child: Text(
-                        "Done",
+                        AppLocalizations.of(context)!.bookDone,
                         style: GoogleFonts.poppins(
                           color: AppColors.primary,
                           fontSize: 16,
@@ -766,7 +778,9 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              isError ? "Hold on" : "Success",
+              isError
+                  ? AppLocalizations.of(context)!.bookHoldOn
+                  : AppLocalizations.of(context)!.bookSuccess,
               style: GoogleFonts.poppins(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -797,7 +811,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                   elevation: 0,
                 ),
                 child: Text(
-                  "Got it",
+                  AppLocalizations.of(context)!.bookGotIt,
                   style: GoogleFonts.poppins(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -835,7 +849,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              "Service Type",
+              AppLocalizations.of(context)!.bookServiceType,
               style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -846,9 +860,21 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildTypeOption("Default", Icons.settings),
-                _buildTypeOption("Home", Icons.home_rounded),
-                _buildTypeOption("Outdoor", Icons.wb_sunny_rounded),
+                _buildTypeOption(
+                  "Default",
+                  AppLocalizations.of(context)!.bookTypeDefault,
+                  Icons.settings,
+                ),
+                _buildTypeOption(
+                  "Home",
+                  AppLocalizations.of(context)!.bookTypeHome,
+                  Icons.home_rounded,
+                ),
+                _buildTypeOption(
+                  "Outdoor",
+                  AppLocalizations.of(context)!.bookTypeOutdoor,
+                  Icons.wb_sunny_rounded,
+                ),
               ],
             ),
             const SizedBox(height: 8),
@@ -858,11 +884,23 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
     );
   }
 
-  Widget _buildTypeOption(String label, IconData icon) {
-    bool isSelected = _serviceType == label;
-    return GestureDetector(
+  String _serviceTypeLabel(AppLocalizations l10n) {
+    switch (_serviceType) {
+      case 'Home':
+        return l10n.bookTypeHome;
+      case 'Outdoor':
+        return l10n.bookTypeOutdoor;
+      case 'Default':
+      default:
+        return l10n.bookTypeDefault;
+    }
+  }
+
+  Widget _buildTypeOption(String value, String label, IconData icon) {
+    bool isSelected = _serviceType == value;
+    return Pressable(
       onTap: () {
-        setState(() => _serviceType = label);
+        setState(() => _serviceType = value);
         Navigator.pop(context);
       },
       child: AnimatedContainer(
@@ -896,6 +934,8 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
             const SizedBox(height: 10),
             Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: GoogleFonts.poppins(
                 color: isSelected ? Colors.white : Colors.black87,
                 fontSize: 13,
@@ -920,17 +960,18 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
   }
 
   Widget _buildQuickSelectRow() {
+    final l10n = AppLocalizations.of(context)!;
     final today = DateTime.now();
     final tomorrow = today.add(const Duration(days: 1));
     final weekend = _getThisWeekendDate();
 
     return Row(
       children: [
-        Expanded(child: _buildQuickSelectChip("Today", today)),
+        Expanded(child: _buildQuickSelectChip(l10n.bookToday, today)),
         const SizedBox(width: 10),
-        Expanded(child: _buildQuickSelectChip("Tomorrow", tomorrow)),
+        Expanded(child: _buildQuickSelectChip(l10n.bookTomorrow, tomorrow)),
         const SizedBox(width: 10),
-        Expanded(child: _buildQuickSelectChip("This Weekend", weekend)),
+        Expanded(child: _buildQuickSelectChip(l10n.bookThisWeekend, weekend)),
       ],
     );
   }
@@ -939,7 +980,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
     final isSelected = _selectedDay != null && isSameDay(_selectedDay, date);
     final isAvailable = _isDayAvailable(date);
 
-    return GestureDetector(
+    return Pressable(
       onTap: () {
         if (!isAvailable) {
           _showNextAvailableToast(date);
@@ -947,7 +988,9 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
         }
         _selectDay(date);
       },
-      child: Container(
+      child: AnimatedContainer(
+        duration: Motion.fast,
+        curve: Motion.curve,
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: isSelected
@@ -968,6 +1011,9 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
         child: Center(
           child: Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -982,6 +1028,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
   // --- UI BUILD ---
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     String imgUrl = _getSafeImage(widget.service);
     String pricingType = widget.service['pricing_type'] ?? 'fixed';
     bool isHourly = pricingType == 'hourly';
@@ -1018,7 +1065,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
         ),
         centerTitle: true,
         title: Text(
-          "Book Service",
+          l10n.bookTitle,
           style: GoogleFonts.poppins(
             color: Colors.black87,
             fontWeight: FontWeight.w600,
@@ -1085,7 +1132,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    "Loading availability...",
+                    l10n.bookLoadingAvailability,
                     style: GoogleFonts.poppins(
                       color: Colors.black54,
                       fontSize: 14,
@@ -1101,7 +1148,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Quick Select",
+                    l10n.bookQuickSelect,
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
@@ -1385,7 +1432,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
-                                    "Fixed",
+                                    l10n.bookFixed,
                                     style: GoogleFonts.poppins(
                                       fontSize: 11,
                                       color: AppColors.primary,
@@ -1404,7 +1451,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                           Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              "Select Service Options",
+                              l10n.bookSelectServiceOptions,
                               style: GoogleFonts.poppins(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
@@ -1419,7 +1466,9 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                             bool isSelected = _selectedOptions.any(
                               (e) => e['name'] == opt['name'],
                             );
-                            return Container(
+                            return AnimatedContainer(
+                              duration: Motion.fast,
+                              curve: Motion.curve,
                               margin: const EdgeInsets.only(bottom: 8),
                               decoration: BoxDecoration(
                                 color: isSelected
@@ -1486,7 +1535,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "More Services",
+                          l10n.bookMoreServices,
                           style: GoogleFonts.poppins(
                             fontWeight: FontWeight.w600,
                             fontSize: 15,
@@ -1494,7 +1543,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                           ),
                         ),
                         Text(
-                          "See all",
+                          l10n.seeAll,
                           style: GoogleFonts.poppins(
                             fontSize: 13,
                             color: AppColors.primary,
@@ -1543,7 +1592,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                               ),
                               const SizedBox(width: 12),
                               Text(
-                                "Service Type",
+                                l10n.bookServiceType,
                                 style: GoogleFonts.poppins(
                                   color: Colors.black87,
                                   fontSize: 14,
@@ -1555,7 +1604,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                           Row(
                             children: [
                               Text(
-                                _serviceType,
+                                _serviceTypeLabel(l10n),
                                 style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 14,
@@ -1605,7 +1654,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                               ),
                               const SizedBox(width: 12),
                               Text(
-                                "Service Time",
+                                l10n.bookServiceTime,
                                 style: GoogleFonts.poppins(
                                   color: Colors.black87,
                                   fontSize: 14,
@@ -1673,7 +1722,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                               color: Colors.black87,
                             ),
                             decoration: InputDecoration(
-                              hintText: "Add special instructions...",
+                              hintText: l10n.bookAddInstructions,
                               hintStyle: GoogleFonts.poppins(
                                 color: Colors.grey[400],
                                 fontSize: 14,
@@ -1719,15 +1768,16 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Total",
+                      l10n.bookTotal,
                       style: GoogleFonts.poppins(
                         fontSize: 12,
                         color: Colors.grey[600],
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      "$currency${standardDisplayTotal.toStringAsFixed(2)}",
+                    AnimatedCount(
+                      value: standardDisplayTotal,
+                      format: (v) => "$currency${v.toStringAsFixed(2)}",
                       style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
@@ -1765,7 +1815,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                         const SizedBox(width: 6),
                         Flexible(
                           child: Text(
-                            "Book Now",
+                            l10n.bookNow,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.poppins(
                               fontSize: 15,

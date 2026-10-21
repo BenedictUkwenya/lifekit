@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart'; // Run: flutter pub add flutter_rating_bar
 import '../../../core/constants/app_colors.dart';
@@ -56,7 +57,7 @@ class _LeaveReviewScreenState extends State<LeaveReviewScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+          SnackBar(content: Text(appErrorMessage(context, e)), backgroundColor: Colors.red),
         );
         setState(() => _isLoading = false);
       }

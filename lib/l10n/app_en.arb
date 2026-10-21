@@ -1,0 +1,1567 @@
+{
+  "@@locale": "en",
+
+  "appName": "LifeKit",
+  "@appName": { "description": "The application name" },
+
+  "loading": "Loading…",
+  "@loading": { "description": "Generic loading state" },
+
+  "errorGeneric": "Something went wrong. Please try again.",
+  "@errorGeneric": { "description": "Generic error message" },
+
+  "retry": "Retry",
+  "@retry": { "description": "Retry button label" },
+
+  "cancel": "Cancel",
+  "@cancel": { "description": "Cancel button label" },
+
+  "save": "Save",
+  "@save": { "description": "Save button label" },
+
+  "delete": "Delete",
+  "@delete": { "description": "Delete button label" },
+
+  "edit": "Edit",
+  "@edit": { "description": "Edit button label" },
+
+  "done": "Done",
+  "@done": { "description": "Done button label" },
+
+  "confirm": "Confirm",
+  "@confirm": { "description": "Confirm button label" },
+
+  "close": "Close",
+  "@close": { "description": "Close button label" },
+
+  "back": "Back",
+  "@back": { "description": "Back button label" },
+
+  "next": "Next",
+  "@next": { "description": "Next button label" },
+
+  "skip": "Skip",
+  "@skip": { "description": "Skip button label" },
+
+  "search": "Search",
+  "@search": { "description": "Search placeholder / button" },
+
+  "noResults": "No results found.",
+  "@noResults": { "description": "Empty search results" },
+
+  "seeAll": "See all",
+  "@seeAll": { "description": "See all items link" },
+
+  "submit": "Submit",
+  "@submit": { "description": "Submit button label" },
+
+  "yes": "Yes",
+  "@yes": { "description": "Confirmation yes" },
+
+  "no": "No",
+  "@no": { "description": "Confirmation no" },
+
+  "or": "or",
+  "@or": { "description": "Divider word" },
+
+  "optional": "Optional",
+  "@optional": { "description": "Optional field label" },
+
+  "signIn": "Sign In",
+  "@signIn": { "description": "Sign in button" },
+
+  "signOut": "Sign Out",
+  "@signOut": { "description": "Sign out button" },
+
+  "signUp": "Sign Up",
+  "@signUp": { "description": "Sign up link label" },
+
+  "createAccount": "Create Account",
+  "@createAccount": { "description": "Create account button" },
+
+  "forgotPassword": "Forgot Password?",
+  "@forgotPassword": { "description": "Forgot password link" },
+
+  "emailLabel": "Email",
+  "@emailLabel": { "description": "Email field label" },
+
+  "emailAddressLabel": "Email Address",
+  "@emailAddressLabel": { "description": "Email field label on signup" },
+
+  "emailPlaceholder": "Enter your email",
+  "@emailPlaceholder": { "description": "Email field placeholder" },
+
+  "passwordLabel": "Password",
+  "@passwordLabel": { "description": "Password field label" },
+
+  "passwordPlaceholder": "Enter your password",
+  "@passwordPlaceholder": { "description": "Password field placeholder" },
+
+  "confirmPasswordLabel": "Confirm Password",
+  "@confirmPasswordLabel": { "description": "Confirm password field label" },
+
+  "fullNameLabel": "Full Name",
+  "@fullNameLabel": { "description": "Full name field label" },
+
+  "phoneLabel": "Phone Number",
+  "@phoneLabel": { "description": "Phone number field label" },
+
+  "loginTitle": "Welcome Back",
+  "@loginTitle": { "description": "Login screen title" },
+
+  "loginSubtitle": "Sign in to continue",
+  "@loginSubtitle": { "description": "Login screen subtitle" },
+
+  "loginButton": "Sign In",
+  "@loginButton": { "description": "Login submit button" },
+
+  "noAccountPrompt": "Don't have an account?",
+  "@noAccountPrompt": { "description": "Prompt to sign up on login screen" },
+
+  "registerTitle": "Create Your Account",
+  "@registerTitle": { "description": "Register screen title" },
+
+  "registerSubtitle": "Complete the info below to create your account",
+  "@registerSubtitle": { "description": "Register screen subtitle" },
+
+  "registerButton": "Create Account",
+  "@registerButton": { "description": "Register submit button" },
+
+  "haveAccountPrompt": "Already have an account?",
+  "@haveAccountPrompt": { "description": "Prompt to sign in on register screen" },
+
+  "continueButton": "Continue",
+  "@continueButton": { "description": "Continue to next signup step" },
+
+  "finish": "Finish",
+  "@finish": { "description": "Complete signup button" },
+
+  "errorEmailRequired": "Please enter your email address.",
+  "@errorEmailRequired": { "description": "Email required validation error" },
+
+  "errorEmailInvalid": "Please enter a valid email address.",
+  "@errorEmailInvalid": { "description": "Email invalid validation error" },
+
+  "errorPasswordRequired": "Please enter a password.",
+  "@errorPasswordRequired": { "description": "Password required validation error" },
+
+  "errorPasswordShort": "Password must be at least 6 characters.",
+  "@errorPasswordShort": { "description": "Password too short validation error" },
+
+  "errorPasswordMatch": "Passwords don't match. Please try again.",
+  "@errorPasswordMatch": { "description": "Passwords don't match validation error" },
+
+  "errorNameRequired": "Please enter your full name.",
+  "@errorNameRequired": { "description": "Name required validation error" },
+
+  "loginSlideWelcomeBackTitle": "Welcome Back!",
+  "@loginSlideWelcomeBackTitle": { "description": "Login header carousel slide title" },
+
+  "loginSlideWelcomeBackSubtitle": "Great to see you again 👋",
+  "@loginSlideWelcomeBackSubtitle": { "description": "Login header carousel slide subtitle" },
+
+  "welcomeBackToast": "Welcome back! 👋",
+  "@welcomeBackToast": { "description": "Success toast after login" },
+
+  "signInFailed": "Sign-in failed. Please try again.",
+  "@signInFailed": { "description": "OAuth sign-in error toast" },
+
+  "verifyYourEmail": "Verify your email",
+  "@verifyYourEmail": { "description": "OTP verification step title" },
+
+  "didntGetCodeResend": "Didn't get a code? Resend",
+  "@didntGetCodeResend": { "description": "Resend OTP link" },
+
+  "almostDone": "Almost done!",
+  "@almostDone": { "description": "Profile photo step title" },
+
+  "addProfilePictureOptional": "Add a profile picture — you can always skip this",
+  "@addProfilePictureOptional": { "description": "Profile photo step subtitle" },
+
+  "welcomeToLifeKit": "Welcome to LifeKit! 🎉",
+  "@welcomeToLifeKit": { "description": "Signup success toast" },
+
+  "allSetWelcome": "You're all set! Welcome to LifeKit 🎉",
+  "@allSetWelcome": { "description": "Signup completion success toast" },
+
+  "signupWelcomeTitle": "Hi, Welcome to LifeKit",
+  "@signupWelcomeTitle": { "description": "Signup step 1 screen title" },
+
+  "choosePasswordTitle": "Choose a password",
+  "@choosePasswordTitle": { "description": "Signup password step title" },
+
+  "choosePasswordSubtitle": "Pick something secure — at least 6 characters",
+  "@choosePasswordSubtitle": { "description": "Signup password step subtitle" },
+
+  "splashTagline": "...Explore Diversity, Create New Bonds",
+  "@splashTagline": { "description": "Splash screen tagline" },
+
+  "onboardingOfferSkillsTitle": "Offer Your Skills.\nEarn on Your Terms",
+  "@onboardingOfferSkillsTitle": { "description": "Onboarding slide 1 title" },
+
+  "onboardingOfferSkillsDesc": "Turn your talent into income by offering your services to a vibrant community that values what you do.",
+  "@onboardingOfferSkillsDesc": { "description": "Onboarding slide 1 description" },
+
+  "onboardingBookServicesTitle": "Book Trusted\nServices Anytime,\nAnywhere",
+  "@onboardingBookServicesTitle": { "description": "Onboarding slide 2 title" },
+
+  "onboardingBookServicesDesc": "Get access to reliable services near you, from beauty to home repairs, wellness, personal care, and more - all in one app.",
+  "@onboardingBookServicesDesc": { "description": "Onboarding slide 2 description" },
+
+  "onboardingCommunityTitle": "Where Community\nMeets Opportunity",
+  "@onboardingCommunityTitle": { "description": "Onboarding slide 3 title" },
+
+  "onboardingCommunityDesc": "Connect, share, and grow with people who get you.",
+  "@onboardingCommunityDesc": { "description": "Onboarding slide 3 description" },
+
+  "getStarted": "Get Started",
+  "@getStarted": { "description": "Get started button on onboarding" },
+
+  "resetYourPassword": "Reset your\npassword",
+  "@resetYourPassword": { "description": "Forgot password screen title" },
+
+  "resetPasswordInstructions": "Enter the email associated with your account. We'll send you a link to reset your password.",
+  "@resetPasswordInstructions": { "description": "Forgot password instructions" },
+
+  "sendResetLink": "Send Reset Link",
+  "@sendResetLink": { "description": "Forgot password submit button" },
+
+  "checkYourEmail": "Check your email",
+  "@checkYourEmail": { "description": "Forgot password success title" },
+
+  "checkSpamFolder": "Didn't receive it? Check your spam folder.",
+  "@checkSpamFolder": { "description": "Forgot password spam hint" },
+
+  "backToLogin": "Back to Login",
+  "@backToLogin": { "description": "Return to login from forgot password" },
+
+  "setNewPasswordTitle": "Set a new password",
+  "@setNewPasswordTitle": { "description": "Reset password screen title" },
+
+  "setNewPasswordSubtitle": "Choose a strong password for your account.",
+  "@setNewPasswordSubtitle": { "description": "Reset password screen subtitle" },
+
+  "updatePasswordButton": "Update Password",
+  "@updatePasswordButton": { "description": "Reset password submit button" },
+
+  "passwordUpdatedTitle": "Password updated",
+  "@passwordUpdatedTitle": { "description": "Reset password success title" },
+
+  "passwordUpdatedMessage": "Your password has been changed. You can sign in with your new password.",
+  "@passwordUpdatedMessage": { "description": "Reset password success message" },
+
+  "resetLinkInvalidTitle": "Link expired",
+  "@resetLinkInvalidTitle": { "description": "Invalid reset link title" },
+
+  "resetLinkInvalidMessage": "This password reset link is invalid or has expired. Request a new one.",
+  "@resetLinkInvalidMessage": { "description": "Invalid reset link message" },
+
+  "emailSentTo": "We sent a password reset link to\n{email}",
+  "@emailSentTo": {
+    "description": "Forgot password success body with email",
+    "placeholders": { "email": { "type": "String" } }
+  },
+
+  "tryDifferentEmail": "Try a different email",
+  "@tryDifferentEmail": { "description": "Retry forgot password with another email" },
+
+  "aiSetupGuide": "AI Setup Guide",
+  "@aiSetupGuide": { "description": "AI onboarding screen title" },
+
+  "aiAnalyzingProfile": "AI is analyzing your profile…",
+  "@aiAnalyzingProfile": { "description": "AI onboarding loading message" },
+
+  "yourGoals": "Your Goals",
+  "@yourGoals": { "description": "AI onboarding field label" },
+
+  "yourGoalsHint": "e.g. Earn extra income, find reliable service providers",
+  "@yourGoalsHint": { "description": "AI onboarding goals placeholder" },
+
+  "yourSkills": "Your Skills",
+  "@yourSkills": { "description": "AI onboarding field label" },
+
+  "yourSkillsHint": "e.g. Cooking, plumbing, teaching, graphic design",
+  "@yourSkillsHint": { "description": "AI onboarding skills placeholder" },
+
+  "yourInterests": "Your Interests",
+  "@yourInterests": { "description": "AI onboarding field label" },
+
+  "yourInterestsHint": "e.g. Music, food, fitness, technology",
+  "@yourInterestsHint": { "description": "AI onboarding interests placeholder" },
+
+  "generateMySevenDayPlan": "Generate My 7-Day Plan",
+  "@generateMySevenDayPlan": { "description": "AI onboarding CTA button" },
+
+  "finishAndGoToHome": "Finish & Go to Home",
+  "@finishAndGoToHome": { "description": "AI onboarding completion button" },
+
+  "takeAction": "Take Action",
+  "@takeAction": { "description": "AI plan day card action button" },
+
+  "failedToGeneratePlan": "Failed to generate plan. Please try again.",
+  "@failedToGeneratePlan": { "description": "AI plan generation error" },
+
+  "navHome": "Home",
+  "@navHome": { "description": "Bottom navigation label" },
+
+  "navExplore": "Explore",
+  "@navExplore": { "description": "Bottom navigation label" },
+
+  "navFeeds": "Feeds",
+  "@navFeeds": { "description": "Bottom navigation label" },
+
+  "navChats": "Chats",
+  "@navChats": { "description": "Bottom navigation label" },
+
+  "navProfile": "Profile",
+  "@navProfile": { "description": "Bottom navigation label" },
+
+  "homeTabDiscover": "Home",
+  "@homeTabDiscover": { "description": "Home tab label" },
+
+  "homeTabFeed": "Feeds",
+  "@homeTabFeed": { "description": "Feed tab label" },
+
+  "homeTabBookings": "Bookings",
+  "@homeTabBookings": { "description": "Bookings tab label" },
+
+  "homeTabGroups": "Groups",
+  "@homeTabGroups": { "description": "Groups tab label" },
+
+  "homeTabProfile": "Profile",
+  "@homeTabProfile": { "description": "Profile tab label" },
+
+  "homeAIRecommended": "Recommended for You",
+  "@homeAIRecommended": { "description": "AI recommended section header" },
+
+  "homeTrending": "Trending",
+  "@homeTrending": { "description": "Trending section header" },
+
+  "homeNearYou": "Near You",
+  "@homeNearYou": { "description": "Near you section header" },
+
+  "searchServicesProviders": "Search services, providers...",
+  "@searchServicesProviders": { "description": "Home search hint" },
+
+  "myBookings": "My Bookings",
+  "@myBookings": { "description": "Quick action and settings label" },
+
+  "rewards": "Rewards",
+  "@rewards": { "description": "Quick action label" },
+
+  "explore": "Explore",
+  "@explore": { "description": "Explore section CTA" },
+
+  "popular": "Popular",
+  "@popular": { "description": "Popular badge and tab label" },
+
+  "communities": "Communities",
+  "@communities": { "description": "Home and groups screen title" },
+
+  "findYourTribe": "Find your tribe, share your world",
+  "@findYourTribe": { "description": "Communities section tagline" },
+
+  "popularProviders": "Popular Providers",
+  "@popularProviders": { "description": "Home section header" },
+
+  "recentSearches": "Recent searches",
+  "@recentSearches": { "description": "Recent searches section header" },
+
+  "maybeLater": "Maybe later",
+  "@maybeLater": { "description": "Dismiss dialog button" },
+
+  "bookingTitle": "Bookings",
+  "@bookingTitle": { "description": "Bookings screen app bar title" },
+
+  "bookingUpcoming": "Upcoming",
+  "@bookingUpcoming": { "description": "Upcoming bookings tab" },
+
+  "bookingPast": "Past",
+  "@bookingPast": { "description": "Past bookings tab" },
+
+  "bookingPending": "Pending",
+  "@bookingPending": { "description": "Pending bookings tab" },
+
+  "clientRequests": "Client Requests",
+  "@clientRequests": { "description": "Bookings tab label" },
+
+  "mySwaps": "My Swaps",
+  "@mySwaps": { "description": "Bookings tab label" },
+
+  "bookingStatusPending": "Pending",
+  "@bookingStatusPending": { "description": "Booking status: pending" },
+
+  "bookingStatusConfirmed": "Confirmed",
+  "@bookingStatusConfirmed": { "description": "Booking status: confirmed" },
+
+  "bookingStatusCompleted": "Completed",
+  "@bookingStatusCompleted": { "description": "Booking status: completed" },
+
+  "bookingStatusCancelled": "Cancelled",
+  "@bookingStatusCancelled": { "description": "Booking status: cancelled" },
+
+  "bookingCancelButton": "Cancel Booking",
+  "@bookingCancelButton": { "description": "Cancel booking button" },
+
+  "bookingConfirmCancel": "Are you sure you want to cancel this booking?",
+  "@bookingConfirmCancel": { "description": "Confirm booking cancellation dialog" },
+
+  "bookingNoUpcoming": "No service booked yet.",
+  "@bookingNoUpcoming": { "description": "Empty upcoming bookings state" },
+
+  "bookingNoPast": "No requests received yet.",
+  "@bookingNoPast": { "description": "Empty past bookings state" },
+
+  "filterOngoing": "Ongoing",
+  "@filterOngoing": { "description": "Booking filter chip" },
+
+  "filterCompleted": "Completed",
+  "@filterCompleted": { "description": "Booking filter chip" },
+
+  "filterUpcoming": "Upcoming",
+  "@filterUpcoming": { "description": "Booking filter chip" },
+
+  "requestAccepted": "Request Accepted! Client notified.",
+  "@requestAccepted": { "description": "Provider accept booking snackbar" },
+
+  "requestRejected": "Request Rejected.",
+  "@requestRejected": { "description": "Provider reject booking snackbar" },
+
+  "reject": "Reject",
+  "@reject": { "description": "Reject booking request button" },
+
+  "accept": "Accept",
+  "@accept": { "description": "Accept booking request button" },
+
+  "trackStatus": "Track Status",
+  "@trackStatus": { "description": "Open booking tracking button" },
+
+  "happeningNow": "🔴 Happening Now!",
+  "@happeningNow": { "description": "Urgent booking time badge" },
+
+  "tomorrow": "tomorrow",
+  "@tomorrow": { "description": "Relative time next day" },
+
+  "waitingApproval": "Waiting Approval",
+  "@waitingApproval": { "description": "Booking status label" },
+
+  "skillSwap": "Skill Swap",
+  "@skillSwap": { "description": "Zero-price booking label" },
+
+  "noSwapsYet": "No Swaps Yet",
+  "@noSwapsYet": { "description": "Swaps empty state title" },
+
+  "noSwapsYetDescription": "Exchange skills with others.\nBrowse the Swap Board to find your first match.",
+  "@noSwapsYetDescription": { "description": "Swaps empty state body" },
+
+  "browseSwapBoard": "Browse Swap Board",
+  "@browseSwapBoard": { "description": "Swaps empty state CTA" },
+
+  "swapActive": "Swap Active",
+  "@swapActive": { "description": "Confirmed swap status" },
+
+  "markDone": "Mark Done",
+  "@markDone": { "description": "Complete swap/task button" },
+
+  "servicesTitle": "Services",
+  "@servicesTitle": { "description": "Services screen title" },
+
+  "servicePrice": "Price",
+  "@servicePrice": { "description": "Price label on service card" },
+
+  "serviceHourlyRate": "/ hr",
+  "@serviceHourlyRate": { "description": "Hourly rate suffix" },
+
+  "serviceAddToCart": "Add to Cart",
+  "@serviceAddToCart": { "description": "Add to cart button" },
+
+  "serviceBookNow": "Book Now",
+  "@serviceBookNow": { "description": "Book now button" },
+
+  "serviceAbout": "About This Service",
+  "@serviceAbout": { "description": "About section on service detail" },
+
+  "serviceProvider": "Provider",
+  "@serviceProvider": { "description": "Provider section label" },
+
+  "serviceReviews": "Reviews",
+  "@serviceReviews": { "description": "Reviews section label" },
+
+  "noServicesFound": "No services found",
+  "@noServicesFound": { "description": "Explore empty state title" },
+
+  "noServicesFoundSubtitle": "New services will appear here once available.",
+  "@noServicesFoundSubtitle": { "description": "Explore empty state subtitle" },
+
+  "createService": "Create Service",
+  "@createService": { "description": "Create service button" },
+
+  "addService": "Add\nService",
+  "@addService": { "description": "Dashboard quick action" },
+
+  "myServices": "My\nServices",
+  "@myServices": { "description": "Dashboard quick action" },
+
+  "cartTitle": "My Cart",
+  "@cartTitle": { "description": "Cart screen title" },
+
+  "cartEmpty": "Your cart is empty.",
+  "@cartEmpty": { "description": "Empty cart message" },
+
+  "cartTotal": "Total",
+  "@cartTotal": { "description": "Cart total label" },
+
+  "cartCheckout": "Confirm Booking",
+  "@cartCheckout": { "description": "Checkout button" },
+
+  "cartRemoveItem": "Remove",
+  "@cartRemoveItem": { "description": "Remove item from cart" },
+
+  "paymentTitle": "Payment",
+  "@paymentTitle": { "description": "Payment screen title" },
+
+  "paymentConfirm": "Confirm Payment",
+  "@paymentConfirm": { "description": "Confirm payment button" },
+
+  "paymentSuccess": "Booking Confirmed!",
+  "@paymentSuccess": { "description": "Payment success message" },
+
+  "paymentFailed": "Payment failed. Please try again.",
+  "@paymentFailed": { "description": "Payment failed message" },
+
+  "paymentCancelled": "Payment Cancelled",
+  "@paymentCancelled": { "description": "Stripe cancel snackbar" },
+
+  "profileTitle": "Profile",
+  "@profileTitle": { "description": "Profile screen title" },
+
+  "profileEdit": "Edit Profile",
+  "@profileEdit": { "description": "Edit profile button" },
+
+  "profileBookings": "My Bookings",
+  "@profileBookings": { "description": "Bookings menu item in profile" },
+
+  "profileLogout": "Log Out",
+  "@profileLogout": { "description": "Logout button in profile" },
+
+  "profileLogoutConfirm": "Are you sure you want to log out?",
+  "@profileLogoutConfirm": { "description": "Logout confirmation dialog" },
+
+  "profileReviews": "Reviews",
+  "@profileReviews": { "description": "Reviews section on profile" },
+
+  "profileFollowers": "Followers",
+  "@profileFollowers": { "description": "Followers count label" },
+
+  "profileFollowing": "Following",
+  "@profileFollowing": { "description": "Following count label" },
+
+  "profileFollow": "Follow",
+  "@profileFollow": { "description": "Follow button" },
+
+  "profileUnfollow": "Unfollow",
+  "@profileUnfollow": { "description": "Unfollow button" },
+
+  "failedToLoadProfile": "Failed to load profile",
+  "@failedToLoadProfile": { "description": "Profile load error" },
+
+  "noBioAdded": "No bio added",
+  "@noBioAdded": { "description": "Empty profile bio" },
+
+  "walletBalance": "Wallet Balance",
+  "@walletBalance": { "description": "Profile wallet card label" },
+
+  "launchOfferProTrial": "Launch Offer: Pro Trial Active",
+  "@launchOfferProTrial": { "description": "Trial banner title" },
+
+  "accountUsage": "Account Usage",
+  "@accountUsage": { "description": "Subscription usage section" },
+
+  "upgradePlan": "Upgrade Plan",
+  "@upgradePlan": { "description": "Open subscription plans button" },
+
+  "foundingMember": "🌟 Founding Member",
+  "@foundingMember": { "description": "Founding member badge" },
+
+  "businessTools": "Business Tools",
+  "@businessTools": { "description": "Profile business tools section" },
+
+  "editProfile": "Edit Profile",
+  "@editProfile": { "description": "Business tool and settings label" },
+
+  "generalSettings": "General Settings",
+  "@generalSettings": { "description": "Settings section header" },
+
+  "personalInformation": "Personal Information",
+  "@personalInformation": { "description": "Settings item" },
+
+  "settingsTitle": "Settings",
+  "@settingsTitle": { "description": "Settings screen title" },
+
+  "settingsLanguage": "Language",
+  "@settingsLanguage": { "description": "Language setting item" },
+
+  "settingsNotifications": "Notifications",
+  "@settingsNotifications": { "description": "Notifications setting item" },
+
+  "settingsSecurity": "Password & Security",
+  "@settingsSecurity": { "description": "Security setting item" },
+
+  "settingsHelp": "Help Center",
+  "@settingsHelp": { "description": "Help & support setting item" },
+
+  "settingsAbout": "About LifeKit",
+  "@settingsAbout": { "description": "About setting item" },
+
+  "settingsDeleteAccount": "Delete Account",
+  "@settingsDeleteAccount": { "description": "Delete account setting item" },
+
+  "helpCenter": "Help Center",
+  "@helpCenter": { "description": "Settings item" },
+
+  "support": "Support",
+  "@support": { "description": "Support section header" },
+
+  "logOut": "Log Out",
+  "@logOut": { "description": "Logout settings item" },
+
+  "walletTitle": "Wallet",
+  "@walletTitle": { "description": "Wallet screen title" },
+
+  "walletTopUp": "Top Up",
+  "@walletTopUp": { "description": "Top up wallet button" },
+
+  "walletWithdraw": "Withdraw",
+  "@walletWithdraw": { "description": "Withdraw from wallet button" },
+
+  "walletTransactions": "Transaction History",
+  "@walletTransactions": { "description": "Transaction history section" },
+
+  "walletNoTransactions": "No transactions yet.",
+  "@walletNoTransactions": { "description": "Empty wallet transactions state" },
+
+  "walletSettingsComingSoon": "Wallet settings are coming soon!",
+  "@walletSettingsComingSoon": { "description": "Wallet settings snackbar" },
+
+  "withdraw": "Withdraw",
+  "@withdraw": { "description": "Withdraw dialog title" },
+
+  "enterAmount": "Enter amount",
+  "@enterAmount": { "description": "Amount input hint" },
+
+  "enterValidAmount": "Enter a valid amount.",
+  "@enterValidAmount": { "description": "Withdraw validation" },
+
+  "amountExceedsBalance": "Amount exceeds balance.",
+  "@amountExceedsBalance": { "description": "Withdraw validation" },
+
+  "withdrawalCompleted": "Withdrawal completed.",
+  "@withdrawalCompleted": { "description": "Withdraw success snackbar" },
+
+  "weeklyIncome": "Weekly Income",
+  "@weeklyIncome": { "description": "Wallet stats label" },
+
+  "points": "Points",
+  "@points": { "description": "Wallet points label" },
+
+  "addMoney": "Add Money",
+  "@addMoney": { "description": "Wallet action button" },
+
+  "setupPayouts": "Setup Payouts",
+  "@setupPayouts": { "description": "Stripe connect CTA" },
+
+  "scan": "Scan",
+  "@scan": { "description": "Wallet QR scan button" },
+
+  "qrScanComingSoon": "QR scan payments are coming soon!",
+  "@qrScanComingSoon": { "description": "QR scan snackbar" },
+
+  "fundWallet": "Fund Wallet",
+  "@fundWallet": { "description": "Add money screen title" },
+
+  "minimumDepositFive": "Minimum deposit is $5",
+  "@minimumDepositFive": { "description": "Deposit minimum validation" },
+
+  "walletFundedSuccessfully": "Wallet funded successfully!",
+  "@walletFundedSuccessfully": { "description": "Deposit success snackbar" },
+
+  "minimumDepositAmount": "Minimum deposit: $5.00",
+  "@minimumDepositAmount": { "description": "Add money helper text" },
+
+  "payWithCard": "Pay with Card",
+  "@payWithCard": { "description": "Stripe payment button" },
+
+  "securedByStripe": "Secured by Stripe",
+  "@securedByStripe": { "description": "Payment security badge" },
+
+  "groupsTitle": "Communities",
+  "@groupsTitle": { "description": "Groups screen title" },
+
+  "groupsJoin": "Join",
+  "@groupsJoin": { "description": "Join group button" },
+
+  "groupsLeave": "Leave",
+  "@groupsLeave": { "description": "Leave group button" },
+
+  "groupsMembers": "Members",
+  "@groupsMembers": { "description": "Members count label" },
+
+  "groupsCreateGroup": "Create",
+  "@groupsCreateGroup": { "description": "Create group button" },
+
+  "groupsNoGroups": "No groups found.",
+  "@groupsNoGroups": { "description": "Empty groups state" },
+
+  "findYourPeople": "Find your people, share your world",
+  "@findYourPeople": { "description": "Communities screen subtitle" },
+
+  "feedTitle": "Feeds",
+  "@feedTitle": { "description": "Feed screen title" },
+
+  "feedNewPost": "Share something…",
+  "@feedNewPost": { "description": "Feed new post placeholder" },
+
+  "feedLike": "Like",
+  "@feedLike": { "description": "Like post button" },
+
+  "feedComment": "Comment",
+  "@feedComment": { "description": "Comment on post button" },
+
+  "feedShare": "Share",
+  "@feedShare": { "description": "Share post button" },
+
+  "feedNoPost": "No posts yet. Be the first to share!",
+  "@feedNoPost": { "description": "Empty feed state" },
+
+  "placesTitle": "Places",
+  "@placesTitle": { "description": "Places screen title" },
+
+  "searchPlacesHint": "Search restaurants, cafés, hotels...",
+  "@searchPlacesHint": { "description": "Places search field hint" },
+
+  "noPlacesNearby": "No places nearby",
+  "@noPlacesNearby": { "description": "Empty places state" },
+
+  "locatingYou": "Locating you...",
+  "@locatingYou": { "description": "Places loading status" },
+
+  "findingPlacesNearYou": "Finding places near you...",
+  "@findingPlacesNearYou": { "description": "Places fetch status" },
+
+  "categoryAll": "All",
+  "@categoryAll": { "description": "Places category filter" },
+
+  "categoryRestaurant": "Restaurant",
+  "@categoryRestaurant": { "description": "Places category filter" },
+
+  "categoryCafe": "Café",
+  "@categoryCafe": { "description": "Places category filter" },
+
+  "categoryHotel": "Hotel",
+  "@categoryHotel": { "description": "Places category filter" },
+
+  "notificationsTitle": "Notifications",
+  "@notificationsTitle": { "description": "Notifications screen title" },
+
+  "notificationsEmpty": "No notifications yet.",
+  "@notificationsEmpty": { "description": "Empty notifications state" },
+
+  "notificationsMarkAllRead": "Mark all as read",
+  "@notificationsMarkAllRead": { "description": "Mark all notifications as read" },
+
+  "languageTitle": "Language",
+  "@languageTitle": { "description": "Language settings screen title" },
+
+  "languageEnglish": "English",
+  "@languageEnglish": { "description": "English language option" },
+
+  "languageGeorgian": "Georgian",
+  "@languageGeorgian": { "description": "Georgian language option" },
+
+  "languageRussian": "Russian",
+  "@languageRussian": { "description": "Russian language option" },
+
+  "languageNativeGeorgian": "ქართული",
+  "@languageNativeGeorgian": { "description": "Georgian language native name" },
+
+  "languageNativeRussian": "Русский",
+  "@languageNativeRussian": { "description": "Russian language native name" },
+
+  "subscriptionPlanFree": "Free",
+  "@subscriptionPlanFree": { "description": "Free subscription plan" },
+
+  "subscriptionPlanPro": "Pro",
+  "@subscriptionPlanPro": { "description": "Pro subscription plan" },
+
+  "subscriptionPlanBusiness": "Business",
+  "@subscriptionPlanBusiness": { "description": "Business subscription plan" },
+
+  "subscriptionUpgrade": "Upgrade Plan",
+  "@subscriptionUpgrade": { "description": "Upgrade plan button" },
+
+  "chatTitle": "Messages",
+  "@chatTitle": { "description": "Chat screen title" },
+
+  "chatInputPlaceholder": "Type a message…",
+  "@chatInputPlaceholder": { "description": "Chat input placeholder" },
+
+  "chatSend": "Send",
+  "@chatSend": { "description": "Chat send button" },
+
+  "chatNoMessages": "No messages yet. Start the conversation!",
+  "@chatNoMessages": { "description": "Empty chat state" },
+
+  "providerDashboard": "Dashboard",
+  "@providerDashboard": { "description": "Provider dashboard title" },
+
+  "quickActions": "Quick Actions",
+  "@quickActions": { "description": "Dashboard section label" },
+
+  "totalEarnings": "Total Earnings",
+  "@totalEarnings": { "description": "Dashboard earnings label" },
+
+  "thisWeek": "This Week",
+  "@thisWeek": { "description": "Dashboard period label" },
+
+  "jobsDone": "Jobs Done",
+  "@jobsDone": { "description": "Dashboard stat label" },
+
+  "avgRating": "Avg Rating",
+  "@avgRating": { "description": "Dashboard stat label" },
+
+  "aiOpportunityRadar": "AI Opportunity Radar",
+  "@aiOpportunityRadar": { "description": "Dashboard AI section title" },
+
+  "servicesYouCouldOffer": "Services you could offer right now",
+  "@servicesYouCouldOffer": { "description": "AI opportunities subtitle" },
+
+  "noOpportunitiesFound": "No opportunities found right now.",
+  "@noOpportunitiesFound": { "description": "AI opportunities empty" },
+
+  "createServiceButton": "Create Service",
+  "@createServiceButton": { "description": "AI opportunity CTA" },
+
+  "reviewsTitle": "Reviews",
+  "@reviewsTitle": { "description": "Reviews screen title" },
+
+  "reviewsWriteReview": "Write a Review",
+  "@reviewsWriteReview": { "description": "Write review button" },
+
+  "reviewsNoReviews": "No reviews yet.",
+  "@reviewsNoReviews": { "description": "Empty reviews state" },
+
+  "reviewsRatePlaceholder": "Write a comment (optional)...",
+  "@reviewsRatePlaceholder": { "description": "Review text placeholder" },
+
+  "reviewsSubmit": "Submit Review",
+  "@reviewsSubmit": { "description": "Submit review button" },
+
+  "reviewSubmitted": "Review Submitted!",
+  "@reviewSubmitted": { "description": "Leave review success snackbar" },
+
+  "anonymous": "Anonymous",
+  "@anonymous": { "description": "Reviewer name fallback" },
+
+  "skillSwapTitle": "Skill Swap",
+  "@skillSwapTitle": { "description": "Skill swap screen title" },
+
+  "skillSwapDiscover": "Discover Swaps",
+  "@skillSwapDiscover": { "description": "Discover swaps tab" },
+
+  "skillSwapPropose": "Propose a Swap",
+  "@skillSwapPropose": { "description": "Propose swap button" },
+
+  "skillSwapAccept": "Accept",
+  "@skillSwapAccept": { "description": "Accept swap button" },
+
+  "skillSwapDecline": "Decline",
+  "@skillSwapDecline": { "description": "Decline swap button" },
+
+  "skillSwapNoSwaps": "No swap offers available.",
+  "@skillSwapNoSwaps": { "description": "Empty skill swap state" },
+
+  "aiAssistantTitle": "AI Assistant",
+  "@aiAssistantTitle": { "description": "AI assistant screen title" },
+
+  "aiAssistantPlaceholder": "Ask me anything about LifeKit…",
+  "@aiAssistantPlaceholder": { "description": "AI assistant input placeholder" },
+
+  "aiAssistantSend": "Send",
+  "@aiAssistantSend": { "description": "AI assistant send button" },
+
+  "providerFallback": "Provider",
+  "@providerFallback": { "description": "Fallback provider name" },
+
+  "userFallback": "User",
+  "@userFallback": { "description": "Fallback display name" },
+
+  "unknown": "Unknown",
+  "@unknown": { "description": "Fallback unknown entity" },
+
+  "untitled": "Untitled",
+  "@untitled": { "description": "Fallback untitled service" },
+
+  "completed": "Completed",
+  "@completed": { "description": "Status label" },
+
+  "cancelled": "Cancelled",
+  "@cancelled": { "description": "Status label" },
+
+  "pending": "Pending",
+  "@pending": { "description": "Status label" },
+
+  "confirmed": "Confirmed",
+  "@confirmed": { "description": "Status label" },
+
+  "success": "Success",
+  "@success": { "description": "Transaction status label" },
+
+  "noDataYet": "No data yet",
+  "@noDataYet": { "description": "Chart empty state" },
+
+  "refresh": "Refresh",
+  "@refresh": { "description": "Refresh button tooltip" },
+
+  "loginSlideProgressTitle": "Your Progress Awaits",
+  "@loginSlideProgressTitle": { "description": "Login slider slide 2 title" },
+
+  "loginSlideProgressSubtitle": "Keep the momentum going",
+  "@loginSlideProgressSubtitle": { "description": "Login slider slide 2 subtitle" },
+
+  "loginSlideAITitle": "AI Insights Ready",
+  "@loginSlideAITitle": { "description": "Login slider slide 3 title" },
+
+  "loginSlideAISubtitle": "Fresh personalized recommendations",
+  "@loginSlideAISubtitle": { "description": "Login slider slide 3 subtitle" },
+
+  "loginSlideCommunityTitle": "Your Community",
+  "@loginSlideCommunityTitle": { "description": "Login slider slide 4 title" },
+
+  "loginSlideCommunitySubtitle": "See what's happening in your circle",
+  "@loginSlideCommunitySubtitle": { "description": "Login slider slide 4 subtitle" },
+
+  "signupSlideWelcomeSubtitle": "Your all-in-one personal growth companion",
+  "@signupSlideWelcomeSubtitle": { "description": "Signup slider slide 1 subtitle" },
+
+  "signupSlideHabitsTitle": "Build Better Habits",
+  "@signupSlideHabitsTitle": { "description": "Signup slider slide 2 title" },
+
+  "signupSlideHabitsSubtitle": "Track goals, streaks & daily progress",
+  "@signupSlideHabitsSubtitle": { "description": "Signup slider slide 2 subtitle" },
+
+  "signupSlideAITitle": "AI-Powered Coaching",
+  "@signupSlideAITitle": { "description": "Signup slider slide 3 title" },
+
+  "signupSlideAISubtitle": "Personalized insights that help you grow",
+  "@signupSlideAISubtitle": { "description": "Signup slider slide 3 subtitle" },
+
+  "signupSlideCommunityTitle": "Vibrant Community",
+  "@signupSlideCommunityTitle": { "description": "Signup slider slide 4 title" },
+
+  "signupSlideCommunitySubtitle": "Connect, share & stay inspired together",
+  "@signupSlideCommunitySubtitle": { "description": "Signup slider slide 4 subtitle" },
+
+  "homeHelloGreeting": "Hello {name} 👋",
+  "@homeHelloGreeting": {
+    "description": "Greeting on the home screen with the user's first name",
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "homeWelcomeTagline": "Explore the shores of delta oceans",
+  "@homeWelcomeTagline": { "description": "Sub-heading under the home greeting" },
+
+  "homeSpecialOfferAwaits": "{name}, a special offer awaits!",
+  "@homeSpecialOfferAwaits": {
+    "description": "Headline on the offer banner",
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "homeOfferTitle": "Get 20% off your\nfirst booking!",
+  "@homeOfferTitle": { "description": "Default offer banner title" },
+
+  "homeOfferValidUntil": "Valid until Oct 30",
+  "@homeOfferValidUntil": { "description": "Default offer banner subtitle" },
+
+  "homeTopSwapOpportunities": "🔄 Top Swap Opportunities",
+  "@homeTopSwapOpportunities": { "description": "Swap section header" },
+
+  "homeCommunitiesCount": "{count} Communities",
+  "@homeCommunitiesCount": {
+    "description": "Communities count badge on home",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "homeBrowseAll": "Browse All →",
+  "@homeBrowseAll": { "description": "Communities browse all button" },
+
+  "homeMoreServices": "More\nServices",
+  "@homeMoreServices": { "description": "Services row CTA chip" },
+
+  "homeMyServiceBadge": "This is your service. Manage it from My Services.",
+  "@homeMyServiceBadge": { "description": "Tooltip when user taps their own service" },
+
+  "homeDailyTaskTitle": "Gracia's Daily Task",
+  "@homeDailyTaskTitle": { "description": "AI daily task card title" },
+
+  "homeDailyTaskDay": "Day {dayNum}",
+  "@homeDailyTaskDay": {
+    "description": "Day number badge on daily task card",
+    "placeholders": { "dayNum": { "type": "int" } }
+  },
+
+  "homeDailyTaskMarkDone": "Mark Done",
+  "@homeDailyTaskMarkDone": { "description": "Mark daily task done button" },
+
+  "homeWelcomeBackOpportunities": "Welcome back! {days}d of new opportunities",
+  "@homeWelcomeBackOpportunities": {
+    "description": "Returning user banner with days since last visit",
+    "placeholders": { "days": { "type": "int" } }
+  },
+
+  "homeCategoryNearby": "Nearby",
+  "@homeCategoryNearby": { "description": "Places filter chip" },
+
+  "homeCategoryLocal": "Local",
+  "@homeCategoryLocal": { "description": "Places filter chip" },
+
+  "homeCategoryConvenient": "Convenient",
+  "@homeCategoryConvenient": { "description": "Places filter chip" },
+
+  "homeCategoryCentral": "Central",
+  "@homeCategoryCentral": { "description": "Places filter chip" },
+
+  "exploreDiscoverBadge": "✦ Discover",
+  "@exploreDiscoverBadge": { "description": "Discover badge on explore header" },
+
+  "exploreFindBest": "Find the best\nservices near you",
+  "@exploreFindBest": { "description": "Explore screen header" },
+
+  "exploreServicesAvailable": "{count}+ services available",
+  "@exploreServicesAvailable": {
+    "description": "Explore subtitle showing service count",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "exploreFeaturedProfessionals": "Featured Professionals",
+  "@exploreFeaturedProfessionals": { "description": "Section header" },
+
+  "exploreFeaturedProfessional": "Featured Professional",
+  "@exploreFeaturedProfessional": { "description": "Provider card subtitle" },
+
+  "exploreBrowseCategories": "Browse Categories",
+  "@exploreBrowseCategories": { "description": "Section header" },
+
+  "exploreAllServices": "All Services",
+  "@exploreAllServices": { "description": "Section header" },
+
+  "exploreCityPulse": "City Pulse",
+  "@exploreCityPulse": { "description": "AI insight banner title" },
+
+  "exploreTapToExplore": "Tap to explore: {category} →",
+  "@exploreTapToExplore": {
+    "description": "Tap-to-explore prompt on City Pulse banner",
+    "placeholders": { "category": { "type": "String" } }
+  },
+
+  "skillSwap": "Skill Swap",
+  "@skillSwap": { "description": "Skill Swap FAB label" },
+
+  "categoryYourListing": "Your Listing",
+  "@categoryYourListing": { "description": "Badge on the user's own service card" },
+
+  "homeYourServiceBadge": "Your Service",
+  "@homeYourServiceBadge": { "description": "Small badge shown on the user's own service cards in lists" },
+
+  "categoryMoreProviders": "More Providers",
+  "@categoryMoreProviders": { "description": "Section header on category items screen" },
+
+  "categoryShowingResults": "Showing {count} results",
+  "@categoryShowingResults": {
+    "description": "Search results count",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "categorySearchHint": "Search {category}...",
+  "@categorySearchHint": {
+    "description": "Search hint that includes the category name",
+    "placeholders": { "category": { "type": "String" } }
+  },
+
+  "profileNoBio": "No bio added",
+  "profileBusinessTools": "Business Tools",
+  "profileToolDashboard": "Dashboard",
+  "profileToolServices": "Services",
+  "profileToolAIPremium": "AI Premium",
+  "profileToolRewards": "Rewards",
+  "profileAIPremiumComingSoon": "AI Premium Tools coming soon!",
+  "profileRewardsComingSoon": "Rewards coming soon!",
+  "profileGeneralSettings": "General Settings",
+  "profileAISetupGuide": "AI Setup Guide",
+  "profileAISetupSubtitle": "Generate your 7-Day Success Plan",
+  "profilePersonalInfo": "Personal Information",
+  "profileSupport": "Support",
+
+  "tierFree": "Free",
+  "tierPlus": "Plus",
+  "tierPro": "Pro",
+  "tierBusiness": "Business",
+
+  "securityLoginDetails": "Login Details",
+  "securityCurrentPassword": "Current Password",
+  "securityNewPassword": "New Password",
+  "securityConfirmPassword": "Confirm New Password",
+  "securityChangePassword": "Change Password",
+  "securityForgotPassword": "Forgot your password?",
+  "securityAdvanced": "Advanced Security",
+  "securityBiometric": "Biometric Login",
+  "securityBiometricSubtitle": "FaceID / TouchID",
+  "securityTwoFactor": "Two-Factor Authentication",
+  "security2FAComingSoon": "2FA Setup coming soon",
+  "securityDeleteAccount": "Delete Account",
+  "securityDeleteWarning": "This action is irreversible. All your data will be lost.",
+  "securityDelete": "Delete",
+  "securityCancel": "Cancel",
+  "securityPasswordMismatch": "New passwords do not match",
+  "securityPasswordTooShort": "New password must be at least 6 characters",
+  "securityEnterCurrent": "Please enter your current password",
+  "securityPasswordUpdated": "Password updated successfully!",
+
+  "notifPush": "Push Notifications",
+  "notifPushSubtitle": "Receive messages and booking updates",
+  "notifEmail": "Email Notifications",
+  "notifEmailSubtitle": "Receive receipts and digests",
+  "notifPromo": "Promotional Offers",
+  "notifPromoSubtitle": "Coupons and news",
+
+  "langEnglish": "English",
+  "langGeorgian": "Georgian",
+  "langRussian": "Russian",
+
+  "helpMyTickets": "My Tickets",
+  "helpNoTickets": "No tickets yet",
+  "helpContactSupport": "Contact Support",
+  "helpSubject": "Subject",
+  "helpMessage": "Message",
+  "helpSubmitTicket": "Submit Ticket",
+  "helpFillBoth": "Please fill subject and message",
+  "helpTicketSubmitted": "Ticket submitted successfully!",
+  "helpSupportTicketDefault": "Support Ticket",
+  "helpFaqCancelQuestion": "How do I cancel a booking?",
+  "helpFaqCancelAnswer": "Go to the bookings tab, select the active booking, and click the 'Cancel' button.",
+  "helpFaqRefundQuestion": "How do refunds work?",
+  "helpFaqRefundAnswer": "Refunds are processed to your wallet immediately after cancellation confirmation.",
+
+  "walletWeeklyIncome": "Weekly Income",
+  "walletPoints": "Points",
+  "walletPointsOf": "of {total}",
+  "@walletPointsOf": {
+    "placeholders": { "total": { "type": "String" } }
+  },
+  "walletAddMoney": "Add Money",
+  "walletWithdraw": "Withdraw",
+  "walletSetupPayouts": "Setup Payouts",
+  "walletScan": "Scan",
+  "walletTransactionHistory": "Transaction History",
+  "walletSuccess": "Success",
+  "walletEnterAmount": "Enter amount",
+  "walletEnterValidAmount": "Enter a valid amount.",
+  "walletAmountExceeds": "Amount exceeds balance.",
+  "walletWithdrawalCompleted": "Withdrawal completed.",
+  "walletSetupFailed": "Setup failed: {error}",
+  "@walletSetupFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "walletWithdrawFailed": "Withdraw failed: {error}",
+  "@walletWithdrawFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "feedsTabFeeds": "Feeds",
+  "feedsTabEvents": "Events",
+  "feedsWhatsOnYourMind": "What's on your mind?",
+  "feedsPhoto": "Photo",
+  "feedsTag": "Tag",
+  "feedsPost": "Post",
+  "feedsCreatePost": "Create Post",
+  "feedsAddTitleOptional": "Add a title (optional)",
+  "feedsTrending": "Trending",
+  "feedsLive": "LIVE",
+  "feedsTrendingSkillOffer": "Skill Offer",
+  "feedsTrendingTips": "Tips",
+  "feedsTrendingSwap": "Swap",
+  "feedsTrendingLookingFor": "Looking For",
+  "feedsTrendingServices": "Services",
+  "feedsReportPost": "Report Post",
+  "feedsPostReported": "Post reported. Thank you.",
+  "profilePrivacyPolicy": "Privacy Policy",
+  "profileTermsOfService": "Terms of Service",
+  "feedsBlockUser": "Block user",
+  "feedsBlockUserConfirm": "You won't see each other's posts. You can unblock them anytime in Profile → Security → Blocked users.",
+  "feedsUserBlocked": "User blocked.",
+  "feedsActionFailed": "Something went wrong. Please try again.",
+  "feedsShare": "Share",
+  "feedsSharedFromLifeKit": "Shared from LifeKit",
+  "feedsDelete": "Delete",
+  "feedsPostDeleted": "Post deleted",
+  "feedsDeleteFailed": "Failed to delete post: {error}",
+  "@feedsDeleteFailed": { "placeholders": { "error": { "type": "String" } } },
+  "feedsLikeFailed": "Failed to update like: {error}",
+  "@feedsLikeFailed": { "placeholders": { "error": { "type": "String" } } },
+  "feedsBookmarkFailed": "Failed to update bookmark: {error}",
+  "@feedsBookmarkFailed": { "placeholders": { "error": { "type": "String" } } },
+  "feedsJustNow": "Just now",
+  "feedsMinAgo": "{count}m ago",
+  "@feedsMinAgo": { "placeholders": { "count": { "type": "int" } } },
+  "feedsHourAgo": "{count}h ago",
+  "@feedsHourAgo": { "placeholders": { "count": { "type": "int" } } },
+  "feedsDayAgo": "{count}d ago",
+  "@feedsDayAgo": { "placeholders": { "count": { "type": "int" } } },
+
+  "eventsSearchHint": "Search events...",
+  "eventsPopularToday": "Popular Today",
+  "eventsSearchResults": "Search Results",
+  "eventsNoFoundFor": "No events found for \"{query}\"",
+  "@eventsNoFoundFor": { "placeholders": { "query": { "type": "String" } } },
+  "eventsNoInCategory": "No events in this category",
+  "eventsCatAll": "All",
+  "eventsCatTheatre": "Theatre",
+  "eventsCatSport": "Sport",
+  "eventsCatFestival": "Festival",
+  "eventsCatTourism": "Tourism",
+  "eventsCatMusic": "Music",
+  "eventsCatFood": "Food",
+
+  "chatsTitle": "Messages",
+  "chatsSearchHint": "Search for chats or services...",
+  "chatsRecentContacts": "Recent Contacts",
+  "chatsTabActive": "Active",
+  "chatsTabFinished": "Finished",
+  "chatsNoActive": "No active conversations right now",
+  "chatsPastWillAppear": "Your past chats will appear here",
+  "chatsStartingNewComingSoon": "Starting a new conversation is coming soon!",
+  "chatsNoMessagesYet": "No messages yet",
+  "chatsGeneral": "General",
+  "chatsJustNow": "Just now",
+  "chatsYesterday": "Yesterday",
+
+  "actionSheetWhatToDo": "What would you like to do?",
+  "actionBookService": "Book Service",
+  "actionBookServiceSubtitle": "Pay & schedule",
+  "actionSkillSwap": "Skill Swap",
+  "actionSkillSwapSubtitle": "Trade skills, no money",
+  "actionNoCash": "✨ No cash",
+  "badgeSwappable": "Swappable",
+
+  "providerDescription": "Service Description",
+  "providerNoDescription": "No description available.",
+  "providerAboutProvider": "About Provider",
+  "providerDefaultBio": "Professional service provider on LifeKit.",
+  "providerInstantConfirmation": "Instant Confirmation",
+  "providerVerifiedProvider": "Verified Provider",
+  "providerTabAbout": "About",
+  "providerTabReviews": "Reviews",
+  "providerTabAvailability": "Availability",
+  "providerTabServices": "Services",
+  "providerSearchServicesHint": "Search services...",
+  "providerBookThisService": "Book This Service",
+  "providerRestrictedTitle": "Restricted",
+  "providerRestrictedBody": "You cannot book your own service.",
+  "providerOk": "OK",
+  "providerOnlineRemote": "Online/Remote",
+  "providerProviderFallback": "Provider",
+  "providerSharedToFeed": "Service shared to feed",
+  "providerShareFailed": "Unable to share service",
+  "providerPriceVaries": "Price Varies",
+  "providerBookNow": "Book Now",
+  "providerRatingsSummary": "Ratings Summary",
+  "providerUserFallback": "User",
+  "providerVerifiedService": "Verified Service",
+  "providerNoReviews": "No reviews yet",
+  "providerBeFirstReview": "Be the first to review and get {points} reward points",
+  "@providerBeFirstReview": { "placeholders": { "points": { "type": "int" } } },
+
+  "bookTitle": "Book Service",
+  "bookQuickSelect": "Quick Select",
+  "bookToday": "Today",
+  "bookTomorrow": "Tomorrow",
+  "bookThisWeekend": "This Weekend",
+  "bookTotal": "Total",
+  "bookNow": "Book Now",
+  "bookLoadingAvailability": "Loading availability...",
+  "bookSelectDate": "Please select a date",
+  "bookSelectAtLeastOneOption": "Please select at least one service option.",
+  "bookNoUpcomingAvailability": "No upcoming availability yet",
+  "bookProviderOffDay": "Provider is off that day. Next available: {date}",
+  "@bookProviderOffDay": { "placeholders": { "date": { "type": "String" } } },
+  "bookUseNext": "Use Next",
+  "bookTimeConflict": "This time slot is already booked.",
+  "bookSelectTime": "Select Time",
+  "bookCancel": "Cancel",
+  "bookDone": "Done",
+  "bookGotIt": "Got it",
+  "bookNoTimeSlots": "No available time slots",
+  "bookHoldOn": "Hold on",
+  "bookSuccess": "Success",
+  "bookCommentSaved": "Comment saved!",
+  "bookServiceType": "Service Type",
+  "bookTypeDefault": "Default",
+  "bookTypeHome": "Home",
+  "bookTypeOutdoor": "Outdoor",
+  "bookFixed": "Fixed",
+  "bookSelectServiceOptions": "Select Service Options",
+  "bookMoreServices": "More Services",
+  "bookServiceTime": "Service Time",
+  "bookAddInstructions": "Add special instructions...",
+
+  "swapTitle": "Skill Swap",
+  "swapPoweredBy": "Powered by Gracia",
+  "swapSelectServiceType": "Select service type",
+  "swapBiDirectional": "Bi-directional AI matching ",
+  "swapBiDirectionalDesc": "finds providers who want what you offer AND offer what you want.",
+  "swapSelectYours": "Select Yours",
+  "swapSelectTarget": "Select Target",
+  "swapLookingForSkill": "Looking for a skill",
+  "swapProposeTo": "Propose Swap to {name}",
+  "@swapProposeTo": { "placeholders": { "name": { "type": "String" } } },
+  "swapFindOtherMatches": "Find Other AI Matches",
+  "swapFindMatch": "Find AI Match",
+  "swapBrowseBoard": "Browse Swap Board",
+  "swapSelectSkillToOffer": "Select a skill to offer",
+  "swapNoServicesCreateFirst": "No services found. Create a service first.",
+  "swapSelectSkillCategory": "Select Skill Category",
+  "swapMatchFound": "Match Found!",
+  "swapAiMatchingFor": "AI matching for",
+  "swapMeLabel": "Me",
+  "swapNoProvidersFound": "No providers found",
+  "swapTryDifferentCategory": "Try a different skill category",
+  "swapAiMatched": "AI Matched",
+  "swapMatchTag": "Match",
+  "swapRatingNew": "New",
+  "swapOtherAiMatches": "Other AI Matches",
+  "swapUserFallback": "User",
+  "swapSendProposal": "Send Swap Proposal",
+  "swapYouOffer": "You offer",
+  "swapYouReceive": "You receive",
+  "swapPreferredDate": "Preferred Date",
+  "swapMessagePlaceholder": "E.g. \"Happy to be flexible on timing, let me know!\"",
+  "swapSendProposalBtn": "Send Proposal",
+  "swapProposalSent": "Swap Proposal Sent!",
+  "swapAcceptedToast": "Swap Accepted! Check your bookings.",
+  "swapDeclinedToast": "Swap declined.",
+  "swapCancelledToast": "Swap proposal cancelled.",
+  "swapBookingNotFound": "Booking not found for this swap.",
+  "swapSelectServiceToOffer": "Please select a service you want to offer.",
+  "swapSelectSkillLookingFor": "Please select a skill you are looking for.",
+  "swapServiceFallback": "Service",
+  "swapProviderFallback": "Provider",
+  "swapDirectSelection": "Direct service selection",
+  "swapPotentialMatch": "Potential match",
+  "swapGoodMatch": "Good complementary match",
+  "swapUnknown": "Unknown",
+  "swapBoardTitle": "Swap Board",
+  "swapBoardSubtitle": "AI-ranked matches for you",
+  "swapTabDiscover": "Discover",
+  "swapTabIncoming": "Incoming",
+  "swapTabOutgoing": "Outgoing",
+  "swapNoSwapsYet": "No swaps yet",
+  "swapEnableHint": "Enable Skill Swap on your services and others will appear here!",
+  "swapPeopleLookingToTrade": "People actively looking to trade skills",
+  "swapServicesFromProviders": "Services from providers willing to trade",
+  "swapNoIncoming": "No incoming proposals",
+  "swapIncomingHint": "Proposals will appear here",
+  "swapNoOutgoing": "No outgoing proposals",
+  "swapOutgoingHint": "Start by finding a match!",
+  "swapPriceOnRequest": "Price on request",
+  "swapMyServiceMessage": "This is your service. Manage it from My Services.",
+  "swapUntitled": "Untitled",
+  "swapDecline": "Decline",
+  "swapYoursLabel": "Yours",
+  "swapYourServiceBadge": "Your Service",
+
+  "bookingsMyBookings": "My Bookings",
+  "bookingsClientRequests": "Client Requests",
+  "bookingsMySwaps": "My Swaps",
+  "bookingsNoneYet": "No service booked yet.",
+  "bookingsFilterOngoing": "Ongoing",
+  "bookingsFilterCompleted": "Completed",
+  "bookingsFilterUpcoming": "Upcoming",
+  "bookingsNoRequestsYet": "No requests received yet.",
+  "bookingsProviderFallback": "Provider",
+  "bookingsClientFallback": "Client",
+  "bookingsUpcomingDue": "Upcoming Due",
+  "bookingsWaitingApproval": "Waiting Approval",
+  "bookingsSkillSwap": "Skill Swap",
+  "bookingsMessageForDetails": "Message provider for details",
+  "bookingsTrackStatus": "Track Status",
+  "bookingsReject": "Reject",
+  "bookingsAccept": "Accept",
+  "bookingsRequestAccepted": "Request Accepted! Client notified.",
+  "bookingsRequestRejected": "Request Rejected.",
+  "bookingsOverdue": "OVERDUE",
+  "bookingsActiveAndPastSwaps": "Active & Past Swaps",
+  "bookingsPendingSwap": "{count} Pending Swap Proposal",
+  "@bookingsPendingSwap": { "placeholders": { "count": { "type": "int" } } },
+  "bookingsPendingSwaps": "{count} Pending Swap Proposals",
+  "@bookingsPendingSwaps": { "placeholders": { "count": { "type": "int" } } },
+  "bookingsTapToView": "Tap to view and respond",
+  "bookingsTapToViewSent": "Tap to view your sent proposals",
+  "bookingsServiceFallback": "Service",
+  "bookingsPartnerFallback": "Partner",
+  "bookingsSwapActive": "Swap Active",
+  "bookingsAwaiting": "Awaiting",
+  "bookingsSwapBadge": "SWAP",
+  "bookingsMessage": "Message",
+  "bookingsMarkDone": "Mark Done",
+  "bookingsNoSwapsYet": "No Swaps Yet",
+  "bookingsBrowseSwapBoard": "Browse Swap Board",
+  "aiGraciaGreeting": "Hello! I'm Gracia, your LifeKit assistant — here to help you discover services, find your community, and make the most of your day. What can I do for you?",
+  "aiAlwaysHereForYou": "Always here for you",
+  "aiMessageHint": "Message Gracia…",
+  "aiGenericError": "Something went wrong. Please try again.",
+  "aiFallbackReply": "Sorry, I could not get a response.",
+  "aiProFeatureTitle": "Pro Feature",
+  "aiProFeatureBody": "Gracia is available on Pro and Business plans. Upgrade to unlock AI chat, smart recommendations, and more.",
+  "aiMaybeLater": "Maybe Later",
+  "aiUpgradeNow": "Upgrade Now ⚡",
+  "aiActionViewFallback": "View",
+  "walletLoadingWallet": "Loading wallet...",
+  "walletAccountUsage": "Account Usage",
+  "walletLoadingUsage": "Loading usage...",
+  "walletSlotsUsedUnlimited": "Slots Used: {count}/∞ (Includes Drafts & Pending)",
+  "@walletSlotsUsedUnlimited": { "placeholders": { "count": { "type": "int" } } },
+  "walletSlotsUsedLimited": "Slots Used: {count}/{limit} (Includes Drafts & Pending)",
+  "@walletSlotsUsedLimited": { "placeholders": { "count": { "type": "int" }, "limit": { "type": "int" } } },
+  "walletRenewsInDays": "Renews in {days} days",
+  "@walletRenewsInDays": { "placeholders": { "days": { "type": "int" } } },
+  "walletUpgradePlan": "Upgrade Plan",
+  "trialBannerTitle": "Launch Offer: Pro Trial Active",
+  "trialBannerSubtitle": "Renews in {days} days • Ends {date}",
+  "@trialBannerSubtitle": { "placeholders": { "days": { "type": "int" }, "date": { "type": "String" } } },
+  "trialPerkServices": "✔ 5 Services",
+  "trialPerkCommission": "✔ 3% Commission",
+  "trialPerkAI": "✔ Pro AI",
+  "subscriptionPlansTitle": "Subscription Plans",
+  "subscriptionGoPremium": "Go Premium",
+  "subscriptionGoPremiumSubtitle": "Unlock more services, more communities, and faster growth.",
+  "subscriptionPopular": "Popular",
+  "subscriptionCurrentPlan": "Current Plan",
+  "subscriptionFreePlan": "Free Plan",
+  "subscriptionUpgrade": "Upgrade",
+  "subscriptionPerMonth": "{price}/mo",
+  "@subscriptionPerMonth": { "placeholders": { "price": { "type": "String" } } },
+  "subscriptionActiveUntil": "Subscription active until {date}",
+  "@subscriptionActiveUntil": { "placeholders": { "date": { "type": "String" } } },
+  "subscriptionInsufficientFundsTitle": "Insufficient Funds",
+  "subscriptionInsufficientFundsBody": "Your wallet balance is too low for this purchase. Add money to continue.",
+  "subscriptionCancel": "Cancel",
+  "subscriptionAddMoney": "Add Money",
+  "planNameFree": "Free",
+  "planNamePlus": "Plus",
+  "planNamePro": "Pro",
+  "planNameBusiness": "Business",
+  "planFreeFeature1": "0 services",
+  "planFreeFeature2": "Max 1 community",
+  "planFreeFeature3": "Basic visibility",
+  "planPlusFeature1": "1 service",
+  "planPlusFeature2": "Max 3 communities",
+  "planPlusFeature3": "Priority listing boost ready",
+  "planProFeature1": "5 services",
+  "planProFeature2": "Max 5 communities",
+  "planProFeature3": "Best for growing providers",
+  "planBusinessFeature1": "Unlimited services",
+  "planBusinessFeature2": "Unlimited communities",
+  "planBusinessFeature3": "Top-tier monetization access",
+  "errNoInternet": "No internet connection. Check your network and try again.",
+  "errTimeout": "That took too long. Please try again.",
+  "errWrongCredentials": "Wrong email or password. Please try again.",
+  "errEmailTaken": "This email is already registered. Try signing in instead.",
+  "errUserNotFound": "We couldn't find an account with that email.",
+  "errInvalidEmail": "Please enter a valid email address.",
+  "errWeakPassword": "Your password is too weak. Try something longer.",
+  "errSessionExpired": "Your session expired. Please sign in again.",
+  "errInvalidCode": "That code is invalid or expired. Please request a new one.",
+  "errInsufficientFunds": "Not enough money in your wallet. Top up and try again.",
+  "errServer": "Something went wrong on our side. Please try again shortly.",
+  "errGeneric": "Something went wrong. Please try again.",
+  "confirmationSent": "Confirmation sent!",
+  "disputeSubmitted": "Dispute submitted. Our team will review it.",
+  "actionDone": "Done!",
+  "signupPasswordTitle": "Choose a password",
+  "signupPasswordSubtitle": "Pick something secure — at least 6 characters",
+  "errorConfirmPassword": "Please confirm your password.",
+  "signupAgreePrefix": "By creating an account you agree to our",
+  "signupAgreeAnd": "and",
+  "blockedUsersTitle": "Blocked users",
+  "blockedUsersSubtitle": "People whose posts you've hidden",
+  "blockedUsersEmpty": "You haven't blocked anyone",
+  "blockedUsersEmptySub": "When you block someone from a post, they'll show up here.",
+  "blockedUserFallbackName": "LifeKit user",
+  "unblock": "Unblock",
+  "userUnblocked": "{name} unblocked",
+  "@userUnblocked": {"placeholders":{"name":{"type":"String"}}},
+  "trackTitle": "Booking details",
+  "trackStepRequested": "Requested",
+  "trackStepRequestedSub": "Booking request sent",
+  "trackStepConfirmed": "Accepted",
+  "trackStepConfirmedSub": "The provider accepted the booking",
+  "trackStepConfirmedPending": "Waiting for the provider to accept",
+  "trackStepServiceDay": "Service day",
+  "trackStepBothConfirm": "Both confirm",
+  "trackStepBothConfirmDone": "Both sides confirmed",
+  "trackStepWaitingYou": "Waiting for your confirmation",
+  "trackStepWaitingOther": "Waiting for {name}",
+  "@trackStepWaitingOther": {"placeholders":{"name":{"type":"String"}}},
+  "trackStepPaidOut": "Paid out",
+  "trackStepPaidOutSub": "Funds released to the provider",
+  "trackStepSwapDone": "Swap complete",
+  "trackStepSwapDoneSub": "Both skills exchanged",
+  "trackHdrRequestedTitle": "Waiting for the provider",
+  "trackHdrRequestedSub": "They'll accept or decline your request soon. Your money is safely on hold.",
+  "trackHdrNewRequestTitle": "New booking request",
+  "trackHdrNewRequestSub": "Accept or decline it from your Requests tab.",
+  "trackHdrUpcomingTitle": "Coming up",
+  "trackHdrUpcomingSub": "Everything is set for the service day.",
+  "trackHdrActionTitle": "Your confirmation is needed",
+  "trackHdrActionClientSub": "Confirm once you've received the service so funds can be released.",
+  "trackHdrActionProviderSub": "Mark the job done once you've finished.",
+  "trackHdrWaitingTitle": "Waiting for {name}",
+  "@trackHdrWaitingTitle": {"placeholders":{"name":{"type":"String"}}},
+  "trackHdrWaitingSub": "You've confirmed — we'll let you know when they do.",
+  "trackHdrCompletedTitle": "All done!",
+  "trackHdrCompletedSub": "Funds have been released. Thanks for using LifeKit.",
+  "trackHdrSwapCompletedSub": "Your skill swap is complete.",
+  "trackHdrOverdueTitle": "Past its scheduled time",
+  "trackHdrOverdueSub": "Please confirm the service was completed, or report an issue to keep the funds on hold.",
+  "trackHdrDisputedTitle": "Under review",
+  "trackHdrDisputedSub": "Our team is reviewing this dispute. Funds stay on hold until it's resolved.",
+  "trackHdrCancelledTitle": "Cancelled",
+  "trackHdrCancelledSub": "This booking was cancelled. Any held funds were returned to the wallet.",
+  "trackInDays": "in {d}d {h}h",
+  "@trackInDays": {"placeholders":{"d":{"type":"int"},"h":{"type":"int"}}},
+  "trackInHours": "in {h}h {m}m",
+  "@trackInHours": {"placeholders":{"h":{"type":"int"},"m":{"type":"int"}}},
+  "trackInMinutes": "in {m} min",
+  "@trackInMinutes": {"placeholders":{"m":{"type":"int"}}},
+  "trackEscrowTitle": "Action required",
+  "trackEscrowBody": "The provider marked this job as done. If you don't confirm or report an issue, funds are released automatically in 48 hours.",
+  "trackMarkReceived": "Mark service received",
+  "trackMarkDone": "Mark job done",
+  "trackYouConfirmed": "You confirmed. Waiting for {name}…",
+  "@trackYouConfirmed": {"placeholders":{"name":{"type":"String"}}},
+  "trackSwapInfo": "This is a skill swap — confirming marks it as successful.",
+  "trackEscrowInfo": "Funds stay safely on hold until both of you confirm.",
+  "trackReportIssue": "Report an issue",
+  "trackRateProvider": "Rate the provider",
+  "trackRateClient": "Rate the client",
+  "trackScheduled": "Scheduled",
+  "trackAmount": "Amount",
+  "trackWith": "With",
+  "trackSkillSwap": "Skill swap",
+  "trackFallbackProvider": "the provider",
+  "trackFallbackClient": "the client",
+  "bookingsFilterAll": "All",
+  "bookingsFilterEmpty": "Nothing here right now.",
+  "bookingSuccessSub": "Your service is booked. The provider will confirm shortly — we'll keep you posted.",
+  "viewMyBookings": "View my bookings",
+  "backToHome": "Back to home"
+}

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
@@ -49,7 +50,7 @@ class _ReportUserScreenState extends State<ReportUserScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              e.toString().replaceAll("Exception: ", ""),
+              appErrorMessage(context, e),
               style: GoogleFonts.poppins(),
             ),
             behavior: SnackBarBehavior.floating,

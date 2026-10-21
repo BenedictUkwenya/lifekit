@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import '../../wallet/screens/add_money_screen.dart'; // Reuse existing
 import '../../../core/widgets/lifekit_loader.dart';
+import '../../../l10n/app_localizations.dart';
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
@@ -61,7 +63,9 @@ class _WalletScreenState extends State<WalletScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Setup failed: $e"),
+            content: Text(
+              AppLocalizations.of(context).walletSetupFailed(appErrorMessage(context, e)),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -70,19 +74,20 @@ class _WalletScreenState extends State<WalletScreen> {
   }
 
   void _showWithdrawDialog() {
+    final l10n = AppLocalizations.of(context);
     _withdrawController.text = balance.toStringAsFixed(2);
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: Text(
-            "Withdraw",
+            l10n.walletWithdraw,
             style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
           ),
           content: TextField(
             controller: _withdrawController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(hintText: "Enter amount"),
+            decoration: InputDecoration(hintText: l10n.walletEnterAmount),
           ),
           actions: [
             TextButton(
@@ -91,7 +96,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   : () {
                       Navigator.pop(context);
                     },
-              child: Text("Cancel", style: GoogleFonts.poppins()),
+              child: Text(l10n.securityCancel, style: GoogleFonts.poppins()),
             ),
             ElevatedButton(
               onPressed: isSubmitting
@@ -102,8 +107,8 @@ class _WalletScreenState extends State<WalletScreen> {
                       );
                       if (amount == null || amount <= 0) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Enter a valid amount."),
+                          SnackBar(
+                            content: Text(l10n.walletEnterValidAmount),
                             backgroundColor: Colors.red,
                           ),
                         );
@@ -111,8 +116,8 @@ class _WalletScreenState extends State<WalletScreen> {
                       }
                       if (amount > balance) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Amount exceeds balance."),
+                          SnackBar(
+                            content: Text(l10n.walletAmountExceeds),
                             backgroundColor: Colors.red,
                           ),
                         );
@@ -121,22 +126,26 @@ class _WalletScreenState extends State<WalletScreen> {
                       setState(() => isSubmitting = true);
                       try {
                         await _apiService.withdrawFromWallet(amount);
-                        if (mounted) {
+                        if (context.mounted) {
                           setState(() => isSubmitting = false);
                           Navigator.pop(context);
                           await _fetchWallet();
+                          if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Withdrawal completed."),
+                            SnackBar(
+                              content: Text(l10n.walletWithdrawalCompleted),
                               backgroundColor: Colors.green,
                             ),
                           );
                         }
                       } catch (e) {
                         setState(() => isSubmitting = false);
+                        if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text("Withdraw failed: $e"),
+                            content: Text(
+                              l10n.walletWithdrawFailed(appErrorMessage(context, e)),
+                            ),
                             backgroundColor: Colors.red,
                           ),
                         );
@@ -146,7 +155,7 @@ class _WalletScreenState extends State<WalletScreen> {
                 backgroundColor: AppColors.primary,
               ),
               child: Text(
-                "Withdraw",
+                l10n.walletWithdraw,
                 style: GoogleFonts.poppins(color: Colors.white),
               ),
             ),
@@ -158,11 +167,12 @@ class _WalletScreenState extends State<WalletScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
         title: Text(
-          "Wallet",
+          l10n.walletTitle,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -228,12 +238,16 @@ class _WalletScreenState extends State<WalletScreen> {
                         Row(
                           children: [
                             _buildSmallStats(
-                              "Weekly Income",
+                              l10n.walletWeeklyIncome,
                               "\$3,142",
                               "+2.6%",
                             ),
                             const SizedBox(width: 12),
-                            _buildSmallStats("Points", "48", "of 500"),
+                            _buildSmallStats(
+                              l10n.walletPoints,
+                              "48",
+                              l10n.walletPointsOf("500"),
+                            ),
                           ],
                         ),
                       ],
@@ -246,7 +260,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildActionBtn(Icons.money, "Add Money", () async {
+                      _buildActionBtn(Icons.money, l10n.walletAddMoney, () async {
                         bool? result = await Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -258,8 +272,8 @@ class _WalletScreenState extends State<WalletScreen> {
                       _buildActionBtn(
                         Icons.arrow_outward,
                         isProvider && balance > 0 && !isStripeConnected
-                            ? "Setup Payouts"
-                            : "Withdraw",
+                            ? l10n.walletSetupPayouts
+                            : l10n.walletWithdraw,
                         () {
                           if (!isProvider || balance <= 0) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -281,7 +295,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           _showWithdrawDialog();
                         },
                       ),
-                      _buildActionBtn(Icons.qr_code_scanner, "Scan", () {
+                      _buildActionBtn(Icons.qr_code_scanner, l10n.walletScan, () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
@@ -306,14 +320,14 @@ class _WalletScreenState extends State<WalletScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Transaction History",
+                        l10n.walletTransactionHistory,
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        "See all",
+                        l10n.seeAll,
                         style: GoogleFonts.poppins(
                           fontSize: 12,
                           color: Colors.grey,
@@ -368,7 +382,7 @@ class _WalletScreenState extends State<WalletScreen> {
                                     ),
                                   ),
                                   Text(
-                                    "Success",
+                                    l10n.walletSuccess,
                                     style: GoogleFonts.poppins(
                                       color: Colors.grey,
                                       fontSize: 12,

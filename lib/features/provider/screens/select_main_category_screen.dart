@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/services/api_service.dart';
@@ -273,8 +274,9 @@ class _SelectMainCategoryScreenState extends State<SelectMainCategoryScreen> {
                                 nameCtrl.text.trim(),
                                 descCtrl.text.trim(),
                               );
-                              if (mounted) {
+                              if (context.mounted) {
                                 Navigator.pop(context);
+                                if (!context.mounted) return;
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text("Request sent successfully!"),
@@ -284,8 +286,9 @@ class _SelectMainCategoryScreenState extends State<SelectMainCategoryScreen> {
                               }
                             } catch (e) {
                               setSheetState(() => isSubmitting = false);
+                              if (!context.mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text("Error: $e")),
+                                SnackBar(content: Text(appErrorMessage(context, e))),
                               );
                             }
                           },

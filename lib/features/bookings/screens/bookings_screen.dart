@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/motion.dart';
+import '../../../core/widgets/skeleton.dart';
+import '../booking_progress.dart';
+import '../widgets/booking_mini_progress.dart';
+import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/app_cache.dart';
-import '../../../core/widgets/lifekit_loader.dart';
+import '../../../l10n/app_localizations.dart';
 
 // IMPORT THE TRACKING & CHAT SCREENS
 import 'booking_tracking_screen.dart';
@@ -21,6 +26,7 @@ class BookingsScreen extends StatefulWidget {
 
 class _BookingsScreenState extends State<BookingsScreen>
     with TickerProviderStateMixin {
+  String _clientFilter = 'all';
   final ApiService _apiService = ApiService();
   late TabController _tabController;
   late AnimationController _pulseController;
@@ -191,12 +197,13 @@ class _BookingsScreenState extends State<BookingsScreen>
       await _fetchData();
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               status == 'confirmed'
-                  ? "Request Accepted! Client notified."
-                  : "Request Rejected.",
+                  ? l10n.bookingsRequestAccepted
+                  : l10n.bookingsRequestRejected,
             ),
             backgroundColor: status == 'confirmed' ? Colors.green : Colors.red,
           ),
@@ -204,14 +211,16 @@ class _BookingsScreenState extends State<BookingsScreen>
       }
     } catch (e) {
       setState(() => isLoading = false);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+        SnackBar(content: Text(appErrorMessage(context, e)), backgroundColor: Colors.red),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
@@ -219,7 +228,7 @@ class _BookingsScreenState extends State<BookingsScreen>
         elevation: 0,
         centerTitle: true,
         title: Text(
-          "Bookings",
+          l10n.bookingTitle,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -233,13 +242,13 @@ class _BookingsScreenState extends State<BookingsScreen>
           indicatorWeight: 3,
           labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600),
           tabs: [
-            const Tab(text: "My Bookings"),
-            const Tab(text: "Client Requests"),
+            Tab(text: l10n.bookingsMyBookings),
+            Tab(text: l10n.bookingsClientRequests),
             Tab(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text("My Swaps"),
+                  Text(l10n.bookingsMySwaps),
                   if (pendingSwaps.isNotEmpty) ...[
                     const SizedBox(width: 5),
                     Container(
@@ -265,7 +274,7 @@ class _BookingsScreenState extends State<BookingsScreen>
         ),
       ),
       body: isLoading
-          ? const Center(child: LifeKitLoader())
+          ? const SkeletonList()
           : TabBarView(
               controller: _tabController,
               children: [
@@ -278,43 +287,63 @@ class _BookingsScreenState extends State<BookingsScreen>
   }
 
   Widget _buildClientView() {
+    final l10n = AppLocalizations.of(context)!;
     return RefreshIndicator(
       onRefresh: _fetchData,
       color: AppColors.primary,
       child: clientBookings.isEmpty
-          ? _buildEmptyState("No service booked yet.")
+          ? _buildEmptyState(l10n.bookingsNoneYet)
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildHeroBookingCard(clientBookings.first, isClient: true),
+                  _buildHeroBookingCard(clientBookings.first, isClient: true)
+                      .fadeSlideIn(),
                   const SizedBox(height: 24),
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
-                        _buildFilterChip("Ongoing", true),
-                        _buildFilterChip("Completed", false),
-                        _buildFilterChip("Upcoming", false),
+                        _buildFilterChip(l10n.bookingsFilterAll, 'all'),
+                        _buildFilterChip(l10n.bookingsFilterOngoing, 'ongoing'),
+                        _buildFilterChip(l10n.bookingsFilterUpcoming, 'upcoming'),
+                        _buildFilterChip(l10n.bookingsFilterCompleted, 'completed'),
                       ],
                     ),
                   ),
                   const SizedBox(height: 16),
-                  if (clientBookings.length > 1)
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: clientBookings.length - 1,
-                      itemBuilder: (context, index) {
-                        final booking = clientBookings[index + 1];
-                        return _buildStandardBookingCard(
-                          booking,
-                          isClient: true,
+                  AnimatedSwitcher(
+                    duration: Motion.medium,
+                    child: Builder(
+                      key: ValueKey(_clientFilter),
+                      builder: (context) {
+                        final rest = clientBookings
+                            .skip(1)
+                            .where(_matchesClientFilter)
+                            .toList();
+                        if (rest.isEmpty) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 32),
+                            child: Center(
+                              child: Text(
+                                l10n.bookingsFilterEmpty,
+                                style: GoogleFonts.poppins(color: Colors.grey, fontSize: 13),
+                              ),
+                            ),
+                          );
+                        }
+                        return Column(
+                          children: [
+                            for (var i = 0; i < rest.length; i++)
+                              _buildStandardBookingCard(rest[i], isClient: true)
+                                  .fadeSlideIn(index: i),
+                          ],
                         );
                       },
                     ),
+                  ),
                 ],
               ),
             ),
@@ -326,7 +355,7 @@ class _BookingsScreenState extends State<BookingsScreen>
       onRefresh: _fetchData,
       color: AppColors.primary,
       child: providerRequests.isEmpty
-          ? _buildEmptyState("No requests received yet.")
+          ? _buildEmptyState(AppLocalizations.of(context)!.bookingsNoRequestsYet)
           : ListView.builder(
               padding: const EdgeInsets.all(20),
               physics: const AlwaysScrollableScrollPhysics(),
@@ -335,7 +364,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                 return _buildStandardBookingCard(
                   providerRequests[index],
                   isClient: false,
-                );
+                ).fadeSlideIn(index: index);
               },
             ),
     );
@@ -521,12 +550,12 @@ class _BookingsScreenState extends State<BookingsScreen>
                   size: 40,
                   color: Colors.grey,
                 ),
-              ),
+              ).popIn(),
               const SizedBox(height: 16),
               Text(
                 message,
                 style: GoogleFonts.poppins(color: Colors.grey, fontSize: 14),
-              ),
+              ).fadeSlideIn(index: 1),
             ],
           ),
         ),
@@ -535,6 +564,7 @@ class _BookingsScreenState extends State<BookingsScreen>
   }
 
   Widget _buildHeroBookingCard(dynamic booking, {required bool isClient}) {
+    final l10n = AppLocalizations.of(context)!;
     final dateObj = DateTime.parse(booking['scheduled_time']);
     final dateStr = DateFormat('dd MMM').format(dateObj);
     final num price = booking['total_price'] ?? 0;
@@ -549,21 +579,21 @@ class _BookingsScreenState extends State<BookingsScreen>
     final bool isSwap = (price == 0);
 
     final otherName = isClient
-        ? (booking['profiles']?['full_name'] ?? "Provider")
-        : (booking['profiles']?['full_name'] ?? "Client");
+        ? (booking['profiles']?['full_name'] ?? l10n.bookingsProviderFallback)
+        : (booking['profiles']?['full_name'] ?? l10n.bookingsClientFallback);
 
     final otherPic = booking['profiles']?['profile_picture_url'];
 
-    String statusText = "Upcoming Due";
+    String statusText = l10n.bookingsUpcomingDue;
     Color statusColor = Colors.black87;
     if (status == 'pending') {
-      statusText = "Waiting Approval";
+      statusText = l10n.bookingsWaitingApproval;
       statusColor = Colors.orange;
     } else if (status == 'completed') {
-      statusText = "Completed";
+      statusText = l10n.bookingStatusCompleted;
       statusColor = Colors.green;
     } else if (status == 'cancelled') {
-      statusText = "Cancelled";
+      statusText = l10n.bookingStatusCancelled;
       statusColor = Colors.red;
     }
 
@@ -676,7 +706,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          "Skill Swap",
+                          l10n.bookingsSkillSwap,
                           style: GoogleFonts.poppins(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -718,7 +748,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      "Message provider for details",
+                      l10n.bookingsMessageForDetails,
                       style: GoogleFonts.poppins(
                         fontSize: 11,
                         color: Colors.orange[800],
@@ -769,7 +799,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                   elevation: 0,
                 ),
                 child: Text(
-                  "Track Status",
+                  l10n.bookingsTrackStatus,
                   style: GoogleFonts.poppins(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -784,7 +814,20 @@ class _BookingsScreenState extends State<BookingsScreen>
     );
   }
 
+  String _localiseServiceType(String type, AppLocalizations l10n) {
+    switch (type) {
+      case 'Home':
+        return l10n.bookTypeHome;
+      case 'Outdoor':
+        return l10n.bookTypeOutdoor;
+      case 'Default':
+      default:
+        return l10n.bookTypeDefault;
+    }
+  }
+
   Widget _buildStandardBookingCard(dynamic booking, {required bool isClient}) {
+    final l10n = AppLocalizations.of(context)!;
     final serviceName = booking['services']['title'];
     final num price = booking['total_price'] ?? 0;
     final dateObj = DateTime.parse(booking['scheduled_time']);
@@ -803,12 +846,13 @@ class _BookingsScreenState extends State<BookingsScreen>
     final bool isSwap = (price == 0);
 
     final otherName = isClient
-        ? (booking['profiles']?['full_name'] ?? "Provider")
-        : (booking['profiles']?['full_name'] ?? "Client");
+        ? (booking['profiles']?['full_name'] ?? l10n.bookingsProviderFallback)
+        : (booking['profiles']?['full_name'] ?? l10n.bookingsClientFallback);
 
     final otherPic = booking['profiles']?['profile_picture_url'];
 
-    return GestureDetector(
+    return Pressable(
+      pressedScale: 0.98,
       onTap: () => _goToTracking(booking, isClient),
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
@@ -889,7 +933,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  "Skill Swap",
+                                  l10n.bookingsSkillSwap,
                                   style: GoogleFonts.poppins(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600,
@@ -959,7 +1003,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    type,
+                    _localiseServiceType(type, l10n),
                     style: GoogleFonts.poppins(
                       fontSize: 10,
                       color: Colors.blue[800],
@@ -990,14 +1034,14 @@ class _BookingsScreenState extends State<BookingsScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Client Note:",
-                      style: GoogleFonts.poppins(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black54,
-                      ),
-                    ),
+                          Text(
+                            "${l10n.bookingsClientFallback}:",
+                            style: GoogleFonts.poppins(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black54,
+                            ),
+                          ),
                     const SizedBox(height: 4),
                     Text(
                       note,
@@ -1027,8 +1071,10 @@ class _BookingsScreenState extends State<BookingsScreen>
                   Expanded(
                     child: Text(
                       isPrivateLocation
-                          ? "Message provider for details"
-                          : (isSwap ? "Swap: $locationInfo" : locationInfo),
+                          ? l10n.bookingsMessageForDetails
+                          : (isSwap
+                                ? "${l10n.bookingsSkillSwap}: $locationInfo"
+                                : locationInfo),
                       style: GoogleFonts.poppins(
                         fontSize: 12,
                         color: isPrivateLocation
@@ -1065,7 +1111,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                       child: Text(
-                        "Reject",
+                        l10n.bookingsReject,
                         style: GoogleFonts.poppins(
                           color: Colors.red,
                           fontWeight: FontWeight.w600,
@@ -1086,7 +1132,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                       child: Text(
-                        "Accept",
+                        l10n.bookingsAccept,
                         style: GoogleFonts.poppins(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
@@ -1097,6 +1143,8 @@ class _BookingsScreenState extends State<BookingsScreen>
                 ],
               ),
             ],
+            const SizedBox(height: 14),
+            BookingMiniProgress(booking: booking as Map, isClient: isClient),
           ],
         ),
       ),
@@ -1104,7 +1152,9 @@ class _BookingsScreenState extends State<BookingsScreen>
   }
 
   Widget _buildStatusBadge(String status, {bool isOverdue = false}) {
-    final badgeText = isOverdue ? 'OVERDUE' : status.toUpperCase();
+    final badgeText = isOverdue
+        ? AppLocalizations.of(context)!.bookingsOverdue
+        : status.toUpperCase();
     final badgeColor = isOverdue ? Colors.red : _getStatusColor(status);
     return Container(
       margin: const EdgeInsets.only(top: 4),
@@ -1153,7 +1203,7 @@ class _BookingsScreenState extends State<BookingsScreen>
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
                 child: Text(
-                  'Active & Past Swaps',
+                  AppLocalizations.of(context)!.bookingsActiveAndPastSwaps,
                   style: GoogleFonts.poppins(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
@@ -1179,6 +1229,7 @@ class _BookingsScreenState extends State<BookingsScreen>
   }
 
   Widget _buildPendingBanner() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 20, 20, 4),
       decoration: BoxDecoration(
@@ -1231,7 +1282,9 @@ class _BookingsScreenState extends State<BookingsScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${pendingSwaps.length} Pending Swap ${pendingSwaps.length == 1 ? "Proposal" : "Proposals"}',
+                        pendingSwaps.length == 1
+                            ? l10n.bookingsPendingSwap(pendingSwaps.length)
+                            : l10n.bookingsPendingSwaps(pendingSwaps.length),
                         style: GoogleFonts.poppins(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
@@ -1240,8 +1293,8 @@ class _BookingsScreenState extends State<BookingsScreen>
                       ),
                       Text(
                         _incomingPendingCount > 0
-                            ? 'Tap to view and respond'
-                            : 'Tap to view your sent proposals',
+                            ? l10n.bookingsTapToView
+                            : l10n.bookingsTapToViewSent,
                         style: GoogleFonts.poppins(
                           color: Colors.white60,
                           fontSize: 12,
@@ -1264,16 +1317,18 @@ class _BookingsScreenState extends State<BookingsScreen>
   }
 
   Widget _buildSwapBookingCard(dynamic booking) {
+    final l10n = AppLocalizations.of(context)!;
     final dateObj =
         DateTime.tryParse(booking['scheduled_time'] ?? '') ?? DateTime.now();
     final dateStr = DateFormat('dd MMM, h:mm a').format(dateObj);
-    final serviceName = booking['services']?['title'] ?? 'Service';
+    final serviceName =
+        booking['services']?['title'] ?? l10n.bookingsServiceFallback;
     final status = booking['status'] as String? ?? 'pending';
     // _swap_role = 'client' if I accepted (I'm client_id), 'provider' if I proposed (I'm provider_id)
     final isClient = (booking['_swap_role'] ?? 'client') == 'client';
     // Partner profile is stored differently depending on role
     final partner = booking['profiles'];
-    final partnerName = partner?['full_name'] ?? 'Partner';
+    final partnerName = partner?['full_name'] ?? l10n.bookingsPartnerFallback;
     final partnerPic = partner?['profile_picture_url'];
 
     final Color statusColor;
@@ -1281,19 +1336,19 @@ class _BookingsScreenState extends State<BookingsScreen>
     switch (status) {
       case 'confirmed':
         statusColor = const Color(0xFF22C55E);
-        statusLabel = 'Swap Active';
+        statusLabel = l10n.bookingsSwapActive;
         break;
       case 'completed':
         statusColor = const Color(0xFF3B82F6);
-        statusLabel = 'Completed';
+        statusLabel = l10n.bookingStatusCompleted;
         break;
       case 'cancelled':
         statusColor = Colors.red;
-        statusLabel = 'Cancelled';
+        statusLabel = l10n.bookingStatusCancelled;
         break;
       default:
         statusColor = const Color(0xFFE8A020);
-        statusLabel = 'Awaiting';
+        statusLabel = l10n.bookingsAwaiting;
     }
 
     return Container(
@@ -1422,9 +1477,9 @@ class _BookingsScreenState extends State<BookingsScreen>
                             ),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Text(
-                            'SWAP',
-                            style: TextStyle(
+                          child: Text(
+                            l10n.bookingsSwapBadge,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 9,
                               fontWeight: FontWeight.w900,
@@ -1448,7 +1503,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                             Icons.chat_bubble_outline_rounded,
                             size: 15,
                           ),
-                          label: const Text('Message'),
+                          label: Text(l10n.bookingsMessage),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppColors.primary,
                             side: BorderSide(
@@ -1474,7 +1529,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                               Icons.check_circle_outline_rounded,
                               size: 15,
                             ),
-                            label: const Text('Mark Done'),
+                            label: Text(l10n.bookingsMarkDone),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFE8A020),
                               foregroundColor: Colors.white,
@@ -1503,6 +1558,7 @@ class _BookingsScreenState extends State<BookingsScreen>
   }
 
   Widget _buildSwapsEmptyState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -1531,7 +1587,7 @@ class _BookingsScreenState extends State<BookingsScreen>
             ),
             const SizedBox(height: 24),
             Text(
-              'No Swaps Yet',
+              l10n.bookingsNoSwapsYet,
               style: GoogleFonts.poppins(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -1540,7 +1596,7 @@ class _BookingsScreenState extends State<BookingsScreen>
             ),
             const SizedBox(height: 10),
             Text(
-              'Exchange skills with others.\nBrowse the Swap Board to find your first match.',
+              l10n.swapEnableHint,
               style: GoogleFonts.poppins(
                 fontSize: 13,
                 color: Colors.black45,
@@ -1556,7 +1612,7 @@ class _BookingsScreenState extends State<BookingsScreen>
               ).then((_) => _fetchData()),
               icon: const Icon(Icons.explore_rounded, size: 18),
               label: Text(
-                'Browse Swap Board',
+                l10n.bookingsBrowseSwapBoard,
                 style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
               ),
               style: ElevatedButton.styleFrom(
@@ -1578,8 +1634,29 @@ class _BookingsScreenState extends State<BookingsScreen>
     );
   }
 
-  Widget _buildFilterChip(String label, bool isSelected) {
-    return Container(
+  bool _matchesClientFilter(dynamic booking) {
+    if (_clientFilter == 'all') return true;
+    final phase = computeBookingProgress(booking as Map, isClient: true).phase;
+    switch (_clientFilter) {
+      case 'upcoming':
+        return phase == BookingPhase.upcoming;
+      case 'completed':
+        return phase == BookingPhase.completed || phase == BookingPhase.cancelled;
+      default: // ongoing
+        return phase == BookingPhase.requested ||
+            phase == BookingPhase.awaitingConfirmation ||
+            phase == BookingPhase.overdue ||
+            phase == BookingPhase.disputed;
+    }
+  }
+
+  Widget _buildFilterChip(String label, String value) {
+    final isSelected = _clientFilter == value;
+    return Pressable(
+      onTap: () => setState(() => _clientFilter = value),
+      child: AnimatedContainer(
+      duration: Motion.fast,
+      curve: Motion.curve,
       margin: const EdgeInsets.only(right: 8),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       decoration: BoxDecoration(
@@ -1605,6 +1682,7 @@ class _BookingsScreenState extends State<BookingsScreen>
           fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           color: isSelected ? AppColors.primary : Colors.grey,
         ),
+      ),
       ),
     );
   }

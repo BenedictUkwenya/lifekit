@@ -1,0 +1,1781 @@
+{
+  "@@locale": "ka",
+  "@appName": {
+    "description": "The application name"
+  },
+  "@loading": {
+    "description": "Generic loading state"
+  },
+  "@errorGeneric": {
+    "description": "Generic error message"
+  },
+  "@retry": {
+    "description": "Retry button label"
+  },
+  "@cancel": {
+    "description": "Cancel button label"
+  },
+  "@save": {
+    "description": "Save button label"
+  },
+  "@delete": {
+    "description": "Delete button label"
+  },
+  "@edit": {
+    "description": "Edit button label"
+  },
+  "@done": {
+    "description": "Done button label"
+  },
+  "@confirm": {
+    "description": "Confirm button label"
+  },
+  "@close": {
+    "description": "Close button label"
+  },
+  "@back": {
+    "description": "Back button label"
+  },
+  "@next": {
+    "description": "Next button label"
+  },
+  "@skip": {
+    "description": "Skip button label"
+  },
+  "@search": {
+    "description": "Search placeholder / button"
+  },
+  "@noResults": {
+    "description": "Empty search results"
+  },
+  "@seeAll": {
+    "description": "See all items link"
+  },
+  "@submit": {
+    "description": "Submit button label"
+  },
+  "@yes": {
+    "description": "Confirmation yes"
+  },
+  "@no": {
+    "description": "Confirmation no"
+  },
+  "@or": {
+    "description": "Divider word"
+  },
+  "@optional": {
+    "description": "Optional field label"
+  },
+  "@signIn": {
+    "description": "Sign in button"
+  },
+  "@signOut": {
+    "description": "Sign out button"
+  },
+  "@signUp": {
+    "description": "Sign up link label"
+  },
+  "@createAccount": {
+    "description": "Create account button"
+  },
+  "@forgotPassword": {
+    "description": "Forgot password link"
+  },
+  "@emailLabel": {
+    "description": "Email field label"
+  },
+  "@emailAddressLabel": {
+    "description": "Email field label on signup"
+  },
+  "@emailPlaceholder": {
+    "description": "Email field placeholder"
+  },
+  "@passwordLabel": {
+    "description": "Password field label"
+  },
+  "@passwordPlaceholder": {
+    "description": "Password field placeholder"
+  },
+  "@confirmPasswordLabel": {
+    "description": "Confirm password field label"
+  },
+  "@fullNameLabel": {
+    "description": "Full name field label"
+  },
+  "@phoneLabel": {
+    "description": "Phone number field label"
+  },
+  "@loginTitle": {
+    "description": "Login screen title"
+  },
+  "@loginSubtitle": {
+    "description": "Login screen subtitle"
+  },
+  "@loginButton": {
+    "description": "Login submit button"
+  },
+  "@noAccountPrompt": {
+    "description": "Prompt to sign up on login screen"
+  },
+  "@registerTitle": {
+    "description": "Register screen title"
+  },
+  "@registerSubtitle": {
+    "description": "Register screen subtitle"
+  },
+  "@registerButton": {
+    "description": "Register submit button"
+  },
+  "@haveAccountPrompt": {
+    "description": "Prompt to sign in on register screen"
+  },
+  "@continueButton": {
+    "description": "Continue to next signup step"
+  },
+  "@finish": {
+    "description": "Complete signup button"
+  },
+  "@errorEmailRequired": {
+    "description": "Email required validation error"
+  },
+  "@errorEmailInvalid": {
+    "description": "Email invalid validation error"
+  },
+  "@errorPasswordRequired": {
+    "description": "Password required validation error"
+  },
+  "@errorPasswordShort": {
+    "description": "Password too short validation error"
+  },
+  "@errorPasswordMatch": {
+    "description": "Passwords don't match validation error"
+  },
+  "@errorNameRequired": {
+    "description": "Name required validation error"
+  },
+  "@loginSlideWelcomeBackTitle": {
+    "description": "Login header carousel slide title"
+  },
+  "@loginSlideWelcomeBackSubtitle": {
+    "description": "Login header carousel slide subtitle"
+  },
+  "@welcomeBackToast": {
+    "description": "Success toast after login"
+  },
+  "@signInFailed": {
+    "description": "OAuth sign-in error toast"
+  },
+  "@verifyYourEmail": {
+    "description": "OTP verification step title"
+  },
+  "@didntGetCodeResend": {
+    "description": "Resend OTP link"
+  },
+  "@almostDone": {
+    "description": "Profile photo step title"
+  },
+  "@addProfilePictureOptional": {
+    "description": "Profile photo step subtitle"
+  },
+  "@welcomeToLifeKit": {
+    "description": "Signup success toast"
+  },
+  "@allSetWelcome": {
+    "description": "Signup completion success toast"
+  },
+  "@signupWelcomeTitle": {
+    "description": "Signup step 1 screen title"
+  },
+  "@choosePasswordTitle": {
+    "description": "Signup password step title"
+  },
+  "@choosePasswordSubtitle": {
+    "description": "Signup password step subtitle"
+  },
+  "@splashTagline": {
+    "description": "Splash screen tagline"
+  },
+  "@onboardingOfferSkillsTitle": {
+    "description": "Onboarding slide 1 title"
+  },
+  "@onboardingOfferSkillsDesc": {
+    "description": "Onboarding slide 1 description"
+  },
+  "@onboardingBookServicesTitle": {
+    "description": "Onboarding slide 2 title"
+  },
+  "@onboardingBookServicesDesc": {
+    "description": "Onboarding slide 2 description"
+  },
+  "@onboardingCommunityTitle": {
+    "description": "Onboarding slide 3 title"
+  },
+  "@onboardingCommunityDesc": {
+    "description": "Onboarding slide 3 description"
+  },
+  "@getStarted": {
+    "description": "Get started button on onboarding"
+  },
+  "@resetYourPassword": {
+    "description": "Forgot password screen title"
+  },
+  "@resetPasswordInstructions": {
+    "description": "Forgot password instructions"
+  },
+  "@sendResetLink": {
+    "description": "Forgot password submit button"
+  },
+  "@checkYourEmail": {
+    "description": "Forgot password success title"
+  },
+  "@checkSpamFolder": {
+    "description": "Forgot password spam hint"
+  },
+  "@backToLogin": {
+    "description": "Return to login from forgot password"
+  },
+  "@setNewPasswordTitle": {
+    "description": "Reset password screen title"
+  },
+  "@setNewPasswordSubtitle": {
+    "description": "Reset password screen subtitle"
+  },
+  "@updatePasswordButton": {
+    "description": "Reset password submit button"
+  },
+  "@passwordUpdatedTitle": {
+    "description": "Reset password success title"
+  },
+  "@passwordUpdatedMessage": {
+    "description": "Reset password success message"
+  },
+  "@resetLinkInvalidTitle": {
+    "description": "Invalid reset link title"
+  },
+  "@resetLinkInvalidMessage": {
+    "description": "Invalid reset link message"
+  },
+  "@emailSentTo": {
+    "description": "Forgot password success body with email",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "@tryDifferentEmail": {
+    "description": "Retry forgot password with another email"
+  },
+  "@aiSetupGuide": {
+    "description": "AI onboarding screen title"
+  },
+  "@aiAnalyzingProfile": {
+    "description": "AI onboarding loading message"
+  },
+  "@yourGoals": {
+    "description": "AI onboarding field label"
+  },
+  "@yourGoalsHint": {
+    "description": "AI onboarding goals placeholder"
+  },
+  "@yourSkills": {
+    "description": "AI onboarding field label"
+  },
+  "@yourSkillsHint": {
+    "description": "AI onboarding skills placeholder"
+  },
+  "@yourInterests": {
+    "description": "AI onboarding field label"
+  },
+  "@yourInterestsHint": {
+    "description": "AI onboarding interests placeholder"
+  },
+  "@generateMySevenDayPlan": {
+    "description": "AI onboarding CTA button"
+  },
+  "@finishAndGoToHome": {
+    "description": "AI onboarding completion button"
+  },
+  "@takeAction": {
+    "description": "AI plan day card action button"
+  },
+  "@failedToGeneratePlan": {
+    "description": "AI plan generation error"
+  },
+  "@navHome": {
+    "description": "Bottom navigation label"
+  },
+  "@navExplore": {
+    "description": "Bottom navigation label"
+  },
+  "@navFeeds": {
+    "description": "Bottom navigation label"
+  },
+  "@navChats": {
+    "description": "Bottom navigation label"
+  },
+  "@navProfile": {
+    "description": "Bottom navigation label"
+  },
+  "@homeTabDiscover": {
+    "description": "Home tab label"
+  },
+  "@homeTabFeed": {
+    "description": "Feed tab label"
+  },
+  "@homeTabBookings": {
+    "description": "Bookings tab label"
+  },
+  "@homeTabGroups": {
+    "description": "Groups tab label"
+  },
+  "@homeTabProfile": {
+    "description": "Profile tab label"
+  },
+  "@homeAIRecommended": {
+    "description": "AI recommended section header"
+  },
+  "@homeTrending": {
+    "description": "Trending section header"
+  },
+  "@homeNearYou": {
+    "description": "Near you section header"
+  },
+  "@searchServicesProviders": {
+    "description": "Home search hint"
+  },
+  "@myBookings": {
+    "description": "Quick action and settings label"
+  },
+  "@rewards": {
+    "description": "Quick action label"
+  },
+  "@explore": {
+    "description": "Explore section CTA"
+  },
+  "@popular": {
+    "description": "Popular badge and tab label"
+  },
+  "@communities": {
+    "description": "Home and groups screen title"
+  },
+  "@findYourTribe": {
+    "description": "Communities section tagline"
+  },
+  "@popularProviders": {
+    "description": "Home section header"
+  },
+  "@recentSearches": {
+    "description": "Recent searches section header"
+  },
+  "@maybeLater": {
+    "description": "Dismiss dialog button"
+  },
+  "@bookingTitle": {
+    "description": "Bookings screen app bar title"
+  },
+  "@bookingUpcoming": {
+    "description": "Upcoming bookings tab"
+  },
+  "@bookingPast": {
+    "description": "Past bookings tab"
+  },
+  "@bookingPending": {
+    "description": "Pending bookings tab"
+  },
+  "@clientRequests": {
+    "description": "Bookings tab label"
+  },
+  "@mySwaps": {
+    "description": "Bookings tab label"
+  },
+  "@bookingStatusPending": {
+    "description": "Booking status: pending"
+  },
+  "@bookingStatusConfirmed": {
+    "description": "Booking status: confirmed"
+  },
+  "@bookingStatusCompleted": {
+    "description": "Booking status: completed"
+  },
+  "@bookingStatusCancelled": {
+    "description": "Booking status: cancelled"
+  },
+  "@bookingCancelButton": {
+    "description": "Cancel booking button"
+  },
+  "@bookingConfirmCancel": {
+    "description": "Confirm booking cancellation dialog"
+  },
+  "@bookingNoUpcoming": {
+    "description": "Empty upcoming bookings state"
+  },
+  "@bookingNoPast": {
+    "description": "Empty past bookings state"
+  },
+  "@filterOngoing": {
+    "description": "Booking filter chip"
+  },
+  "@filterCompleted": {
+    "description": "Booking filter chip"
+  },
+  "@filterUpcoming": {
+    "description": "Booking filter chip"
+  },
+  "@requestAccepted": {
+    "description": "Provider accept booking snackbar"
+  },
+  "@requestRejected": {
+    "description": "Provider reject booking snackbar"
+  },
+  "@reject": {
+    "description": "Reject booking request button"
+  },
+  "@accept": {
+    "description": "Accept booking request button"
+  },
+  "@trackStatus": {
+    "description": "Open booking tracking button"
+  },
+  "@happeningNow": {
+    "description": "Urgent booking time badge"
+  },
+  "@tomorrow": {
+    "description": "Relative time next day"
+  },
+  "@waitingApproval": {
+    "description": "Booking status label"
+  },
+  "@skillSwap": {
+    "description": "Zero-price booking label"
+  },
+  "@noSwapsYet": {
+    "description": "Swaps empty state title"
+  },
+  "@noSwapsYetDescription": {
+    "description": "Swaps empty state body"
+  },
+  "@browseSwapBoard": {
+    "description": "Swaps empty state CTA"
+  },
+  "@swapActive": {
+    "description": "Confirmed swap status"
+  },
+  "@markDone": {
+    "description": "Complete swap/task button"
+  },
+  "@servicesTitle": {
+    "description": "Services screen title"
+  },
+  "@servicePrice": {
+    "description": "Price label on service card"
+  },
+  "@serviceHourlyRate": {
+    "description": "Hourly rate suffix"
+  },
+  "@serviceAddToCart": {
+    "description": "Add to cart button"
+  },
+  "@serviceBookNow": {
+    "description": "Book now button"
+  },
+  "@serviceAbout": {
+    "description": "About section on service detail"
+  },
+  "@serviceProvider": {
+    "description": "Provider section label"
+  },
+  "@serviceReviews": {
+    "description": "Reviews section label"
+  },
+  "@noServicesFound": {
+    "description": "Explore empty state title"
+  },
+  "@noServicesFoundSubtitle": {
+    "description": "Explore empty state subtitle"
+  },
+  "@createService": {
+    "description": "Create service button"
+  },
+  "@addService": {
+    "description": "Dashboard quick action"
+  },
+  "@myServices": {
+    "description": "Dashboard quick action"
+  },
+  "@cartTitle": {
+    "description": "Cart screen title"
+  },
+  "@cartEmpty": {
+    "description": "Empty cart message"
+  },
+  "@cartTotal": {
+    "description": "Cart total label"
+  },
+  "@cartCheckout": {
+    "description": "Checkout button"
+  },
+  "@cartRemoveItem": {
+    "description": "Remove item from cart"
+  },
+  "@paymentTitle": {
+    "description": "Payment screen title"
+  },
+  "@paymentConfirm": {
+    "description": "Confirm payment button"
+  },
+  "@paymentSuccess": {
+    "description": "Payment success message"
+  },
+  "@paymentFailed": {
+    "description": "Payment failed message"
+  },
+  "@paymentCancelled": {
+    "description": "Stripe cancel snackbar"
+  },
+  "@profileTitle": {
+    "description": "Profile screen title"
+  },
+  "@profileEdit": {
+    "description": "Edit profile button"
+  },
+  "@profileBookings": {
+    "description": "Bookings menu item in profile"
+  },
+  "@profileLogout": {
+    "description": "Logout button in profile"
+  },
+  "@profileLogoutConfirm": {
+    "description": "Logout confirmation dialog"
+  },
+  "@profileReviews": {
+    "description": "Reviews section on profile"
+  },
+  "@profileFollowers": {
+    "description": "Followers count label"
+  },
+  "@profileFollowing": {
+    "description": "Following count label"
+  },
+  "@profileFollow": {
+    "description": "Follow button"
+  },
+  "@profileUnfollow": {
+    "description": "Unfollow button"
+  },
+  "@failedToLoadProfile": {
+    "description": "Profile load error"
+  },
+  "@noBioAdded": {
+    "description": "Empty profile bio"
+  },
+  "@walletBalance": {
+    "description": "Profile wallet card label"
+  },
+  "@launchOfferProTrial": {
+    "description": "Trial banner title"
+  },
+  "@accountUsage": {
+    "description": "Subscription usage section"
+  },
+  "@upgradePlan": {
+    "description": "Open subscription plans button"
+  },
+  "@foundingMember": {
+    "description": "Founding member badge"
+  },
+  "@businessTools": {
+    "description": "Profile business tools section"
+  },
+  "@editProfile": {
+    "description": "Business tool and settings label"
+  },
+  "@generalSettings": {
+    "description": "Settings section header"
+  },
+  "@personalInformation": {
+    "description": "Settings item"
+  },
+  "@settingsTitle": {
+    "description": "Settings screen title"
+  },
+  "@settingsLanguage": {
+    "description": "Language setting item"
+  },
+  "@settingsNotifications": {
+    "description": "Notifications setting item"
+  },
+  "@settingsSecurity": {
+    "description": "Security setting item"
+  },
+  "@settingsHelp": {
+    "description": "Help & support setting item"
+  },
+  "@settingsAbout": {
+    "description": "About setting item"
+  },
+  "@settingsDeleteAccount": {
+    "description": "Delete account setting item"
+  },
+  "@helpCenter": {
+    "description": "Settings item"
+  },
+  "@support": {
+    "description": "Support section header"
+  },
+  "@logOut": {
+    "description": "Logout settings item"
+  },
+  "@walletTitle": {
+    "description": "Wallet screen title"
+  },
+  "@walletTopUp": {
+    "description": "Top up wallet button"
+  },
+  "@walletWithdraw": {
+    "description": "Withdraw from wallet button"
+  },
+  "@walletTransactions": {
+    "description": "Transaction history section"
+  },
+  "@walletNoTransactions": {
+    "description": "Empty wallet transactions state"
+  },
+  "@walletSettingsComingSoon": {
+    "description": "Wallet settings snackbar"
+  },
+  "@withdraw": {
+    "description": "Withdraw dialog title"
+  },
+  "@enterAmount": {
+    "description": "Amount input hint"
+  },
+  "@enterValidAmount": {
+    "description": "Withdraw validation"
+  },
+  "@amountExceedsBalance": {
+    "description": "Withdraw validation"
+  },
+  "@withdrawalCompleted": {
+    "description": "Withdraw success snackbar"
+  },
+  "@weeklyIncome": {
+    "description": "Wallet stats label"
+  },
+  "@points": {
+    "description": "Wallet points label"
+  },
+  "@addMoney": {
+    "description": "Wallet action button"
+  },
+  "@setupPayouts": {
+    "description": "Stripe connect CTA"
+  },
+  "@scan": {
+    "description": "Wallet QR scan button"
+  },
+  "@qrScanComingSoon": {
+    "description": "QR scan snackbar"
+  },
+  "@fundWallet": {
+    "description": "Add money screen title"
+  },
+  "@minimumDepositFive": {
+    "description": "Deposit minimum validation"
+  },
+  "@walletFundedSuccessfully": {
+    "description": "Deposit success snackbar"
+  },
+  "@minimumDepositAmount": {
+    "description": "Add money helper text"
+  },
+  "@payWithCard": {
+    "description": "Stripe payment button"
+  },
+  "@securedByStripe": {
+    "description": "Payment security badge"
+  },
+  "@groupsTitle": {
+    "description": "Groups screen title"
+  },
+  "@groupsJoin": {
+    "description": "Join group button"
+  },
+  "@groupsLeave": {
+    "description": "Leave group button"
+  },
+  "@groupsMembers": {
+    "description": "Members count label"
+  },
+  "@groupsCreateGroup": {
+    "description": "Create group button"
+  },
+  "@groupsNoGroups": {
+    "description": "Empty groups state"
+  },
+  "@findYourPeople": {
+    "description": "Communities screen subtitle"
+  },
+  "@feedTitle": {
+    "description": "Feed screen title"
+  },
+  "@feedNewPost": {
+    "description": "Feed new post placeholder"
+  },
+  "@feedLike": {
+    "description": "Like post button"
+  },
+  "@feedComment": {
+    "description": "Comment on post button"
+  },
+  "@feedShare": {
+    "description": "Share post button"
+  },
+  "@feedNoPost": {
+    "description": "Empty feed state"
+  },
+  "@placesTitle": {
+    "description": "Places screen title"
+  },
+  "@searchPlacesHint": {
+    "description": "Places search field hint"
+  },
+  "@noPlacesNearby": {
+    "description": "Empty places state"
+  },
+  "@locatingYou": {
+    "description": "Places loading status"
+  },
+  "@findingPlacesNearYou": {
+    "description": "Places fetch status"
+  },
+  "@categoryAll": {
+    "description": "Places category filter"
+  },
+  "@categoryRestaurant": {
+    "description": "Places category filter"
+  },
+  "@categoryCafe": {
+    "description": "Places category filter"
+  },
+  "@categoryHotel": {
+    "description": "Places category filter"
+  },
+  "@notificationsTitle": {
+    "description": "Notifications screen title"
+  },
+  "@notificationsEmpty": {
+    "description": "Empty notifications state"
+  },
+  "@notificationsMarkAllRead": {
+    "description": "Mark all notifications as read"
+  },
+  "@languageTitle": {
+    "description": "Language settings screen title"
+  },
+  "@languageEnglish": {
+    "description": "English language option"
+  },
+  "@languageGeorgian": {
+    "description": "Georgian language option"
+  },
+  "@languageRussian": {
+    "description": "Russian language option"
+  },
+  "@languageNativeGeorgian": {
+    "description": "Georgian language native name"
+  },
+  "@languageNativeRussian": {
+    "description": "Russian language native name"
+  },
+  "@subscriptionPlanFree": {
+    "description": "Free subscription plan"
+  },
+  "@subscriptionPlanPro": {
+    "description": "Pro subscription plan"
+  },
+  "@subscriptionPlanBusiness": {
+    "description": "Business subscription plan"
+  },
+  "@subscriptionUpgrade": {
+    "description": "Upgrade plan button"
+  },
+  "@chatTitle": {
+    "description": "Chat screen title"
+  },
+  "@chatInputPlaceholder": {
+    "description": "Chat input placeholder"
+  },
+  "@chatSend": {
+    "description": "Chat send button"
+  },
+  "@chatNoMessages": {
+    "description": "Empty chat state"
+  },
+  "@providerDashboard": {
+    "description": "Provider dashboard title"
+  },
+  "@quickActions": {
+    "description": "Dashboard section label"
+  },
+  "@totalEarnings": {
+    "description": "Dashboard earnings label"
+  },
+  "@thisWeek": {
+    "description": "Dashboard period label"
+  },
+  "@jobsDone": {
+    "description": "Dashboard stat label"
+  },
+  "@avgRating": {
+    "description": "Dashboard stat label"
+  },
+  "@aiOpportunityRadar": {
+    "description": "Dashboard AI section title"
+  },
+  "@servicesYouCouldOffer": {
+    "description": "AI opportunities subtitle"
+  },
+  "@noOpportunitiesFound": {
+    "description": "AI opportunities empty"
+  },
+  "@createServiceButton": {
+    "description": "AI opportunity CTA"
+  },
+  "@reviewsTitle": {
+    "description": "Reviews screen title"
+  },
+  "@reviewsWriteReview": {
+    "description": "Write review button"
+  },
+  "@reviewsNoReviews": {
+    "description": "Empty reviews state"
+  },
+  "@reviewsRatePlaceholder": {
+    "description": "Review text placeholder"
+  },
+  "@reviewsSubmit": {
+    "description": "Submit review button"
+  },
+  "@reviewSubmitted": {
+    "description": "Leave review success snackbar"
+  },
+  "@anonymous": {
+    "description": "Reviewer name fallback"
+  },
+  "@skillSwapTitle": {
+    "description": "Skill swap screen title"
+  },
+  "@skillSwapDiscover": {
+    "description": "Discover swaps tab"
+  },
+  "@skillSwapPropose": {
+    "description": "Propose swap button"
+  },
+  "@skillSwapAccept": {
+    "description": "Accept swap button"
+  },
+  "@skillSwapDecline": {
+    "description": "Decline swap button"
+  },
+  "@skillSwapNoSwaps": {
+    "description": "Empty skill swap state"
+  },
+  "@aiAssistantTitle": {
+    "description": "AI assistant screen title"
+  },
+  "@aiAssistantPlaceholder": {
+    "description": "AI assistant input placeholder"
+  },
+  "@aiAssistantSend": {
+    "description": "AI assistant send button"
+  },
+  "@providerFallback": {
+    "description": "Fallback provider name"
+  },
+  "@userFallback": {
+    "description": "Fallback display name"
+  },
+  "@unknown": {
+    "description": "Fallback unknown entity"
+  },
+  "@untitled": {
+    "description": "Fallback untitled service"
+  },
+  "@completed": {
+    "description": "Status label"
+  },
+  "@cancelled": {
+    "description": "Status label"
+  },
+  "@pending": {
+    "description": "Status label"
+  },
+  "@confirmed": {
+    "description": "Status label"
+  },
+  "@success": {
+    "description": "Transaction status label"
+  },
+  "@noDataYet": {
+    "description": "Chart empty state"
+  },
+  "@refresh": {
+    "description": "Refresh button tooltip"
+  },
+  "appName": "LifeKit",
+  "loading": "იტვირთება…",
+  "errorGeneric": "მოხდა შეცდომა. სცადეთ თავიდან",
+  "retry": "გამეორება",
+  "cancel": "შეწყვეტა",
+  "save": "_შენახვა...",
+  "delete": "წაშლა",
+  "edit": "ჩასოწრება",
+  "done": "ჩატარებული",
+  "confirm": "დადასტურება",
+  "close": "დაკეტვა",
+  "back": "უკან",
+  "next": "Next",
+  "skip": "გამოტოვება",
+  "search": "ძებნა ",
+  "noResults": "შედეგების გარეშე.",
+  "seeAll": "ყველას ნახვა",
+  "submit": "გაგზავნა",
+  "yes": "დიახ",
+  "no": "არა",
+  "or": "ან ",
+  "optional": "არასავალდებულო",
+  "signIn": "შესვლა",
+  "signOut": "გასვლა",
+  "signUp": "რეგისტრაცია",
+  "createAccount": "Შექმენი ანგარიში",
+  "forgotPassword": "პაროლი დაგავიწყდა?",
+  "emailLabel": "ელფოსტა",
+  "emailAddressLabel": "ელ-ფოსტის მისამართი",
+  "emailPlaceholder": "შეიყვანეთ ელ-ფოსტის მისამართი",
+  "passwordLabel": "პაროლი    ",
+  "passwordPlaceholder": "შეიყვანეთ თქვენი პაროლი",
+  "confirmPasswordLabel": "პაროლის დადასტურება",
+  "fullNameLabel": "სრული სახელი",
+  "phoneLabel": "ტელეფონის ნომერი",
+  "loginTitle": "ეჲბპვ ეჲქლთ ჲბპარნჲ.",
+  "loginSubtitle": "Გასაგრძელებლად შედით სისტემაში",
+  "loginButton": "შესვლა",
+  "noAccountPrompt": "არ გაქვთ ანგარიში?",
+  "registerTitle": "შექმენით თქვენი ანგარიში",
+  "registerSubtitle": "Ანგარიშის შესაქმნელად შეავსეთ ქვემოთ მოცემული ინფორმაცია",
+  "registerButton": "Შექმენი ანგარიში",
+  "haveAccountPrompt": "უკვე დარეგისტრირებული ხართ?",
+  "continueButton": "გაგრძელება ",
+  "finish": "დასრულება",
+  "errorEmailRequired": "შეიყვანეთ თქვენი ელფოსტის მისამართი",
+  "errorEmailInvalid": "გთხოვთ შეიყვანოთ სწორი ელფოსტის მისამართი.",
+  "errorPasswordRequired": "შეიყვანეთ პაროლი!",
+  "errorPasswordShort": "Პაროლი უნდა შეიცავდეს მინიმუმ 6 სიმბოლოს.",
+  "errorPasswordMatch": "Პაროლები არ ემთხვევა ერთმანეთს. სცადეთ ხელახლა.",
+  "errorNameRequired": "გთხოვთ შეიყვანოთ თქვენი სახელი.",
+  "loginSlideWelcomeBackTitle": "გილოცავ ჩვენთან დაბრუნებას!",
+  "loginSlideWelcomeBackSubtitle": "Სასიამოვნოა თქვენი კიდევ ერთხელ ხილვა 👋",
+  "welcomeBackToast": "გილოცავ ჩვენთან დაბრუნებას!",
+  "signInFailed": "Შესვლა ვერ მოხერხდა. სცადეთ ხელახლა.",
+  "verifyYourEmail": "Დაადასტურეთ ელფოსტის მისამართი",
+  "didntGetCodeResend": "Არ მიგიღიათ კოდი? ხელახლა გაგზავნა",
+  "almostDone": "ოჲფრთ ჟგყპქთჳმვ.",
+  "addProfilePictureOptional": "Დაამატეთ პროფილის სურათი — ამის გამოტოვება ყოველთვის შეგიძლიათ",
+  "welcomeToLifeKit": "Მოგესალმებათ LifeKit! 🎉",
+  "allSetWelcome": "Ყველაფერი მზადაა! კეთილი იყოს თქვენი მობრძანება LifeKit-ში 🎉",
+  "signupWelcomeTitle": "Გამარჯობა, კეთილი იყოს თქვენი მობრძანება LifeKit-ში",
+  "choosePasswordTitle": "შეიყვანეთ პაროლი:",
+  "choosePasswordSubtitle": "Აირჩიეთ რაიმე დაცული (მინიმუმ 6 სიმბოლო)",
+  "splashTagline": "...აღმოაჩინეთ მრავალფეროვნება, შექმენით ახალი ობლიგაციები",
+  "onboardingOfferSkillsTitle": "Შესთავაზეთ თქვენი უნარები.\nᲛიიღეთ შემოსავალი პირობებით",
+  "onboardingOfferSkillsDesc": "Აქციეთ თქვენი ნიჭი შემოსავლად და შესთავაზეთ თქვენი მომსახურება ენერგიულ საზოგადოებას, რომელიც აფასებს თქვენს საქმიანობას.",
+  "onboardingBookServicesTitle": "Სანდო დაჯავშნა\nᲛომსახურება ნებისმიერ დროს,\nᲜებისმიერ ადგილას",
+  "onboardingBookServicesDesc": "Ისარგებლეთ ახლომდებარე საიმედო მომსახურებებით - სილამაზით, სახლის რემონტით, გაჯანსაღებით, პირადი ჰიგიენით და სხვა - ყველაფერი ერთ აპში.",
+  "onboardingCommunityTitle": "Სად გაერთიანება\nᲐკმაყოფილებს შესაძლებლობას",
+  "onboardingCommunityDesc": "Დაუკავშირდით, გაუზიარეთ და გაიზარდეთ იმ ადამიანებთან ერთად, რომლებიც გყავთ.",
+  "getStarted": "დაწყება",
+  "resetYourPassword": "თქვენი პაროლის აღდგენა",
+  "resetPasswordInstructions": "Მიუთითეთ თქვენს ანგარიშთან დაკავშირებული ელფოსტის მისამართი. პაროლის გადასაყენებლად ბმულს გამოგიგზავნით.",
+  "sendResetLink": "Გადატვირთვის ბმულის გაგზავნა",
+  "checkYourEmail": "შეამოწმეთ თქვენი ელ - ფოსტა",
+  "checkSpamFolder": "Არ მიგიღიათ? შეამოწმეთ სპამის საქაღალდე.",
+  "backToLogin": "დაბრუნება შესვლა",
+  "setNewPasswordTitle": "ახალი პაროლი",
+  "setNewPasswordSubtitle": "აირჩიეთ ძლიერი პაროლი თქვენი ანგარიშისთვის.",
+  "updatePasswordButton": "პაროლის განახლება",
+  "passwordUpdatedTitle": "პაროლი განახლდა",
+  "passwordUpdatedMessage": "თქვენი პაროლი შეიცვალა. შეგიძლიათ ახალი პაროლით შესვლა.",
+  "resetLinkInvalidTitle": "ბმული ვადაგასულია",
+  "resetLinkInvalidMessage": "პაროლის აღდგენის ბმული არასწორია ან ვადაგასულია. მოითხოვეთ ახალი.",
+  "emailSentTo": "პაროლის აღდგენის ბმული გამოვიგზავნეთ\n{email}",
+  "tryDifferentEmail": "სხვა ელ. ფოსტის მცდელობა",
+  "aiSetupGuide": "AI-ს დაყენების გზამკვლევი",
+  "aiAnalyzingProfile": "AI აანალიზებს თქვენს პროფილს...",
+  "yourGoals": "Თქვენი მიზნები",
+  "yourGoalsHint": "მაგ., მიიღეთ დამატებითი შემოსავალი, იპოვეთ სანდო მომსახურების მომწოდებლები",
+  "yourSkills": "Თქვენი უნარები",
+  "yourSkillsHint": "მაგ. საჭმლის მომზადება, სანტექნიკა, სწავლება, გრაფიკული დიზაინი",
+  "yourInterests": "Თქვენი ინტერესები",
+  "yourInterestsHint": "მაგ. მუსიკა, საკვები, ფიტნესი, ტექნოლოგია",
+  "generateMySevenDayPlan": "Ჩემი 7-დღიანი გეგმის შექმნა",
+  "finishAndGoToHome": "Დაასრულეთ და გადადით სახლში",
+  "takeAction": "ქმედების განხორციელება",
+  "failedToGeneratePlan": "Ვერ მოხერხდა გეგმის შექმნა. სცადეთ ხელახლა.",
+  "navHome": "საწყისი",
+  "navExplore": "დათვალიერება",
+  "navFeeds": "ლენტები",
+  "navChats": "საუბრები",
+  "navProfile": "პროფილი",
+  "homeTabDiscover": "საწყისი",
+  "homeTabFeed": "ლენტები",
+  "homeTabBookings": "ჯავშნები",
+  "homeTabGroups": "ჯგუფები",
+  "homeTabProfile": "პროფილი",
+  "homeAIRecommended": "Რეკომენდებულია თქვენთვის",
+  "homeTrending": "ტრენდული",
+  "homeNearYou": "Თქვენთან ახლოს",
+  "searchServicesProviders": "Სერვისების, პროვაიდერების ძებნა...",
+  "myBookings": "Ჩემი ჯავშნები",
+  "rewards": "ქულები",
+  "explore": "დათვალიერება",
+  "popular": "პოპულარული",
+  "communities": "Მუნიციპალიტეტები",
+  "findYourTribe": "Იპოვეთ თქვენი ტომი და გააზიარეთ თქვენი სამყარო",
+  "popularProviders": "Პოპულარული პროვაიდერები",
+  "recentSearches": "ბოლო ძებნები",
+  "maybeLater": "მჲზვ ბთ ოჲჟლვ.",
+  "bookingTitle": "ჯავშნები",
+  "bookingUpcoming": "მოახლოებული",
+  "bookingPast": "წარსული",
+  "bookingPending": "დარჩენილი",
+  "clientRequests": "Კლიენტის მოთხოვნები",
+  "mySwaps": "Ჩემი სვოპები",
+  "bookingStatusPending": "დარჩენილი",
+  "bookingStatusConfirmed": "დადასტურებული",
+  "bookingStatusCompleted": "დასრულებულია",
+  "bookingStatusCancelled": "შეწყვეტილია",
+  "bookingCancelButton": "გააუქმეთ დაჯავშნა",
+  "bookingConfirmCancel": "Ნამდვილად გსურთ ამ ჯავშნის გაუქმება?",
+  "bookingNoUpcoming": "Მომსახურება ჯერ არ დაჯავშნილა.",
+  "bookingNoPast": "Მოთხოვნები ჯერ არ მიუღიათ.",
+  "filterOngoing": "მიმდინარე",
+  "filterCompleted": "დასრულებულია",
+  "filterUpcoming": "მოახლოებული",
+  "requestAccepted": "Მოთხოვნა მიღებულია! კლიენტმა შეატყობინა.",
+  "requestRejected": "Მოთხოვნა უარყოფილია.",
+  "reject": "უარყოფა",
+  "accept": "დასტური",
+  "trackStatus": "Ტრეკის სტატუსი",
+  "happeningNow": "🔴 Ხდება!",
+  "tomorrow": "ხვალ",
+  "waitingApproval": "ველოდები დასამტკიცებლად",
+  "skillSwap": "Უნარ-ჩვევების სვოპი",
+  "noSwapsYet": "Სვოპები ჯერ არ არის",
+  "noSwapsYetDescription": "Უნარ-ჩვევების სხვებთან გაცვლა.\nᲓაათვალიერეთ სვოპ დაფა და იპოვეთ თქვენი პირველი დამთხვევა.",
+  "browseSwapBoard": "Სვოპ დაფის დათვალიერება",
+  "swapActive": "Აქტიური სვოპი",
+  "markDone": "Მარკ მზადაა",
+  "servicesTitle": "სერვისები",
+  "servicePrice": "ფასი",
+  "serviceHourlyRate": "HR",
+  "serviceAddToCart": "კალათაში",
+  "serviceBookNow": "დაჯავშნა",
+  "serviceAbout": "ამ სამსახურის შესახებ",
+  "serviceProvider": "სერვისის მომწოდებელი",
+  "serviceReviews": "მიმოხილვები",
+  "noServicesFound": "Მომსახურებები ვერ მოიძებნა",
+  "noServicesFoundSubtitle": "Ხელმისაწვდომობის შემდეგ აქ გამოჩნდება ახალი სერვისები.",
+  "createService": "შექმენით მომსახურება",
+  "addService": "სერვისის დამატება",
+  "myServices": "Ჩემი\nᲛომსახურება",
+  "cartTitle": "კალათა",
+  "cartEmpty": "თქვენი კალათა ცარიელია",
+  "cartTotal": "სულ",
+  "cartCheckout": "Დაჯავშნის დადასტურება",
+  "cartRemoveItem": "_წაშლა",
+  "paymentTitle": "გადახდა",
+  "paymentConfirm": "დაადასტურეთ გადახდა",
+  "paymentSuccess": "Ჯავშანი დადასტურებულია!",
+  "paymentFailed": "Გადახდა ვერ მოხერხდა. სცადეთ ხელახლა.",
+  "paymentCancelled": "გადახდა გაუქმებულია",
+  "profileTitle": "პროფილი",
+  "profileEdit": "პროფილის რედაქტირება",
+  "profileBookings": "Ჩემი ჯავშნები",
+  "profileLogout": "გასვლა",
+  "profileLogoutConfirm": "ნამდვილად გსურთ გასვლა?",
+  "profileReviews": "მიმოხილვები",
+  "profileFollowers": "მიმდევრები",
+  "profileFollowing": "გამოწერილია",
+  "profileFollow": "გამოწერა",
+  "profileUnfollow": "გამოწერის გაუქმება",
+  "failedToLoadProfile": "Პროფილის ჩატვირთვა ვერ მოხერხდა",
+  "noBioAdded": "Ბიოგრაფია არ არის დამატებული",
+  "walletBalance": "ბალანსი საფულეში",
+  "launchOfferProTrial": "Შეთავაზების გაშვება: Pro Trial Active",
+  "accountUsage": "Ანგარიშის გამოყენება",
+  "upgradePlan": "Გეგმის განახლება",
+  "foundingMember": "🌟 Დამფუძნებელი წევრი",
+  "businessTools": "Ბიზნეს ხელსაწყოები",
+  "editProfile": "პროფილის რედაქტირება",
+  "generalSettings": "ზოგადი პარამეტრები",
+  "personalInformation": "პირადი ინფორმაცია",
+  "settingsTitle": "&მორგება",
+  "settingsLanguage": "ენა",
+  "settingsNotifications": "გაფრთხილებები",
+  "settingsSecurity": "Პაროლი და უსაფრთხოება",
+  "settingsHelp": "დახმარების ცენტრი",
+  "settingsAbout": "LifeKit-ის შესახებ",
+  "settingsDeleteAccount": "ანგარიშის წაშლა",
+  "helpCenter": "დახმარების ცენტრი",
+  "support": "მხარდაჭერა",
+  "logOut": "გასვლა",
+  "walletTitle": "საფულე",
+  "walletTopUp": "Შევსება",
+  "walletWithdraw": "თანხის მოხსნა",
+  "walletTransactions": "გადარიცხვების ისტორია",
+  "walletNoTransactions": "Ტრანზაქციები ჯერ არ განხორციელებულა.",
+  "walletSettingsComingSoon": "Საფულის პარამეტრები მალე მოახლოვდება!",
+  "withdraw": "თანხის მოხსნა",
+  "enterAmount": "Მიუთითეთ თანხა",
+  "enterValidAmount": "Მიუთითეთ სწორი თანხა.",
+  "amountExceedsBalance": "Თანხა აღემატება ნაშთს.",
+  "withdrawalCompleted": "Მოხსნა დასრულებულია.",
+  "weeklyIncome": "Ყოველკვირეული შემოსავალი",
+  "points": "წერტილები",
+  "addMoney": "Თანხის დამატება",
+  "setupPayouts": "Ანაზღაურების დაყენება",
+  "scan": "სკანირება",
+  "qrScanComingSoon": "QR სკანირების გადახდები მალე დაიწყება!",
+  "fundWallet": "Ფონდის საფულე",
+  "minimumDepositFive": "Მინიმალური დეპოზიტია 5 $",
+  "walletFundedSuccessfully": "Საფულე წარმატებით დაფინანსდა!",
+  "minimumDepositAmount": "Მინიმალური დეპოზიტი: 5.00 $",
+  "payWithCard": "Ბარათით გადახდა",
+  "securedByStripe": "Უზრუნველყოფილია Stripe-ით",
+  "groupsTitle": "Მუნიციპალიტეტები",
+  "groupsJoin": "შეერთება",
+  "groupsLeave": "გასვლა",
+  "groupsMembers": "წევრები",
+  "groupsCreateGroup": "შექმნა",
+  "groupsNoGroups": "ჯგუფები ვერ მოიძებნა.",
+  "findYourPeople": "Იპოვეთ თქვენი ხალხი, გააზიარეთ თქვენი სამყარო",
+  "feedTitle": "ლენტები",
+  "feedNewPost": "Გააზიარეთ რამე…",
+  "feedLike": "მომწონს",
+  "feedComment": "კომენტარი",
+  "feedShare": "გაზიარება ",
+  "feedNoPost": "Პოსტები ჯერ არ არის. პირველმა გააზიარე!",
+  "placesTitle": "ადგილები",
+  "searchPlacesHint": "Მოიძიეთ რესტორნები, კაფეები, სასტუმროები...",
+  "noPlacesNearby": "Ახლომდებარე საცხოვრებლები არ არის",
+  "locatingYou": "Თქვენი მდებარეობა...",
+  "findingPlacesNearYou": "Თქვენთან ახლოს მდებარე საცხოვრებლების პოვნა...",
+  "categoryAll": "ყველა",
+  "categoryRestaurant": "რესტორანი",
+  "categoryCafe": "Კაფე",
+  "categoryHotel": "სასტუმრო",
+  "notificationsTitle": "გაფრთხილებები",
+  "notificationsEmpty": "Გაფრთხილებები ჯერ არ არის.",
+  "notificationsMarkAllRead": "ყველას წაკითხულად მონიშვნა",
+  "languageTitle": "ენა",
+  "languageEnglish": "English",
+  "languageGeorgian": "ქართული",
+  "languageRussian": "Russian",
+  "languageNativeGeorgian": "ქართული",
+  "languageNativeRussian": "Русский",
+  "subscriptionPlanFree": "თავისუფალი",
+  "subscriptionPlanPro": "Pro",
+  "subscriptionPlanBusiness": "ბიზნესი",
+  "subscriptionUpgrade": "Გეგმის განახლება",
+  "chatTitle": "შეტყობინებები",
+  "chatInputPlaceholder": "Აკრიფეთ შეტყობინება…",
+  "chatSend": "გაგზავნა",
+  "chatNoMessages": "Შეტყობინებები ჯერ არ არის. დაიწყე საუბარი!",
+  "providerDashboard": "სამუშაო დაფა",
+  "quickActions": "Სწრაფი მოქმედებები",
+  "totalEarnings": "Ჯამური შემოსავალი",
+  "thisWeek": "ამ კვირაში",
+  "jobsDone": "Დავალებები შესრულებულია",
+  "avgRating": "Საშუალო შეფასება",
+  "aiOpportunityRadar": "AI შესაძლებლობების რადარი",
+  "servicesYouCouldOffer": "Მომსახურება, რომლის შეთავაზებაც ახლავე შეგიძლიათ",
+  "noOpportunitiesFound": "Ამჟამად შესაძლებლობები ვერ მოიძებნა.",
+  "createServiceButton": "შექმენით მომსახურება",
+  "reviewsTitle": "მიმოხილვები",
+  "reviewsWriteReview": "შეფასების დაწერა",
+  "reviewsNoReviews": "Მიმოხილვები ჯერ არ არის.",
+  "reviewsRatePlaceholder": "Დაწერეთ კომენტარი (არასავალდებულო)...",
+  "reviewsSubmit": "მიმოხილვის შეტანა",
+  "reviewSubmitted": "რეცენზია წარდგენილია",
+  "anonymous": "ანონიმურად",
+  "skillSwapTitle": "Უნარ-ჩვევების სვოპი",
+  "skillSwapDiscover": "Სვოპების აღმოჩენა",
+  "skillSwapPropose": "Სვოპის შეთავაზება",
+  "skillSwapAccept": "დასტური",
+  "skillSwapDecline": "უარყოფა",
+  "skillSwapNoSwaps": "Სვოპის შემოთავაზებები არ არის ხელმისაწვდომი.",
+  "aiAssistantTitle": "AI ასისტენტი: ",
+  "aiAssistantPlaceholder": "Მკითხეთ რამე LifeKit-ის შესახებ...",
+  "aiAssistantSend": "გაგზავნა",
+  "providerFallback": "სერვისის მომწოდებელი",
+  "userFallback": "მომხმარებელი ",
+  "unknown": "უცნობი",
+  "untitled": "უსახელო",
+  "completed": "დასრულებულია",
+  "cancelled": "შეწყვეტილია",
+  "pending": "დარჩენილი",
+  "confirmed": "დადასტურებული",
+  "success": "წარმატება",
+  "noDataYet": "ჯერ კიდევ მონაცემების გარეშე",
+  "refresh": "განახლება",
+
+  "loginSlideProgressTitle": "შენი პროგრესი გელოდება",
+  "loginSlideProgressSubtitle": "განაგრძე მუდმივად",
+  "loginSlideAITitle": "AI შეხედულებები მზადაა",
+  "loginSlideAISubtitle": "ახალი პერსონალური რეკომენდაციები",
+  "loginSlideCommunityTitle": "შენი თემი",
+  "loginSlideCommunitySubtitle": "ნახე რა ხდება შენს წრეში",
+
+  "signupSlideWelcomeSubtitle": "შენი ყოვლისმომცველი პირადი განვითარების თანამგზავრი",
+  "signupSlideHabitsTitle": "შექმენი უკეთესი ჩვევები",
+  "signupSlideHabitsSubtitle": "თვალი ადევნე მიზნებს, სერიებსა და ყოველდღიურ პროგრესს",
+  "signupSlideAITitle": "AI-ზე დაფუძნებული კოუჩინგი",
+  "signupSlideAISubtitle": "პერსონალიზებული შეხედულებები, რომლებიც გეხმარება ზრდაში",
+  "signupSlideCommunityTitle": "მხიარული თემი",
+  "signupSlideCommunitySubtitle": "დაუკავშირდი, გაუზიარე და დარჩი შთაგონებული ერთად",
+
+  "homeHelloGreeting": "გამარჯობა {name} 👋",
+  "@homeHelloGreeting": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "homeWelcomeTagline": "გამოიკვლიე დელტას ოკეანეების ნაპირები",
+  "homeSpecialOfferAwaits": "{name}, განსაკუთრებული შეთავაზება გელოდება!",
+  "@homeSpecialOfferAwaits": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "homeOfferTitle": "მიიღე 20% ფასდაკლება\nშენს პირველ ჯავშანზე!",
+  "homeOfferValidUntil": "ძალაშია 30 ოქტომბრამდე",
+  "homeTopSwapOpportunities": "🔄 საუკეთესო გაცვლის შესაძლებლობები",
+  "homeCommunitiesCount": "{count} საზოგადოება",
+  "@homeCommunitiesCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "homeBrowseAll": "ნახე ყველა →",
+  "homeMoreServices": "მეტი\nსერვისი",
+  "homeMyServiceBadge": "ეს არის შენი სერვისი. მართე იგი 'ჩემი სერვისებიდან'.",
+  "homeDailyTaskTitle": "Gracia-ს დღიური დავალება",
+  "homeDailyTaskDay": "დღე {dayNum}",
+  "@homeDailyTaskDay": {
+    "placeholders": { "dayNum": { "type": "int" } }
+  },
+  "homeDailyTaskMarkDone": "მონიშნე შესრულებულად",
+  "homeWelcomeBackOpportunities": "კეთილი იყოს დაბრუნება! {days} დღე ახალი შესაძლებლობებისა",
+  "@homeWelcomeBackOpportunities": {
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "homeCategoryNearby": "ახლომდებარე",
+  "homeCategoryLocal": "ადგილობრივი",
+  "homeCategoryConvenient": "მოსახერხებელი",
+  "homeCategoryCentral": "ცენტრალური",
+
+  "exploreDiscoverBadge": "✦ აღმოაჩინე",
+  "exploreFindBest": "იპოვე საუკეთესო\nსერვისები შენთან ახლოს",
+  "exploreServicesAvailable": "{count}+ ხელმისაწვდომი სერვისი",
+  "@exploreServicesAvailable": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "exploreFeaturedProfessionals": "გამორჩეული პროფესიონალები",
+  "exploreFeaturedProfessional": "გამორჩეული პროფესიონალი",
+  "exploreBrowseCategories": "კატეგორიების დათვალიერება",
+  "exploreAllServices": "ყველა სერვისი",
+  "exploreCityPulse": "ქალაქის პულსი",
+  "exploreTapToExplore": "შეეხე გასახსნელად: {category} →",
+  "@exploreTapToExplore": {
+    "placeholders": { "category": { "type": "String" } }
+  },
+  "skillSwap": "უნარების გაცვლა",
+
+  "categoryYourListing": "შენი განცხადება",
+  "homeYourServiceBadge": "შენი სერვისი",
+  "categoryMoreProviders": "მეტი მომწოდებელი",
+  "categoryShowingResults": "ნაჩვენებია {count} შედეგი",
+  "@categoryShowingResults": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "categorySearchHint": "ძებნა {category}...",
+  "@categorySearchHint": {
+    "placeholders": { "category": { "type": "String" } }
+  },
+
+  "profileNoBio": "ბიო არ არის დამატებული",
+  "profileBusinessTools": "ბიზნეს ხელსაწყოები",
+  "profileToolDashboard": "მართვის პანელი",
+  "profileToolServices": "სერვისები",
+  "profileToolAIPremium": "AI პრემიუმი",
+  "profileToolRewards": "ჯილდოები",
+  "profileAIPremiumComingSoon": "AI პრემიუმის ხელსაწყოები მალე იქნება ხელმისაწვდომი!",
+  "profileRewardsComingSoon": "ჯილდოები მალე იქნება ხელმისაწვდომი!",
+  "profileGeneralSettings": "ზოგადი პარამეტრები",
+  "profileAISetupGuide": "AI გამოყენების სახელმძღვანელო",
+  "profileAISetupSubtitle": "შექმენით თქვენი 7-დღიანი წარმატების გეგმა",
+  "profilePersonalInfo": "პირადი ინფორმაცია",
+  "profileSupport": "მხარდაჭერა",
+
+  "tierFree": "უფასო",
+  "tierPlus": "პლუსი",
+  "tierPro": "პრო",
+  "tierBusiness": "ბიზნესი",
+
+  "securityLoginDetails": "შესვლის დეტალები",
+  "securityCurrentPassword": "მიმდინარე პაროლი",
+  "securityNewPassword": "ახალი პაროლი",
+  "securityConfirmPassword": "დაადასტურეთ ახალი პაროლი",
+  "securityChangePassword": "პაროლის შეცვლა",
+  "securityForgotPassword": "დაგავიწყდათ პაროლი?",
+  "securityAdvanced": "გაფართოებული უსაფრთხოება",
+  "securityBiometric": "ბიომეტრიული შესვლა",
+  "securityBiometricSubtitle": "FaceID / TouchID",
+  "securityTwoFactor": "ორფაქტორიანი ავთენტიფიკაცია",
+  "security2FAComingSoon": "2FA-ის დაყენება მალე იქნება",
+  "securityDeleteAccount": "ანგარიშის წაშლა",
+  "securityDeleteWarning": "ეს მოქმედება შეუქცევადია. ყველა მონაცემი დაიკარგება.",
+  "securityDelete": "წაშლა",
+  "securityCancel": "გაუქმება",
+  "securityPasswordMismatch": "ახალი პაროლები არ ემთხვევა",
+  "securityPasswordTooShort": "ახალი პაროლი უნდა შეიცავდეს მინიმუმ 6 სიმბოლოს",
+  "securityEnterCurrent": "გთხოვთ შეიყვანოთ მიმდინარე პაროლი",
+  "securityPasswordUpdated": "პაროლი წარმატებით განახლდა!",
+
+  "notifPush": "Push შეტყობინებები",
+  "notifPushSubtitle": "მიიღეთ შეტყობინებები და ჯავშნის განახლებები",
+  "notifEmail": "ელფოსტის შეტყობინებები",
+  "notifEmailSubtitle": "მიიღეთ ქვითრები და დაიჯესტები",
+  "notifPromo": "სარეკლამო შეთავაზებები",
+  "notifPromoSubtitle": "კუპონები და სიახლეები",
+
+  "langEnglish": "ინგლისური",
+  "langGeorgian": "ქართული",
+  "langRussian": "რუსული",
+
+  "helpMyTickets": "ჩემი ბილეთები",
+  "helpNoTickets": "ბილეთები ჯერ არ არის",
+  "helpContactSupport": "დაუკავშირდით მხარდაჭერას",
+  "helpSubject": "თემა",
+  "helpMessage": "შეტყობინება",
+  "helpSubmitTicket": "ბილეთის გაგზავნა",
+  "helpFillBoth": "გთხოვთ შეავსოთ თემა და შეტყობინება",
+  "helpTicketSubmitted": "ბილეთი წარმატებით გაიგზავნა!",
+  "helpSupportTicketDefault": "მხარდაჭერის ბილეთი",
+  "helpFaqCancelQuestion": "როგორ გავაუქმო ჯავშანი?",
+  "helpFaqCancelAnswer": "გადადით ჯავშნების ჩანართზე, აირჩიეთ აქტიური ჯავშანი და დააწკაპუნეთ ღილაკზე „გაუქმება“.",
+  "helpFaqRefundQuestion": "როგორ მუშაობს თანხის დაბრუნება?",
+  "helpFaqRefundAnswer": "თანხის დაბრუნება ხდება თქვენს საფულეში ჯავშნის გაუქმების დადასტურებისთანავე.",
+
+  "walletWeeklyIncome": "კვირის შემოსავალი",
+  "walletPoints": "ქულები",
+  "walletPointsOf": "{total}-დან",
+  "@walletPointsOf": {
+    "placeholders": { "total": { "type": "String" } }
+  },
+  "walletAddMoney": "თანხის დამატება",
+  "walletWithdraw": "გატანა",
+  "walletSetupPayouts": "გადახდის დაყენება",
+  "walletScan": "სკანირება",
+  "walletTransactionHistory": "ტრანზაქციების ისტორია",
+  "walletSuccess": "წარმატება",
+  "walletEnterAmount": "შეიყვანეთ თანხა",
+  "walletEnterValidAmount": "შეიყვანეთ მართებული თანხა.",
+  "walletAmountExceeds": "თანხა აღემატება ბალანსს.",
+  "walletWithdrawalCompleted": "გატანა დასრულდა.",
+  "walletSetupFailed": "დაყენება ვერ მოხერხდა: {error}",
+  "@walletSetupFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "walletWithdrawFailed": "გატანა ვერ მოხერხდა: {error}",
+  "@walletWithdrawFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "feedsTabFeeds": "ფიდი",
+  "feedsTabEvents": "ღონისძიებები",
+  "feedsWhatsOnYourMind": "რას ფიქრობ?",
+  "feedsPhoto": "ფოტო",
+  "feedsTag": "თეგი",
+  "feedsPost": "გამოქვეყნება",
+  "feedsCreatePost": "ახალი პოსტი",
+  "feedsAddTitleOptional": "დაამატე სათაური (არასავალდებულო)",
+  "feedsTrending": "პოპულარული",
+  "feedsLive": "პირდაპირ",
+  "feedsTrendingSkillOffer": "უნარის შეთავაზება",
+  "feedsTrendingTips": "რჩევები",
+  "feedsTrendingSwap": "გაცვლა",
+  "feedsTrendingLookingFor": "ვეძებ",
+  "feedsTrendingServices": "სერვისები",
+  "feedsReportPost": "პოსტის რეპორტი",
+  "feedsPostReported": "პოსტი დარეპორტდა. გმადლობთ.",
+  "profilePrivacyPolicy": "კონფიდენციალურობის პოლიტიკა",
+  "profileTermsOfService": "მომსახურების პირობები",
+  "feedsBlockUser": "მომხმარებლის დაბლოკვა",
+  "feedsBlockUserConfirm": "ერთმანეთის პოსტებს ვეღარ დაინახავთ. განბლოკვა ნებისმიერ დროს შეგიძლიათ: პროფილი → უსაფრთხოება → დაბლოკილი მომხმარებლები.",
+  "feedsUserBlocked": "მომხმარებელი დაიბლოკა.",
+  "feedsActionFailed": "რაღაც შეცდომა მოხდა. სცადეთ ხელახლა.",
+  "feedsShare": "გაზიარება",
+  "feedsSharedFromLifeKit": "გაზიარებულია LifeKit-დან",
+  "feedsDelete": "წაშლა",
+  "feedsPostDeleted": "პოსტი წაიშალა",
+  "feedsDeleteFailed": "პოსტის წაშლა ვერ მოხერხდა: {error}",
+  "@feedsDeleteFailed": { "placeholders": { "error": { "type": "String" } } },
+  "feedsLikeFailed": "მოწონების განახლება ვერ მოხერხდა: {error}",
+  "@feedsLikeFailed": { "placeholders": { "error": { "type": "String" } } },
+  "feedsBookmarkFailed": "სანიშნის განახლება ვერ მოხერხდა: {error}",
+  "@feedsBookmarkFailed": { "placeholders": { "error": { "type": "String" } } },
+  "feedsJustNow": "ახლახან",
+  "feedsMinAgo": "{count} წთ წინ",
+  "@feedsMinAgo": { "placeholders": { "count": { "type": "int" } } },
+  "feedsHourAgo": "{count} სთ წინ",
+  "@feedsHourAgo": { "placeholders": { "count": { "type": "int" } } },
+  "feedsDayAgo": "{count} დღის წინ",
+  "@feedsDayAgo": { "placeholders": { "count": { "type": "int" } } },
+
+  "eventsSearchHint": "ღონისძიებების ძებნა...",
+  "eventsPopularToday": "დღეს პოპულარული",
+  "eventsSearchResults": "ძებნის შედეგები",
+  "eventsNoFoundFor": "„{query}“-სთვის ღონისძიება ვერ მოიძებნა",
+  "@eventsNoFoundFor": { "placeholders": { "query": { "type": "String" } } },
+  "eventsNoInCategory": "ამ კატეგორიაში ღონისძიება არ არის",
+  "eventsCatAll": "ყველა",
+  "eventsCatTheatre": "თეატრი",
+  "eventsCatSport": "სპორტი",
+  "eventsCatFestival": "ფესტივალი",
+  "eventsCatTourism": "ტურიზმი",
+  "eventsCatMusic": "მუსიკა",
+  "eventsCatFood": "კვება",
+
+  "chatsTitle": "შეტყობინებები",
+  "chatsSearchHint": "ჩათების ან სერვისების ძებნა...",
+  "chatsRecentContacts": "ბოლო კონტაქტები",
+  "chatsTabActive": "აქტიური",
+  "chatsTabFinished": "დასრულებული",
+  "chatsNoActive": "აქტიური საუბრები არ არის",
+  "chatsPastWillAppear": "შენი ძველი ჩათები აქ გამოჩნდება",
+  "chatsStartingNewComingSoon": "ახალი საუბრის დაწყება მალე იქნება ხელმისაწვდომი!",
+  "chatsNoMessagesYet": "შეტყობინებები ჯერ არ არის",
+  "chatsGeneral": "ზოგადი",
+  "chatsJustNow": "ახლახან",
+  "chatsYesterday": "გუშინ",
+
+  "actionSheetWhatToDo": "რისი გაკეთება გსურს?",
+  "actionBookService": "სერვისის ჯავშანი",
+  "actionBookServiceSubtitle": "გადახდა და დაგეგმვა",
+  "actionSkillSwap": "უნარების გაცვლა",
+  "actionSkillSwapSubtitle": "გაცვალე უნარები, ფული არ საჭიროა",
+  "actionNoCash": "✨ ფული არ საჭიროა",
+  "badgeSwappable": "გასაცვლელია",
+
+  "providerDescription": "სერვისის აღწერა",
+  "providerNoDescription": "აღწერა მიუწვდომელია.",
+  "providerAboutProvider": "მომწოდებლის შესახებ",
+  "providerDefaultBio": "პროფესიონალი სერვისის მომწოდებელი LifeKit-ზე.",
+  "providerInstantConfirmation": "მყისიერი დადასტურება",
+  "providerVerifiedProvider": "დადასტურებული მომწოდებელი",
+  "providerTabAbout": "შესახებ",
+  "providerTabReviews": "შეფასებები",
+  "providerTabAvailability": "ხელმისაწვდომობა",
+  "providerTabServices": "სერვისები",
+  "providerSearchServicesHint": "სერვისების ძებნა...",
+  "providerBookThisService": "სერვისის დაჯავშნა",
+  "providerRestrictedTitle": "შეზღუდულია",
+  "providerRestrictedBody": "შენი საკუთარი სერვისის დაჯავშნა შეუძლებელია.",
+  "providerOk": "კარგი",
+  "providerOnlineRemote": "ონლაინ/დისტანციური",
+  "providerProviderFallback": "მომწოდებელი",
+  "providerSharedToFeed": "სერვისი გაზიარდა ფიდში",
+  "providerShareFailed": "სერვისის გაზიარება ვერ მოხერხდა",
+  "providerPriceVaries": "ფასი იცვლება",
+  "providerBookNow": "დაჯავშნე ახლა",
+  "providerRatingsSummary": "შეფასებების შეჯამება",
+  "providerUserFallback": "მომხმარებელი",
+  "providerVerifiedService": "დადასტურებული სერვისი",
+  "providerNoReviews": "შეფასებები ჯერ არ არის",
+  "providerBeFirstReview": "იყავი პირველი შემფასებელი და მიიღე {points} ჯილდოს ქულა",
+  "@providerBeFirstReview": { "placeholders": { "points": { "type": "int" } } },
+
+  "bookTitle": "სერვისის ჯავშანი",
+  "bookQuickSelect": "სწრაფი არჩევანი",
+  "bookToday": "დღეს",
+  "bookTomorrow": "ხვალ",
+  "bookThisWeekend": "ამ შაბათ-კვირას",
+  "bookTotal": "სულ",
+  "bookNow": "დაჯავშნე ახლა",
+  "bookLoadingAvailability": "ხელმისაწვდომობის ჩატვირთვა...",
+  "bookSelectDate": "გთხოვ აირჩიო თარიღი",
+  "bookSelectAtLeastOneOption": "გთხოვ აირჩიო მინიმუმ ერთი სერვისის ვარიანტი.",
+  "bookNoUpcomingAvailability": "მომავალში ხელმისაწვდომობა ჯერ არ არის",
+  "bookProviderOffDay": "მომწოდებელი ამ დღეს დასვენებაშია. შემდეგი ხელმისაწვდომი: {date}",
+  "@bookProviderOffDay": { "placeholders": { "date": { "type": "String" } } },
+  "bookUseNext": "გამოიყენე შემდეგი",
+  "bookTimeConflict": "ეს დროის სლოტი უკვე დაჯავშნილია.",
+  "bookSelectTime": "აირჩიე დრო",
+  "bookCancel": "გაუქმება",
+  "bookDone": "მზადაა",
+  "bookGotIt": "გასაგებია",
+  "bookNoTimeSlots": "ხელმისაწვდომი დროის სლოტი არ არის",
+  "bookHoldOn": "მოიცადე",
+  "bookSuccess": "წარმატება",
+  "bookCommentSaved": "კომენტარი შენახულია!",
+  "bookServiceType": "სერვისის ტიპი",
+  "bookTypeDefault": "ნაგულისხმევი",
+  "bookTypeHome": "სახლი",
+  "bookTypeOutdoor": "გარეთ",
+  "bookFixed": "ფიქსირებული",
+  "bookSelectServiceOptions": "აირჩიე სერვისის ვარიანტები",
+  "bookMoreServices": "მეტი სერვისი",
+  "bookServiceTime": "სერვისის დრო",
+  "bookAddInstructions": "დაამატე სპეციალური ინსტრუქციები...",
+
+  "swapTitle": "უნარების გაცვლა",
+  "swapPoweredBy": "Gracia-ს მიერ",
+  "swapSelectServiceType": "აირჩიე სერვისის ტიპი",
+  "swapBiDirectional": "ორმხრივი AI შესაბამისობა ",
+  "swapBiDirectionalDesc": "პოულობს მომწოდებლებს, რომლებიც სურთ შენ ის, რასაც სთავაზობ, და გთავაზობენ იმას, რასაც შენ ეძებ.",
+  "swapSelectYours": "აირჩიე შენი",
+  "swapSelectTarget": "აირჩიე სამიზნე",
+  "swapLookingForSkill": "უნარის ძებნა",
+  "swapProposeTo": "გაცვლის შეთავაზება {name}-ისთვის",
+  "@swapProposeTo": { "placeholders": { "name": { "type": "String" } } },
+  "swapFindOtherMatches": "სხვა AI შესაბამისობების პოვნა",
+  "swapFindMatch": "AI შესაბამისობის პოვნა",
+  "swapBrowseBoard": "გაცვლის დაფის ნახვა",
+  "swapSelectSkillToOffer": "აირჩიე უნარი შესათავაზებლად",
+  "swapNoServicesCreateFirst": "სერვისები ვერ მოიძებნა. ჯერ შექმენი სერვისი.",
+  "swapSelectSkillCategory": "აირჩიე უნარის კატეგორია",
+  "swapMatchFound": "შესაბამისობა მოიძებნა!",
+  "swapAiMatchingFor": "AI ეძებს შესაბამისობას",
+  "swapMeLabel": "მე",
+  "swapNoProvidersFound": "მომწოდებლები ვერ მოიძებნა",
+  "swapTryDifferentCategory": "სცადე სხვა უნარის კატეგორია",
+  "swapAiMatched": "AI-ით შერჩეული",
+  "swapMatchTag": "შესაბამისობა",
+  "swapRatingNew": "ახალი",
+  "swapOtherAiMatches": "სხვა AI შესაბამისობები",
+  "swapUserFallback": "მომხმარებელი",
+  "swapSendProposal": "გაცვლის შეთავაზების გაგზავნა",
+  "swapYouOffer": "შენ სთავაზობ",
+  "swapYouReceive": "შენ იღებ",
+  "swapPreferredDate": "სასურველი თარიღი",
+  "swapMessagePlaceholder": "მაგ. „მზად ვარ მოქნილი ვიყო დროზე, შემატყობინე!“",
+  "swapSendProposalBtn": "შეთავაზების გაგზავნა",
+  "swapProposalSent": "გაცვლის შეთავაზება გაიგზავნა!",
+  "swapAcceptedToast": "გაცვლა დადასტურდა! შეამოწმე შენი ჯავშნები.",
+  "swapDeclinedToast": "გაცვლა უარყოფილია.",
+  "swapCancelledToast": "გაცვლის შეთავაზება გაუქმდა.",
+  "swapBookingNotFound": "ამ გაცვლისთვის ჯავშანი ვერ მოიძებნა.",
+  "swapSelectServiceToOffer": "გთხოვ აირჩიო სერვისი, რომელიც გინდა შესთავაზო.",
+  "swapSelectSkillLookingFor": "გთხოვ აირჩიო უნარი, რომელსაც ეძებ.",
+  "swapServiceFallback": "სერვისი",
+  "swapProviderFallback": "მომწოდებელი",
+  "swapDirectSelection": "სერვისის პირდაპირი არჩევანი",
+  "swapPotentialMatch": "შესაძლო შესაბამისობა",
+  "swapGoodMatch": "კარგი დამატებითი შესაბამისობა",
+  "swapUnknown": "უცნობი",
+  "swapBoardTitle": "გაცვლის დაფა",
+  "swapBoardSubtitle": "AI-ით დარანჟირებული შესაბამისობები",
+  "swapTabDiscover": "აღმოაჩინე",
+  "swapTabIncoming": "შემომავალი",
+  "swapTabOutgoing": "გამავალი",
+  "swapNoSwapsYet": "გაცვლები ჯერ არ არის",
+  "swapEnableHint": "ჩართე უნარების გაცვლა შენს სერვისებზე და სხვები აქ გამოჩნდებიან!",
+  "swapPeopleLookingToTrade": "ადამიანები, რომლებიც აქტიურად ეძებენ უნარების გაცვლას",
+  "swapServicesFromProviders": "სერვისები მომწოდებლებისგან, რომლებიც მზად არიან გასაცვლელად",
+  "swapNoIncoming": "შემომავალი წინადადებები არ არის",
+  "swapIncomingHint": "წინადადებები აქ გამოჩნდება",
+  "swapNoOutgoing": "გამავალი წინადადებები არ არის",
+  "swapOutgoingHint": "დაიწყე შესაბამისობის პოვნით!",
+  "swapPriceOnRequest": "ფასი მოთხოვნით",
+  "swapMyServiceMessage": "ეს შენი სერვისია. მართე „ჩემი სერვისები“-დან.",
+  "swapUntitled": "უსათაურო",
+  "swapDecline": "უარყოფა",
+  "swapYoursLabel": "შენი",
+  "swapYourServiceBadge": "შენი სერვისი",
+
+  "bookingsMyBookings": "ჩემი ჯავშნები",
+  "bookingsClientRequests": "კლიენტის მოთხოვნები",
+  "bookingsMySwaps": "ჩემი გაცვლები",
+  "bookingsNoneYet": "სერვისი ჯერ არ არის დაჯავშნილი.",
+  "bookingsFilterOngoing": "მიმდინარე",
+  "bookingsFilterCompleted": "დასრულებული",
+  "bookingsFilterUpcoming": "მომავალი",
+  "bookingsNoRequestsYet": "მოთხოვნები ჯერ არ მიგიღია.",
+  "bookingsProviderFallback": "მომწოდებელი",
+  "bookingsClientFallback": "კლიენტი",
+  "bookingsUpcomingDue": "მომავალი",
+  "bookingsWaitingApproval": "მოლოდინში",
+  "bookingsSkillSwap": "უნარების გაცვლა",
+  "bookingsMessageForDetails": "მიწერე მომწოდებელს დეტალებისთვის",
+  "bookingsTrackStatus": "სტატუსის თვალყური",
+  "bookingsReject": "უარყოფა",
+  "bookingsAccept": "მიღება",
+  "bookingsRequestAccepted": "მოთხოვნა მიღებულია! კლიენტი ეცნობა.",
+  "bookingsRequestRejected": "მოთხოვნა უარყოფილია.",
+  "bookingsOverdue": "ვადაგასული",
+  "bookingsActiveAndPastSwaps": "აქტიური და ძველი გაცვლები",
+  "bookingsPendingSwap": "{count} მოლოდინში მყოფი გაცვლის წინადადება",
+  "@bookingsPendingSwap": { "placeholders": { "count": { "type": "int" } } },
+  "bookingsPendingSwaps": "{count} მოლოდინში მყოფი გაცვლის წინადადება",
+  "@bookingsPendingSwaps": { "placeholders": { "count": { "type": "int" } } },
+  "bookingsTapToView": "დააწკაპუნე სანახავად და საპასუხოდ",
+  "bookingsTapToViewSent": "დააწკაპუნე გაგზავნილი წინადადებების სანახავად",
+  "bookingsServiceFallback": "სერვისი",
+  "bookingsPartnerFallback": "პარტნიორი",
+  "bookingsSwapActive": "გაცვლა აქტიურია",
+  "bookingsAwaiting": "მოლოდინში",
+  "bookingsSwapBadge": "გაცვლა",
+  "bookingsMessage": "შეტყობინება",
+  "bookingsMarkDone": "მონიშნე დასრულებულად",
+  "bookingsNoSwapsYet": "გაცვლები ჯერ არ არის",
+  "bookingsBrowseSwapBoard": "გაცვლის დაფის ნახვა",
+  "aiGraciaGreeting": "გამარჯობა! მე ვარ Gracia, შენი LifeKit-ის ასისტენტი — დაგეხმარები სერვისების აღმოჩენაში, შენი თემის პოვნაში და დღის სრულად გამოყენებაში. რით შემიძლია დაგეხმარო?",
+  "aiAlwaysHereForYou": "ყოველთვის შენთვის",
+  "aiMessageHint": "მიწერე Gracia-ს…",
+  "aiGenericError": "რაღაც შეცდომა მოხდა. გთხოვ, კიდევ სცადე.",
+  "aiFallbackReply": "ვწუხვარ, ვერ მივიღე პასუხი.",
+  "aiProFeatureTitle": "Pro ფუნქცია",
+  "aiProFeatureBody": "Gracia ხელმისაწვდომია Pro და Business გეგმებზე. გაიუმჯობესე ხელმოწერა, რათა გახსნა AI ჩატი, ჭკვიანი რეკომენდაციები და სხვა.",
+  "aiMaybeLater": "შესაძლოა მოგვიანებით",
+  "aiUpgradeNow": "გააუმჯობესე ახლა ⚡",
+  "aiActionViewFallback": "ნახვა",
+  "walletLoadingWallet": "საფულე იტვირთება...",
+  "walletAccountUsage": "ანგარიშის გამოყენება",
+  "walletLoadingUsage": "მონაცემები იტვირთება...",
+  "walletSlotsUsedUnlimited": "გამოყენებული ადგილები: {count}/∞ (მათ შორის მონახაზები და მოლოდინში)",
+  "@walletSlotsUsedUnlimited": { "placeholders": { "count": { "type": "int" } } },
+  "walletSlotsUsedLimited": "გამოყენებული ადგილები: {count}/{limit} (მათ შორის მონახაზები და მოლოდინში)",
+  "@walletSlotsUsedLimited": { "placeholders": { "count": { "type": "int" }, "limit": { "type": "int" } } },
+  "walletRenewsInDays": "განახლდება {days} დღეში",
+  "@walletRenewsInDays": { "placeholders": { "days": { "type": "int" } } },
+  "walletUpgradePlan": "გეგმის გაუმჯობესება",
+  "trialBannerTitle": "გაშვების შეთავაზება: Pro ცდის რეჟიმი აქტიურია",
+  "trialBannerSubtitle": "განახლდება {days} დღეში • სრულდება {date}",
+  "@trialBannerSubtitle": { "placeholders": { "days": { "type": "int" }, "date": { "type": "String" } } },
+  "trialPerkServices": "✔ 5 სერვისი",
+  "trialPerkCommission": "✔ 3% საკომისიო",
+  "trialPerkAI": "✔ Pro AI",
+  "subscriptionPlansTitle": "გამოწერის გეგმები",
+  "subscriptionGoPremium": "გადადი Premium-ზე",
+  "subscriptionGoPremiumSubtitle": "გახსენი მეტი სერვისი, მეტი თემი და სწრაფი ზრდა.",
+  "subscriptionPopular": "პოპულარული",
+  "subscriptionCurrentPlan": "მიმდინარე გეგმა",
+  "subscriptionFreePlan": "უფასო გეგმა",
+  "subscriptionUpgrade": "გაუმჯობესება",
+  "subscriptionPerMonth": "{price}/თვე",
+  "@subscriptionPerMonth": { "placeholders": { "price": { "type": "String" } } },
+  "subscriptionActiveUntil": "გამოწერა აქტიურია {date}-მდე",
+  "@subscriptionActiveUntil": { "placeholders": { "date": { "type": "String" } } },
+  "subscriptionInsufficientFundsTitle": "არასაკმარისი თანხა",
+  "subscriptionInsufficientFundsBody": "შენი საფულის ბალანსი ძალიან დაბალია ამ შესყიდვისთვის. დაამატე თანხა გასაგრძელებლად.",
+  "subscriptionCancel": "გაუქმება",
+  "subscriptionAddMoney": "თანხის დამატება",
+  "planNameFree": "უფასო",
+  "planNamePlus": "Plus",
+  "planNamePro": "Pro",
+  "planNameBusiness": "Business",
+  "planFreeFeature1": "0 სერვისი",
+  "planFreeFeature2": "მაქს. 1 თემი",
+  "planFreeFeature3": "ძირითადი ხილვადობა",
+  "planPlusFeature1": "1 სერვისი",
+  "planPlusFeature2": "მაქს. 3 თემი",
+  "planPlusFeature3": "სიის პრიორიტეტული წახალისება",
+  "planProFeature1": "5 სერვისი",
+  "planProFeature2": "მაქს. 5 თემი",
+  "planProFeature3": "საუკეთესო მზარდი მომწოდებლებისთვის",
+  "planBusinessFeature1": "შეუზღუდავი სერვისები",
+  "planBusinessFeature2": "შეუზღუდავი თემები",
+  "planBusinessFeature3": "უმაღლესი დონის მონეტიზაცია",
+  "errNoInternet": "ინტერნეტთან კავშირი არ არის. შეამოწმეთ ქსელი და სცადეთ ხელახლა.",
+  "errTimeout": "ძალიან დიდხანს გაგრძელდა. გთხოვთ, სცადოთ ხელახლა.",
+  "errWrongCredentials": "ელფოსტა ან პაროლი არასწორია. სცადეთ ხელახლა.",
+  "errEmailTaken": "ეს ელფოსტა უკვე რეგისტრირებულია. სცადეთ შესვლა.",
+  "errUserNotFound": "ამ ელფოსტით ანგარიში ვერ მოიძებნა.",
+  "errInvalidEmail": "შეიყვანეთ სწორი ელფოსტის მისამართი.",
+  "errWeakPassword": "პაროლი ძალიან სუსტია. სცადეთ უფრო გრძელი.",
+  "errSessionExpired": "სესიას ვადა გაუვიდა. გთხოვთ, ხელახლა შეხვიდეთ.",
+  "errInvalidCode": "კოდი არასწორია ან ვადაგასულია. მოითხოვეთ ახალი.",
+  "errInsufficientFunds": "საფულეში საკმარისი თანხა არ არის. შეავსეთ და სცადეთ ხელახლა.",
+  "errServer": "ჩვენს მხარეს რაღაც შეფერხდა. სცადეთ ცოტა ხანში.",
+  "errGeneric": "რაღაც შეცდომა მოხდა. სცადეთ ხელახლა.",
+  "confirmationSent": "დადასტურება გაიგზავნა!",
+  "disputeSubmitted": "დავა გაიგზავნა. ჩვენი გუნდი განიხილავს.",
+  "actionDone": "მზადაა!",
+  "signupPasswordTitle": "აირჩიეთ პაროლი",
+  "signupPasswordSubtitle": "აირჩიეთ საიმედო პაროლი — მინიმუმ 6 სიმბოლო",
+  "errorConfirmPassword": "გთხოვთ, დაადასტუროთ პაროლი.",
+  "signupAgreePrefix": "ანგარიშის შექმნით ეთანხმებით ჩვენს",
+  "signupAgreeAnd": "და",
+  "blockedUsersTitle": "დაბლოკილი მომხმარებლები",
+  "blockedUsersSubtitle": "ადამიანები, რომელთა პოსტებიც დამალეთ",
+  "blockedUsersEmpty": "ჯერ არავინ დაგიბლოკავთ",
+  "blockedUsersEmptySub": "პოსტიდან ვინმეს დაბლოკვისას, აქ გამოჩნდება.",
+  "blockedUserFallbackName": "LifeKit-ის მომხმარებელი",
+  "unblock": "განბლოკვა",
+  "userUnblocked": "{name} განიბლოკა",
+  "trackTitle": "ჯავშნის დეტალები",
+  "trackStepRequested": "მოთხოვნილია",
+  "trackStepRequestedSub": "ჯავშნის მოთხოვნა გაიგზავნა",
+  "trackStepConfirmed": "მიღებულია",
+  "trackStepConfirmedSub": "პროვაიდერმა ჯავშანი მიიღო",
+  "trackStepConfirmedPending": "ველოდებით პროვაიდერის თანხმობას",
+  "trackStepServiceDay": "მომსახურების დღე",
+  "trackStepBothConfirm": "ორივე ადასტურებს",
+  "trackStepBothConfirmDone": "ორივე მხარემ დაადასტურა",
+  "trackStepWaitingYou": "ველოდებით თქვენს დადასტურებას",
+  "trackStepWaitingOther": "ველოდებით: {name}",
+  "trackStepPaidOut": "გადახდილია",
+  "trackStepPaidOutSub": "თანხა გადაეცა პროვაიდერს",
+  "trackStepSwapDone": "გაცვლა დასრულდა",
+  "trackStepSwapDoneSub": "ორივე უნარი გაცვლილია",
+  "trackHdrRequestedTitle": "ველოდებით პროვაიდერს",
+  "trackHdrRequestedSub": "მალე მიიღებენ ან უარყოფენ მოთხოვნას. თქვენი თანხა უსაფრთხოდ არის დაკავებული.",
+  "trackHdrNewRequestTitle": "ახალი ჯავშნის მოთხოვნა",
+  "trackHdrNewRequestSub": "მიიღეთ ან უარყავით „მოთხოვნების“ ჩანართიდან.",
+  "trackHdrUpcomingTitle": "მალე",
+  "trackHdrUpcomingSub": "ყველაფერი მზადაა მომსახურების დღისთვის.",
+  "trackHdrActionTitle": "საჭიროა თქვენი დადასტურება",
+  "trackHdrActionClientSub": "დაადასტურეთ მომსახურების მიღების შემდეგ, რომ თანხა გადაირიცხოს.",
+  "trackHdrActionProviderSub": "მონიშნეთ სამუშაო შესრულებულად დასრულების შემდეგ.",
+  "trackHdrWaitingTitle": "ველოდებით: {name}",
+  "trackHdrWaitingSub": "თქვენ დაადასტურეთ — შეგატყობინებთ, როცა ისინიც დაადასტურებენ.",
+  "trackHdrCompletedTitle": "ყველაფერი მზადაა!",
+  "trackHdrCompletedSub": "თანხა გადაირიცხა. გმადლობთ, რომ იყენებთ LifeKit-ს.",
+  "trackHdrSwapCompletedSub": "უნარების გაცვლა დასრულდა.",
+  "trackHdrOverdueTitle": "დაგეგმილი დრო გავიდა",
+  "trackHdrOverdueSub": "დაადასტურეთ, რომ მომსახურება შესრულდა, ან გაასაჩივრეთ, რომ თანხა დაკავებული დარჩეს.",
+  "trackHdrDisputedTitle": "განხილვაშია",
+  "trackHdrDisputedSub": "ჩვენი გუნდი განიხილავს დავას. თანხა დაკავებულია გადაწყვეტამდე.",
+  "trackHdrCancelledTitle": "გაუქმებულია",
+  "trackHdrCancelledSub": "ჯავშანი გაუქმდა. დაკავებული თანხა საფულეში დაბრუნდა.",
+  "trackInDays": "{d} დღე {h} სთ-ში",
+  "trackInHours": "{h} სთ {m} წთ-ში",
+  "trackInMinutes": "{m} წთ-ში",
+  "trackEscrowTitle": "საჭიროა მოქმედება",
+  "trackEscrowBody": "პროვაიდერმა სამუშაო შესრულებულად მონიშნა. თუ არ დაადასტურებთ ან არ გაასაჩივრებთ, თანხა ავტომატურად გადაირიცხება 48 საათში.",
+  "trackMarkReceived": "მომსახურება მივიღე",
+  "trackMarkDone": "სამუშაო შესრულებულია",
+  "trackYouConfirmed": "თქვენ დაადასტურეთ. ველოდებით: {name}…",
+  "trackSwapInfo": "ეს უნარების გაცვლაა — დადასტურება მას წარმატებულად მონიშნავს.",
+  "trackEscrowInfo": "თანხა უსაფრთხოდ არის დაკავებული, სანამ ორივე არ დაადასტურებთ.",
+  "trackReportIssue": "პრობლემის შეტყობინება",
+  "trackRateProvider": "შეაფასეთ პროვაიდერი",
+  "trackRateClient": "შეაფასეთ კლიენტი",
+  "trackScheduled": "დაგეგმილია",
+  "trackAmount": "თანხა",
+  "trackWith": "ვისთან",
+  "trackSkillSwap": "უნარების გაცვლა",
+  "trackFallbackProvider": "პროვაიდერი",
+  "trackFallbackClient": "კლიენტი",
+  "bookingsFilterAll": "ყველა",
+  "bookingsFilterEmpty": "აქ ჯერ არაფერია.",
+  "bookingSuccessSub": "მომსახურება დაჯავშნილია. პროვაიდერი მალე დაადასტურებს — გაცნობებთ.",
+  "viewMyBookings": "ჩემი ჯავშნები",
+  "backToHome": "მთავარზე დაბრუნება"
+}

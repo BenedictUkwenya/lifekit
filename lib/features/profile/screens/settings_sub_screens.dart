@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/providers/locale_provider.dart';
 import '../../../core/services/api_service.dart';
+import 'blocked_users_screen.dart';
 import '../../auth/screens/forgot_password_screen.dart';
 import '../../auth/screens/login_screen.dart';
+import '../../../l10n/app_localizations.dart';
 
 // =============================================================================
 // 1. MODERN SECURITY SCREEN
@@ -18,7 +22,6 @@ class SecurityScreen extends StatefulWidget {
 
 class _SecurityScreenState extends State<SecurityScreen> {
   final ApiService _apiService = ApiService();
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   // Controllers
   final _currentPassController = TextEditingController();
@@ -35,41 +38,34 @@ class _SecurityScreenState extends State<SecurityScreen> {
   bool isLoading = false;
 
   Future<void> _updatePassword() async {
-    // Basic validation
+    final l10n = AppLocalizations.of(context);
     if (_currentPassController.text.isEmpty) {
-      _showSnackBar("Please enter your current password", isError: true);
+      _showSnackBar(l10n.securityEnterCurrent, isError: true);
       return;
     }
     if (_newPassController.text.length < 6) {
-      _showSnackBar(
-        "New password must be at least 6 characters",
-        isError: true,
-      );
+      _showSnackBar(l10n.securityPasswordTooShort, isError: true);
       return;
     }
     if (_newPassController.text != _confirmPassController.text) {
-      _showSnackBar("New passwords do not match", isError: true);
+      _showSnackBar(l10n.securityPasswordMismatch, isError: true);
       return;
     }
 
     setState(() => isLoading = true);
     try {
-      // Pass BOTH old and new password
       await _apiService.changePassword(
         _currentPassController.text,
         _newPassController.text,
       );
 
       if (mounted) {
-        _showSnackBar("Password updated successfully!", isError: false);
+        _showSnackBar(l10n.securityPasswordUpdated, isError: false);
         Navigator.pop(context);
       }
     } catch (e) {
-      // THE FIX: Remove "Exception: " prefix for a clean user message
-      String cleanMessage = e.toString().replaceAll("Exception: ", "");
-
       if (mounted) {
-        _showSnackBar(cleanMessage, isError: true);
+        _showSnackBar(appErrorMessage(context, e), isError: true);
       }
     } finally {
       if (mounted) setState(() => isLoading = false);
@@ -77,26 +73,27 @@ class _SecurityScreenState extends State<SecurityScreen> {
   }
 
   Future<void> _confirmDeleteAccount() async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          "Delete Account",
+          l10n.securityDeleteAccount,
           style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
         ),
         content: Text(
-          "This action is irreversible. All your data will be lost.",
+          l10n.securityDeleteWarning,
           style: GoogleFonts.poppins(fontSize: 13),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text("Cancel", style: GoogleFonts.poppins()),
+            child: Text(l10n.securityCancel, style: GoogleFonts.poppins()),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(
-              "Delete",
+              l10n.securityDelete,
               style: GoogleFonts.poppins(color: Colors.red),
             ),
           ),
@@ -108,7 +105,6 @@ class _SecurityScreenState extends State<SecurityScreen> {
 
     try {
       await _apiService.deleteAccount();
-      await _storage.deleteAll();
       if (mounted) {
         Navigator.pushAndRemoveUntil(
           context,
@@ -119,7 +115,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
     } catch (e) {
       if (mounted) {
         _showSnackBar(
-          e.toString().replaceAll("Exception: ", ""),
+          appErrorMessage(context, e),
           isError: true,
         );
       }
@@ -144,11 +140,12 @@ class _SecurityScreenState extends State<SecurityScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
         title: Text(
-          "Password & Security",
+          l10n.settingsSecurity,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -164,7 +161,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle("Login Details"),
+            _buildSectionTitle(l10n.securityLoginDetails),
             const SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.all(20),
@@ -181,21 +178,21 @@ class _SecurityScreenState extends State<SecurityScreen> {
               child: Column(
                 children: [
                   _buildPasswordField(
-                    "Current Password",
+                    l10n.securityCurrentPassword,
                     _currentPassController,
                     _obscureCurrent,
                     () => setState(() => _obscureCurrent = !_obscureCurrent),
                   ),
                   const SizedBox(height: 16),
                   _buildPasswordField(
-                    "New Password",
+                    l10n.securityNewPassword,
                     _newPassController,
                     _obscureNew,
                     () => setState(() => _obscureNew = !_obscureNew),
                   ),
                   const SizedBox(height: 16),
                   _buildPasswordField(
-                    "Confirm New Password",
+                    l10n.securityConfirmPassword,
                     _confirmPassController,
                     _obscureConfirm,
                     () => setState(() => _obscureConfirm = !_obscureConfirm),
@@ -215,7 +212,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                       child: isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
                           : Text(
-                              "Change Password",
+                              l10n.securityChangePassword,
                               style: GoogleFonts.poppins(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
@@ -233,7 +230,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                         ),
                       ),
                       child: Text(
-                        "Forgot your password?",
+                        l10n.securityForgotPassword,
                         style: GoogleFonts.poppins(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w500,
@@ -247,7 +244,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
             ),
 
             const SizedBox(height: 30),
-            _buildSectionTitle("Advanced Security"),
+            _buildSectionTitle(l10n.securityAdvanced),
             const SizedBox(height: 10),
             Container(
               decoration: BoxDecoration(
@@ -265,11 +262,11 @@ class _SecurityScreenState extends State<SecurityScreen> {
                   SwitchListTile(
                     activeThumbColor: AppColors.primary,
                     title: Text(
-                      "Biometric Login",
+                      l10n.securityBiometric,
                       style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
                     ),
                     subtitle: Text(
-                      "FaceID / TouchID",
+                      l10n.securityBiometricSubtitle,
                       style: GoogleFonts.poppins(
                         fontSize: 12,
                         color: Colors.grey,
@@ -283,7 +280,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                   ListTile(
                     leading: const Icon(Icons.phonelink_lock),
                     title: Text(
-                      "Two-Factor Authentication",
+                      l10n.securityTwoFactor,
                       style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
                     ),
                     trailing: const Icon(
@@ -292,9 +289,29 @@ class _SecurityScreenState extends State<SecurityScreen> {
                     ),
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("2FA Setup coming soon")),
+                        SnackBar(content: Text(l10n.security2FAComingSoon)),
                       );
                     },
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.block_rounded),
+                    title: Text(
+                      l10n.blockedUsersTitle,
+                      style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                    ),
+                    subtitle: Text(
+                      l10n.blockedUsersSubtitle,
+                      style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                    ),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      color: Colors.grey,
+                    ),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const BlockedUsersScreen()),
+                    ),
                   ),
                 ],
               ),
@@ -312,7 +329,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                   ),
                 ),
                 child: Text(
-                  "Delete Account",
+                  l10n.securityDeleteAccount,
                   style: GoogleFonts.poppins(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -385,11 +402,12 @@ class _NotificationSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
         title: Text(
-          "Notifications",
+          l10n.settingsNotifications,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -411,22 +429,22 @@ class _NotificationSettingsScreenState
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildSwitch(
-                "Push Notifications",
-                "Receive messages and booking updates",
+                l10n.notifPush,
+                l10n.notifPushSubtitle,
                 push,
                 (v) => setState(() => push = v),
               ),
               const Divider(height: 1),
               _buildSwitch(
-                "Email Notifications",
-                "Receive receipts and digests",
+                l10n.notifEmail,
+                l10n.notifEmailSubtitle,
                 email,
                 (v) => setState(() => email = v),
               ),
               const Divider(height: 1),
               _buildSwitch(
-                "Promotional Offers",
-                "Coupons and news",
+                l10n.notifPromo,
+                l10n.notifPromoSubtitle,
                 promo,
                 (v) => setState(() => promo = v),
               ),
@@ -470,22 +488,23 @@ class LanguageScreen extends StatefulWidget {
 }
 
 class _LanguageScreenState extends State<LanguageScreen> {
-  String selectedLang = "English (US)";
-  final List<String> languages = [
-    "English (US)",
-    "French",
-    "Spanish",
-    "German",
-    "Chinese",
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final localeProvider = context.watch<LocaleProvider>();
+    final current = localeProvider.locale.languageCode;
+
+    final options = [
+      _LangOption(locale: const Locale('en'), label: l10n.langEnglish, nativeLabel: 'English'),
+      _LangOption(locale: const Locale('ka'), label: l10n.langGeorgian, nativeLabel: 'ქართული'),
+      _LangOption(locale: const Locale('ru'), label: l10n.langRussian, nativeLabel: 'Русский'),
+    ];
+
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
         title: Text(
-          "Language",
+          l10n.settingsLanguage,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -498,32 +517,44 @@ class _LanguageScreenState extends State<LanguageScreen> {
       ),
       body: ListView.separated(
         padding: const EdgeInsets.all(20),
-        itemCount: languages.length,
+        itemCount: options.length,
         separatorBuilder: (_, __) => const SizedBox(height: 10),
         itemBuilder: (context, index) {
-          final lang = languages[index];
-          final isSelected = lang == selectedLang;
+          final opt = options[index];
+          final isSelected = current == opt.locale.languageCode;
           return GestureDetector(
-            onTap: () => setState(() => selectedLang = lang),
+            onTap: () => context.read<LocaleProvider>().setLocale(opt.locale),
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
                 border: isSelected
-                    ? Border.all(color: AppColors.primary)
-                    : null,
+                    ? Border.all(color: AppColors.primary, width: 2)
+                    : Border.all(color: Colors.grey.shade100),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    lang,
-                    style: GoogleFonts.poppins(
-                      fontWeight: isSelected
-                          ? FontWeight.w600
-                          : FontWeight.normal,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        opt.nativeLabel,
+                        style: GoogleFonts.poppins(
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                          fontSize: 15,
+                        ),
+                      ),
+                      if (opt.nativeLabel != opt.label)
+                        Text(
+                          opt.label,
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                    ],
                   ),
                   if (isSelected)
                     const Icon(
@@ -539,6 +570,17 @@ class _LanguageScreenState extends State<LanguageScreen> {
       ),
     );
   }
+}
+
+class _LangOption {
+  _LangOption({
+    required this.locale,
+    required this.label,
+    required this.nativeLabel,
+  });
+  final Locale locale;
+  final String label;
+  final String nativeLabel;
 }
 
 // =============================================================================
@@ -577,7 +619,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
         _showSnackBar(
-          e.toString().replaceAll("Exception: ", ""),
+          appErrorMessage(context, e),
           isError: true,
         );
       }
@@ -585,9 +627,10 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
   }
 
   Future<void> _submitTicket() async {
+    final l10n = AppLocalizations.of(context);
     if (_subjectController.text.trim().isEmpty ||
         _messageController.text.trim().isEmpty) {
-      _showSnackBar("Please fill subject and message", isError: true);
+      _showSnackBar(l10n.helpFillBoth, isError: true);
       return;
     }
     try {
@@ -600,12 +643,12 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
         _subjectController.clear();
         _messageController.clear();
         _fetchTickets();
-        _showSnackBar("Ticket submitted successfully!", isError: false);
+        _showSnackBar(l10n.helpTicketSubmitted, isError: false);
       }
     } catch (e) {
       if (mounted) {
         _showSnackBar(
-          e.toString().replaceAll("Exception: ", ""),
+          appErrorMessage(context, e),
           isError: true,
         );
       }
@@ -613,6 +656,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
   }
 
   void _openCreateTicketSheet() {
+    final l10n = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -633,7 +677,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Contact Support",
+                l10n.helpContactSupport,
                 style: GoogleFonts.poppins(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -643,7 +687,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
               TextField(
                 controller: _subjectController,
                 decoration: InputDecoration(
-                  labelText: "Subject",
+                  labelText: l10n.helpSubject,
                   labelStyle: GoogleFonts.poppins(fontSize: 12),
                   filled: true,
                   fillColor: const Color(0xFFFAFAFA),
@@ -657,7 +701,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                 controller: _messageController,
                 maxLines: 4,
                 decoration: InputDecoration(
-                  labelText: "Message",
+                  labelText: l10n.helpMessage,
                   labelStyle: GoogleFonts.poppins(fontSize: 12),
                   filled: true,
                   fillColor: const Color(0xFFFAFAFA),
@@ -679,7 +723,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                     ),
                   ),
                   child: Text(
-                    "Submit Ticket",
+                    l10n.helpSubmitTicket,
                     style: GoogleFonts.poppins(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -719,11 +763,12 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
         title: Text(
-          "Help Center",
+          l10n.settingsHelp,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -747,7 +792,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
               padding: const EdgeInsets.all(20),
               children: [
                 Text(
-                  "My Tickets",
+                  l10n.helpMyTickets,
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -771,7 +816,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          "No tickets yet",
+                          l10n.helpNoTickets,
                           style: GoogleFonts.poppins(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -796,7 +841,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                             children: [
                               Expanded(
                                 child: Text(
-                                  ticket['subject'] ?? 'Support Ticket',
+                                  ticket['subject'] ?? l10n.helpSupportTicketDefault,
                                   style: GoogleFonts.poppins(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 13,
@@ -866,13 +911,13 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                   ),
                 const SizedBox(height: 10),
                 _buildFaqItem(
-                  "How do I cancel a booking?",
-                  "Go to the bookings tab, select the active booking, and click the 'Cancel' button.",
+                  l10n.helpFaqCancelQuestion,
+                  l10n.helpFaqCancelAnswer,
                 ),
                 const SizedBox(height: 10),
                 _buildFaqItem(
-                  "How do refunds work?",
-                  "Refunds are processed to your wallet immediately after cancellation confirmation.",
+                  l10n.helpFaqRefundQuestion,
+                  l10n.helpFaqRefundAnswer,
                 ),
               ],
             ),

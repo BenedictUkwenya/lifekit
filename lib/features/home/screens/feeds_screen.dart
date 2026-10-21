@@ -1,4 +1,5 @@
 import 'dart:io';
+import '../../../core/utils/error_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -17,6 +18,7 @@ import 'saved_posts_screen.dart';
 
 import '../../services/screens/service_booking_detail_screen.dart';
 import '../../services/screens/skill_swap_dashboard_screen.dart';
+import '../../../l10n/app_localizations.dart';
 
 // ─────────────────────────────────────────────
 // FEEDS SCREEN
@@ -42,14 +44,15 @@ class _FeedsScreenState extends State<FeedsScreen>
   String _selectedCategory = 'All';
   String _eventSearchQuery = '';
   final TextEditingController _eventSearchController = TextEditingController();
-  final List<Map<String, dynamic>> _categories = [
-    {'label': 'All', 'emoji': '🌟'},
-    {'label': 'Theatre', 'emoji': '🎭'},
-    {'label': 'Sport', 'emoji': '🏀'},
-    {'label': 'Festival', 'emoji': '🎉'},
-    {'label': 'Tourism', 'emoji': '🏛️'},
-    {'label': 'Music', 'emoji': '🎵'},
-    {'label': 'Food', 'emoji': '🍽️'},
+
+  List<Map<String, dynamic>> _buildCategories(AppLocalizations l10n) => [
+    {'key': 'All', 'label': l10n.eventsCatAll, 'emoji': '🌟'},
+    {'key': 'Theatre', 'label': l10n.eventsCatTheatre, 'emoji': '🎭'},
+    {'key': 'Sport', 'label': l10n.eventsCatSport, 'emoji': '🏀'},
+    {'key': 'Festival', 'label': l10n.eventsCatFestival, 'emoji': '🎉'},
+    {'key': 'Tourism', 'label': l10n.eventsCatTourism, 'emoji': '🏛️'},
+    {'key': 'Music', 'label': l10n.eventsCatMusic, 'emoji': '🎵'},
+    {'key': 'Food', 'label': l10n.eventsCatFood, 'emoji': '🍽️'},
   ];
 
   @override
@@ -145,7 +148,7 @@ class _FeedsScreenState extends State<FeedsScreen>
               centerTitle: false,
               automaticallyImplyLeading: false,
               title: Text(
-                "Feeds",
+                AppLocalizations.of(context).navFeeds,
                 style: GoogleFonts.poppins(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
@@ -219,7 +222,8 @@ class _FeedsScreenState extends State<FeedsScreen>
                   ),
                   child: Row(
                     children: List.generate(2, (i) {
-                      final labels = ['Feeds', 'Events'];
+                      final l10n = AppLocalizations.of(context);
+                      final labels = [l10n.feedsTabFeeds, l10n.feedsTabEvents];
                       final isSelected = _tabController.index == i;
                       return GestureDetector(
                         onTap: () {
@@ -368,7 +372,7 @@ class _FeedsScreenState extends State<FeedsScreen>
                         borderRadius: BorderRadius.circular(26),
                       ),
                       child: Text(
-                        "What's on your mind?",
+                        AppLocalizations.of(context).feedsWhatsOnYourMind,
                         style: GoogleFonts.poppins(
                           color: Colors.grey[400],
                           fontSize: 13.5,
@@ -386,13 +390,13 @@ class _FeedsScreenState extends State<FeedsScreen>
                 children: [
                   _ComposeQuickBtn(
                     icon: Icons.photo_library_rounded,
-                    label: 'Photo',
+                    label: AppLocalizations.of(context).feedsPhoto,
                     color: const Color(0xFF22C55E),
                   ),
                   const SizedBox(width: 16),
                   _ComposeQuickBtn(
                     icon: Icons.sell_rounded,
-                    label: 'Tag',
+                    label: AppLocalizations.of(context).feedsTag,
                     color: const Color(0xFF3B82F6),
                   ),
                   const Spacer(),
@@ -408,7 +412,7 @@ class _FeedsScreenState extends State<FeedsScreen>
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      'Post',
+                      AppLocalizations.of(context).feedsPost,
                       style: GoogleFonts.poppins(
                         color: Colors.white,
                         fontSize: 13,
@@ -426,13 +430,14 @@ class _FeedsScreenState extends State<FeedsScreen>
   }
 
   Widget _buildTrendingStrip() {
+    final l10n = AppLocalizations.of(context);
     final trending = [
-      ('🔥', 'Trending', const Color(0xFFFF6B6B)),
-      ('🔧', 'Skill Offer', const Color(0xFF3B82F6)),
-      ('💡', 'Tips', const Color(0xFFA855F7)),
-      ('🤝', 'Swap', AppColors.primary),
-      ('🔍', 'Looking For', const Color(0xFFF97316)),
-      ('💼', 'Services', const Color(0xFF22C55E)),
+      ('🔥', l10n.feedsTrending, const Color(0xFFFF6B6B)),
+      ('🔧', l10n.feedsTrendingSkillOffer, const Color(0xFF3B82F6)),
+      ('💡', l10n.feedsTrendingTips, const Color(0xFFA855F7)),
+      ('🤝', l10n.feedsTrendingSwap, AppColors.primary),
+      ('🔍', l10n.feedsTrendingLookingFor, const Color(0xFFF97316)),
+      ('💼', l10n.feedsTrendingServices, const Color(0xFF22C55E)),
     ];
 
     return Container(
@@ -443,7 +448,7 @@ class _FeedsScreenState extends State<FeedsScreen>
           Row(
             children: [
               Text(
-                'Trending',
+                l10n.feedsTrending,
                 style: GoogleFonts.poppins(
                   fontWeight: FontWeight.w700,
                   fontSize: 13.5,
@@ -458,7 +463,7 @@ class _FeedsScreenState extends State<FeedsScreen>
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  'LIVE',
+                  l10n.feedsLive,
                   style: GoogleFonts.poppins(
                     fontSize: 9,
                     fontWeight: FontWeight.w700,
@@ -534,7 +539,7 @@ class _FeedsScreenState extends State<FeedsScreen>
                 controller: _eventSearchController,
                 onChanged: (v) => setState(() => _eventSearchQuery = v),
                 decoration: InputDecoration(
-                  hintText: 'Search events...',
+                  hintText: AppLocalizations.of(context).eventsSearchHint,
                   hintStyle: GoogleFonts.poppins(
                     color: Colors.grey,
                     fontSize: 13,
@@ -577,7 +582,7 @@ class _FeedsScreenState extends State<FeedsScreen>
           // 2. Category chips (hide when searching)
           if (_eventSearchQuery.isEmpty)
             _CategoriesRow(
-              categories: _categories,
+              categories: _buildCategories(AppLocalizations.of(context)),
               selected: _selectedCategory,
               onSelect: (cat) => setState(() => _selectedCategory = cat),
             ),
@@ -592,8 +597,8 @@ class _FeedsScreenState extends State<FeedsScreen>
               children: [
                 Text(
                   _eventSearchQuery.isNotEmpty
-                      ? 'Search Results'
-                      : 'Popular Today',
+                      ? AppLocalizations.of(context).eventsSearchResults
+                      : AppLocalizations.of(context).eventsPopularToday,
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -621,8 +626,8 @@ class _FeedsScreenState extends State<FeedsScreen>
                     const SizedBox(height: 12),
                     Text(
                       _eventSearchQuery.isNotEmpty
-                          ? 'No events found for "$_eventSearchQuery"'
-                          : 'No events in this category',
+                          ? AppLocalizations.of(context).eventsNoFoundFor(_eventSearchQuery)
+                          : AppLocalizations.of(context).eventsNoInCategory,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(color: Colors.grey),
                     ),
@@ -745,9 +750,13 @@ class _FeedCardState extends State<_FeedCard> with TickerProviderStateMixin {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to update like: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).feedsLikeFailed(appErrorMessage(context, e)),
+          ),
+        ),
+      );
     }
   }
 
@@ -774,9 +783,13 @@ class _FeedCardState extends State<_FeedCard> with TickerProviderStateMixin {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to update bookmark: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).feedsBookmarkFailed(appErrorMessage(context, e)),
+          ),
+        ),
+      );
     }
   }
 
@@ -805,26 +818,102 @@ class _FeedCardState extends State<_FeedCard> with TickerProviderStateMixin {
             ),
             ListTile(
               leading: const Icon(Icons.flag_outlined),
-              title: Text('Report Post', style: GoogleFonts.poppins()),
-              onTap: () {
+              title: Text(
+                AppLocalizations.of(context).feedsReportPost,
+                style: GoogleFonts.poppins(),
+              ),
+              onTap: () async {
+                final l10n = AppLocalizations.of(context);
+                final messenger = ScaffoldMessenger.of(context);
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Post reported. Thank you.'),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
+                // Files a real report for the moderation queue (admin → Support → Reports).
+                try {
+                  await _apiService.reportUser(
+                    reportedUserId: '${widget.post['user_id']}',
+                    reason: 'Inappropriate post',
+                    details:
+                        'Post ${widget.post['id']}: ${'${widget.post['content'] ?? ''}'.characters.take(300)}',
+                  );
+                  messenger.showSnackBar(
+                    SnackBar(
+                      content: Text(l10n.feedsPostReported),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                } catch (_) {
+                  messenger.showSnackBar(
+                    SnackBar(
+                      content: Text(l10n.feedsActionFailed),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
               },
             ),
+            if (!isOwner && widget.post['user_id'] != null)
+              ListTile(
+                leading: const Icon(Icons.block_rounded, color: Colors.red),
+                title: Text(
+                  AppLocalizations.of(context).feedsBlockUser,
+                  style: GoogleFonts.poppins(color: Colors.red),
+                ),
+                onTap: () async {
+                  final l10n = AppLocalizations.of(context);
+                  final messenger = ScaffoldMessenger.of(context);
+                  Navigator.pop(context);
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: Text(l10n.feedsBlockUser),
+                      content: Text(l10n.feedsBlockUserConfirm),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, false),
+                          child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, true),
+                          child: Text(
+                            l10n.feedsBlockUser,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirmed != true) return;
+                  try {
+                    await _apiService.blockUser('${widget.post['user_id']}');
+                    widget.onDeleted?.call(); // hide this post right away
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text(l10n.feedsUserBlocked),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  } catch (_) {
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text(l10n.feedsActionFailed),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                },
+              ),
             ListTile(
               leading: const Icon(Icons.share_outlined),
-              title: Text('Share', style: GoogleFonts.poppins()),
+              title: Text(
+                AppLocalizations.of(context).feedsShare,
+                style: GoogleFonts.poppins(),
+              ),
               onTap: () {
+                final l10n = AppLocalizations.of(context);
                 Navigator.pop(context);
                 final content = widget.post['content'] ?? '';
                 final title = widget.post['title'] ?? '';
                 final text =
-                    '${title.isNotEmpty ? '$title\n\n' : ''}$content\n\nShared from LifeKit';
+                    '${title.isNotEmpty ? '$title\n\n' : ''}$content\n\n${l10n.feedsSharedFromLifeKit}';
                 Share.share(text.trim());
               },
             ),
@@ -832,27 +921,28 @@ class _FeedCardState extends State<_FeedCard> with TickerProviderStateMixin {
               ListTile(
                 leading: const Icon(Icons.delete_outline, color: Colors.red),
                 title: Text(
-                  'Delete',
+                  AppLocalizations.of(context).feedsDelete,
                   style: GoogleFonts.poppins(color: Colors.red),
                 ),
                 onTap: () async {
+                  final l10n = AppLocalizations.of(context);
                   Navigator.pop(context);
                   try {
                     await _apiService.deletePost(widget.post['id']);
                     widget.onDeleted?.call();
-                    if (context.mounted) {
+                    if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Post deleted'),
+                        SnackBar(
+                          content: Text(l10n.feedsPostDeleted),
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
                     }
                   } catch (e) {
-                    if (context.mounted) {
+                    if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Failed to delete post: $e'),
+                          content: Text(l10n.feedsDeleteFailed(appErrorMessage(context, e))),
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
@@ -887,6 +977,7 @@ class _FeedCardState extends State<_FeedCard> with TickerProviderStateMixin {
       images = [widget.post['image_url'] as String];
     }
 
+    final l10n = AppLocalizations.of(context);
     String dateLabel = '';
     if (createdAt != null) {
       try {
@@ -894,13 +985,13 @@ class _FeedCardState extends State<_FeedCard> with TickerProviderStateMixin {
         final now = DateTime.now();
         final diff = now.difference(dt);
         if (diff.inMinutes < 1) {
-          dateLabel = 'Just now';
+          dateLabel = l10n.feedsJustNow;
         } else if (diff.inMinutes < 60) {
-          dateLabel = '${diff.inMinutes}m ago';
+          dateLabel = l10n.feedsMinAgo(diff.inMinutes);
         } else if (diff.inHours < 24) {
-          dateLabel = '${diff.inHours}h ago';
+          dateLabel = l10n.feedsHourAgo(diff.inHours);
         } else if (diff.inDays < 7) {
-          dateLabel = '${diff.inDays}d ago';
+          dateLabel = l10n.feedsDayAgo(diff.inDays);
         } else {
           dateLabel = DateFormat('MMM d').format(dt);
         }
@@ -1571,9 +1662,9 @@ class _CategoriesRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
           children: categories.map((cat) {
-            final isSelected = cat['label'] == selected;
+            final isSelected = (cat['key'] ?? cat['label']) == selected;
             return GestureDetector(
-              onTap: () => onSelect(cat['label']),
+              onTap: () => onSelect(cat['key'] ?? cat['label']),
               child: Container(
                 margin: const EdgeInsets.only(right: 20),
                 child: Column(
@@ -1961,7 +2052,7 @@ class _ComposePostSheetState extends State<_ComposePostSheet> {
             children: [
               Expanded(
                 child: Text(
-                  'Create Post',
+                  AppLocalizations.of(context).feedsCreatePost,
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
@@ -1992,7 +2083,7 @@ class _ComposePostSheetState extends State<_ComposePostSheet> {
                         ),
                       )
                     : Text(
-                        'Post',
+                        AppLocalizations.of(context).feedsPost,
                         style: GoogleFonts.poppins(
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
@@ -2011,7 +2102,7 @@ class _ComposePostSheetState extends State<_ComposePostSheet> {
               fontWeight: FontWeight.w700,
             ),
             decoration: InputDecoration(
-              hintText: 'Add a title (optional)',
+              hintText: AppLocalizations.of(context).feedsAddTitleOptional,
               hintStyle: GoogleFonts.poppins(
                 color: Colors.grey[350],
                 fontSize: 15,
@@ -2031,7 +2122,7 @@ class _ComposePostSheetState extends State<_ComposePostSheet> {
             autofocus: true,
             style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
             decoration: InputDecoration(
-              hintText: "What's on your mind?",
+              hintText: AppLocalizations.of(context).feedsWhatsOnYourMind,
               hintStyle: GoogleFonts.poppins(
                 color: Colors.grey[400],
                 fontSize: 14,

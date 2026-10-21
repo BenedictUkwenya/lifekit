@@ -7,7 +7,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
-import '../../../core/widgets/lifekit_loader.dart';
 import 'place_detail_screen.dart';
 
 class PlacesListScreen extends StatefulWidget {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
@@ -126,7 +127,7 @@ class _AllGroupsTabState extends State<AllGroupsTab> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.toString().replaceAll('Exception:', '').trim()),
+            content: Text(appErrorMessage(context, e)),
             backgroundColor: Colors.redAccent,
             behavior: SnackBarBehavior.floating,
           ),

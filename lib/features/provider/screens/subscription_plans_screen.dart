@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../wallet/screens/add_money_screen.dart';
 
 class SubscriptionPlansScreen extends StatefulWidget {
@@ -19,45 +21,50 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
   String? _selectedTier;
   final Set<String> _loadingTiers = {};
 
-  final List<Map<String, dynamic>> _plans = [
+  // Plans are now built inside `build()` so they can pull localized strings.
+  List<Map<String, dynamic>> _buildPlans(AppLocalizations l10n) => [
     {
-      "name": "Free",
+      "name": l10n.planNameFree,
       "tier": "free",
-      "price": "\$0/mo",
-      "highlight": false,
-      "features": ["0 services", "Max 1 community", "Basic visibility"],
-    },
-    {
-      "name": "Plus",
-      "tier": "plus",
-      "price": "\$6.99/mo",
+      "price": l10n.subscriptionPerMonth("\$0"),
       "highlight": false,
       "features": [
-        "1 service",
-        "Max 3 communities",
-        "Priority listing boost ready",
+        l10n.planFreeFeature1,
+        l10n.planFreeFeature2,
+        l10n.planFreeFeature3,
       ],
     },
     {
-      "name": "Pro",
+      "name": l10n.planNamePlus,
+      "tier": "plus",
+      "price": l10n.subscriptionPerMonth("\$6.99"),
+      "highlight": false,
+      "features": [
+        l10n.planPlusFeature1,
+        l10n.planPlusFeature2,
+        l10n.planPlusFeature3,
+      ],
+    },
+    {
+      "name": l10n.planNamePro,
       "tier": "pro",
-      "price": "\$17.99/mo",
+      "price": l10n.subscriptionPerMonth("\$17.99"),
       "highlight": true,
       "features": [
-        "5 services",
-        "Max 5 communities",
-        "Best for growing providers",
+        l10n.planProFeature1,
+        l10n.planProFeature2,
+        l10n.planProFeature3,
       ],
     },
     {
-      "name": "Business",
+      "name": l10n.planNameBusiness,
       "tier": "business",
-      "price": "\$44.99/mo",
+      "price": l10n.subscriptionPerMonth("\$44.99"),
       "highlight": false,
       "features": [
-        "Unlimited services",
-        "Unlimited communities",
-        "Top-tier monetization access",
+        l10n.planBusinessFeature1,
+        l10n.planBusinessFeature2,
+        l10n.planBusinessFeature3,
       ],
     },
   ];
@@ -82,6 +89,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
 
   Future<void> _buyPlan(String tier) async {
     setState(() => _loadingTiers.add(tier));
+    final l10n = AppLocalizations.of(context)!;
     try {
       final result = await _apiService.buySubscription(tier);
       if (!mounted) return;
@@ -89,7 +97,9 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            "Subscription active until ${result['subscription_expiry'] ?? ''}",
+            l10n.subscriptionActiveUntil(
+              (result['subscription_expiry'] ?? '').toString(),
+            ),
           ),
           backgroundColor: Colors.green,
         ),
@@ -100,7 +110,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
         await _showInsufficientFundsDialog();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+          SnackBar(content: Text(appErrorMessage(context, e)), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -111,23 +121,24 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
   }
 
   Future<void> _showInsufficientFundsDialog() async {
+    final l10n = AppLocalizations.of(context)!;
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          "Insufficient Funds",
+          l10n.subscriptionInsufficientFundsTitle,
           style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
         ),
         content: Text(
-          "Your wallet balance is too low for this purchase. Add money to continue.",
+          l10n.subscriptionInsufficientFundsBody,
           style: GoogleFonts.poppins(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              "Cancel",
+              l10n.subscriptionCancel,
               style: GoogleFonts.poppins(color: Colors.grey.shade700),
             ),
           ),
@@ -141,7 +152,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
             child: Text(
-              "Add Money",
+              l10n.subscriptionAddMoney,
               style: GoogleFonts.poppins(color: Colors.white),
             ),
           ),
@@ -152,6 +163,8 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final plans = _buildPlans(l10n);
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
@@ -160,7 +173,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
         surfaceTintColor: Colors.white,
         centerTitle: true,
         title: Text(
-          "Subscription Plans",
+          l10n.subscriptionPlansTitle,
           style: GoogleFonts.poppins(
             fontSize: 17,
             fontWeight: FontWeight.w600,
@@ -188,7 +201,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Go Premium",
+                  l10n.subscriptionGoPremium,
                   style: GoogleFonts.poppins(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -197,7 +210,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Unlock more services, more communities, and faster growth.",
+                  l10n.subscriptionGoPremiumSubtitle,
                   style: GoogleFonts.poppins(
                     color: Colors.white.withOpacity(0.95),
                     fontSize: 13,
@@ -208,13 +221,13 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          ..._plans.map((plan) => _buildPlanCard(plan)),
+          ...plans.map((plan) => _buildPlanCard(plan, l10n)),
         ],
       ),
     );
   }
 
-  Widget _buildPlanCard(Map<String, dynamic> plan) {
+  Widget _buildPlanCard(Map<String, dynamic> plan, AppLocalizations l10n) {
     final String name = plan["name"];
     final String tier = plan["tier"];
     final bool isHighlighted = plan["highlight"] == true;
@@ -267,7 +280,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    "Popular",
+                    l10n.subscriptionPopular,
                     style: GoogleFonts.poppins(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w600,
@@ -337,8 +350,10 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
                     )
                   : Text(
                       isCurrent
-                          ? "Current Plan"
-                          : (isFree ? "Free Plan" : "Upgrade"),
+                          ? l10n.subscriptionCurrentPlan
+                          : (isFree
+                                ? l10n.subscriptionFreePlan
+                                : l10n.subscriptionUpgrade),
                       style: GoogleFonts.poppins(
                         color: isFree || isCurrent
                             ? Colors.grey.shade700

@@ -65,6 +65,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     // 2. Call API
     try {
       await _apiService.markAllNotificationsRead();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
@@ -104,6 +105,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     // 2. Call API
     try {
       await _apiService.deleteNotification(id);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(

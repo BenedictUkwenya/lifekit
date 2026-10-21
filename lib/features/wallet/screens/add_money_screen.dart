@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../l10n/app_localizations.dart';
 
 class AddMoneyScreen extends StatefulWidget {
   const AddMoneyScreen({super.key});
@@ -73,13 +75,15 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
     } on StripeException catch (e) {
       setState(() => isLoading = false);
       if (e.error.code == FailureCode.Canceled) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Payment Cancelled"),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).paymentCancelled),
             backgroundColor: Colors.grey,
           ),
         );
       } else {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Error: ${e.error.localizedMessage}"),
@@ -89,14 +93,16 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
       }
     } catch (e) {
       setState(() => isLoading = false);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+        SnackBar(content: Text(appErrorMessage(context, e)), backgroundColor: Colors.red),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
@@ -105,7 +111,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
         leading: const BackButton(color: Colors.black),
         centerTitle: true,
         title: Text(
-          "Fund Wallet",
+          l10n.walletTopUp,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,

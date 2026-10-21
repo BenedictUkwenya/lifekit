@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/utils/error_handler.dart';
 import 'event_receipt_screen.dart'; // We will create this next
 
 class EventBookingScreen extends StatefulWidget {
@@ -43,9 +44,10 @@ class _EventBookingScreenState extends State<EventBookingScreen> {
         );
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Payment Failed: $e"),
+          content: Text(friendlyError(e)),
           backgroundColor: Colors.red,
         ),
       );

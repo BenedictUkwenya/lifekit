@@ -432,7 +432,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
             setSheetState(() => isGenerating = true);
             try {
               final response = await _apiService.generateServiceWithAI(prompt);
-              if (!mounted) return;
+              if (!ctx.mounted) return;
               Navigator.pop(ctx);
               setState(() {
                 _titleController.text = (response['title'] ?? '').toString();
@@ -447,7 +447,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
               );
             } catch (e) {
               if (e is UpgradeRequiredException) {
-                if (!mounted) return;
+                if (!ctx.mounted || !mounted) return;
                 Navigator.pop(ctx); // close bottom sheet
                 Navigator.push(
                   context,
