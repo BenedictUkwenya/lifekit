@@ -1,6 +1,7 @@
 ﻿import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import '../../../core/widgets/app_toast.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -4241,28 +4242,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
   }
 
   Widget _buildEmpty(String title, String sub, IconData icon) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 52, color: Colors.grey[300]),
-          const SizedBox(height: 12),
-          Text(
-            title,
-            style: GoogleFonts.poppins(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            sub,
-            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[400]),
-          ),
-        ],
-      ),
-    );
+    return EmptyState(icon: icon, title: title, message: sub);
   }
 
   String _timeAgo(dynamic ts) {

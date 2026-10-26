@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/motion.dart';
 import '../../../core/widgets/skeleton.dart';
@@ -526,31 +527,8 @@ class _BookingsScreenState extends State<BookingsScreen>
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
-        SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-        Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(25),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.calendar_today_outlined,
-                  size: 40,
-                  color: Colors.grey,
-                ),
-              ).popIn(),
-              const SizedBox(height: 16),
-              Text(
-                message,
-                style: GoogleFonts.poppins(color: Colors.grey, fontSize: 14),
-              ).fadeSlideIn(index: 1),
-            ],
-          ),
-        ),
+        SizedBox(height: MediaQuery.of(context).size.height * 0.12),
+        EmptyState(icon: Icons.event_available_rounded, title: message),
       ],
     );
   }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/motion.dart';
+import '../../../core/services/app_cache.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -62,7 +64,12 @@ class _WalletScreenState extends State<WalletScreen> {
       }
     } catch (e) {
       if (mounted) {
-        AppToast.error(context, AppLocalizations.of(context).walletSetupFailed(appErrorMessage(context, e)));
+        AppToast.error(
+          context,
+          AppLocalizations.of(
+            context,
+          ).walletSetupFailed(appErrorMessage(context, e)),
+        );
       }
     }
   }
@@ -115,12 +122,20 @@ class _WalletScreenState extends State<WalletScreen> {
                           Navigator.pop(context);
                           await _fetchWallet();
                           if (!context.mounted) return;
-                          AppToast.success(context, l10n.walletWithdrawalCompleted);
+                          AppToast.success(
+                            context,
+                            l10n.walletWithdrawalCompleted,
+                          );
                         }
                       } catch (e) {
                         setState(() => isSubmitting = false);
                         if (!context.mounted) return;
-                        AppToast.error(context, l10n.walletWithdrawFailed(appErrorMessage(context, e)));
+                        AppToast.error(
+                          context,
+                          l10n.walletWithdrawFailed(
+                            appErrorMessage(context, e),
+                          ),
+                        );
                       }
                     },
               style: ElevatedButton.styleFrom(
@@ -154,188 +169,203 @@ class _WalletScreenState extends State<WalletScreen> {
         elevation: 0,
         centerTitle: true,
         leading: const BackButton(color: Colors.black),
-        actions: [
-        ],
+        actions: [],
       ),
       body: isLoading
           ? const Center(child: LifeKitLoader())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // MAROON CARD
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF89273B),
-                      borderRadius: BorderRadius.circular(24),
-                      image: const DecorationImage(
-                        image: AssetImage('assets/images/background_bg.png'),
-                        fit: BoxFit.cover,
-                        opacity: 0.2,
-                      ), // Mock pattern
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "\$${balance.toStringAsFixed(2)}",
-                          style: GoogleFonts.poppins(
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+          : RefreshIndicator(
+              color: AppColors.primary,
+              onRefresh: () {
+                AppCache.instance.invalidate('wallet');
+                return _fetchWallet();
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // MAROON CARD
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF89273B),
+                        borderRadius: BorderRadius.circular(24),
+                        image: const DecorationImage(
+                          image: AssetImage('assets/images/background_bg.png'),
+                          fit: BoxFit.cover,
+                          opacity: 0.2,
+                        ), // Mock pattern
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AnimatedCount(
+                            value: balance,
+                            format: (v) => "\$${v.toStringAsFixed(2)}",
+                            style: GoogleFonts.poppins(
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              _buildSmallStats(
+                                l10n.walletWeeklyIncome,
+                                "\$3,142",
+                                "+2.6%",
+                              ),
+                              const SizedBox(width: 12),
+                              _buildSmallStats(
+                                l10n.walletPoints,
+                                "48",
+                                l10n.walletPointsOf("500"),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // ACTION BUTTONS
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildActionBtn(
+                          Icons.money,
+                          l10n.walletAddMoney,
+                          () async {
+                            bool? result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const AddMoneyScreen(),
+                              ),
+                            );
+                            if (result == true) _fetchWallet();
+                          },
                         ),
-                        const SizedBox(height: 20),
-                        Row(
-                          children: [
-                            _buildSmallStats(
-                              l10n.walletWeeklyIncome,
-                              "\$3,142",
-                              "+2.6%",
-                            ),
-                            const SizedBox(width: 12),
-                            _buildSmallStats(
-                              l10n.walletPoints,
-                              "48",
-                              l10n.walletPointsOf("500"),
-                            ),
-                          ],
+                        _buildActionBtn(
+                          Icons.arrow_outward,
+                          isProvider && balance > 0 && !isStripeConnected
+                              ? l10n.walletSetupPayouts
+                              : l10n.walletWithdraw,
+                          () {
+                            if (!isProvider || balance <= 0) {
+                              AppToast.info(
+                                context,
+                                isProvider
+                                    ? "Balance must be greater than 0."
+                                    : "Withdrawals are for providers.",
+                              );
+                              return;
+                            }
+                            if (!isStripeConnected) {
+                              _startPayoutSetup();
+                              return;
+                            }
+                            _showWithdrawDialog();
+                          },
                         ),
                       ],
                     ),
-                  ),
 
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 30),
 
-                  // ACTION BUTTONS
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildActionBtn(Icons.money, l10n.walletAddMoney, () async {
-                        bool? result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const AddMoneyScreen(),
+                    // TRANSACTIONS
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          l10n.walletTransactionHistory,
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          l10n.seeAll,
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: transactions.length,
+                      itemBuilder: (context, index) {
+                        final tx = transactions[index];
+                        final bool isCredit =
+                            tx['type'] == 'deposit' ||
+                            tx['type'] == 'earning' ||
+                            tx['type'] == 'refund';
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  isCredit
+                                      ? Icons.arrow_downward
+                                      : Icons.arrow_upward,
+                                  color: isCredit ? Colors.green : Colors.red,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      tx['description'] ?? 'Transaction',
+                                      style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    Text(
+                                      l10n.walletSuccess,
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.grey,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Text(
+                                "${isCredit ? '+' : ''}\$${tx['amount']}",
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.bold,
+                                  color: isCredit ? Colors.green : Colors.red,
+                                ),
+                              ),
+                            ],
                           ),
                         );
-                        if (result == true) _fetchWallet();
-                      }),
-                      _buildActionBtn(
-                        Icons.arrow_outward,
-                        isProvider && balance > 0 && !isStripeConnected
-                            ? l10n.walletSetupPayouts
-                            : l10n.walletWithdraw,
-                        () {
-                          if (!isProvider || balance <= 0) {
-                            AppToast.info(context, isProvider
-                                      ? "Balance must be greater than 0."
-                                      : "Withdrawals are for providers.");
-                            return;
-                          }
-                          if (!isStripeConnected) {
-                            _startPayoutSetup();
-                            return;
-                          }
-                          _showWithdrawDialog();
-                        },
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  // TRANSACTIONS
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        l10n.walletTransactionHistory,
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        l10n.seeAll,
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: transactions.length,
-                    itemBuilder: (context, index) {
-                      final tx = transactions[index];
-                      final bool isCredit =
-                          tx['type'] == 'deposit' ||
-                          tx['type'] == 'earning' ||
-                          tx['type'] == 'refund';
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[100],
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                isCredit
-                                    ? Icons.arrow_downward
-                                    : Icons.arrow_upward,
-                                color: isCredit ? Colors.green : Colors.red,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    tx['description'] ?? 'Transaction',
-                                    style: GoogleFonts.poppins(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  Text(
-                                    l10n.walletSuccess,
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.grey,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Text(
-                              "${isCredit ? '+' : ''}\$${tx['amount']}",
-                              style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.bold,
-                                color: isCredit ? Colors.green : Colors.red,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ],
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
     );

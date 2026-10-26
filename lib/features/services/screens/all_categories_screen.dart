@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../core/services/app_cache.dart';
+import '../../../core/constants/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -182,12 +184,20 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
       ),
       body: isLoading
           ? const Center(child: LifeKitLoader())
-          : ListView.separated(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-              itemCount: categories.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 16),
-              itemBuilder: (context, index) =>
-                  _buildCategoryTile(categories[index]),
+          : RefreshIndicator(
+              color: AppColors.primary,
+              onRefresh: () {
+                AppCache.instance.invalidatePrefix('categories_');
+                return _fetchCategories();
+              },
+              child: ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                itemCount: categories.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 16),
+                itemBuilder: (context, index) =>
+                    _buildCategoryTile(categories[index]),
+              ),
             ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/empty_state.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -110,18 +111,9 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.search_off, size: 60, color: Colors.grey),
-          const SizedBox(height: 16),
-          Text(
-            AppLocalizations.of(context).noResults,
-            style: GoogleFonts.poppins(color: Colors.grey),
-          ),
-        ],
-      ),
+    return EmptyState(
+      icon: Icons.search_off_rounded,
+      title: AppLocalizations.of(context).noResults,
     );
   }
 

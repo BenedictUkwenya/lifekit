@@ -1,6 +1,7 @@
 import 'dart:io';
 import '../../../core/utils/error_handler.dart';
 import 'package:flutter/material.dart';
+import '../../../core/widgets/motion.dart';
 import '../../../core/widgets/skeleton.dart';
 import '../../../core/widgets/app_toast.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -1409,24 +1410,43 @@ class _ActionBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Pressable(
+      pressedScale: 0.9,
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: Motion.fast,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: active ? color.withOpacity(0.10) : Colors.transparent,
+          color: active ? color.withValues(alpha: 0.10) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 19, color: color),
+            // Icon pops with a bounce when it changes (e.g. like toggled).
+            AnimatedSwitcher(
+              duration: Motion.slow,
+              switchInCurve: Curves.elasticOut,
+              transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
+              child: Icon(icon, key: ValueKey(icon), size: 19, color: color),
+            ),
             const SizedBox(width: 4),
-            Text(
-              label,
-              style: GoogleFonts.poppins(
-                color: color,
-                fontSize: 12.5,
-                fontWeight: FontWeight.w500,
+            AnimatedSwitcher(
+              duration: Motion.fast,
+              transitionBuilder: (child, anim) => FadeTransition(
+                opacity: anim,
+                child: SlideTransition(
+                  position: Tween(begin: const Offset(0, 0.4), end: Offset.zero).animate(anim),
+                  child: child,
+                ),
+              ),
+              child: Text(
+                label,
+                key: ValueKey(label),
+                style: GoogleFonts.poppins(
+                  color: color,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ],

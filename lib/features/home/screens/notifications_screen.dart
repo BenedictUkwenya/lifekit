@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/empty_state.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/skeleton.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -228,13 +229,21 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ? const SkeletonList(count: 8, thumbSize: 44)
           : notifications.isEmpty
           ? _buildEmptyState()
-          : ListView.builder(
-              padding: const EdgeInsets.all(20),
-              itemCount: notifications.length,
-              itemBuilder: (context, index) {
-                final notif = notifications[index];
-                return _buildDismissibleItem(notif, index);
+          : RefreshIndicator(
+              color: AppColors.primary,
+              onRefresh: () {
+                AppCache.instance.invalidate('notifications');
+                return _fetchNotifications();
               },
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(20),
+                itemCount: notifications.length,
+                itemBuilder: (context, index) {
+                  final notif = notifications[index];
+                  return _buildDismissibleItem(notif, index);
+                },
+              ),
             ),
     );
   }
@@ -262,22 +271,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.notifications_off_outlined,
-            size: 60,
-            color: Colors.grey[300],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            AppLocalizations.of(context).txNoNotificationsYet,
-            style: GoogleFonts.poppins(color: Colors.grey),
-          ),
-        ],
-      ),
+    return EmptyState(
+      icon: Icons.notifications_none_rounded,
+      title: AppLocalizations.of(context).txNoNotificationsYet,
     );
   }
 
