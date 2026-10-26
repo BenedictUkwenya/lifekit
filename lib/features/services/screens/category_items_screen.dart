@@ -112,7 +112,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
             const SizedBox(height: 10),
             ListTile(
               leading: const Icon(Icons.star),
-              title: const Text("Top Rated"),
+              title: Text(AppLocalizations.of(context).sortTopRated),
               onTap: () {
                 setState(
                   () => filteredServices.sort(
@@ -126,7 +126,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.arrow_upward),
-              title: const Text("Price: Low to High"),
+              title: Text(AppLocalizations.of(context).sortPriceLowHigh),
               onTap: () {
                 setState(
                   () => filteredServices.sort(
@@ -140,6 +140,12 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -281,7 +287,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
 
                 Expanded(
                   child: filteredServices.isEmpty
-                      ? const Center(child: Text("No services found."))
+                      ? Center(child: Text(AppLocalizations.of(context).msgNoServicesFound))
                       : ListView(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 20,

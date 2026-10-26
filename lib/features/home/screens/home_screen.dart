@@ -2445,8 +2445,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   // Safely check IDs before navigating to prevent crashes
                   if (sId == null || pId == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Service details unavailable."),
+                      SnackBar(
+                        content: Text(AppLocalizations.of(context).msgServiceUnavailable),
                       ),
                     );
                     return;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart'; // Run: flutter pub add flutter_rating_bar
@@ -47,8 +48,8 @@ class _LeaveReviewScreenState extends State<LeaveReviewScreen> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Review Submitted!"),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).msgReviewSubmitted),
             backgroundColor: Colors.green,
           ),
         );
@@ -62,6 +63,12 @@ class _LeaveReviewScreenState extends State<LeaveReviewScreen> {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
   }
 
   @override

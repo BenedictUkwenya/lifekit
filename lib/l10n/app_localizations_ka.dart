@@ -2758,4 +2758,86 @@ class AppLocalizationsKa extends AppLocalizations {
   String planDayDoneToast(int day) {
     return 'დღე $day შესრულდა — ყოჩაღ!';
   }
+
+  @override
+  String get msgReceiptDownloaded => 'ქვითარი შენახულია ფაილებში';
+
+  @override
+  String get msgEnterReason => 'გთხოვთ, მიუთითოთ მიზეზი.';
+
+  @override
+  String get msgPostReported => 'პოსტზე საჩივარი გაიგზავნა. გმადლობთ.';
+
+  @override
+  String get msgServiceUnavailable => 'მომსახურების დეტალები მიუწვდომელია.';
+
+  @override
+  String get reportScam => 'თაღლითობა';
+
+  @override
+  String get reportHarassment => 'შევიწროება';
+
+  @override
+  String get reportInappropriate => 'შეუფერებელი კონტენტი';
+
+  @override
+  String get reportOther => 'სხვა';
+
+  @override
+  String get placesNearby => 'ახლოს';
+
+  @override
+  String get placesPopular => 'პოპულარული';
+
+  @override
+  String get msgProfileUpdated => 'პროფილი განახლდა!';
+
+  @override
+  String get msgProfileLoadFailed => 'პროფილის ჩატვირთვა ვერ მოხერხდა';
+
+  @override
+  String get msgLinkCopied => 'ბმული დაკოპირდა!';
+
+  @override
+  String get shareScanToConnect =>
+      'დაასკანერეთ, რომ დაუკავშირდეთ ამ მომხმარებელს LifeKit-ში';
+
+  @override
+  String get msgServiceDeleted => 'მომსახურება წაიშალა.';
+
+  @override
+  String get msgBoostActivated => 'ბუსტი გააქტიურდა!';
+
+  @override
+  String msgFoundInParent(String parent) {
+    return 'ნაპოვნია „$parent“-ში. იხსნება…';
+  }
+
+  @override
+  String get msgRequestSent => 'მოთხოვნა გაიგზავნა!';
+
+  @override
+  String get msgReviewSubmitted => 'შეფასება გაიგზავნა — გმადლობთ!';
+
+  @override
+  String get sortTopRated => 'საუკეთესო შეფასებით';
+
+  @override
+  String get sortPriceLowHigh => 'ფასი: ზრდადობით';
+
+  @override
+  String get msgNoServicesFound => 'მომსახურება ვერ მოიძებნა.';
+
+  @override
+  String get msgProposalFailed =>
+      'შეთავაზების შედგენა ვერ მოხერხდა. სცადეთ ხელახლა.';
+
+  @override
+  String get msgEnterAmount => 'გთხოვთ, შეიყვანოთ თანხა';
+
+  @override
+  String get msgMinDeposit => 'მინიმალური შევსება \$5-ია';
+
+  @override
+  String get msgWalletFunded => 'საფულე წარმატებით შეივსო!';
 }

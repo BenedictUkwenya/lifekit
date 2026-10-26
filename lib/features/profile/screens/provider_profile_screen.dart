@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:lifekit_frontend/features/profile/screens/service_profile_screen.dart';
@@ -119,7 +120,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen>
             icon: const Icon(Icons.share_outlined, color: Colors.black),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Sharing Link Copied!")),
+                SnackBar(content: Text(AppLocalizations.of(context).msgLinkCopied)),
               );
             },
           ),

@@ -98,8 +98,8 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
                                   .trim();
                               if (reason.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text("Please enter a reason."),
+                                  SnackBar(
+                                    content: Text(AppLocalizations.of(context).msgEnterReason),
                                     backgroundColor: Colors.red,
                                   ),
                                 );

@@ -2742,4 +2742,85 @@ class AppLocalizationsEn extends AppLocalizations {
   String planDayDoneToast(int day) {
     return 'Day $day done — nice work!';
   }
+
+  @override
+  String get msgReceiptDownloaded => 'Receipt saved to your files';
+
+  @override
+  String get msgEnterReason => 'Please enter a reason.';
+
+  @override
+  String get msgPostReported => 'Post reported. Thank you.';
+
+  @override
+  String get msgServiceUnavailable => 'Service details unavailable.';
+
+  @override
+  String get reportScam => 'Scam or fraud';
+
+  @override
+  String get reportHarassment => 'Harassment';
+
+  @override
+  String get reportInappropriate => 'Inappropriate content';
+
+  @override
+  String get reportOther => 'Other';
+
+  @override
+  String get placesNearby => 'Nearby';
+
+  @override
+  String get placesPopular => 'Popular';
+
+  @override
+  String get msgProfileUpdated => 'Profile updated!';
+
+  @override
+  String get msgProfileLoadFailed => 'Couldn\'t load your profile';
+
+  @override
+  String get msgLinkCopied => 'Link copied!';
+
+  @override
+  String get shareScanToConnect => 'Scan to connect with this user on LifeKit';
+
+  @override
+  String get msgServiceDeleted => 'Service deleted.';
+
+  @override
+  String get msgBoostActivated => 'Boost activated!';
+
+  @override
+  String msgFoundInParent(String parent) {
+    return 'Found in “$parent”. Opening…';
+  }
+
+  @override
+  String get msgRequestSent => 'Request sent!';
+
+  @override
+  String get msgReviewSubmitted => 'Review submitted — thank you!';
+
+  @override
+  String get sortTopRated => 'Top rated';
+
+  @override
+  String get sortPriceLowHigh => 'Price: low to high';
+
+  @override
+  String get msgNoServicesFound => 'No services found.';
+
+  @override
+  String get msgProposalFailed =>
+      'Couldn\'t write a proposal. Please try again.';
+
+  @override
+  String get msgEnterAmount => 'Please enter an amount';
+
+  @override
+  String get msgMinDeposit => 'The minimum deposit is \$5';
+
+  @override
+  String get msgWalletFunded => 'Wallet funded successfully!';
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
@@ -48,7 +49,7 @@ class _ProviderOnboardingIntroScreenState
         backgroundColor: Colors.white,
         leading: TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text("Cancel", style: TextStyle(color: Colors.black)),
+          child: Text(AppLocalizations.of(context).cancel, style: TextStyle(color: Colors.black)),
         ),
         leadingWidth: 80,
         title: Text(

@@ -5235,6 +5235,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Day {day} done — nice work!'**
   String planDayDoneToast(int day);
+
+  /// No description provided for @msgReceiptDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt saved to your files'**
+  String get msgReceiptDownloaded;
+
+  /// No description provided for @msgEnterReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a reason.'**
+  String get msgEnterReason;
+
+  /// No description provided for @msgPostReported.
+  ///
+  /// In en, this message translates to:
+  /// **'Post reported. Thank you.'**
+  String get msgPostReported;
+
+  /// No description provided for @msgServiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Service details unavailable.'**
+  String get msgServiceUnavailable;
+
+  /// No description provided for @reportScam.
+  ///
+  /// In en, this message translates to:
+  /// **'Scam or fraud'**
+  String get reportScam;
+
+  /// No description provided for @reportHarassment.
+  ///
+  /// In en, this message translates to:
+  /// **'Harassment'**
+  String get reportHarassment;
+
+  /// No description provided for @reportInappropriate.
+  ///
+  /// In en, this message translates to:
+  /// **'Inappropriate content'**
+  String get reportInappropriate;
+
+  /// No description provided for @reportOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get reportOther;
+
+  /// No description provided for @placesNearby.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby'**
+  String get placesNearby;
+
+  /// No description provided for @placesPopular.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular'**
+  String get placesPopular;
+
+  /// No description provided for @msgProfileUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated!'**
+  String get msgProfileUpdated;
+
+  /// No description provided for @msgProfileLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your profile'**
+  String get msgProfileLoadFailed;
+
+  /// No description provided for @msgLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied!'**
+  String get msgLinkCopied;
+
+  /// No description provided for @shareScanToConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan to connect with this user on LifeKit'**
+  String get shareScanToConnect;
+
+  /// No description provided for @msgServiceDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Service deleted.'**
+  String get msgServiceDeleted;
+
+  /// No description provided for @msgBoostActivated.
+  ///
+  /// In en, this message translates to:
+  /// **'Boost activated!'**
+  String get msgBoostActivated;
+
+  /// No description provided for @msgFoundInParent.
+  ///
+  /// In en, this message translates to:
+  /// **'Found in “{parent}”. Opening…'**
+  String msgFoundInParent(String parent);
+
+  /// No description provided for @msgRequestSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent!'**
+  String get msgRequestSent;
+
+  /// No description provided for @msgReviewSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Review submitted — thank you!'**
+  String get msgReviewSubmitted;
+
+  /// No description provided for @sortTopRated.
+  ///
+  /// In en, this message translates to:
+  /// **'Top rated'**
+  String get sortTopRated;
+
+  /// No description provided for @sortPriceLowHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Price: low to high'**
+  String get sortPriceLowHigh;
+
+  /// No description provided for @msgNoServicesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No services found.'**
+  String get msgNoServicesFound;
+
+  /// No description provided for @msgProposalFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t write a proposal. Please try again.'**
+  String get msgProposalFailed;
+
+  /// No description provided for @msgEnterAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter an amount'**
+  String get msgEnterAmount;
+
+  /// No description provided for @msgMinDeposit.
+  ///
+  /// In en, this message translates to:
+  /// **'The minimum deposit is \$5'**
+  String get msgMinDeposit;
+
+  /// No description provided for @msgWalletFunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet funded successfully!'**
+  String get msgWalletFunded;
 }
 
 class _AppLocalizationsDelegate

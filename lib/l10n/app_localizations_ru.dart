@@ -2753,4 +2753,86 @@ class AppLocalizationsRu extends AppLocalizations {
   String planDayDoneToast(int day) {
     return 'День $day выполнен — отлично!';
   }
+
+  @override
+  String get msgReceiptDownloaded => 'Чек сохранён в файлы';
+
+  @override
+  String get msgEnterReason => 'Пожалуйста, укажите причину.';
+
+  @override
+  String get msgPostReported => 'Жалоба на пост отправлена. Спасибо.';
+
+  @override
+  String get msgServiceUnavailable => 'Данные услуги недоступны.';
+
+  @override
+  String get reportScam => 'Мошенничество';
+
+  @override
+  String get reportHarassment => 'Домогательства';
+
+  @override
+  String get reportInappropriate => 'Неприемлемый контент';
+
+  @override
+  String get reportOther => 'Другое';
+
+  @override
+  String get placesNearby => 'Рядом';
+
+  @override
+  String get placesPopular => 'Популярное';
+
+  @override
+  String get msgProfileUpdated => 'Профиль обновлён!';
+
+  @override
+  String get msgProfileLoadFailed => 'Не удалось загрузить профиль';
+
+  @override
+  String get msgLinkCopied => 'Ссылка скопирована!';
+
+  @override
+  String get shareScanToConnect =>
+      'Отсканируйте, чтобы связаться с этим пользователем в LifeKit';
+
+  @override
+  String get msgServiceDeleted => 'Услуга удалена.';
+
+  @override
+  String get msgBoostActivated => 'Продвижение активировано!';
+
+  @override
+  String msgFoundInParent(String parent) {
+    return 'Найдено в «$parent». Открываем…';
+  }
+
+  @override
+  String get msgRequestSent => 'Запрос отправлен!';
+
+  @override
+  String get msgReviewSubmitted => 'Отзыв отправлен — спасибо!';
+
+  @override
+  String get sortTopRated => 'Лучшие по рейтингу';
+
+  @override
+  String get sortPriceLowHigh => 'Цена: по возрастанию';
+
+  @override
+  String get msgNoServicesFound => 'Услуги не найдены.';
+
+  @override
+  String get msgProposalFailed =>
+      'Не удалось составить предложение. Попробуйте ещё раз.';
+
+  @override
+  String get msgEnterAmount => 'Пожалуйста, введите сумму';
+
+  @override
+  String get msgMinDeposit => 'Минимальное пополнение — \$5';
+
+  @override
+  String get msgWalletFunded => 'Кошелёк успешно пополнен!';
 }

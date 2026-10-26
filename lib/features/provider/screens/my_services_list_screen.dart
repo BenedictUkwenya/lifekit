@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -231,8 +232,8 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
       await _apiService.deleteService(serviceId);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Service deleted successfully.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).msgServiceDeleted),
             backgroundColor: Color(0xFF10B981),
           ),
         );
@@ -443,8 +444,8 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                             Navigator.pop(context);
                             if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Boost activated successfully."),
+                              SnackBar(
+                                content: Text(AppLocalizations.of(context).msgBoostActivated),
                                 backgroundColor: Colors.green,
                               ),
                             );

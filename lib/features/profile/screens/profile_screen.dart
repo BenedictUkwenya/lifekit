@@ -274,13 +274,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               const Icon(Icons.error_outline, size: 48, color: Colors.red),
               const SizedBox(height: 16),
-              Text("Failed to load profile", style: GoogleFonts.poppins()),
+              Text(AppLocalizations.of(context).msgProfileLoadFailed, style: GoogleFonts.poppins()),
               TextButton(
                 onPressed: () {
                   setState(() => isLoading = true);
                   _fetchProfile();
                 },
-                child: const Text("Retry"),
+                child: Text(AppLocalizations.of(context).retry),
               ),
             ],
           ),

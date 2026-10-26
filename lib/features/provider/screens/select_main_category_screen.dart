@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -88,7 +89,7 @@ class _SelectMainCategoryScreenState extends State<SelectMainCategoryScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Found inside '$parentName'. Opening..."),
+          content: Text(AppLocalizations.of(context).msgFoundInParent(parentName)),
           duration: const Duration(seconds: 1),
         ),
       );
@@ -278,8 +279,8 @@ class _SelectMainCategoryScreenState extends State<SelectMainCategoryScreen> {
                                 Navigator.pop(context);
                                 if (!context.mounted) return;
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text("Request sent successfully!"),
+                                  SnackBar(
+                                    content: Text(AppLocalizations.of(context).msgRequestSent),
                                     backgroundColor: Colors.green,
                                   ),
                                 );
@@ -316,6 +317,12 @@ class _SelectMainCategoryScreenState extends State<SelectMainCategoryScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override

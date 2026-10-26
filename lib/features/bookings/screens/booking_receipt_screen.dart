@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
@@ -149,7 +150,7 @@ class BookingReceiptScreen extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Receipt Downloaded to Files")),
+                  SnackBar(content: Text(AppLocalizations.of(context).msgReceiptDownloaded)),
                 );
               },
               icon: const Icon(Icons.download, color: Colors.black),

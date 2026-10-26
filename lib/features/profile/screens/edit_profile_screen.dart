@@ -1,6 +1,7 @@
 import 'dart:io'; // Needed for File
 import '../../../core/utils/error_handler.dart';
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart'; // Ensure you have this package
@@ -67,8 +68,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Profile Updated!"),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).msgProfileUpdated),
             backgroundColor: Colors.green,
           ),
         );
@@ -82,6 +83,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         );
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _usernameController.dispose();
+    _phoneController.dispose();
+    _bioController.dispose();
+    super.dispose();
   }
 
   @override

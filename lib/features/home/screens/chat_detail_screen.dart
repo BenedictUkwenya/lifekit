@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/error_handler.dart';
 import 'dart:async';
 import 'package:google_fonts/google_fonts.dart';
@@ -1091,7 +1092,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel', style: GoogleFonts.poppins()),
+            child: Text(AppLocalizations.of(context).cancel, style: GoogleFonts.poppins()),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),

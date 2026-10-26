@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -100,8 +101,8 @@ class _GroupPostCardState extends State<GroupPostCard> {
               onTap: () {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Post reported. Thank you.'),
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context).msgPostReported),
                     behavior: SnackBarBehavior.floating,
                   ),
                 );

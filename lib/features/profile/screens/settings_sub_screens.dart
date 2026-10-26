@@ -139,6 +139,14 @@ class _SecurityScreenState extends State<SecurityScreen> {
   }
 
   @override
+  void dispose() {
+    _currentPassController.dispose();
+    _newPassController.dispose();
+    _confirmPassController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
@@ -759,6 +767,13 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
         margin: const EdgeInsets.all(16),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _subjectController.dispose();
+    _messageController.dispose();
+    super.dispose();
   }
 
   @override

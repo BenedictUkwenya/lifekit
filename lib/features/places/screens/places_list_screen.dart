@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:geolocator/geolocator.dart';
@@ -246,7 +247,7 @@ class _PlacesListScreenState extends State<PlacesListScreen>
                 children: [
                   const Icon(Icons.near_me, size: 16),
                   const SizedBox(width: 6),
-                  const Text("Nearby"),
+                  Text(AppLocalizations.of(context).placesNearby),
                 ],
               ),
             ),
@@ -256,7 +257,7 @@ class _PlacesListScreenState extends State<PlacesListScreen>
                 children: [
                   const Icon(Icons.local_fire_department, size: 16),
                   const SizedBox(width: 6),
-                  const Text("Popular"),
+                  Text(AppLocalizations.of(context).placesPopular),
                 ],
               ),
             ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
@@ -67,6 +68,12 @@ class _ReportUserScreenState extends State<ReportUserScreen> {
   }
 
   @override
+  void dispose() {
+    _detailsController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
@@ -98,22 +105,22 @@ class _ReportUserScreenState extends State<ReportUserScreen> {
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               value: _reason,
-              items: const [
+              items: [
                 DropdownMenuItem(
                   value: 'Scam or Fraud',
-                  child: Text('Scam or Fraud'),
+                  child: Text(AppLocalizations.of(context).reportScam),
                 ),
                 DropdownMenuItem(
                   value: 'Harassment',
-                  child: Text('Harassment'),
+                  child: Text(AppLocalizations.of(context).reportHarassment),
                 ),
                 DropdownMenuItem(
                   value: 'Inappropriate Content',
-                  child: Text('Inappropriate Content'),
+                  child: Text(AppLocalizations.of(context).reportInappropriate),
                 ),
                 DropdownMenuItem(
                   value: 'Other',
-                  child: Text('Other'),
+                  child: Text(AppLocalizations.of(context).reportOther),
                 ),
               ],
               onChanged: (value) {

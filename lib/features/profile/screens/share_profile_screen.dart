@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart'; // Make sure to add this package
 
@@ -54,7 +55,7 @@ class ShareProfileScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: 24),
-              const Text("Scan to connect with this user on LifeKit"),
+              Text(AppLocalizations.of(context).shareScanToConnect),
               const SizedBox(height: 30),
 
               Row(

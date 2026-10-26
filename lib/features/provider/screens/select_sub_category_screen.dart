@@ -195,6 +195,12 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final groupedData = _groupCategories();
     final sortedKeys = groupedData.keys.toList()..sort();

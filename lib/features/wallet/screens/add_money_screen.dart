@@ -22,7 +22,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
     if (_amountController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("Please enter an amount")));
+      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).msgEnterAmount)));
       return;
     }
 
@@ -30,7 +30,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
     if (amount < 5) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("Minimum deposit is \$5")));
+      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).msgMinDeposit)));
       return;
     }
 
@@ -65,8 +65,8 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Wallet funded successfully!"),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).msgWalletFunded),
             backgroundColor: Colors.green,
           ),
         );
@@ -86,7 +86,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Error: ${e.error.localizedMessage}"),
+            content: Text(e.error.localizedMessage ?? AppLocalizations.of(context).errGeneric),
             backgroundColor: Colors.red,
           ),
         );
@@ -98,6 +98,12 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
         SnackBar(content: Text(appErrorMessage(context, e)), backgroundColor: Colors.red),
       );
     }
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    super.dispose();
   }
 
   @override
