@@ -1,6 +1,8 @@
 import 'dart:io';
 import '../../../core/utils/error_handler.dart';
 import 'package:flutter/material.dart';
+import '../../../core/widgets/skeleton.dart';
+import '../../../core/widgets/app_toast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
@@ -9,7 +11,6 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/app_cache.dart';
-import '../../../core/widgets/lifekit_loader.dart';
 import '../widgets/comments_sheet.dart';
 import 'event_detail_screen.dart';
 import 'feed_detail_screen.dart';
@@ -268,7 +269,7 @@ class _FeedsScreenState extends State<FeedsScreen>
             ),
           ],
           body: isLoading
-              ? const Center(child: LifeKitLoader())
+              ? const SkeletonList(count: 4, thumbSize: 44)
               : Column(
                   children: [
                     Expanded(
@@ -750,13 +751,7 @@ class _FeedCardState extends State<_FeedCard> with TickerProviderStateMixin {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context).feedsLikeFailed(appErrorMessage(context, e)),
-          ),
-        ),
-      );
+      AppToast.info(context, AppLocalizations.of(context).feedsLikeFailed(appErrorMessage(context, e)));
     }
   }
 
@@ -783,13 +778,7 @@ class _FeedCardState extends State<_FeedCard> with TickerProviderStateMixin {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context).feedsBookmarkFailed(appErrorMessage(context, e)),
-          ),
-        ),
-      );
+      AppToast.info(context, AppLocalizations.of(context).feedsBookmarkFailed(appErrorMessage(context, e)));
     }
   }
 
@@ -931,21 +920,11 @@ class _FeedCardState extends State<_FeedCard> with TickerProviderStateMixin {
                     await _apiService.deletePost(widget.post['id']);
                     widget.onDeleted?.call();
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(l10n.feedsPostDeleted),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
+                      AppToast.info(context, l10n.feedsPostDeleted);
                     }
                   } catch (e) {
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(l10n.feedsDeleteFailed(appErrorMessage(context, e))),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
+                      AppToast.info(context, l10n.feedsDeleteFailed(appErrorMessage(context, e)));
                     }
                   }
                 },

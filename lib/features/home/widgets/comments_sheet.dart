@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/lifekit_loader.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -88,13 +90,7 @@ class _CommentsSheetState extends State<CommentsSheet> {
     if (text.isEmpty) return;
 
     if (!_isSafe(text)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Safety Warning: Contact details are not allowed in comments.",
-          ),
-        ),
-      );
+      AppToast.info(context, "Safety Warning: Contact details are not allowed in comments.");
       return;
     }
 
@@ -112,12 +108,7 @@ class _CommentsSheetState extends State<CommentsSheet> {
       _fetchComments(); // Refresh the list
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(appErrorMessage(context, e),
-          ),
-        ),
-      );
+      AppToast.info(context, appErrorMessage(context, e));
     } finally {
       if (mounted) setState(() => isPosting = false);
     }
@@ -137,9 +128,7 @@ class _CommentsSheetState extends State<CommentsSheet> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorMessage(context, e))),
-        );
+        AppToast.info(context, appErrorMessage(context, e));
       }
     }
   }
@@ -188,9 +177,7 @@ class _CommentsSheetState extends State<CommentsSheet> {
           // List
           Expanded(
             child: isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
-                  )
+                ? const Center(child: LifeKitLoader(showSlowHint: false))
                 : comments.isEmpty
                 ? Center(
                     child: Text(

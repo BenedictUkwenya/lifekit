@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
@@ -94,24 +95,15 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
       final result = await _apiService.buySubscription(tier);
       if (!mounted) return;
       setState(() => _selectedTier = tier);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.subscriptionActiveUntil(
+      AppToast.success(context, l10n.subscriptionActiveUntil(
               (result['subscription_expiry'] ?? '').toString(),
-            ),
-          ),
-          backgroundColor: Colors.green,
-        ),
-      );
+            ));
     } catch (e) {
       if (!mounted) return;
       if (e is ApiException && e.statusCode == 402) {
         await _showInsufficientFundsDialog();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorMessage(context, e)), backgroundColor: Colors.red),
-        );
+        AppToast.error(context, appErrorMessage(context, e));
       }
     } finally {
       if (mounted) {

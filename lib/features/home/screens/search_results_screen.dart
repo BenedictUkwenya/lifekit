@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/lifekit_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
@@ -67,9 +68,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         ),
       ),
       body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            )
+          ? const Center(child: LifeKitLoader())
           : services.isEmpty && providers.isEmpty
           ? _buildEmptyState()
           : ListView(

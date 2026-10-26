@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/lifekit_loader.dart';
+import '../../../core/widgets/app_toast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
@@ -105,27 +107,10 @@ class _ServiceProfileScreenState extends State<ServiceProfileScreen>
     try {
       await _apiService.shareServiceToFeed(widget.service['id']);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "Service shared to feed successfully",
-            style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
-          ),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: AppColors.primary,
-        ),
-      );
+      AppToast.info(context, "Service shared to feed successfully");
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "Could not share service to feed",
-            style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      AppToast.info(context, "Could not share service to feed");
     } finally {
       if (mounted) {
         setState(() => _isSharingToFeed = false);
@@ -179,7 +164,7 @@ class _ServiceProfileScreenState extends State<ServiceProfileScreen>
         ),
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator(color: brandColor))
+          ? const Center(child: LifeKitLoader())
           : Stack(
               children: [
                 NestedScrollView(

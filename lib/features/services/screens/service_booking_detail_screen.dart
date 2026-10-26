@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../../../core/widgets/lifekit_loader.dart';
+import '../../../core/widgets/app_toast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
@@ -243,27 +245,10 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
     try {
       await _apiService.shareServiceToFeed(widget.serviceId);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.providerSharedToFeed,
-            style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
-          ),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: AppColors.primary,
-        ),
-      );
+      AppToast.info(context, l10n.providerSharedToFeed);
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.providerShareFailed,
-            style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      AppToast.info(context, l10n.providerShareFailed);
     } finally {
       if (mounted) {
         setState(() => _isSharingToFeed = false);
@@ -286,7 +271,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator(color: brandColor))
+          ? const Center(child: LifeKitLoader())
           : NestedScrollView(
               headerSliverBuilder: (context, innerBoxIsScrolled) => [
                 SliverAppBar(

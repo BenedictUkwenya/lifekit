@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/lifekit_loader.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import 'my_services_list_screen.dart';
 import 'edit_service_screen.dart';
@@ -108,9 +109,7 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
         Navigator.pop(context, {"plan_limit": true, "message": e.message});
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorMessage(context, e)), backgroundColor: Colors.red),
-      );
+      AppToast.error(context, appErrorMessage(context, e));
       setState(() => isLoading = false);
     }
   }
@@ -230,9 +229,7 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
         ),
       ),
       body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            )
+          ? const Center(child: LifeKitLoader())
           : Column(
               children: [
                 // 1. Search Bar

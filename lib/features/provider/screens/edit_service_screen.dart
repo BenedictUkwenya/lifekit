@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -381,37 +383,8 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
   }
 
   void _showSnackBar(String msg, {required bool isError}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(
-              isError ? Icons.error_outline : Icons.check_circle_outline,
-              color: Colors.white,
-              size: 20,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                msg,
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: isError
-            ? const Color(0xFFE53935)
-            : const Color(0xFF43A047),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
-        duration: const Duration(seconds: 3),
-      ),
-    );
+    if (!mounted) return;
+    isError ? AppToast.error(context, msg) : AppToast.success(context, msg);
   }
 
   // ═══════════════════════════════════════════
@@ -1011,12 +984,10 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
           onPageChanged: (i) => setState(() => _currentImageIndex = i),
           itemBuilder: (_, i) {
             if (i < _existingImages.length) {
-              return Image.network(
-                _existingImages[i],
+              return CachedNetworkImage(
+                imageUrl: _existingImages[i],
                 fit: BoxFit.cover,
-                loadingBuilder: (_, child, progress) => progress == null
-                    ? child
-                    : const Center(
+                placeholder: (_, _) => const Center(
                         child: CircularProgressIndicator(
                           color: AppColors.primary,
                           strokeWidth: 2,
@@ -1230,7 +1201,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(9),
                 child: i < _existingImages.length
-                    ? Image.network(_existingImages[i], fit: BoxFit.cover)
+                    ? CachedNetworkImage(imageUrl: _existingImages[i], fit: BoxFit.cover)
                     : Image.file(
                         _newImages[i - _existingImages.length],
                         fit: BoxFit.cover,

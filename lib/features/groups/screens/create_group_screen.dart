@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../../core/widgets/app_toast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/constants/app_colors.dart';
@@ -303,14 +304,13 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   }
 
   void _showSnack(String msg, {bool isError = false, bool isSuccess = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        backgroundColor: isError
-            ? Colors.redAccent
-            : (isSuccess ? Colors.green : Colors.black87),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    if (!mounted) return;
+    if (isError) {
+      AppToast.error(context, msg);
+    } else if (isSuccess) {
+      AppToast.success(context, msg);
+    } else {
+      AppToast.info(context, msg);
+    }
   }
 }

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/skeleton.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/app_cache.dart';
 import 'chat_detail_screen.dart';
-import '../../../core/widgets/lifekit_loader.dart';
 import '../../../l10n/app_localizations.dart';
 
 class ChatsListScreen extends StatefulWidget {
@@ -131,7 +131,7 @@ class _ChatsListScreenState extends State<ChatsListScreen>
     if (isLoading) {
       return const Scaffold(
         backgroundColor: Color(0xFFFAFAFA),
-        body: Center(child: LifeKitLoader()),
+        body: const SkeletonList(count: 8, thumbSize: 52),
       );
     }
 

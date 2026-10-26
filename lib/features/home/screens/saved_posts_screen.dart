@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/lifekit_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
@@ -57,7 +58,7 @@ class _SavedPostsScreenState extends State<SavedPostsScreen> {
       ),
       backgroundColor: const Color(0xFFF2F2F7),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: LifeKitLoader())
           : posts.isEmpty
               ? Center(
                   child: Column(

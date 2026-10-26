@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -97,12 +98,7 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
                               final reason = _disputeReasonController.text
                                   .trim();
                               if (reason.isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(AppLocalizations.of(context).msgEnterReason),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
+                                AppToast.error(context, AppLocalizations.of(context).msgEnterReason);
                                 return;
                               }
 
@@ -121,24 +117,14 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
                                   });
                                   Navigator.pop(context);
                                   if (!context.mounted) return;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(AppLocalizations.of(context).disputeSubmitted),
-                                      backgroundColor: Colors.green,
-                                    ),
-                                  );
+                                  AppToast.success(context, AppLocalizations.of(context).disputeSubmitted);
                                 }
                               } catch (e) {
                                 setSheetState(
                                   () => _isDisputeSubmitting = false,
                                 );
                                 if (!context.mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(appErrorMessage(context, e)),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
+                                AppToast.error(context, appErrorMessage(context, e));
                               }
                             },
                       style: ElevatedButton.styleFrom(
@@ -191,18 +177,11 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
       });
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).confirmationSent),
-          backgroundColor: Colors.green,
-        ),
-      );
+      AppToast.success(context, AppLocalizations.of(context).confirmationSent);
     } catch (e) {
       setState(() => _isLoading = false);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorMessage(context, e)), backgroundColor: Colors.red),
-      );
+      AppToast.error(context, appErrorMessage(context, e));
     }
   }
 

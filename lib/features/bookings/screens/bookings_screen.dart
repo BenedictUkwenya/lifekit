@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/motion.dart';
 import '../../../core/widgets/skeleton.dart';
 import '../booking_progress.dart';
@@ -198,23 +199,14 @@ class _BookingsScreenState extends State<BookingsScreen>
 
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              status == 'confirmed'
+        AppToast.error(context, status == 'confirmed'
                   ? l10n.bookingsRequestAccepted
-                  : l10n.bookingsRequestRejected,
-            ),
-            backgroundColor: status == 'confirmed' ? Colors.green : Colors.red,
-          ),
-        );
+                  : l10n.bookingsRequestRejected);
       }
     } catch (e) {
       setState(() => isLoading = false);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorMessage(context, e)), backgroundColor: Colors.red),
-      );
+      AppToast.error(context, appErrorMessage(context, e));
     }
   }
 

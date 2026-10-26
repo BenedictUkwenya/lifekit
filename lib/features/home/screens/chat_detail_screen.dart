@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/lifekit_loader.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/error_handler.dart';
 import 'dart:async';
@@ -196,9 +198,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
     } catch (e) {
       setState(() => isSending = false);
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(appErrorMessage(context, e))));
+      AppToast.info(context, appErrorMessage(context, e));
     }
   }
 
@@ -512,9 +512,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
           // 2. Chat Area
           Expanded(
             child: isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
-                  )
+                ? const Center(child: LifeKitLoader(showSlowHint: false))
                 : messages.isEmpty
                 ? _buildEmptyState()
                 : ListView.builder(
@@ -1095,26 +1093,11 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
     try {
       await _apiService.completeBooking(bookingId);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Booking marked as done!',
-            style: GoogleFonts.poppins(),
-          ),
-          backgroundColor: const Color(0xFF22C55E),
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.all(16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      );
+      AppToast.info(context, 'Booking marked as done!');
       _fetchMessages(isPolling: true); // refreshes booking status
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorMessage(context, e), style: GoogleFonts.poppins())),
-      );
+      AppToast.info(context, appErrorMessage(context, e));
     }
   }
 

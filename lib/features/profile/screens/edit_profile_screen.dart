@@ -1,6 +1,7 @@
 import 'dart:io'; // Needed for File
 import '../../../core/utils/error_handler.dart';
 import 'package:flutter/material.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -67,20 +68,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context).msgProfileUpdated),
-            backgroundColor: Colors.green,
-          ),
-        );
+        AppToast.success(context, AppLocalizations.of(context).msgProfileUpdated);
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
         setState(() => isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorMessage(context, e)), backgroundColor: Colors.red),
-        );
+        AppToast.error(context, appErrorMessage(context, e));
       }
     }
   }

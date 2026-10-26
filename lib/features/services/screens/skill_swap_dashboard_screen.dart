@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:flutter/services.dart';
@@ -111,27 +112,11 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
       }
       _load();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              action == 'accept' ? '✅ Swap accepted!' : 'Proposal declined',
-            ),
-            backgroundColor: action == 'accept'
-                ? const Color(0xFF22C55E)
-                : Colors.redAccent,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            margin: const EdgeInsets.all(16),
-          ),
-        );
+        AppToast.error(context, action == 'accept' ? '✅ Swap accepted!' : 'Proposal declined');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorMessage(context, e)), backgroundColor: Colors.red),
-        );
+        AppToast.error(context, appErrorMessage(context, e));
       }
     }
   }
@@ -577,7 +562,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                 radius: 22,
                 backgroundColor: Colors.grey[200],
                 backgroundImage: (pic != null && pic.isNotEmpty)
-                    ? NetworkImage(pic)
+                    ? CachedNetworkImageProvider(pic)
                     : null,
                 child: (pic == null || pic.isEmpty)
                     ? Text(
@@ -831,20 +816,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
               return GestureDetector(
                 onTap: () {
                   if (isOwn) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'This is your service. Manage it from My Services.',
-                          style: GoogleFonts.poppins(fontSize: 13),
-                        ),
-                        backgroundColor: const Color(0xFF4F46E5),
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        margin: const EdgeInsets.all(16),
-                      ),
-                    );
+                    AppToast.info(context, 'This is your service. Manage it from My Services.');
                     return;
                   }
                   if (sId == null || pId == null) return;
@@ -1102,17 +1074,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                 return;
               }
               if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(AppLocalizations.of(context).msgProposalFailed),
-                    backgroundColor: Colors.red,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    margin: const EdgeInsets.all(16),
-                  ),
-                );
+                AppToast.error(context, AppLocalizations.of(context).msgProposalFailed);
               }
             }
           }
@@ -1219,19 +1181,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                   onPressed: () {
                     Clipboard.setData(ClipboardData(text: generatedProposal!));
                     Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text(
-                          '\ud83d\udccb Copied to clipboard!',
-                        ),
-                        backgroundColor: const Color(0xFF22C55E),
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        margin: const EdgeInsets.all(16),
-                      ),
-                    );
+                    AppToast.info(context, '\ud83d\udccb Copied to clipboard!');
                   },
                 ),
               ElevatedButton(

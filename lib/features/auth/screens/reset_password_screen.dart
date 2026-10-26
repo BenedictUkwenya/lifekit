@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -42,18 +43,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       if (mounted) setState(() => _done = true);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              appErrorMessage(context, e),
-              style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
-            ),
-            backgroundColor: Colors.redAccent,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            margin: const EdgeInsets.all(16),
-          ),
-        );
+        AppToast.error(context, appErrorMessage(context, e));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

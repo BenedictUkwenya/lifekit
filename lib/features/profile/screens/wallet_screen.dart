@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -61,14 +62,7 @@ class _WalletScreenState extends State<WalletScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context).walletSetupFailed(appErrorMessage(context, e)),
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
+        AppToast.error(context, AppLocalizations.of(context).walletSetupFailed(appErrorMessage(context, e)));
       }
     }
   }
@@ -106,21 +100,11 @@ class _WalletScreenState extends State<WalletScreen> {
                         _withdrawController.text.trim(),
                       );
                       if (amount == null || amount <= 0) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(l10n.walletEnterValidAmount),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
+                        AppToast.error(context, l10n.walletEnterValidAmount);
                         return;
                       }
                       if (amount > balance) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(l10n.walletAmountExceeds),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
+                        AppToast.error(context, l10n.walletAmountExceeds);
                         return;
                       }
                       setState(() => isSubmitting = true);
@@ -131,24 +115,12 @@ class _WalletScreenState extends State<WalletScreen> {
                           Navigator.pop(context);
                           await _fetchWallet();
                           if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(l10n.walletWithdrawalCompleted),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
+                          AppToast.success(context, l10n.walletWithdrawalCompleted);
                         }
                       } catch (e) {
                         setState(() => isSubmitting = false);
                         if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              l10n.walletWithdrawFailed(appErrorMessage(context, e)),
-                            ),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
+                        AppToast.error(context, l10n.walletWithdrawFailed(appErrorMessage(context, e)));
                       }
                     },
               style: ElevatedButton.styleFrom(
@@ -258,16 +230,9 @@ class _WalletScreenState extends State<WalletScreen> {
                             : l10n.walletWithdraw,
                         () {
                           if (!isProvider || balance <= 0) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  isProvider
+                            AppToast.info(context, isProvider
                                       ? "Balance must be greater than 0."
-                                      : "Withdrawals are for providers.",
-                                  style: GoogleFonts.poppins(),
-                                ),
-                              ),
-                            );
+                                      : "Withdrawals are for providers.");
                             return;
                           }
                           if (!isStripeConnected) {

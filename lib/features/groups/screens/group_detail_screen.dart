@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../../core/widgets/app_toast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
@@ -1728,24 +1729,14 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
   }
 
   void _showSnack(String msg, {bool isError = false, bool isSuccess = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          msg,
-          style: GoogleFonts.nunito(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 13,
-          ),
-        ),
-        backgroundColor: isError
-            ? const Color(0xFFE57373)
-            : (isSuccess ? _T.mint : _T.textPri),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        margin: const EdgeInsets.all(14),
-      ),
-    );
+    if (!mounted) return;
+    if (isError) {
+      AppToast.error(context, msg);
+    } else if (isSuccess) {
+      AppToast.success(context, msg);
+    } else {
+      AppToast.info(context, msg);
+    }
   }
 
   bool _isContentSafe(String text) {

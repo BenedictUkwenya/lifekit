@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/skeleton.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/app_cache.dart';
-import '../../../core/widgets/lifekit_loader.dart';
 
 // Navigation Targets
 import '../../bookings/screens/bookings_screen.dart';
@@ -224,7 +224,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ],
       ),
       body: isLoading
-          ? const Center(child: LifeKitLoader())
+          ? const SkeletonList(count: 8, thumbSize: 44)
           : notifications.isEmpty
           ? _buildEmptyState()
           : ListView.builder(

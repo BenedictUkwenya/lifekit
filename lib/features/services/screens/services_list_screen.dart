@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../../../core/widgets/app_toast.dart';
 import 'package:intl/intl.dart';
 import '../../../core/widgets/motion.dart';
 import '../../../core/widgets/skeleton.dart';
@@ -1028,20 +1029,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
     return Pressable(
       onTap: () {
         if (isOwn) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'This is your service. Manage it from My Services.',
-                style: GoogleFonts.poppins(fontSize: 13),
-              ),
-              backgroundColor: const Color(0xFF4F46E5),
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              margin: const EdgeInsets.all(16),
-            ),
-          );
+          AppToast.info(context, 'This is your service. Manage it from My Services.');
           return;
         }
         final serviceId = (service['id'] ?? '').toString();

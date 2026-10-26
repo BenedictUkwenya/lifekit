@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/lifekit_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/services/api_service.dart';
-import '../../../core/constants/app_colors.dart';
 import 'category_items_screen.dart';
 
 class AllCategoriesScreen extends StatefulWidget {
@@ -180,9 +180,7 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
         ),
       ),
       body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            )
+          ? const Center(child: LifeKitLoader())
           : ListView.separated(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
               itemCount: categories.length,

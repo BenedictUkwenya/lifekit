@@ -1,6 +1,8 @@
 ﻿import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../../core/widgets/lifekit_loader.dart';
+import '../../../core/widgets/app_toast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -93,35 +95,8 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
   }
 
   void _showSnack(String msg, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(
-              isError ? Icons.error_outline : Icons.info_outline,
-              color: Colors.white,
-              size: 18,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                msg,
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: isError
-            ? Colors.red.shade600
-            : const Color(0xFF333333),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
-      ),
-    );
+    if (!mounted) return;
+    isError ? AppToast.error(context, msg) : AppToast.success(context, msg);
   }
 
   Future<void> _fetchMyServices() async {
@@ -1803,43 +1778,14 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
   }
 
   void _showSnack(String msg, {bool isError = false, bool isSuccess = false}) {
-    final color = isError
-        ? Colors.red.shade600
-        : isSuccess
-        ? Colors.green.shade600
-        : const Color(0xFF333333);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(
-              isError
-                  ? Icons.error_outline
-                  : isSuccess
-                  ? Icons.check_circle_outline
-                  : Icons.info_outline,
-              color: Colors.white,
-              size: 18,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                msg,
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
-        duration: const Duration(seconds: 3),
-      ),
-    );
+    if (!mounted) return;
+    if (isError) {
+      AppToast.error(context, msg);
+    } else if (isSuccess) {
+      AppToast.success(context, msg);
+    } else {
+      AppToast.info(context, msg);
+    }
   }
 
   Future<void> _loadData() async {
@@ -2638,17 +2584,7 @@ class _SwapProposalSheetState extends State<_SwapProposalSheet> {
       widget.onSent();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(appErrorMessage(context, e)),
-          backgroundColor: Colors.red.shade600,
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.all(16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      );
+      AppToast.error(context, appErrorMessage(context, e));
     } finally {
       if (mounted) setState(() => isSending = false);
     }
@@ -3150,19 +3086,14 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
   }
 
   void _showSnack(String msg, {bool isError = false, bool isSuccess = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg, style: GoogleFonts.poppins(fontSize: 13)),
-        backgroundColor: isError
-            ? Colors.red.shade600
-            : isSuccess
-            ? Colors.green.shade600
-            : const Color(0xFF333333),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
-      ),
-    );
+    if (!mounted) return;
+    if (isError) {
+      AppToast.error(context, msg);
+    } else if (isSuccess) {
+      AppToast.success(context, msg);
+    } else {
+      AppToast.info(context, msg);
+    }
   }
 
   @override
@@ -3251,9 +3182,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
             color: AppColors.primary,
             onRefresh: _loadBoard,
             child: isLoadingBoard
-                ? const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
-                  )
+                ? const Center(child: LifeKitLoader(showSlowHint: false))
                 : (boardItems.isEmpty && availableServices.isEmpty)
                 ? _buildEmpty(
                     l10n.swapNoSwapsYet,
@@ -3289,9 +3218,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
             color: AppColors.primary,
             onRefresh: _loadMine,
             child: isLoadingMine
-                ? const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
-                  )
+                ? const Center(child: LifeKitLoader(showSlowHint: false))
                 : _mineLoadError
                 ? _buildRetry(_loadMine)
                 : incomingSwaps.isEmpty
@@ -3310,9 +3237,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
             color: AppColors.primary,
             onRefresh: _loadMine,
             child: isLoadingMine
-                ? const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
-                  )
+                ? const Center(child: LifeKitLoader(showSlowHint: false))
                 : _mineLoadError
                 ? _buildRetry(_loadMine)
                 : outgoingSwaps.isEmpty
@@ -3372,20 +3297,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
     return GestureDetector(
       onTap: () {
         if (isOwn) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                l10n.swapMyServiceMessage,
-                style: GoogleFonts.poppins(fontSize: 13),
-              ),
-              backgroundColor: const Color(0xFF4F46E5),
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              margin: const EdgeInsets.all(16),
-            ),
-          );
+          AppToast.info(context, l10n.swapMyServiceMessage);
           return;
         }
         final sId = service['id']?.toString();

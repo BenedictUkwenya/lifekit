@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../../../core/widgets/lifekit_loader.dart';
 import '../../../core/utils/share_profile.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -159,7 +160,7 @@ class _ProviderFullDetailScreenState extends State<ProviderFullDetailScreen>
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator(color: brandColor))
+          ? const Center(child: LifeKitLoader())
           : NestedScrollView(
               headerSliverBuilder: (context, innerBoxIsScrolled) => [
                 SliverAppBar(

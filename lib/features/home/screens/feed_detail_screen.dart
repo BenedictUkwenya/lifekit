@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -69,9 +70,7 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
         })
         .catchError((e) {
           if (!mounted) return;
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(appErrorMessage(context, e))));
+          AppToast.info(context, appErrorMessage(context, e));
         });
   }
 

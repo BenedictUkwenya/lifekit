@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/lifekit_loader.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -123,18 +125,8 @@ class _SecurityScreenState extends State<SecurityScreen> {
 
   // Helper for consistent SnackBar styling
   void _showSnackBar(String msg, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          msg,
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
-        ),
-        backgroundColor: isError ? Colors.redAccent : Colors.green,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.all(16),
-      ),
-    );
+    if (!mounted) return;
+    isError ? AppToast.error(context, msg) : AppToast.success(context, msg);
   }
 
   @override
@@ -720,18 +712,8 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
   }
 
   void _showSnackBar(String msg, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          msg,
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
-        ),
-        backgroundColor: isError ? Colors.redAccent : Colors.green,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.all(16),
-      ),
-    );
+    if (!mounted) return;
+    isError ? AppToast.error(context, msg) : AppToast.success(context, msg);
   }
 
   @override
@@ -765,9 +747,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
         child: const Icon(Icons.support_agent, color: Colors.white),
       ),
       body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            )
+          ? const Center(child: LifeKitLoader())
           : ListView(
               padding: const EdgeInsets.all(20),
               children: [

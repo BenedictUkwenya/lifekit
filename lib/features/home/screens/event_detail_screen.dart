@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/app_toast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
@@ -135,15 +136,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "Failed to post comment. Please try again.",
-              style: GoogleFonts.poppins(),
-            ),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        AppToast.info(context, "Failed to post comment. Please try again.");
       }
     } finally {
       if (mounted) setState(() => _isPostingComment = false);

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/lifekit_loader.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -87,12 +89,7 @@ class _SelectMainCategoryScreenState extends State<SelectMainCategoryScreen> {
       parentId = cat['parent_category_id'];
       parentName = cat['parent']['name'];
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).msgFoundInParent(parentName)),
-          duration: const Duration(seconds: 1),
-        ),
-      );
+      AppToast.info(context, AppLocalizations.of(context).msgFoundInParent(parentName));
     } else {
       // It's a Main Category
       parentId = cat['id'];
@@ -278,19 +275,12 @@ class _SelectMainCategoryScreenState extends State<SelectMainCategoryScreen> {
                               if (context.mounted) {
                                 Navigator.pop(context);
                                 if (!context.mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(AppLocalizations.of(context).msgRequestSent),
-                                    backgroundColor: Colors.green,
-                                  ),
-                                );
+                                AppToast.success(context, AppLocalizations.of(context).msgRequestSent);
                               }
                             } catch (e) {
                               setSheetState(() => isSubmitting = false);
                               if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(appErrorMessage(context, e))),
-                              );
+                              AppToast.info(context, appErrorMessage(context, e));
                             }
                           },
                     child: isSubmitting
@@ -369,9 +359,7 @@ class _SelectMainCategoryScreenState extends State<SelectMainCategoryScreen> {
           // 2. LIST
           Expanded(
             child: isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
-                  )
+                ? const Center(child: LifeKitLoader(showSlowHint: false))
                 : ListView.separated(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     itemCount: isSearching

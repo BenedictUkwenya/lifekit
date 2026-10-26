@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -231,22 +232,12 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
     try {
       await _apiService.deleteService(serviceId);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context).msgServiceDeleted),
-            backgroundColor: Color(0xFF10B981),
-          ),
-        );
+        AppToast.info(context, AppLocalizations.of(context).msgServiceDeleted);
         _fetchMyServices();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(appErrorMessage(context, e)),
-            backgroundColor: Colors.red,
-          ),
-        );
+        AppToast.error(context, appErrorMessage(context, e));
       }
     }
   }
@@ -443,12 +434,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                             if (!context.mounted) return;
                             Navigator.pop(context);
                             if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(AppLocalizations.of(context).msgBoostActivated),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
+                            AppToast.success(context, AppLocalizations.of(context).msgBoostActivated);
                             _fetchMyServices();
                           } catch (e) {
                             if (e is ApiException && e.statusCode == 402) {
@@ -458,12 +444,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                             } else {
                               setSheetState(() => isSubmitting = false);
                               if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(appErrorMessage(context, e)),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
+                                AppToast.error(context, appErrorMessage(context, e));
                               }
                             }
                           }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -125,13 +126,7 @@ class _AllGroupsTabState extends State<AllGroupsTab> {
       if (msg.contains('plan limit') || msg.contains('plan_limit_reached')) {
         _showPlanLimitSheet(group);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(appErrorMessage(context, e)),
-            backgroundColor: Colors.redAccent,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        AppToast.error(context, appErrorMessage(context, e));
       }
     } finally {
       if (mounted) setState(() => _joiningGroups.remove(id));

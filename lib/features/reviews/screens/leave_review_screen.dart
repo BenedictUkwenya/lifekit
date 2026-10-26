@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -47,19 +48,12 @@ class _LeaveReviewScreenState extends State<LeaveReviewScreen> {
         comment: _commentController.text,
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context).msgReviewSubmitted),
-            backgroundColor: Colors.green,
-          ),
-        );
+        AppToast.success(context, AppLocalizations.of(context).msgReviewSubmitted);
         Navigator.pop(context, true); // true = rated successfully
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorMessage(context, e)), backgroundColor: Colors.red),
-        );
+        AppToast.error(context, appErrorMessage(context, e));
         setState(() => _isLoading = false);
       }
     }

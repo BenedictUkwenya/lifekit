@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/app_toast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
@@ -45,12 +46,7 @@ class _EventBookingScreenState extends State<EventBookingScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(friendlyError(e)),
-          backgroundColor: Colors.red,
-        ),
-      );
+      AppToast.error(context, friendlyError(e));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

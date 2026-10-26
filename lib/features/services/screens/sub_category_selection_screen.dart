@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/lifekit_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import 'category_items_screen.dart'; // Navigate here on "Next"
 
@@ -99,9 +99,7 @@ class _SubCategorySelectionScreenState
         ),
       ),
       body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            )
+          ? const Center(child: LifeKitLoader())
           : Column(
               children: [
                 // 1. Search Bar

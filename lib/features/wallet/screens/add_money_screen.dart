@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
@@ -20,17 +21,13 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
 
   Future<void> _processStripePayment() async {
     if (_amountController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).msgEnterAmount)));
+      AppToast.info(context, AppLocalizations.of(context).msgEnterAmount);
       return;
     }
 
     double amount = double.tryParse(_amountController.text) ?? 0.0;
     if (amount < 5) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).msgMinDeposit)));
+      AppToast.info(context, AppLocalizations.of(context).msgMinDeposit);
       return;
     }
 
@@ -64,39 +61,22 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
       await _apiService.confirmDeposit(paymentIntentId);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context).msgWalletFunded),
-            backgroundColor: Colors.green,
-          ),
-        );
+        AppToast.success(context, AppLocalizations.of(context).msgWalletFunded);
         Navigator.pop(context, true); // Return 'true' to refresh wallet screen
       }
     } on StripeException catch (e) {
       setState(() => isLoading = false);
       if (e.error.code == FailureCode.Canceled) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context).paymentCancelled),
-            backgroundColor: Colors.grey,
-          ),
-        );
+        AppToast.info(context, AppLocalizations.of(context).paymentCancelled);
       } else {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.error.localizedMessage ?? AppLocalizations.of(context).errGeneric),
-            backgroundColor: Colors.red,
-          ),
-        );
+        AppToast.error(context, e.error.localizedMessage ?? AppLocalizations.of(context).errGeneric);
       }
     } catch (e) {
       setState(() => isLoading = false);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorMessage(context, e)), backgroundColor: Colors.red),
-      );
+      AppToast.error(context, appErrorMessage(context, e));
     }
   }
 

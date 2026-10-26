@@ -1962,20 +1962,7 @@ class _HomeScreenState extends State<HomeScreen> {
               return Pressable(
                 onTap: () {
                   if (isOwn) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          AppLocalizations.of(context)!.homeMyServiceBadge,
-                          style: GoogleFonts.poppins(fontSize: 13),
-                        ),
-                        backgroundColor: const Color(0xFF4F46E5),
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        margin: const EdgeInsets.all(16),
-                      ),
-                    );
+                    AppToast.info(context, AppLocalizations.of(context)!.homeMyServiceBadge);
                     return;
                   }
                   if (sId == null || pId == null) return;
@@ -2274,10 +2261,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   child: ClipOval(
                                     child: homeGroups[i]['image_url'] != null
-                                        ? Image.network(
-                                            homeGroups[i]['image_url'],
+                                        ? CachedNetworkImage(
+                                            imageUrl: homeGroups[i]['image_url'],
                                             fit: BoxFit.cover,
-                                            errorBuilder: (_, __, ___) =>
+                                            fadeInDuration: const Duration(milliseconds: 250),
+                                            errorWidget: (_, _, _) =>
                                                 const Icon(
                                                   Icons.groups_rounded,
                                                   color: Colors.white,
@@ -2345,10 +2333,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         child: ClipOval(
                           child: g['image_url'] != null
-                              ? Image.network(
-                                  g['image_url'],
+                              ? CachedNetworkImage(
+                                  imageUrl: g['image_url'],
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => const Icon(
+                                  fadeInDuration: const Duration(milliseconds: 250),
+                                  errorWidget: (_, _, _) => const Icon(
                                     Icons.groups_rounded,
                                     color: AppColors.primary,
                                     size: 12,
@@ -2426,29 +2415,12 @@ class _HomeScreenState extends State<HomeScreen> {
               return Pressable(
                 onTap: () {
                   if (isOwn) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          AppLocalizations.of(context)!.homeMyServiceBadge,
-                          style: GoogleFonts.poppins(fontSize: 13),
-                        ),
-                        backgroundColor: const Color(0xFF4F46E5),
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        margin: const EdgeInsets.all(16),
-                      ),
-                    );
+                    AppToast.info(context, AppLocalizations.of(context)!.homeMyServiceBadge);
                     return;
                   }
                   // Safely check IDs before navigating to prevent crashes
                   if (sId == null || pId == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(AppLocalizations.of(context).msgServiceUnavailable),
-                      ),
-                    );
+                    AppToast.info(context, AppLocalizations.of(context).msgServiceUnavailable);
                     return;
                   }
 

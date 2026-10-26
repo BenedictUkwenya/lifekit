@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -85,9 +86,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorMessage(context, e)), backgroundColor: Colors.red),
-      );
+      AppToast.error(context, appErrorMessage(context, e));
     } finally {
       if (mounted) setState(() => isLoading = false);
     }

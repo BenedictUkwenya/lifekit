@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -149,9 +150,7 @@ class BookingReceiptScreen extends StatelessWidget {
             // DOWNLOAD BUTTON (Mock)
             OutlinedButton.icon(
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context).msgReceiptDownloaded)),
-                );
+                AppToast.info(context, AppLocalizations.of(context).msgReceiptDownloaded);
               },
               icon: const Icon(Icons.download, color: Colors.black),
               label: Text(

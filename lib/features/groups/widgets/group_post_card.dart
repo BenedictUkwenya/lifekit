@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -100,12 +101,7 @@ class _GroupPostCardState extends State<GroupPostCard> {
               color: Colors.grey[700]!,
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(AppLocalizations.of(context).msgPostReported),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
+                AppToast.info(context, AppLocalizations.of(context).msgPostReported);
               },
             ),
           ],
@@ -120,13 +116,7 @@ class _GroupPostCardState extends State<GroupPostCard> {
       widget.onRefresh?.call();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(appErrorMessage(context, e)),
-            backgroundColor: Colors.redAccent,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        AppToast.error(context, appErrorMessage(context, e));
       }
     }
   }
