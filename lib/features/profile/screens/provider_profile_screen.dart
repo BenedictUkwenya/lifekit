@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../core/utils/share_profile.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:lifekit_frontend/features/profile/screens/service_profile_screen.dart';
@@ -118,11 +118,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen>
         actions: [
           IconButton(
             icon: const Icon(Icons.share_outlined, color: Colors.black),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(AppLocalizations.of(context).msgLinkCopied)),
-              );
-            },
+            onPressed: () => shareProviderProfile(context, widget.providerName),
           ),
         ],
       ),

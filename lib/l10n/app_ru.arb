@@ -1881,5 +1881,8 @@
   "msgProposalFailed": "Не удалось составить предложение. Попробуйте ещё раз.",
   "msgEnterAmount": "Пожалуйста, введите сумму",
   "msgMinDeposit": "Минимальное пополнение — $5",
-  "msgWalletFunded": "Кошелёк успешно пополнен!"
+  "msgWalletFunded": "Кошелёк успешно пополнен!",
+  "shareProviderText": "Посмотрите {name} в LifeKit — бронируйте надёжные услуги или обменивайтесь навыками: {link}",
+  "shareProviderSubject": "{name} в LifeKit",
+  "chatTypeMessage": "Введите сообщение..."
 }

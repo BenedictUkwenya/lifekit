@@ -1881,5 +1881,8 @@
   "msgProposalFailed": "შეთავაზების შედგენა ვერ მოხერხდა. სცადეთ ხელახლა.",
   "msgEnterAmount": "გთხოვთ, შეიყვანოთ თანხა",
   "msgMinDeposit": "მინიმალური შევსება $5-ია",
-  "msgWalletFunded": "საფულე წარმატებით შეივსო!"
+  "msgWalletFunded": "საფულე წარმატებით შეივსო!",
+  "shareProviderText": "გაეცანით {name}-ს LifeKit-ში — დაჯავშნეთ სანდო მომსახურება ან გაცვალეთ უნარები: {link}",
+  "shareProviderSubject": "{name} LifeKit-ში",
+  "chatTypeMessage": "დაწერეთ შეტყობინება..."
 }

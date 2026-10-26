@@ -2823,4 +2823,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get msgWalletFunded => 'Wallet funded successfully!';
+
+  @override
+  String shareProviderText(String name, String link) {
+    return 'Check out $name on LifeKit — book trusted local services or swap skills: $link';
+  }
+
+  @override
+  String shareProviderSubject(String name) {
+    return '$name on LifeKit';
+  }
+
+  @override
+  String get chatTypeMessage => 'Type your message...';
 }

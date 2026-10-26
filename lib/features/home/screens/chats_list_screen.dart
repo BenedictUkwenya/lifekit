@@ -160,41 +160,6 @@ class _ChatsListScreenState extends State<ChatsListScreen>
           ),
         ),
         actions: [
-          IconButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    l10n.chatsStartingNewComingSoon,
-                    style: GoogleFonts.poppins(),
-                  ),
-                  behavior: SnackBarBehavior.floating,
-                  margin: const EdgeInsets.all(16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              );
-            },
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.edit_square,
-                color: Colors.black,
-                size: 20,
-              ),
-            ),
-          ),
           const SizedBox(width: 20),
         ],
       ),

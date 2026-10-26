@@ -1675,5 +1675,10 @@
   "msgProposalFailed": "Couldn't write a proposal. Please try again.",
   "msgEnterAmount": "Please enter an amount",
   "msgMinDeposit": "The minimum deposit is $5",
-  "msgWalletFunded": "Wallet funded successfully!"
+  "msgWalletFunded": "Wallet funded successfully!",
+  "shareProviderText": "Check out {name} on LifeKit — book trusted local services or swap skills: {link}",
+  "@shareProviderText": {"placeholders":{"name":{"type":"String"},"link":{"type":"String"}}},
+  "shareProviderSubject": "{name} on LifeKit",
+  "@shareProviderSubject": {"placeholders":{"name":{"type":"String"}}},
+  "chatTypeMessage": "Type your message..."
 }

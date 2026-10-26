@@ -2835,4 +2835,17 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get msgWalletFunded => 'Кошелёк успешно пополнен!';
+
+  @override
+  String shareProviderText(String name, String link) {
+    return 'Посмотрите $name в LifeKit — бронируйте надёжные услуги или обменивайтесь навыками: $link';
+  }
+
+  @override
+  String shareProviderSubject(String name) {
+    return '$name в LifeKit';
+  }
+
+  @override
+  String get chatTypeMessage => 'Введите сообщение...';
 }

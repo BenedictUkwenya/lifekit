@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../../../core/utils/share_profile.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
@@ -172,21 +173,7 @@ class _ProviderFullDetailScreenState extends State<ProviderFullDetailScreen>
                         Icons.share_outlined,
                         color: Colors.black,
                       ),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              "Share profile feature coming soon!",
-                              style: GoogleFonts.poppins(),
-                            ),
-                            behavior: SnackBarBehavior.floating,
-                            margin: const EdgeInsets.all(16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        );
-                      },
+                      onPressed: () => shareProviderProfile(context, name),
                     ),
                   ],
                   flexibleSpace: FlexibleSpaceBar(

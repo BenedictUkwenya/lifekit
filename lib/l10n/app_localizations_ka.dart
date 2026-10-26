@@ -2840,4 +2840,17 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get msgWalletFunded => 'საფულე წარმატებით შეივსო!';
+
+  @override
+  String shareProviderText(String name, String link) {
+    return 'გაეცანით $name-ს LifeKit-ში — დაჯავშნეთ სანდო მომსახურება ან გაცვალეთ უნარები: $link';
+  }
+
+  @override
+  String shareProviderSubject(String name) {
+    return '$name LifeKit-ში';
+  }
+
+  @override
+  String get chatTypeMessage => 'დაწერეთ შეტყობინება...';
 }

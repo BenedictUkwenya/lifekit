@@ -869,24 +869,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               _fetchProfile(forceRefresh: true);
                             },
                           ),
-                          _buildToolItem(
-                            Icons.auto_awesome_rounded,
-                            l10n.profileToolAIPremium,
-                            () => ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(l10n.profileAIPremiumComingSoon),
-                              ),
-                            ),
-                          ),
-                          _buildToolItem(
-                            Icons.card_giftcard,
-                            l10n.profileToolRewards,
-                            () => ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(l10n.profileRewardsComingSoon),
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     ],

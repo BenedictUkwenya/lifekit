@@ -183,24 +183,6 @@ class _WalletScreenState extends State<WalletScreen> {
         centerTitle: true,
         leading: const BackButton(color: Colors.black),
         actions: [
-          IconButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    "Wallet settings are coming soon!",
-                    style: GoogleFonts.poppins(),
-                  ),
-                  behavior: SnackBarBehavior.floating,
-                  margin: const EdgeInsets.all(16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              );
-            },
-            icon: const Icon(Icons.settings_outlined, color: Colors.black),
-          ),
         ],
       ),
       body: isLoading
@@ -295,21 +277,6 @@ class _WalletScreenState extends State<WalletScreen> {
                           _showWithdrawDialog();
                         },
                       ),
-                      _buildActionBtn(Icons.qr_code_scanner, l10n.walletScan, () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              "QR scan payments are coming soon!",
-                              style: GoogleFonts.poppins(),
-                            ),
-                            behavior: SnackBarBehavior.floating,
-                            margin: const EdgeInsets.all(16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        );
-                      }),
                     ],
                   ),
 

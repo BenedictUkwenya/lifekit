@@ -5391,6 +5391,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Wallet funded successfully!'**
   String get msgWalletFunded;
+
+  /// No description provided for @shareProviderText.
+  ///
+  /// In en, this message translates to:
+  /// **'Check out {name} on LifeKit — book trusted local services or swap skills: {link}'**
+  String shareProviderText(String name, String link);
+
+  /// No description provided for @shareProviderSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} on LifeKit'**
+  String shareProviderSubject(String name);
+
+  /// No description provided for @chatTypeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Type your message...'**
+  String get chatTypeMessage;
 }
 
 class _AppLocalizationsDelegate

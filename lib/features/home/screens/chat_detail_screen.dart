@@ -631,24 +631,6 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
             );
           },
         ),
-        IconButton(
-          icon: const Icon(Icons.phone_outlined, color: Colors.black),
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  "In-app calling is coming soon!",
-                  style: GoogleFonts.poppins(),
-                ),
-                behavior: SnackBarBehavior.floating,
-                margin: const EdgeInsets.all(16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            );
-          },
-        ),
         const SizedBox(width: 10),
       ],
     );
@@ -1195,29 +1177,11 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
                     child: TextField(
                       controller: _messageController,
                       decoration: InputDecoration(
-                        hintText: "Type your message...",
+                        hintText: AppLocalizations.of(context).chatTypeMessage,
                         hintStyle: GoogleFonts.poppins(color: Colors.grey[400]),
                         border: InputBorder.none,
                       ),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.attach_file, color: Colors.grey),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            "File attachments are coming soon!",
-                            style: GoogleFonts.poppins(),
-                          ),
-                          behavior: SnackBarBehavior.floating,
-                          margin: const EdgeInsets.all(16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      );
-                    },
                   ),
                   IconButton(
                     icon: Icon(

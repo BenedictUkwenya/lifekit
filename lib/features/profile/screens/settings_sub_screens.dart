@@ -34,7 +34,6 @@ class _SecurityScreenState extends State<SecurityScreen> {
   bool _obscureConfirm = true;
 
   // Biometrics State (Mock)
-  bool _biometricsEnabled = false;
   bool isLoading = false;
 
   Future<void> _updatePassword() async {
@@ -267,40 +266,6 @@ class _SecurityScreenState extends State<SecurityScreen> {
               ),
               child: Column(
                 children: [
-                  SwitchListTile(
-                    activeThumbColor: AppColors.primary,
-                    title: Text(
-                      l10n.securityBiometric,
-                      style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
-                    ),
-                    subtitle: Text(
-                      l10n.securityBiometricSubtitle,
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    value: _biometricsEnabled,
-                    secondary: const Icon(Icons.fingerprint),
-                    onChanged: (v) => setState(() => _biometricsEnabled = v),
-                  ),
-                  const Divider(height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.phonelink_lock),
-                    title: Text(
-                      l10n.securityTwoFactor,
-                      style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
-                    ),
-                    trailing: const Icon(
-                      Icons.chevron_right,
-                      color: Colors.grey,
-                    ),
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.security2FAComingSoon)),
-                      );
-                    },
-                  ),
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.block_rounded),
