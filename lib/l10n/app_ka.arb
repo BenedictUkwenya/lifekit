@@ -1841,5 +1841,19 @@
   "aiObFinish": "დასრულება და მთავარზე გადასვლა",
   "aiObDay": "დღე {day}",
   "aiObTakeAction": "მოქმედება",
-  "aiAutofillDone": "✨ AI-მ შეავსო თქვენი მომსახურება! ახლა აირჩიეთ კატეგორია და დაამატეთ ფოტოები."
+  "aiAutofillDone": "✨ AI-მ შეავსო თქვენი მომსახურება! ახლა აირჩიეთ კატეგორია და დაამატეთ ფოტოები.",
+  "planDayOf": "დღე {day} / {total}",
+  "planDoIt": "შესრულება",
+  "planUndo": "შეუსრულებლად მონიშვნა",
+  "planCaughtUp": "ყველაფერი შესრულებულია! შემდეგი დავალება ხვალ გაიხსნება.",
+  "planProgress": "შესრულდა {done}/{total}",
+  "planCompleteTitle": "გეგმა დასრულდა! 🎉",
+  "planCompleteBody": "თქვენ დაასრულეთ LifeKit-ის 7-დღიანი გეგმა. შესანიშნავი დასაწყისია!",
+  "planSheetTitle": "თქვენი 7-დღიანი გეგმა",
+  "planToday": "დღეს",
+  "planDone": "შესრულდა",
+  "planLocked": "ჩაკეტილია",
+  "planCatchUp": "დასაწევი",
+  "planViewAll": "გეგმის ნახვა",
+  "planDayDoneToast": "დღე {day} შესრულდა — ყოჩაღ!"
 }

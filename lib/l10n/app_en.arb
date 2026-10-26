@@ -1631,5 +1631,22 @@
   "aiObDay": "Day {day}",
   "@aiObDay": {"placeholders":{"day":{"type":"int"}}},
   "aiObTakeAction": "Take action",
-  "aiAutofillDone": "✨ AI filled in your service! Now pick a category and add photos."
+  "aiAutofillDone": "✨ AI filled in your service! Now pick a category and add photos.",
+  "planDayOf": "Day {day} of {total}",
+  "@planDayOf": {"placeholders":{"day":{"type":"int"},"total":{"type":"int"}}},
+  "planDoIt": "Do it",
+  "planUndo": "Mark not done",
+  "planCaughtUp": "All caught up! Your next task unlocks tomorrow.",
+  "planProgress": "{done}/{total} done",
+  "@planProgress": {"placeholders":{"done":{"type":"int"},"total":{"type":"int"}}},
+  "planCompleteTitle": "Plan complete! 🎉",
+  "planCompleteBody": "You finished all 7 days of your LifeKit plan. What a start!",
+  "planSheetTitle": "Your 7-day plan",
+  "planToday": "Today",
+  "planDone": "Done",
+  "planLocked": "Locked",
+  "planCatchUp": "Catch up",
+  "planViewAll": "View plan",
+  "planDayDoneToast": "Day {day} done — nice work!",
+  "@planDayDoneToast": {"placeholders":{"day":{"type":"int"}}}
 }

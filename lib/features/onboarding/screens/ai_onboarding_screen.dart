@@ -9,11 +9,9 @@ import '../../../core/services/api_service.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import '../../groups/screens/create_group_screen.dart';
 import '../../groups/screens/group_detail_screen.dart';
-import '../../profile/screens/edit_profile_screen.dart';
-import '../../profile/screens/wallet_screen.dart';
 import '../../provider/screens/select_main_category_screen.dart';
-import '../../services/screens/services_list_screen.dart';
 import '../../home/screens/home_screen.dart';
+import '../../home/plan_actions.dart';
 
 class AIOnboardingScreen extends StatefulWidget {
   const AIOnboardingScreen({super.key});
@@ -529,37 +527,6 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
     );
   }
 
-  void _navigateForRoute(String actionRoute) {
-    switch (actionRoute) {
-      case 'profile':
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const EditProfileScreen(profile: {}),
-          ),
-        );
-        break;
-      case 'create_service':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const SelectMainCategoryScreen()),
-        );
-        break;
-      case 'explore':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const ServicesListScreen()),
-        );
-        break;
-      case 'wallet':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const WalletScreen()),
-        );
-        break;
-    }
-  }
-
   Widget _buildTimelineRow({
     required int day,
     required String task,
@@ -655,7 +622,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
                     if (actionRoute != 'none') ...[
                       const SizedBox(height: 8),
                       GestureDetector(
-                        onTap: () => _navigateForRoute(actionRoute),
+                        onTap: () => openPlanAction(context, actionRoute),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

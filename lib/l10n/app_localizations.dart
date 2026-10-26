@@ -5151,6 +5151,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'✨ AI filled in your service! Now pick a category and add photos.'**
   String get aiAutofillDone;
+
+  /// No description provided for @planDayOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day} of {total}'**
+  String planDayOf(int day, int total);
+
+  /// No description provided for @planDoIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Do it'**
+  String get planDoIt;
+
+  /// No description provided for @planUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark not done'**
+  String get planUndo;
+
+  /// No description provided for @planCaughtUp.
+  ///
+  /// In en, this message translates to:
+  /// **'All caught up! Your next task unlocks tomorrow.'**
+  String get planCaughtUp;
+
+  /// No description provided for @planProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done}/{total} done'**
+  String planProgress(int done, int total);
+
+  /// No description provided for @planCompleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan complete! 🎉'**
+  String get planCompleteTitle;
+
+  /// No description provided for @planCompleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You finished all 7 days of your LifeKit plan. What a start!'**
+  String get planCompleteBody;
+
+  /// No description provided for @planSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your 7-day plan'**
+  String get planSheetTitle;
+
+  /// No description provided for @planToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get planToday;
+
+  /// No description provided for @planDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get planDone;
+
+  /// No description provided for @planLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get planLocked;
+
+  /// No description provided for @planCatchUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Catch up'**
+  String get planCatchUp;
+
+  /// No description provided for @planViewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View plan'**
+  String get planViewAll;
+
+  /// No description provided for @planDayDoneToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day} done — nice work!'**
+  String planDayDoneToast(int day);
 }
 
 class _AppLocalizationsDelegate

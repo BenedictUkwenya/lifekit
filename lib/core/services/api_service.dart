@@ -1480,6 +1480,17 @@ class ApiService {
     return data;
   }
 
+  /// Marks a day of Gracia's 7-day plan done (or not). Returns the updated
+  /// plan in the user's language.
+  Future<List<dynamic>> setPlanDayDone(int day, bool done) async {
+    final data = await _authenticatedPost('/users/onboarding-plan/progress', {
+      'day': day,
+      'done': done,
+    });
+    AppCache.instance.invalidate('user_profile');
+    return (data['onboarding_plan'] as List?) ?? const [];
+  }
+
   // Home greeting bubble — one AI call per user per day.
   Future<String> getAiGreeting() async {
     final data = await _oncePerDay(

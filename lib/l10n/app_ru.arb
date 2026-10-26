@@ -1841,5 +1841,19 @@
   "aiObFinish": "Готово — на главную",
   "aiObDay": "День {day}",
   "aiObTakeAction": "Перейти",
-  "aiAutofillDone": "✨ AI заполнил вашу услугу! Теперь выберите категорию и добавьте фото."
+  "aiAutofillDone": "✨ AI заполнил вашу услугу! Теперь выберите категорию и добавьте фото.",
+  "planDayOf": "День {day} из {total}",
+  "planDoIt": "Выполнить",
+  "planUndo": "Отметить как невыполненное",
+  "planCaughtUp": "Всё выполнено! Следующее задание откроется завтра.",
+  "planProgress": "Выполнено {done}/{total}",
+  "planCompleteTitle": "План выполнен! 🎉",
+  "planCompleteBody": "Вы прошли все 7 дней плана LifeKit. Отличное начало!",
+  "planSheetTitle": "Ваш план на 7 дней",
+  "planToday": "Сегодня",
+  "planDone": "Готово",
+  "planLocked": "Закрыто",
+  "planCatchUp": "Догнать",
+  "planViewAll": "Весь план",
+  "planDayDoneToast": "День {day} выполнен — отлично!"
 }

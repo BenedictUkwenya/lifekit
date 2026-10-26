@@ -6,6 +6,8 @@ import '../../../core/services/push_service.dart';
 import '../../../core/utils/error_handler.dart';
 import '../../../core/widgets/app_toast.dart';
 import 'event_detail_screen.dart';
+import '../daily_plan.dart';
+import '../widgets/daily_plan_card.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
@@ -94,7 +96,6 @@ class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> aiRecommendations = [];
 
   // AI Success Task
-  bool _taskDoneToday = false;
 
   // Draggable AI button position (right/bottom offsets from screen edge)
   double _aiButtonRight = 16;
@@ -136,7 +137,6 @@ class _HomeScreenState extends State<HomeScreen> {
     // SWR: paint from cache immediately, then revalidate in background
     _loadHomeCache().then((_) => _fetchAllData());
     _fetchCounts();
-    _checkTaskDone();
     _checkInactivityNudge();
     // Trigger AI greeting shortly after home loads
     Future.delayed(const Duration(milliseconds: 1200), _triggerAiGreeting);
@@ -235,12 +235,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<void> _checkTaskDone() async {
-    final prefs = await SharedPreferences.getInstance();
-    final doneDate = prefs.getString('task_done_date');
-    final today = DateTime.now().toIso8601String().substring(0, 10);
-    if (mounted) setState(() => _taskDoneToday = doneDate == today);
-  }
 
   /// Shows a bottom-sheet AI nudge when the user hasn't opened the app in 3+
   /// days and is registered as a service provider.
@@ -413,16 +407,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Returns the task for today based on days since profile creation.
-  Map<String, dynamic>? _getTodayTask() {
-    final plan = userProfile?['onboarding_plan'];
-    if (plan == null || plan is! List || plan.isEmpty) return null;
-    final createdAt = DateTime.tryParse(userProfile?['created_at'] ?? '');
-    final dayIndex = createdAt != null
-        ? DateTime.now().difference(createdAt).inDays.clamp(0, 6)
-        : 0;
-    return Map<String, dynamic>.from(plan[dayIndex] as Map);
-  }
 
   Future<void> _saveRecent(String query) async {
     final prefs = await SharedPreferences.getInstance();
@@ -1099,8 +1083,16 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 22),
 
                         // AI Success Task
-                        if (_getTodayTask() != null && !_taskDoneToday) ...[
-                          _buildSuccessTaskCard().fadeSlideIn(index: 4),
+                        if (DailyPlan.fromProfile(userProfile) != null) ...[
+                          DailyPlanCard(
+                            profile: userProfile,
+                            onPlanUpdated: (plan) => setState(() {
+                              userProfile = {
+                                ...?userProfile,
+                                'onboarding_plan': plan,
+                              };
+                            }),
+                          ).fadeSlideIn(index: 4),
                           const SizedBox(height: 20),
                         ],
 
@@ -2807,119 +2799,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // ── AI Success Task Card ─────────────────
-  Widget _buildSuccessTaskCard() {
-    final task = _getTodayTask();
-    if (task == null) return const SizedBox.shrink();
-    final dayNum = task['day'] ?? 1;
-    final taskText = task['task']?.toString() ?? '';
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, Color(0xFF7C3AED)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.35),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Text('\uD83C\uDFAF', style: TextStyle(fontSize: 18)),
-              const SizedBox(width: 8),
-              Text(
-                AppLocalizations.of(context)!.homeDailyTaskTitle,
-                style: GoogleFonts.poppins(
-                  color: Colors.white70,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  AppLocalizations.of(context)!.homeDailyTaskDay(dayNum is int ? dayNum : (int.tryParse(dayNum.toString()) ?? 1)),
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            taskText,
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              height: 1.45,
-            ),
-          ),
-          const SizedBox(height: 14),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Pressable(
-              onTap: () async {
-                HapticFeedback.mediumImpact();
-                final prefs = await SharedPreferences.getInstance();
-                final today = DateTime.now().toIso8601String().substring(0, 10);
-                await prefs.setString('task_done_date', today);
-                if (mounted) setState(() => _taskDoneToday = true);
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.check_rounded,
-                      size: 16,
-                      color: AppColors.primary,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      AppLocalizations.of(context)!.homeDailyTaskMarkDone,
-                      style: GoogleFonts.poppins(
-                        color: AppColors.primary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   // ── AI Recommendations ────────────────────
   Widget _buildAiRecommendations() {

@@ -2693,4 +2693,53 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get aiAutofillDone =>
       '✨ AI filled in your service! Now pick a category and add photos.';
+
+  @override
+  String planDayOf(int day, int total) {
+    return 'Day $day of $total';
+  }
+
+  @override
+  String get planDoIt => 'Do it';
+
+  @override
+  String get planUndo => 'Mark not done';
+
+  @override
+  String get planCaughtUp => 'All caught up! Your next task unlocks tomorrow.';
+
+  @override
+  String planProgress(int done, int total) {
+    return '$done/$total done';
+  }
+
+  @override
+  String get planCompleteTitle => 'Plan complete! 🎉';
+
+  @override
+  String get planCompleteBody =>
+      'You finished all 7 days of your LifeKit plan. What a start!';
+
+  @override
+  String get planSheetTitle => 'Your 7-day plan';
+
+  @override
+  String get planToday => 'Today';
+
+  @override
+  String get planDone => 'Done';
+
+  @override
+  String get planLocked => 'Locked';
+
+  @override
+  String get planCatchUp => 'Catch up';
+
+  @override
+  String get planViewAll => 'View plan';
+
+  @override
+  String planDayDoneToast(int day) {
+    return 'Day $day done — nice work!';
+  }
 }

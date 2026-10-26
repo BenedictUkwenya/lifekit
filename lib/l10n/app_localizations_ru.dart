@@ -2703,4 +2703,54 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get aiAutofillDone =>
       '✨ AI заполнил вашу услугу! Теперь выберите категорию и добавьте фото.';
+
+  @override
+  String planDayOf(int day, int total) {
+    return 'День $day из $total';
+  }
+
+  @override
+  String get planDoIt => 'Выполнить';
+
+  @override
+  String get planUndo => 'Отметить как невыполненное';
+
+  @override
+  String get planCaughtUp =>
+      'Всё выполнено! Следующее задание откроется завтра.';
+
+  @override
+  String planProgress(int done, int total) {
+    return 'Выполнено $done/$total';
+  }
+
+  @override
+  String get planCompleteTitle => 'План выполнен! 🎉';
+
+  @override
+  String get planCompleteBody =>
+      'Вы прошли все 7 дней плана LifeKit. Отличное начало!';
+
+  @override
+  String get planSheetTitle => 'Ваш план на 7 дней';
+
+  @override
+  String get planToday => 'Сегодня';
+
+  @override
+  String get planDone => 'Готово';
+
+  @override
+  String get planLocked => 'Закрыто';
+
+  @override
+  String get planCatchUp => 'Догнать';
+
+  @override
+  String get planViewAll => 'Весь план';
+
+  @override
+  String planDayDoneToast(int day) {
+    return 'День $day выполнен — отлично!';
+  }
 }

@@ -2708,4 +2708,54 @@ class AppLocalizationsKa extends AppLocalizations {
   @override
   String get aiAutofillDone =>
       '✨ AI-მ შეავსო თქვენი მომსახურება! ახლა აირჩიეთ კატეგორია და დაამატეთ ფოტოები.';
+
+  @override
+  String planDayOf(int day, int total) {
+    return 'დღე $day / $total';
+  }
+
+  @override
+  String get planDoIt => 'შესრულება';
+
+  @override
+  String get planUndo => 'შეუსრულებლად მონიშვნა';
+
+  @override
+  String get planCaughtUp =>
+      'ყველაფერი შესრულებულია! შემდეგი დავალება ხვალ გაიხსნება.';
+
+  @override
+  String planProgress(int done, int total) {
+    return 'შესრულდა $done/$total';
+  }
+
+  @override
+  String get planCompleteTitle => 'გეგმა დასრულდა! 🎉';
+
+  @override
+  String get planCompleteBody =>
+      'თქვენ დაასრულეთ LifeKit-ის 7-დღიანი გეგმა. შესანიშნავი დასაწყისია!';
+
+  @override
+  String get planSheetTitle => 'თქვენი 7-დღიანი გეგმა';
+
+  @override
+  String get planToday => 'დღეს';
+
+  @override
+  String get planDone => 'შესრულდა';
+
+  @override
+  String get planLocked => 'ჩაკეტილია';
+
+  @override
+  String get planCatchUp => 'დასაწევი';
+
+  @override
+  String get planViewAll => 'გეგმის ნახვა';
+
+  @override
+  String planDayDoneToast(int day) {
+    return 'დღე $day შესრულდა — ყოჩაღ!';
+  }
 }
