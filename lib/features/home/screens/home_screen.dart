@@ -3,6 +3,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../../core/widgets/motion.dart';
 import '../../../core/services/push_service.dart';
+import '../../../core/utils/error_handler.dart';
+import '../../../core/widgets/app_toast.dart';
+import 'event_detail_screen.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
@@ -145,23 +148,31 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  /// Discovery only returns an event's id; load the full record to open it.
+  Future<void> _openEventById(String id) async {
+    try {
+      final events = await _apiService.getEvents();
+      final event = events.cast<dynamic>().firstWhere(
+        (e) => '${e['id']}' == id,
+        orElse: () => null,
+      );
+      if (event == null || !mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
+      );
+    } catch (e) {
+      if (mounted) AppToast.error(context, appErrorMessage(context, e));
+    }
+  }
+
   // ── AI Greeting bubble ────────────────────────────────────────────────────
   Future<void> _triggerAiGreeting() async {
     if (!mounted) return;
     String message;
     try {
-      final firstName = (userProfile?['full_name'] ?? '')
-          .toString()
-          .split(' ')
-          .first;
-      final prompt = firstName.isNotEmpty
-          ? 'Give a short, friendly greeting or useful tip for a LifeKit app user named $firstName. '
-                'LifeKit is a service marketplace where people book services and swap skills. '
-                'Keep it under 20 words. Be warm, fun, and occasionally add an emoji.'
-          : 'Give a short fun fact or tip related to a service marketplace app called LifeKit '
-                'where people book services and swap skills. Under 20 words. Add an emoji.';
-      final result = await _apiService.sendAiChatMessage(prompt, []);
-      message = (result['reply'] ?? result['message'] ?? '').toString().trim();
+      // Lightweight endpoint, cached on the device for the day.
+      message = (await _apiService.getAiGreeting()).trim();
       if (message.isEmpty) throw Exception('empty');
     } catch (_) {
       // Fallback to a random hardcoded message
@@ -2975,6 +2986,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         builder: (_) => GroupDetailScreen(groupId: id),
                       ),
                     );
+                  } else if (type == 'event' && id.isNotEmpty) {
+                    _openEventById(id);
                   }
                 },
                 child: Container(

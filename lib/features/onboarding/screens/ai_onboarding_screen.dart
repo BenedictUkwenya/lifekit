@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/motion.dart';
+import '../../../core/utils/error_handler.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -44,7 +47,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
     final interests = _interestsController.text.trim();
 
     if (goals.isEmpty || skills.isEmpty || interests.isEmpty) {
-      setState(() => _errorMessage = 'Please fill in all three fields.');
+      setState(() => _errorMessage = AppLocalizations.of(context).aiObFillAll);
       return;
     }
 
@@ -63,7 +66,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
     } catch (e) {
       if (mounted) {
         setState(
-          () => _errorMessage = 'Failed to generate plan. Please try again.',
+          () => _errorMessage = appErrorMessage(context, e),
         );
       }
     } finally {
@@ -97,7 +100,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
         onPressed: () => _goHome(),
       ),
       title: Text(
-        'AI Setup Guide',
+        AppLocalizations.of(context).aiObTitle,
         style: GoogleFonts.poppins(
           fontSize: 17,
           fontWeight: FontWeight.w600,
@@ -108,7 +111,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
         TextButton(
           onPressed: _goHome,
           child: Text(
-            'Skip',
+            AppLocalizations.of(context).skip,
             style: GoogleFonts.poppins(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -136,7 +139,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
           const LifeKitLoader(),
           const SizedBox(height: 24),
           Text(
-            'AI is analyzing your profile…',
+            AppLocalizations.of(context).aiObAnalyzing,
             style: GoogleFonts.poppins(
               fontSize: 15,
               color: Colors.black54,
@@ -188,7 +191,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Let AI Guide Your\nLifeKit Journey',
+                            AppLocalizations.of(context).aiObHeroTitle,
                             style: GoogleFonts.poppins(
                               fontSize: 19,
                               fontWeight: FontWeight.w700,
@@ -198,7 +201,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Get a personalised 7-Day\nSuccess Plan in seconds.',
+                            AppLocalizations.of(context).aiObHeroSub,
                             style: GoogleFonts.poppins(
                               fontSize: 12,
                               color: Colors.white.withOpacity(0.85),
@@ -227,8 +230,8 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
 
           _buildInputCard(
             icon: Icons.flag_outlined,
-            label: 'Your Goals',
-            hint: 'e.g. Earn extra income, find reliable service providers',
+            label: AppLocalizations.of(context).aiObGoals,
+            hint: AppLocalizations.of(context).aiObGoalsHint,
             controller: _goalsController,
           ),
 
@@ -236,8 +239,8 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
 
           _buildInputCard(
             icon: Icons.build_outlined,
-            label: 'Your Skills',
-            hint: 'e.g. Cooking, plumbing, teaching, graphic design',
+            label: AppLocalizations.of(context).aiObSkills,
+            hint: AppLocalizations.of(context).aiObSkillsHint,
             controller: _skillsController,
           ),
 
@@ -245,8 +248,8 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
 
           _buildInputCard(
             icon: Icons.favorite_border_rounded,
-            label: 'Your Interests',
-            hint: 'e.g. Music, food, fitness, technology',
+            label: AppLocalizations.of(context).aiObInterests,
+            hint: AppLocalizations.of(context).aiObInterestsHint,
             controller: _interestsController,
           ),
 
@@ -289,7 +292,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
               onPressed: _generatePlan,
               icon: const Icon(Icons.auto_awesome, size: 18),
               label: Text(
-                'Generate My 7-Day Plan',
+                AppLocalizations.of(context).aiObGenerate,
                 style: GoogleFonts.poppins(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
@@ -432,7 +435,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'Your Personalized\n7-Day Plan',
+                            AppLocalizations.of(context).aiObPlanTitle,
                             style: GoogleFonts.poppins(
                               fontSize: 17,
                               fontWeight: FontWeight.w700,
@@ -442,7 +445,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'Follow these steps to hit the\nground running!',
+                            AppLocalizations.of(context).aiObPlanSub,
                             style: GoogleFonts.poppins(
                               fontSize: 11,
                               color: Colors.white.withOpacity(0.85),
@@ -479,7 +482,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
               task: item['task']?.toString() ?? '',
               actionRoute: item['action_route']?.toString() ?? 'none',
               isLast: isLast,
-            );
+            ).fadeSlideIn(index: i);
           }),
 
           const SizedBox(height: 28),
@@ -511,7 +514,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
                 ),
               ),
               child: Text(
-                'Finish & Go to Home',
+                AppLocalizations.of(context).aiObFinish,
                 style: GoogleFonts.poppins(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
@@ -632,7 +635,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Day $day',
+                      AppLocalizations.of(context).aiObDay(day),
                       style: GoogleFonts.poppins(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
@@ -657,7 +660,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              'Take Action',
+                              AppLocalizations.of(context).aiObTakeAction,
                               style: GoogleFonts.poppins(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,

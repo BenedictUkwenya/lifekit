@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../../core/widgets/motion.dart';
 import '../../../core/widgets/skeleton.dart';
 import 'package:flutter/rendering.dart';
@@ -102,17 +103,20 @@ class _ServicesListScreenState extends State<ServicesListScreen>
 
       // Non-critical: AI City Pulse
       try {
+        // e.g. "Tuesday 18:40 (evening)" — lets the AI tailor the insight.
         final now = DateTime.now();
-        final hour = now.hour;
-        final String timeOfDay = hour < 12
-            ? 'Morning'
-            : hour < 17
-            ? 'Afternoon'
-            : 'Evening';
+        final part = now.hour < 12
+            ? 'morning'
+            : now.hour < 17
+            ? 'afternoon'
+            : 'evening';
+        final String timeOfDay =
+            '${DateFormat('EEEE HH:mm').format(now)} ($part)';
+        // profiles has no city column; country is the best location we have.
         final String userCity =
-            profileData['profile']?['city'] ??
-            profileData['profile']?['country'] ??
-            'your area';
+            (profileData['profile']?['country'] ?? '').toString().trim().isNotEmpty
+            ? profileData['profile']['country'].toString()
+            : 'your area';
         final pulseData = await _apiService.getCityPulse(
           city: userCity,
           localTime: timeOfDay,

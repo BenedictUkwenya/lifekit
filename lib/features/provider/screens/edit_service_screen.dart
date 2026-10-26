@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
@@ -442,7 +444,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                     .toString();
               });
               _showSnackBar(
-                "✨ AI Autofill complete! Don't forget to select your Category and Images.",
+                AppLocalizations.of(context).aiAutofillDone,
                 isError: false,
               );
             } catch (e) {
@@ -459,7 +461,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
               }
               setSheetState(() => isGenerating = false);
               _showSnackBar(
-                'AI generation failed. Please try again.',
+                appErrorMessage(context, e),
                 isError: true,
               );
             }

@@ -2483,4 +2483,214 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backToHome => 'Back to home';
+
+  @override
+  String get obTitle1 => 'Offer your skills.\nEarn on your terms.';
+
+  @override
+  String get obDesc1 =>
+      'Turn your talent into income by offering your services to a community that values what you do.';
+
+  @override
+  String get obTitle2 => 'Build a profile\npeople trust';
+
+  @override
+  String get obDesc2 =>
+      'Showcase your work and collect reviews, so clients book you with confidence.';
+
+  @override
+  String get obTitle3 => 'Book trusted services,\nanytime, anywhere';
+
+  @override
+  String get obDesc3 =>
+      'From beauty to home repairs, wellness and personal care — reliable help near you, all in one app.';
+
+  @override
+  String get obTitle4 => 'Where community\nmeets opportunity';
+
+  @override
+  String get obDesc4 =>
+      'Connect, swap skills and grow with people who get you.';
+
+  @override
+  String get obHaveAccount => 'I already have an account';
+
+  @override
+  String get authNameHint => 'Please include your last name too';
+
+  @override
+  String get authNameBoth => 'Please enter both your first and last name.';
+
+  @override
+  String authStepOf(int current, int total) {
+    return 'Step $current of $total';
+  }
+
+  @override
+  String get authPwWeak => 'Weak';
+
+  @override
+  String get authPwFair => 'Fair';
+
+  @override
+  String get authPwGood => 'Good';
+
+  @override
+  String get authPwStrong => 'Strong';
+
+  @override
+  String get authPwTip =>
+      'Mix letters, numbers and a symbol for a stronger password.';
+
+  @override
+  String get authVerifyTitle => 'Verify your email';
+
+  @override
+  String authVerifySub(String email) {
+    return 'Enter the 6-digit code we sent to $email';
+  }
+
+  @override
+  String get authResend => 'Didn\'t get a code? Resend';
+
+  @override
+  String authResendIn(int seconds) {
+    return 'Resend code in ${seconds}s';
+  }
+
+  @override
+  String get authCodeSent => 'New code sent! Check your inbox.';
+
+  @override
+  String get authResendFailed => 'Couldn\'t resend the code. Please try again.';
+
+  @override
+  String get authCheckSpam => 'Can\'t find it? Check your spam folder.';
+
+  @override
+  String get authAlmostTitle => 'Almost done!';
+
+  @override
+  String get authAlmostSub =>
+      'Add a profile picture — you can always do this later';
+
+  @override
+  String get authAddPhoto => 'Add a photo';
+
+  @override
+  String get authChangePhoto => 'Change photo';
+
+  @override
+  String get authSkipForNow => 'Skip for now';
+
+  @override
+  String get authWelcomeAboard => 'You\'re all set! Welcome to LifeKit 🎉';
+
+  @override
+  String get authPhotoSkipped =>
+      'Profile picture skipped — you can add it later.';
+
+  @override
+  String get authSocialFailed => 'Sign-in failed. Please try again.';
+
+  @override
+  String get aiNewChat => 'New chat';
+
+  @override
+  String get aiTryAsking => 'Try asking';
+
+  @override
+  String get aiSuggest1 => 'Find me a cleaner this weekend';
+
+  @override
+  String get aiSuggest2 => 'How can I earn with my skills?';
+
+  @override
+  String get aiSuggest3 => 'How do skill swaps work?';
+
+  @override
+  String get aiSuggest4 => 'Which communities should I join?';
+
+  @override
+  String get aiTapRetry => 'Couldn\'t send. Tap to retry';
+
+  @override
+  String get aiCopied => 'Copied';
+
+  @override
+  String get aiFreeBanner =>
+      'Chatting with Gracia is a Pro feature. Start your free trial or upgrade to unlock it.';
+
+  @override
+  String get aiSeePlans => 'See plans';
+
+  @override
+  String get aiCardService => 'Service';
+
+  @override
+  String get aiCardCommunity => 'Community';
+
+  @override
+  String get aiCardEvent => 'Event';
+
+  @override
+  String get aiNewChatConfirm =>
+      'Start a new chat? This clears the current conversation.';
+
+  @override
+  String get aiObTitle => 'AI setup guide';
+
+  @override
+  String get aiObAnalyzing => 'Gracia is building your plan…';
+
+  @override
+  String get aiObHeroTitle => 'Let AI guide your\nLifeKit journey';
+
+  @override
+  String get aiObHeroSub => 'Get a personalised 7-day success plan in seconds.';
+
+  @override
+  String get aiObGoals => 'Your goals';
+
+  @override
+  String get aiObGoalsHint => 'e.g. Earn extra income on weekends';
+
+  @override
+  String get aiObSkills => 'Your skills';
+
+  @override
+  String get aiObSkillsHint => 'e.g. Cooking, tutoring maths';
+
+  @override
+  String get aiObInterests => 'Your interests';
+
+  @override
+  String get aiObInterestsHint => 'e.g. Music, fitness, meeting people';
+
+  @override
+  String get aiObGenerate => 'Generate my 7-day plan';
+
+  @override
+  String get aiObFillAll => 'Please fill in all three fields.';
+
+  @override
+  String get aiObPlanTitle => 'Your personalised\n7-day plan';
+
+  @override
+  String get aiObPlanSub => 'Follow these steps to hit the ground running!';
+
+  @override
+  String get aiObFinish => 'Finish & go to home';
+
+  @override
+  String aiObDay(int day) {
+    return 'Day $day';
+  }
+
+  @override
+  String get aiObTakeAction => 'Take action';
+
+  @override
+  String get aiAutofillDone =>
+      '✨ AI filled in your service! Now pick a category and add photos.';
 }

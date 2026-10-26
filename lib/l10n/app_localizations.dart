@@ -4767,6 +4767,390 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Back to home'**
   String get backToHome;
+
+  /// No description provided for @obTitle1.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer your skills.\nEarn on your terms.'**
+  String get obTitle1;
+
+  /// No description provided for @obDesc1.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn your talent into income by offering your services to a community that values what you do.'**
+  String get obDesc1;
+
+  /// No description provided for @obTitle2.
+  ///
+  /// In en, this message translates to:
+  /// **'Build a profile\npeople trust'**
+  String get obTitle2;
+
+  /// No description provided for @obDesc2.
+  ///
+  /// In en, this message translates to:
+  /// **'Showcase your work and collect reviews, so clients book you with confidence.'**
+  String get obDesc2;
+
+  /// No description provided for @obTitle3.
+  ///
+  /// In en, this message translates to:
+  /// **'Book trusted services,\nanytime, anywhere'**
+  String get obTitle3;
+
+  /// No description provided for @obDesc3.
+  ///
+  /// In en, this message translates to:
+  /// **'From beauty to home repairs, wellness and personal care — reliable help near you, all in one app.'**
+  String get obDesc3;
+
+  /// No description provided for @obTitle4.
+  ///
+  /// In en, this message translates to:
+  /// **'Where community\nmeets opportunity'**
+  String get obTitle4;
+
+  /// No description provided for @obDesc4.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect, swap skills and grow with people who get you.'**
+  String get obDesc4;
+
+  /// No description provided for @obHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'I already have an account'**
+  String get obHaveAccount;
+
+  /// No description provided for @authNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please include your last name too'**
+  String get authNameHint;
+
+  /// No description provided for @authNameBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter both your first and last name.'**
+  String get authNameBoth;
+
+  /// No description provided for @authStepOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String authStepOf(int current, int total);
+
+  /// No description provided for @authPwWeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Weak'**
+  String get authPwWeak;
+
+  /// No description provided for @authPwFair.
+  ///
+  /// In en, this message translates to:
+  /// **'Fair'**
+  String get authPwFair;
+
+  /// No description provided for @authPwGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get authPwGood;
+
+  /// No description provided for @authPwStrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Strong'**
+  String get authPwStrong;
+
+  /// No description provided for @authPwTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Mix letters, numbers and a symbol for a stronger password.'**
+  String get authPwTip;
+
+  /// No description provided for @authVerifyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your email'**
+  String get authVerifyTitle;
+
+  /// No description provided for @authVerifySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code we sent to {email}'**
+  String authVerifySub(String email);
+
+  /// No description provided for @authResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t get a code? Resend'**
+  String get authResend;
+
+  /// No description provided for @authResendIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code in {seconds}s'**
+  String authResendIn(int seconds);
+
+  /// No description provided for @authCodeSent.
+  ///
+  /// In en, this message translates to:
+  /// **'New code sent! Check your inbox.'**
+  String get authCodeSent;
+
+  /// No description provided for @authResendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t resend the code. Please try again.'**
+  String get authResendFailed;
+
+  /// No description provided for @authCheckSpam.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t find it? Check your spam folder.'**
+  String get authCheckSpam;
+
+  /// No description provided for @authAlmostTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Almost done!'**
+  String get authAlmostTitle;
+
+  /// No description provided for @authAlmostSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a profile picture — you can always do this later'**
+  String get authAlmostSub;
+
+  /// No description provided for @authAddPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a photo'**
+  String get authAddPhoto;
+
+  /// No description provided for @authChangePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get authChangePhoto;
+
+  /// No description provided for @authSkipForNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip for now'**
+  String get authSkipForNow;
+
+  /// No description provided for @authWelcomeAboard.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all set! Welcome to LifeKit 🎉'**
+  String get authWelcomeAboard;
+
+  /// No description provided for @authPhotoSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile picture skipped — you can add it later.'**
+  String get authPhotoSkipped;
+
+  /// No description provided for @authSocialFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in failed. Please try again.'**
+  String get authSocialFailed;
+
+  /// No description provided for @aiNewChat.
+  ///
+  /// In en, this message translates to:
+  /// **'New chat'**
+  String get aiNewChat;
+
+  /// No description provided for @aiTryAsking.
+  ///
+  /// In en, this message translates to:
+  /// **'Try asking'**
+  String get aiTryAsking;
+
+  /// No description provided for @aiSuggest1.
+  ///
+  /// In en, this message translates to:
+  /// **'Find me a cleaner this weekend'**
+  String get aiSuggest1;
+
+  /// No description provided for @aiSuggest2.
+  ///
+  /// In en, this message translates to:
+  /// **'How can I earn with my skills?'**
+  String get aiSuggest2;
+
+  /// No description provided for @aiSuggest3.
+  ///
+  /// In en, this message translates to:
+  /// **'How do skill swaps work?'**
+  String get aiSuggest3;
+
+  /// No description provided for @aiSuggest4.
+  ///
+  /// In en, this message translates to:
+  /// **'Which communities should I join?'**
+  String get aiSuggest4;
+
+  /// No description provided for @aiTapRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send. Tap to retry'**
+  String get aiTapRetry;
+
+  /// No description provided for @aiCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get aiCopied;
+
+  /// No description provided for @aiFreeBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Chatting with Gracia is a Pro feature. Start your free trial or upgrade to unlock it.'**
+  String get aiFreeBanner;
+
+  /// No description provided for @aiSeePlans.
+  ///
+  /// In en, this message translates to:
+  /// **'See plans'**
+  String get aiSeePlans;
+
+  /// No description provided for @aiCardService.
+  ///
+  /// In en, this message translates to:
+  /// **'Service'**
+  String get aiCardService;
+
+  /// No description provided for @aiCardCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Community'**
+  String get aiCardCommunity;
+
+  /// No description provided for @aiCardEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Event'**
+  String get aiCardEvent;
+
+  /// No description provided for @aiNewChatConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a new chat? This clears the current conversation.'**
+  String get aiNewChatConfirm;
+
+  /// No description provided for @aiObTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI setup guide'**
+  String get aiObTitle;
+
+  /// No description provided for @aiObAnalyzing.
+  ///
+  /// In en, this message translates to:
+  /// **'Gracia is building your plan…'**
+  String get aiObAnalyzing;
+
+  /// No description provided for @aiObHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Let AI guide your\nLifeKit journey'**
+  String get aiObHeroTitle;
+
+  /// No description provided for @aiObHeroSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Get a personalised 7-day success plan in seconds.'**
+  String get aiObHeroSub;
+
+  /// No description provided for @aiObGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Your goals'**
+  String get aiObGoals;
+
+  /// No description provided for @aiObGoalsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Earn extra income on weekends'**
+  String get aiObGoalsHint;
+
+  /// No description provided for @aiObSkills.
+  ///
+  /// In en, this message translates to:
+  /// **'Your skills'**
+  String get aiObSkills;
+
+  /// No description provided for @aiObSkillsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Cooking, tutoring maths'**
+  String get aiObSkillsHint;
+
+  /// No description provided for @aiObInterests.
+  ///
+  /// In en, this message translates to:
+  /// **'Your interests'**
+  String get aiObInterests;
+
+  /// No description provided for @aiObInterestsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Music, fitness, meeting people'**
+  String get aiObInterestsHint;
+
+  /// No description provided for @aiObGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate my 7-day plan'**
+  String get aiObGenerate;
+
+  /// No description provided for @aiObFillAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill in all three fields.'**
+  String get aiObFillAll;
+
+  /// No description provided for @aiObPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your personalised\n7-day plan'**
+  String get aiObPlanTitle;
+
+  /// No description provided for @aiObPlanSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow these steps to hit the ground running!'**
+  String get aiObPlanSub;
+
+  /// No description provided for @aiObFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish & go to home'**
+  String get aiObFinish;
+
+  /// No description provided for @aiObDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day}'**
+  String aiObDay(int day);
+
+  /// No description provided for @aiObTakeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Take action'**
+  String get aiObTakeAction;
+
+  /// No description provided for @aiAutofillDone.
+  ///
+  /// In en, this message translates to:
+  /// **'✨ AI filled in your service! Now pick a category and add photos.'**
+  String get aiAutofillDone;
 }
 
 class _AppLocalizationsDelegate

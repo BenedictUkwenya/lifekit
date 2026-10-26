@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/widgets/app_toast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -73,6 +76,16 @@ class _LoginScreenState extends State<LoginScreen>
   late final Animation<double> _logoFade;
   late final Animation<double> _formFade;
   late final Animation<Offset> _formSlide;
+  late final AnimationController _shakeCtrl = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 420),
+  );
+
+  /// Nudges the form side-to-side so errors are felt, not just read.
+  void _shake() {
+    HapticFeedback.mediumImpact();
+    _shakeCtrl.forward(from: 0);
+  }
 
   @override
   void initState() {
@@ -123,6 +136,7 @@ class _LoginScreenState extends State<LoginScreen>
     _sliderTimer?.cancel();
     _sliderCtrl.dispose();
     _entryCtrl.dispose();
+    _shakeCtrl.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _oauthSub?.cancel();
@@ -144,7 +158,10 @@ class _LoginScreenState extends State<LoginScreen>
         );
         await _apiService.ensureSocialProfile(session.accessToken);
         if (mounted) {
-          AppToast.success(context, AppLocalizations.of(context)!.welcomeBackToast);
+          AppToast.success(
+            context,
+            AppLocalizations.of(context)!.welcomeBackToast,
+          );
           await Future.delayed(const Duration(milliseconds: 500));
           if (mounted) {
             Navigator.pushAndRemoveUntil(
@@ -166,34 +183,39 @@ class _LoginScreenState extends State<LoginScreen>
       _oauthSub?.cancel();
       _oauthSub = null;
       if (mounted) {
-        AppToast.error(context, 'Sign-in failed. Please try again.');
+        AppToast.error(context, AppLocalizations.of(context).authSocialFailed);
       }
     }
   }
 
   Future<void> handleLogin() async {
+    if (isLoading) return;
     final l10n = AppLocalizations.of(context)!;
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
     // ── Client-side validation first ───────────────────────
+    String? problem;
     if (email.isEmpty) {
-      AppToast.error(context, l10n.errorEmailRequired);
-      return;
+      problem = l10n.errorEmailRequired;
+    } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
+      problem = l10n.errorEmailInvalid;
+    } else if (password.isEmpty) {
+      problem = l10n.errorPasswordRequired;
     }
-    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
-      AppToast.error(context, l10n.errorEmailInvalid);
-      return;
-    }
-    if (password.isEmpty) {
-      AppToast.error(context, l10n.errorPasswordRequired);
+    if (problem != null) {
+      _shake();
+      AppToast.error(context, problem);
       return;
     }
 
+    FocusScope.of(context).unfocus();
     setState(() => isLoading = true);
 
     try {
       await _apiService.login(email, password);
+      // Lets password managers offer to save the credentials.
+      TextInput.finishAutofillContext();
       if (mounted) {
         AppToast.success(context, l10n.welcomeBackToast);
         await Future.delayed(const Duration(milliseconds: 800));
@@ -206,7 +228,8 @@ class _LoginScreenState extends State<LoginScreen>
       }
     } catch (e) {
       if (mounted) {
-        AppToast.error(context, friendlyError(e));
+        _shake();
+        AppToast.error(context, appErrorMessage(context, e));
       }
     } finally {
       if (mounted) setState(() => isLoading = false);
@@ -250,17 +273,17 @@ class _LoginScreenState extends State<LoginScreen>
                   const Positioned(
                     top: -48,
                     right: -40,
-                    child: _DecoCircle(size: 180, opacity: 0.08),
+                    child: _DecoCircle(size: 180, opacity: 0.08, drift: 14),
                   ),
                   const Positioned(
                     bottom: -20,
                     left: -60,
-                    child: _DecoCircle(size: 220, opacity: 0.06),
+                    child: _DecoCircle(size: 220, opacity: 0.06, drift: -18),
                   ),
                   const Positioned(
                     top: 70,
                     left: 30,
-                    child: _DecoCircle(size: 60, opacity: 0.10),
+                    child: _DecoCircle(size: 60, opacity: 0.10, drift: 10),
                   ),
                   Positioned.fill(
                     child: SafeArea(
@@ -317,11 +340,30 @@ class _LoginScreenState extends State<LoginScreen>
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(
-                                        s.icon,
-                                        color: Colors.white.withOpacity(0.90),
-                                        size: 28,
-                                      ),
+                                      Container(
+                                            padding: const EdgeInsets.all(10),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withValues(
+                                                alpha: 0.16,
+                                              ),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(
+                                              s.icon,
+                                              color: Colors.white,
+                                              size: 24,
+                                            ),
+                                          )
+                                          .animate(
+                                            key: ValueKey(
+                                              'icon$i-$_sliderIndex',
+                                            ),
+                                          )
+                                          .scale(
+                                            begin: const Offset(0.6, 0.6),
+                                            duration: 500.ms,
+                                            curve: Curves.elasticOut,
+                                          ),
                                       const SizedBox(height: 8),
                                       Flexible(
                                         child: FittedBox(
@@ -349,7 +391,9 @@ class _LoginScreenState extends State<LoginScreen>
                                           overflow: TextOverflow.ellipsis,
                                           style: GoogleFonts.poppins(
                                             fontSize: 12,
-                                            color: Colors.white.withOpacity(0.78),
+                                            color: Colors.white.withOpacity(
+                                              0.78,
+                                            ),
                                             height: 1.3,
                                           ),
                                         ),
@@ -397,92 +441,116 @@ class _LoginScreenState extends State<LoginScreen>
               opacity: _formFade,
               child: SlideTransition(
                 position: _formSlide,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(22, 28, 22, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _LoginTextField(
-                        controller: _emailController,
-                        hintText: l10n.emailPlaceholder,
-                        prefixIcon: Icons.mail_outline_rounded,
-                        keyboardType: TextInputType.emailAddress,
+                child: AnimatedBuilder(
+                  animation: _shakeCtrl,
+                  builder: (_, child) {
+                    final t = _shakeCtrl.value;
+                    return Transform.translate(
+                      offset: Offset(
+                        math.sin(t * math.pi * 6) * 10 * (1 - t),
+                        0,
                       ),
-                      const SizedBox(height: 14),
-                      _LoginTextField(
-                        controller: _passwordController,
-                        hintText: l10n.passwordPlaceholder,
-                        prefixIcon: Icons.lock_outline_rounded,
-                        isPassword: true,
-                        isVisible: isPasswordVisible,
-                        onVisibilityToggle: () => setState(
-                          () => isPasswordVisible = !isPasswordVisible,
-                        ),
-                      ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const ForgotPasswordScreen(),
-                            ),
+                      child: child,
+                    );
+                  },
+                  child: AutofillGroup(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(22, 28, 22, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _LoginTextField(
+                            controller: _emailController,
+                            hintText: l10n.emailPlaceholder,
+                            prefixIcon: Icons.mail_outline_rounded,
+                            keyboardType: TextInputType.emailAddress,
+                            autofillHints: const [
+                              AutofillHints.email,
+                              AutofillHints.username,
+                            ],
+                            textInputAction: TextInputAction.next,
                           ),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 4,
-                              vertical: 8,
+                          const SizedBox(height: 14),
+                          _LoginTextField(
+                            controller: _passwordController,
+                            hintText: l10n.passwordPlaceholder,
+                            prefixIcon: Icons.lock_outline_rounded,
+                            isPassword: true,
+                            isVisible: isPasswordVisible,
+                            onVisibilityToggle: () => setState(
+                              () => isPasswordVisible = !isPasswordVisible,
                             ),
+                            autofillHints: const [AutofillHints.password],
+                            textInputAction: TextInputAction.done,
+                            onSubmitted: (_) => handleLogin(),
                           ),
-                          child: Text(
-                            l10n.forgotPassword,
-                            style: GoogleFonts.poppins(
-                              color: AppColors.primary,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      _AnimatedPrimaryButton(
-                        text: l10n.loginButton,
-                        isLoading: isLoading,
-                        onTap: handleLogin,
-                      ),
-                      // ── social buttons (coming soon) ──────────
-                      // _SocialButton(Google), _SocialButton(Apple)
-                      const SizedBox(height: 36),
-                      Center(
-                        child: RichText(
-                          text: TextSpan(
-                            text: '${l10n.noAccountPrompt} ',
-                            style: GoogleFonts.poppins(
-                              color: Colors.black54,
-                              fontSize: 14,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: l10n.registerButton,
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const ForgotPasswordScreen(),
+                                ),
+                              ),
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                  vertical: 8,
+                                ),
+                              ),
+                              child: Text(
+                                l10n.forgotPassword,
                                 style: GoogleFonts.poppins(
                                   color: AppColors.primary,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          _AnimatedPrimaryButton(
+                            text: l10n.loginButton,
+                            isLoading: isLoading,
+                            onTap: handleLogin,
+                          ),
+                          // ── social buttons (coming soon) ──────────
+                          // _SocialButton(Google), _SocialButton(Apple)
+                          const SizedBox(height: 36),
+                          Center(
+                            child: RichText(
+                              text: TextSpan(
+                                text: '${l10n.noAccountPrompt} ',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.black54,
                                   fontSize: 14,
                                 ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const SignupFlowWrapper(),
+                                children: [
+                                  TextSpan(
+                                    text: l10n.registerButton,
+                                    style: GoogleFonts.poppins(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
                                     ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              const SignupFlowWrapper(),
+                                        ),
+                                      ),
                                   ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
+                          SizedBox(height: mq.padding.bottom + 28),
+                        ],
                       ),
-                      SizedBox(height: mq.padding.bottom + 28),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -506,8 +574,14 @@ class _LoginTextField extends StatefulWidget {
   final VoidCallback? onVisibilityToggle;
   final TextInputType keyboardType;
   final IconData? prefixIcon;
+  final Iterable<String>? autofillHints;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onSubmitted;
 
   const _LoginTextField({
+    this.autofillHints,
+    this.textInputAction,
+    this.onSubmitted,
     required this.controller,
     required this.hintText,
     this.isPassword = false,
@@ -567,6 +641,10 @@ class _LoginTextFieldState extends State<_LoginTextField> {
         focusNode: _focus,
         obscureText: widget.isPassword && !widget.isVisible,
         keyboardType: widget.keyboardType,
+        autofillHints: widget.autofillHints,
+        textInputAction: widget.textInputAction,
+        onSubmitted: widget.onSubmitted,
+        autocorrect: false,
         style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
         decoration: InputDecoration(
           hintText: widget.hintText,
@@ -687,9 +765,13 @@ class _AnimatedPrimaryButtonState extends State<_AnimatedPrimaryButton>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (_) => _ctrl.forward(),
+      onTapDown: (_) {
+        if (!widget.isLoading) _ctrl.forward();
+      },
       onTapUp: (_) {
         _ctrl.reverse();
+        if (widget.isLoading) return;
+        HapticFeedback.lightImpact();
         widget.onTap();
       },
       onTapCancel: () => _ctrl.reverse(),
@@ -713,23 +795,28 @@ class _AnimatedPrimaryButtonState extends State<_AnimatedPrimaryButton>
             ],
           ),
           child: Center(
-            child: widget.isLoading
-                ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2.5,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 220),
+              child: widget.isLoading
+                  ? const SizedBox(
+                      key: ValueKey('spinner'),
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.5,
+                      ),
+                    )
+                  : Text(
+                      widget.text,
+                      key: const ValueKey('label'),
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
                     ),
-                  )
-                : Text(
-                    widget.text,
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
+            ),
           ),
         ),
       ),
@@ -741,17 +828,33 @@ class _DecoCircle extends StatelessWidget {
   final double size;
   final double opacity;
 
-  const _DecoCircle({required this.size, required this.opacity});
+  /// Vertical drift in px; bubbles float slowly so the header feels alive.
+  final double drift;
+
+  const _DecoCircle({
+    required this.size,
+    required this.opacity,
+    this.drift = 0,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final circle = Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.white.withOpacity(opacity),
+        color: Colors.white.withValues(alpha: opacity),
       ),
     );
+    if (drift == 0) return circle;
+    return circle
+        .animate(onPlay: (c) => c.repeat(reverse: true))
+        .moveY(
+          begin: 0,
+          end: drift,
+          duration: 4.seconds,
+          curve: Curves.easeInOut,
+        );
   }
 }

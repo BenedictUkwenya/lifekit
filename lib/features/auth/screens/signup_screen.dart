@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pinput/pinput.dart';
@@ -42,8 +44,24 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
   bool _showNameHint = false;
   StreamSubscription<AuthState>? _oauthSub;
 
+  // Resend-code cooldown so people don't spam the button (backend rate-limits too).
+  static const _resendCooldown = 30;
+  int _resendIn = 0;
+  Timer? _resendTimer;
+
+  void _startResendCooldown() {
+    _resendTimer?.cancel();
+    setState(() => _resendIn = _resendCooldown);
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) return t.cancel();
+      setState(() => _resendIn--);
+      if (_resendIn <= 0) t.cancel();
+    });
+  }
+
   @override
   void dispose() {
+    _resendTimer?.cancel();
     _oauthSub?.cancel();
     super.dispose();
   }
@@ -63,7 +81,7 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
         );
         await _apiService.ensureSocialProfile(session.accessToken);
         if (mounted) {
-          showSuccess('Welcome to LifeKit! 🎉');
+          showSuccess(AppLocalizations.of(context).authWelcomeAboard);
           await Future.delayed(const Duration(milliseconds: 500));
           if (mounted) {
             Navigator.pushAndRemoveUntil(
@@ -85,7 +103,7 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
       _oauthSub?.cancel();
       _oauthSub = null;
       if (mounted) {
-        showError('Sign-in failed. Please try again.');
+        showError(AppLocalizations.of(context).authSocialFailed);
       }
     }
   }
@@ -101,7 +119,10 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
   );
 
   // ── Use AppToast everywhere — no raw SnackBar ──
-  void showError(dynamic e) => AppToast.error(context, friendlyError(e));
+  void showError(dynamic e) {
+    HapticFeedback.mediumImpact();
+    AppToast.error(context, appErrorMessage(context, e));
+  }
 
   void showSuccess(String msg) => AppToast.success(context, msg);
 
@@ -118,6 +139,7 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
       );
       if (mounted) {
         setState(() => isLoading = false);
+        _startResendCooldown();
         nextPage();
       }
     } catch (e) {
@@ -129,6 +151,7 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
   }
 
   Future<void> resendOtp() async {
+    if (_resendIn > 0) return;
     setState(() => isLoading = true);
     try {
       await _apiService.signup(
@@ -139,12 +162,13 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
       );
       if (mounted) {
         setState(() => isLoading = false);
-        showSuccess('New code sent! Check your inbox.');
+        _startResendCooldown();
+        showSuccess(AppLocalizations.of(context).authCodeSent);
       }
     } catch (e) {
       if (mounted) {
         setState(() => isLoading = false);
-        showError('Could not resend code. Please try again.');
+        showError(AppLocalizations.of(context).authResendFailed);
       }
     }
   }
@@ -171,7 +195,7 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
       if (_imageFile != null) {
         await _apiService.uploadProfilePic(_imageFile!);
       }
-      showSuccess("You're all set! Welcome to LifeKit 🎉");
+      if (mounted) showSuccess(AppLocalizations.of(context).authWelcomeAboard);
       await Future.delayed(const Duration(seconds: 1));
       if (mounted) {
         // Navigate to AI Onboarding so the user immediately sees
@@ -184,7 +208,7 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
       }
     } catch (e) {
       // Profile pic upload failing shouldn't block access
-      showInfo('Profile picture skipped — you can add it later.');
+      if (mounted) showInfo(AppLocalizations.of(context).authPhotoSkipped);
       if (mounted) {
         Navigator.pushAndRemoveUntil(
           context,
@@ -228,6 +252,9 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
         _CustomTextField(
           label: l10n.fullNameLabel,
           initialValue: fullName,
+          icon: Icons.person_outline_rounded,
+          autofillHints: const [AutofillHints.name],
+          textInputAction: TextInputAction.next,
           onChanged: (v) {
             fullName = v;
             setState(() {
@@ -250,7 +277,7 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        'Please include your last name too',
+                        l10n.authNameHint,
                         style: GoogleFonts.poppins(
                           fontSize: 12,
                           color: Colors.orange[700],
@@ -267,6 +294,9 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
           initialValue: email,
           onChanged: (v) => email = v,
           keyboardType: TextInputType.emailAddress,
+          icon: Icons.mail_outline_rounded,
+          autofillHints: const [AutofillHints.email],
+          textInputAction: TextInputAction.done,
         ),
         const SizedBox(height: 30),
         _PrimaryButton(
@@ -277,7 +307,7 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
               return;
             }
             if (!fullName.trim().contains(' ')) {
-              showError('Please enter both your first and last name.');
+              showError(l10n.authNameBoth);
               return;
             }
             if (email.trim().isEmpty ||
@@ -336,12 +366,19 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
           label: l10n.passwordLabel,
           initialValue: password,
           isPassword: true,
-          onChanged: (v) => password = v,
+          icon: Icons.lock_outline_rounded,
+          autofillHints: const [AutofillHints.newPassword],
+          textInputAction: TextInputAction.next,
+          onChanged: (v) => setState(() => password = v),
         ),
+        _PasswordStrength(password: password),
         const SizedBox(height: 16),
         _CustomTextField(
           label: l10n.confirmPasswordLabel,
           isPassword: true,
+          icon: Icons.lock_reset_rounded,
+          autofillHints: const [AutofillHints.newPassword],
+          textInputAction: TextInputAction.done,
           onChanged: (v) => confirmPassword = v,
         ),
         const SizedBox(height: 30),
@@ -379,43 +416,109 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
   Widget _buildOtpScreen() {
     final l10n = AppLocalizations.of(context)!;
     return _BaseAuthLayout(
-      title: 'Verify your email',
-      subtitle: 'Enter the 6-digit code sent to $email',
+      title: l10n.authVerifyTitle,
+      subtitle: l10n.authVerifySub(email),
       onBack: previousPage,
       currentStep: 3,
       totalSteps: 4,
       children: [
-        const SizedBox(height: 40),
+        const SizedBox(height: 16),
         Center(
-          child: Pinput(
-            length: 6,
-            defaultPinTheme: PinTheme(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.primary),
-                borderRadius: BorderRadius.circular(8),
-                color: const Color(0xFFF9F9F9),
-              ),
-              textStyle: GoogleFonts.poppins(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+          child: Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.08),
+              shape: BoxShape.circle,
             ),
-            onCompleted: (pin) => verifyOtp(pin),
+            child: const Icon(
+              Icons.mark_email_unread_rounded,
+              size: 40,
+              color: AppColors.primary,
+            ),
+          ).popIn(),
+        ),
+        const SizedBox(height: 24),
+        Center(
+          child: Builder(
+            builder: (context) {
+              final base = PinTheme(
+                width: 48,
+                height: 56,
+                textStyle: GoogleFonts.poppins(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textDark,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.grey.shade300),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+              );
+              return Pinput(
+                length: 6,
+                autofocus: true,
+                defaultPinTheme: base,
+                focusedPinTheme: base.copyDecorationWith(
+                  border: Border.all(color: AppColors.primary, width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.18),
+                      blurRadius: 12,
+                    ),
+                  ],
+                ),
+                submittedPinTheme: base.copyDecorationWith(
+                  color: AppColors.primary.withValues(alpha: 0.06),
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.5),
+                  ),
+                ),
+                hapticFeedbackType: HapticFeedbackType.lightImpact,
+                onCompleted: (pin) => verifyOtp(pin),
+              ).fadeSlideIn(index: 1);
+            },
           ),
         ),
-        const SizedBox(height: 30),
+        const SizedBox(height: 24),
         Center(
-          child: TextButton(
-            onPressed: isLoading ? null : resendOtp,
-            child: Text(
-              isLoading ? l10n.loading : "Didn't get a code? Resend",
-              style: const TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+          child: AnimatedSwitcher(
+            duration: Motion.fast,
+            child: _resendIn > 0
+                ? Text(
+                    l10n.authResendIn(_resendIn),
+                    key: const ValueKey('countdown'),
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: Colors.grey[500],
+                    ),
+                  )
+                : TextButton(
+                    key: const ValueKey('resend'),
+                    onPressed: isLoading ? null : resendOtp,
+                    child: Text(
+                      isLoading ? l10n.loading : l10n.authResend,
+                      style: GoogleFonts.poppins(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Center(
+          child: Text(
+            l10n.authCheckSpam,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[500]),
           ),
         ),
         if (isLoading) const Center(child: LifeKitLoader()),
@@ -428,46 +531,97 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
   Widget _buildProfileScreen() {
     final l10n = AppLocalizations.of(context)!;
     return _BaseAuthLayout(
-      title: 'Almost done!',
-      subtitle: 'Add a profile picture — you can always skip this',
+      title: l10n.authAlmostTitle,
+      subtitle: l10n.authAlmostSub,
       onBack: null,
       currentStep: 4,
       totalSteps: 4,
       children: [
-        const SizedBox(height: 40),
+        const SizedBox(height: 28),
         Center(
-          child: Stack(
-            children: [
-              CircleAvatar(
-                radius: 60,
-                backgroundColor: Colors.grey[200],
-                backgroundImage: _imageFile != null
-                    ? FileImage(_imageFile!)
-                    : null,
-                child: _imageFile == null
-                    ? const Icon(Icons.person, size: 60, color: Colors.grey)
-                    : null,
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: GestureDetector(
-                  onTap: () async {
-                    final XFile? image = await ImagePicker().pickImage(
-                      source: ImageSource.gallery,
-                    );
-                    if (image != null) {
-                      setState(() => _imageFile = File(image.path));
-                    }
-                  },
-                  child: const CircleAvatar(
-                    backgroundColor: AppColors.primary,
-                    radius: 18,
-                    child: Icon(Icons.edit, color: Colors.white, size: 18),
+          child: Pressable(
+            onTap: () async {
+              final XFile? image = await ImagePicker().pickImage(
+                source: ImageSource.gallery,
+                maxWidth: 1024,
+                imageQuality: 85,
+              );
+              if (image != null && mounted) {
+                setState(() => _imageFile = File(image.path));
+              }
+            },
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF89273B), Color(0xFFBF3F5E)],
+                    ),
+                  ),
+                  child: CircleAvatar(
+                    radius: 62,
+                    backgroundColor: Colors.white,
+                    child: AnimatedSwitcher(
+                      duration: Motion.medium,
+                      child: _imageFile != null
+                          ? CircleAvatar(
+                              key: ValueKey(_imageFile!.path),
+                              radius: 58,
+                              backgroundImage: FileImage(_imageFile!),
+                            )
+                          : CircleAvatar(
+                              key: const ValueKey('empty'),
+                              radius: 58,
+                              backgroundColor: AppColors.primary.withValues(
+                                alpha: 0.08,
+                              ),
+                              child: Text(
+                                fullName.trim().isEmpty
+                                    ? '?'
+                                    : fullName.trim()[0].toUpperCase(),
+                                style: GoogleFonts.poppins(
+                                  fontSize: 44,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                    ),
                   ),
                 ),
-              ),
-            ],
+                Positioned(
+                  bottom: 4,
+                  right: 4,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 3),
+                    ),
+                    child: const Icon(
+                      Icons.photo_camera_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ).popIn(),
+        ),
+        const SizedBox(height: 10),
+        Center(
+          child: Text(
+            _imageFile == null ? l10n.authAddPhoto : l10n.authChangePhoto,
+            style: GoogleFonts.poppins(
+              fontSize: 13,
+              color: AppColors.primary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
         const SizedBox(height: 20),
@@ -491,6 +645,19 @@ class _SignupFlowWrapperState extends State<SignupFlowWrapper> {
         isLoading
             ? const Center(child: LifeKitLoader())
             : _PrimaryButton(text: l10n.done, onTap: uploadAndFinish),
+        if (_imageFile == null && !isLoading)
+          Center(
+            child: TextButton(
+              onPressed: uploadAndFinish,
+              child: Text(
+                l10n.authSkipForNow,
+                style: GoogleFonts.poppins(
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
         const SizedBox(height: 30),
       ],
     );
@@ -755,12 +922,12 @@ class _BaseAuthLayoutState extends State<_BaseAuthLayout>
                   const Positioned(
                     top: -40,
                     right: -30,
-                    child: _DecoCircle(size: 160, opacity: 0.08),
+                    child: _DecoCircle(size: 160, opacity: 0.08, drift: 14),
                   ),
                   const Positioned(
                     bottom: -20,
                     left: -50,
-                    child: _DecoCircle(size: 200, opacity: 0.06),
+                    child: _DecoCircle(size: 200, opacity: 0.06, drift: -16),
                   ),
                   Positioned.fill(
                     child: SafeArea(
@@ -785,30 +952,9 @@ class _BaseAuthLayoutState extends State<_BaseAuthLayout>
                                   const SizedBox(width: 48),
                                 const Spacer(),
                                 if (widget.totalSteps > 0)
-                                  Row(
-                                    children: List.generate(
-                                      widget.totalSteps,
-                                      (i) => AnimatedContainer(
-                                        duration: const Duration(
-                                          milliseconds: 300,
-                                        ),
-                                        margin: const EdgeInsets.symmetric(
-                                          horizontal: 3,
-                                        ),
-                                        width: i + 1 == widget.currentStep
-                                            ? 18
-                                            : 6,
-                                        height: 6,
-                                        decoration: BoxDecoration(
-                                          color: i + 1 == widget.currentStep
-                                              ? Colors.white
-                                              : Colors.white.withOpacity(0.35),
-                                          borderRadius: BorderRadius.circular(
-                                            3,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                                  _StepProgress(
+                                    current: widget.currentStep,
+                                    total: widget.totalSteps,
                                   ),
                                 const Spacer(),
                                 const SizedBox(width: 48),
@@ -928,8 +1074,14 @@ class _CustomTextField extends StatefulWidget {
   final bool isPassword;
   final TextInputType keyboardType;
   final String? initialValue;
+  final IconData? icon;
+  final Iterable<String>? autofillHints;
+  final TextInputAction? textInputAction;
 
   const _CustomTextField({
+    this.icon,
+    this.autofillHints,
+    this.textInputAction,
     required this.label,
     required this.onChanged,
     this.isPassword = false,
@@ -990,6 +1142,9 @@ class _CustomTextFieldState extends State<_CustomTextField> {
         obscureText: _obscure,
         keyboardType: widget.keyboardType,
         onChanged: widget.onChanged,
+        autofillHints: widget.autofillHints,
+        textInputAction: widget.textInputAction,
+        autocorrect: false,
         style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
         decoration: InputDecoration(
           hintText: widget.label,
@@ -999,6 +1154,13 @@ class _CustomTextFieldState extends State<_CustomTextField> {
             horizontal: 16,
             vertical: 17,
           ),
+          prefixIcon: widget.icon == null
+              ? null
+              : Icon(
+                  widget.icon,
+                  size: 20,
+                  color: _focused ? AppColors.primary : Colors.grey[400],
+                ),
           suffixIcon: widget.isPassword
               ? IconButton(
                   icon: Icon(
@@ -1025,7 +1187,11 @@ class _TermsNotice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final base = GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600], height: 1.5);
+    final base = GoogleFonts.poppins(
+      fontSize: 12,
+      color: Colors.grey[600],
+      height: 1.5,
+    );
     final link = base.copyWith(
       color: AppColors.primary,
       fontWeight: FontWeight.w600,
@@ -1033,9 +1199,9 @@ class _TermsNotice extends StatelessWidget {
       decorationColor: AppColors.primary.withValues(alpha: 0.4),
     );
     Widget linkText(String label, String url) => GestureDetector(
-          onTap: () => launchUrl(Uri.parse(url), mode: LaunchMode.inAppBrowserView),
-          child: Text(label, style: link),
-        );
+      onTap: () => launchUrl(Uri.parse(url), mode: LaunchMode.inAppBrowserView),
+      child: Text(label, style: link),
+    );
 
     return Wrap(
       alignment: WrapAlignment.center,
@@ -1049,6 +1215,149 @@ class _TermsNotice extends StatelessWidget {
         linkText(l10n.profilePrivacyPolicy, LegalLinks.privacyPolicy),
       ],
     ).fadeSlideIn(index: 2);
+  }
+}
+
+/// "Step 2 of 4" with a bar that fills as you move through signup.
+class _StepProgress extends StatelessWidget {
+  final int current;
+  final int total;
+
+  const _StepProgress({required this.current, required this.total});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          AppLocalizations.of(context).authStepOf(current, total),
+          style: GoogleFonts.poppins(
+            fontSize: 11.5,
+            fontWeight: FontWeight.w600,
+            color: Colors.white.withValues(alpha: 0.9),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Container(
+          width: 120,
+          height: 5,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.25),
+            borderRadius: BorderRadius.circular(3),
+          ),
+          alignment: Alignment.centerLeft,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: (current - 1) / total, end: current / total),
+            duration: Motion.slow,
+            curve: Motion.curve,
+            builder: (_, v, _) => FractionallySizedBox(
+              widthFactor: v,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Live 4-segment password strength meter.
+class _PasswordStrength extends StatelessWidget {
+  final String password;
+
+  const _PasswordStrength({required this.password});
+
+  static int score(String p) {
+    if (p.isEmpty) return 0;
+    var s = 0;
+    if (p.length >= 6) s++;
+    if (p.length >= 10) s++;
+    if (RegExp(r'[A-Za-z]').hasMatch(p) && RegExp(r'\d').hasMatch(p)) s++;
+    if (RegExp(r'[^A-Za-z0-9]').hasMatch(p) ||
+        (RegExp(r'[a-z]').hasMatch(p) && RegExp(r'[A-Z]').hasMatch(p)))
+      s++;
+    return s.clamp(1, 4);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final s = score(password);
+    const colors = [
+      Color(0xFFDC2626),
+      Color(0xFFF59E0B),
+      Color(0xFF3B82F6),
+      Color(0xFF10B981),
+    ];
+    final labels = [
+      l10n.authPwWeak,
+      l10n.authPwFair,
+      l10n.authPwGood,
+      l10n.authPwStrong,
+    ];
+    return AnimatedSize(
+      duration: Motion.medium,
+      curve: Motion.curve,
+      child: password.isEmpty
+          ? const SizedBox(width: double.infinity)
+          : Padding(
+              padding: const EdgeInsets.only(top: 10, left: 4, right: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      for (var i = 0; i < 4; i++) ...[
+                        if (i > 0) const SizedBox(width: 5),
+                        Expanded(
+                          child: AnimatedContainer(
+                            duration: Motion.medium,
+                            curve: Motion.curve,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              color: i < s
+                                  ? colors[s - 1]
+                                  : Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(width: 10),
+                      AnimatedSwitcher(
+                        duration: Motion.fast,
+                        child: Text(
+                          labels[s - 1],
+                          key: ValueKey(s),
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: colors[s - 1],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (s < 3) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.authPwTip,
+                      style: GoogleFonts.poppins(
+                        fontSize: 11.5,
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+    );
   }
 }
 
@@ -1178,17 +1487,33 @@ class _DecoCircle extends StatelessWidget {
   final double size;
   final double opacity;
 
-  const _DecoCircle({required this.size, required this.opacity});
+  /// Vertical drift in px; bubbles float slowly so the header feels alive.
+  final double drift;
+
+  const _DecoCircle({
+    required this.size,
+    required this.opacity,
+    this.drift = 0,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final circle = Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.white.withOpacity(opacity),
+        color: Colors.white.withValues(alpha: opacity),
       ),
     );
+    if (drift == 0) return circle;
+    return circle
+        .animate(onPlay: (c) => c.repeat(reverse: true))
+        .moveY(
+          begin: 0,
+          end: drift,
+          duration: 4.seconds,
+          curve: Curves.easeInOut,
+        );
   }
 }

@@ -2492,4 +2492,215 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get backToHome => 'На главную';
+
+  @override
+  String get obTitle1 =>
+      'Предлагайте свои навыки.\nЗарабатывайте на своих условиях.';
+
+  @override
+  String get obDesc1 =>
+      'Превратите талант в доход — предлагайте услуги сообществу, которое ценит ваше дело.';
+
+  @override
+  String get obTitle2 => 'Профиль,\nкоторому доверяют';
+
+  @override
+  String get obDesc2 =>
+      'Показывайте свои работы и собирайте отзывы, чтобы клиенты бронировали вас уверенно.';
+
+  @override
+  String get obTitle3 => 'Надёжные услуги —\nв любое время и в любом месте';
+
+  @override
+  String get obDesc3 =>
+      'От красоты до ремонта дома, велнеса и ухода — надёжная помощь рядом, в одном приложении.';
+
+  @override
+  String get obTitle4 => 'Где сообщество\nвстречает возможности';
+
+  @override
+  String get obDesc4 =>
+      'Общайтесь, обменивайтесь навыками и растите вместе с единомышленниками.';
+
+  @override
+  String get obHaveAccount => 'У меня уже есть аккаунт';
+
+  @override
+  String get authNameHint => 'Пожалуйста, укажите и фамилию';
+
+  @override
+  String get authNameBoth => 'Пожалуйста, введите имя и фамилию.';
+
+  @override
+  String authStepOf(int current, int total) {
+    return 'Шаг $current из $total';
+  }
+
+  @override
+  String get authPwWeak => 'Слабый';
+
+  @override
+  String get authPwFair => 'Средний';
+
+  @override
+  String get authPwGood => 'Хороший';
+
+  @override
+  String get authPwStrong => 'Надёжный';
+
+  @override
+  String get authPwTip => 'Для надёжности используйте буквы, цифры и символ.';
+
+  @override
+  String get authVerifyTitle => 'Подтвердите email';
+
+  @override
+  String authVerifySub(String email) {
+    return 'Введите 6-значный код, отправленный на $email';
+  }
+
+  @override
+  String get authResend => 'Не пришёл код? Отправить снова';
+
+  @override
+  String authResendIn(int seconds) {
+    return 'Отправить снова через $seconds с';
+  }
+
+  @override
+  String get authCodeSent => 'Новый код отправлен! Проверьте почту.';
+
+  @override
+  String get authResendFailed =>
+      'Не удалось отправить код. Попробуйте ещё раз.';
+
+  @override
+  String get authCheckSpam => 'Не нашли? Проверьте папку «Спам».';
+
+  @override
+  String get authAlmostTitle => 'Почти готово!';
+
+  @override
+  String get authAlmostSub =>
+      'Добавьте фото профиля — это можно сделать и позже';
+
+  @override
+  String get authAddPhoto => 'Добавить фото';
+
+  @override
+  String get authChangePhoto => 'Сменить фото';
+
+  @override
+  String get authSkipForNow => 'Пропустить';
+
+  @override
+  String get authWelcomeAboard => 'Всё готово! Добро пожаловать в LifeKit 🎉';
+
+  @override
+  String get authPhotoSkipped =>
+      'Фото профиля пропущено — его можно добавить позже.';
+
+  @override
+  String get authSocialFailed => 'Не удалось войти. Попробуйте ещё раз.';
+
+  @override
+  String get aiNewChat => 'Новый чат';
+
+  @override
+  String get aiTryAsking => 'Попробуйте спросить';
+
+  @override
+  String get aiSuggest1 => 'Найди мне уборщика на выходные';
+
+  @override
+  String get aiSuggest2 => 'Как заработать на своих навыках?';
+
+  @override
+  String get aiSuggest3 => 'Как работает обмен навыками?';
+
+  @override
+  String get aiSuggest4 => 'В какие сообщества мне вступить?';
+
+  @override
+  String get aiTapRetry => 'Не отправлено. Нажмите, чтобы повторить';
+
+  @override
+  String get aiCopied => 'Скопировано';
+
+  @override
+  String get aiFreeBanner =>
+      'Чат с Gracia — функция Pro. Начните бесплатный пробный период или обновите план.';
+
+  @override
+  String get aiSeePlans => 'Тарифы';
+
+  @override
+  String get aiCardService => 'Услуга';
+
+  @override
+  String get aiCardCommunity => 'Сообщество';
+
+  @override
+  String get aiCardEvent => 'Событие';
+
+  @override
+  String get aiNewChatConfirm =>
+      'Начать новый чат? Текущая переписка будет удалена.';
+
+  @override
+  String get aiObTitle => 'AI-помощник настройки';
+
+  @override
+  String get aiObAnalyzing => 'Gracia составляет ваш план…';
+
+  @override
+  String get aiObHeroTitle => 'Пусть AI проведёт вас\nпо LifeKit';
+
+  @override
+  String get aiObHeroSub => 'Получите персональный 7-дневный план за секунды.';
+
+  @override
+  String get aiObGoals => 'Ваши цели';
+
+  @override
+  String get aiObGoalsHint => 'напр. Дополнительный доход по выходным';
+
+  @override
+  String get aiObSkills => 'Ваши навыки';
+
+  @override
+  String get aiObSkillsHint => 'напр. Готовка, репетиторство по математике';
+
+  @override
+  String get aiObInterests => 'Ваши интересы';
+
+  @override
+  String get aiObInterestsHint => 'напр. Музыка, фитнес, новые знакомства';
+
+  @override
+  String get aiObGenerate => 'Составить план на 7 дней';
+
+  @override
+  String get aiObFillAll => 'Пожалуйста, заполните все три поля.';
+
+  @override
+  String get aiObPlanTitle => 'Ваш персональный\nплан на 7 дней';
+
+  @override
+  String get aiObPlanSub => 'Следуйте этим шагам, чтобы быстро начать!';
+
+  @override
+  String get aiObFinish => 'Готово — на главную';
+
+  @override
+  String aiObDay(int day) {
+    return 'День $day';
+  }
+
+  @override
+  String get aiObTakeAction => 'Перейти';
+
+  @override
+  String get aiAutofillDone =>
+      '✨ AI заполнил вашу услугу! Теперь выберите категорию и добавьте фото.';
 }

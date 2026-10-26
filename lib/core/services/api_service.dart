@@ -8,6 +8,7 @@ import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show Supabase;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'app_cache.dart';
 
 part 'admin_api.dart';
@@ -1436,23 +1437,73 @@ class ApiService {
     return data;
   }
 
-  // Module 2.5/2.6 — AI Discovery Engine
-  Future<Map<String, dynamic>> getAiDiscovery() async {
-    return await _authenticatedGet('/ai/discovery');
+  // Module 2.5/2.6 — AI Discovery Engine (cached 6h — each call costs an AI request)
+  Future<Map<String, dynamic>> getAiDiscovery({bool force = false}) async {
+    final key = 'ai_discovery_$_lang';
+    if (!force) {
+      final cached = AppCache.instance.get<Map<String, dynamic>>(key);
+      if (cached != null) return cached;
+    }
+    final data = await _authenticatedGet('/ai/discovery');
+    AppCache.instance.set(key, data, ttl: const Duration(hours: 6));
+    return data;
   }
 
-  // Module 2.5/2.7 — AI City Pulse
+  /// Runs [fetch] at most once per day per user + language, keeping the
+  /// result on the device. Used for AI content that only changes daily.
+  Future<Map<String, dynamic>> _oncePerDay(
+    String name,
+    Future<dynamic> Function() fetch,
+  ) async {
+    final now = DateTime.now();
+    final user = await getCurrentUserId() ?? 'anon';
+    final key =
+        'daily_${name}_${user}_${_lang}_${now.year}-${now.month}-${now.day}';
+    final prefs = await SharedPreferences.getInstance();
+    final hit = prefs.getString(key);
+    if (hit != null) {
+      try {
+        return Map<String, dynamic>.from(jsonDecode(hit) as Map);
+      } catch (_) {}
+    }
+    final raw = await fetch();
+    final data = raw is Map ? Map<String, dynamic>.from(raw) : <String, dynamic>{};
+    // Drop earlier days for this item so storage doesn't grow.
+    final stale = prefs
+        .getKeys()
+        .where((k) => k.startsWith('daily_${name}_') && k != key)
+        .toList();
+    for (final k in stale) {
+      await prefs.remove(k);
+    }
+    await prefs.setString(key, jsonEncode(data));
+    return data;
+  }
+
+  // Home greeting bubble — one AI call per user per day.
+  Future<String> getAiGreeting() async {
+    final data = await _oncePerDay(
+      'greeting',
+      () => _authenticatedGet('/ai/greeting?hour=${DateTime.now().hour}'),
+    );
+    return (data['message'] ?? '').toString();
+  }
+
+  // Module 2.5/2.7 — AI City Pulse (one per user per day)
   Future<Map<String, dynamic>> getCityPulse({
     double? lat,
     double? lng,
     required String city,
     required String localTime,
-  }) async {
-    return await _authenticatedPost('/ai/city-pulse', {
-      'lat': lat,
-      'lng': lng,
-      'city': city,
-      'local_time': localTime,
-    });
+  }) {
+    return _oncePerDay(
+      'city_pulse',
+      () => _authenticatedPost('/ai/city-pulse', {
+        'lat': lat,
+        'lng': lng,
+        'city': city,
+        'local_time': localTime,
+      }),
+    );
   }
 }

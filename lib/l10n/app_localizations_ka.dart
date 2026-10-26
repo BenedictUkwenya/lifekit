@@ -2494,4 +2494,218 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get backToHome => 'მთავარზე დაბრუნება';
+
+  @override
+  String get obTitle1 => 'შესთავაზეთ თქვენი უნარები.\nიშოვეთ თქვენი პირობებით.';
+
+  @override
+  String get obDesc1 =>
+      'აქციეთ თქვენი ნიჭი შემოსავლად — შესთავაზეთ მომსახურება საზოგადოებას, რომელიც აფასებს თქვენს საქმეს.';
+
+  @override
+  String get obTitle2 => 'შექმენით სანდო\nპროფილი';
+
+  @override
+  String get obDesc2 =>
+      'აჩვენეთ თქვენი ნამუშევრები და შეაგროვეთ შეფასებები, რომ კლიენტებმა თამამად დაგჯავშნონ.';
+
+  @override
+  String get obTitle3 =>
+      'დაჯავშნეთ სანდო მომსახურება\nნებისმიერ დროს, ნებისმიერ ადგილას';
+
+  @override
+  String get obDesc3 =>
+      'სილამაზიდან სახლის შეკეთებამდე, ველნესი და პირადი მოვლა — საიმედო დახმარება ახლოს, ერთ აპლიკაციაში.';
+
+  @override
+  String get obTitle4 => 'სადაც საზოგადოება\nშესაძლებლობას ხვდება';
+
+  @override
+  String get obDesc4 =>
+      'დაუკავშირდით, გაცვალეთ უნარები და განვითარდით თქვენნაირ ადამიანებთან ერთად.';
+
+  @override
+  String get obHaveAccount => 'უკვე მაქვს ანგარიში';
+
+  @override
+  String get authNameHint => 'გთხოვთ, მიუთითოთ გვარიც';
+
+  @override
+  String get authNameBoth => 'გთხოვთ, შეიყვანოთ სახელი და გვარი.';
+
+  @override
+  String authStepOf(int current, int total) {
+    return 'ნაბიჯი $current / $total';
+  }
+
+  @override
+  String get authPwWeak => 'სუსტი';
+
+  @override
+  String get authPwFair => 'საშუალო';
+
+  @override
+  String get authPwGood => 'კარგი';
+
+  @override
+  String get authPwStrong => 'ძლიერი';
+
+  @override
+  String get authPwTip =>
+      'ძლიერი პაროლისთვის გამოიყენეთ ასოები, ციფრები და სიმბოლო.';
+
+  @override
+  String get authVerifyTitle => 'დაადასტურეთ ელფოსტა';
+
+  @override
+  String authVerifySub(String email) {
+    return 'შეიყვანეთ 6-ნიშნა კოდი, რომელიც გამოვაგზავნეთ: $email';
+  }
+
+  @override
+  String get authResend => 'კოდი არ მოგივიდათ? ხელახლა გაგზავნა';
+
+  @override
+  String authResendIn(int seconds) {
+    return 'ხელახლა გაგზავნა $seconds წამში';
+  }
+
+  @override
+  String get authCodeSent => 'ახალი კოდი გაიგზავნა! შეამოწმეთ ფოსტა.';
+
+  @override
+  String get authResendFailed =>
+      'კოდის ხელახლა გაგზავნა ვერ მოხერხდა. სცადეთ ხელახლა.';
+
+  @override
+  String get authCheckSpam => 'ვერ პოულობთ? შეამოწმეთ სპამის საქაღალდე.';
+
+  @override
+  String get authAlmostTitle => 'თითქმის მზადაა!';
+
+  @override
+  String get authAlmostSub =>
+      'დაამატეთ პროფილის სურათი — ამის გაკეთება მოგვიანებითაც შეგიძლიათ';
+
+  @override
+  String get authAddPhoto => 'სურათის დამატება';
+
+  @override
+  String get authChangePhoto => 'სურათის შეცვლა';
+
+  @override
+  String get authSkipForNow => 'ახლა გამოტოვება';
+
+  @override
+  String get authWelcomeAboard =>
+      'ყველაფერი მზადაა! კეთილი იყოს თქვენი მობრძანება LifeKit-ში 🎉';
+
+  @override
+  String get authPhotoSkipped =>
+      'პროფილის სურათი გამოტოვებულია — შეგიძლიათ მოგვიანებით დაამატოთ.';
+
+  @override
+  String get authSocialFailed => 'შესვლა ვერ მოხერხდა. სცადეთ ხელახლა.';
+
+  @override
+  String get aiNewChat => 'ახალი ჩატი';
+
+  @override
+  String get aiTryAsking => 'სცადეთ კითხვა';
+
+  @override
+  String get aiSuggest1 => 'მომიძებნე დამლაგებელი ამ შაბათ-კვირას';
+
+  @override
+  String get aiSuggest2 => 'როგორ გამოვიმუშავო ჩემი უნარებით?';
+
+  @override
+  String get aiSuggest3 => 'როგორ მუშაობს უნარების გაცვლა?';
+
+  @override
+  String get aiSuggest4 => 'რომელ საზოგადოებებს შევუერთდე?';
+
+  @override
+  String get aiTapRetry => 'ვერ გაიგზავნა. შეეხეთ ხელახლა საცდელად';
+
+  @override
+  String get aiCopied => 'დაკოპირდა';
+
+  @override
+  String get aiFreeBanner =>
+      'Gracia-სთან ჩატი Pro ფუნქციაა. დაიწყეთ უფასო საცდელი პერიოდი ან განაახლეთ გეგმა.';
+
+  @override
+  String get aiSeePlans => 'გეგმების ნახვა';
+
+  @override
+  String get aiCardService => 'მომსახურება';
+
+  @override
+  String get aiCardCommunity => 'საზოგადოება';
+
+  @override
+  String get aiCardEvent => 'ღონისძიება';
+
+  @override
+  String get aiNewChatConfirm =>
+      'დავიწყოთ ახალი ჩატი? მიმდინარე საუბარი წაიშლება.';
+
+  @override
+  String get aiObTitle => 'AI დაყენების გზამკვლევი';
+
+  @override
+  String get aiObAnalyzing => 'Gracia ამზადებს თქვენს გეგმას…';
+
+  @override
+  String get aiObHeroTitle => 'AI დაგეხმარებათ\nLifeKit-ში';
+
+  @override
+  String get aiObHeroSub =>
+      'მიიღეთ პერსონალური 7-დღიანი წარმატების გეგმა წამებში.';
+
+  @override
+  String get aiObGoals => 'თქვენი მიზნები';
+
+  @override
+  String get aiObGoalsHint => 'მაგ. დამატებითი შემოსავალი შაბათ-კვირას';
+
+  @override
+  String get aiObSkills => 'თქვენი უნარები';
+
+  @override
+  String get aiObSkillsHint => 'მაგ. კულინარია, მათემატიკის მეცადინეობა';
+
+  @override
+  String get aiObInterests => 'თქვენი ინტერესები';
+
+  @override
+  String get aiObInterestsHint => 'მაგ. მუსიკა, ფიტნესი, ახალი ნაცნობები';
+
+  @override
+  String get aiObGenerate => 'შემიქმენი 7-დღიანი გეგმა';
+
+  @override
+  String get aiObFillAll => 'გთხოვთ, შეავსოთ სამივე ველი.';
+
+  @override
+  String get aiObPlanTitle => 'თქვენი პერსონალური\n7-დღიანი გეგმა';
+
+  @override
+  String get aiObPlanSub => 'მიჰყევით ამ ნაბიჯებს და სწრაფად დაიწყეთ!';
+
+  @override
+  String get aiObFinish => 'დასრულება და მთავარზე გადასვლა';
+
+  @override
+  String aiObDay(int day) {
+    return 'დღე $day';
+  }
+
+  @override
+  String get aiObTakeAction => 'მოქმედება';
+
+  @override
+  String get aiAutofillDone =>
+      '✨ AI-მ შეავსო თქვენი მომსახურება! ახლა აირჩიეთ კატეგორია და დაამატეთ ფოტოები.';
 }
