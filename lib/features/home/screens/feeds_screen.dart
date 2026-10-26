@@ -42,6 +42,10 @@ class _FeedsScreenState extends State<FeedsScreen>
   bool isLoading = true;
   int unreadNotifications = 0;
 
+  // Infinite scroll
+  bool _hasMorePosts = true;
+  bool _loadingMorePosts = false;
+
   // Event filtering + search state (persists across tab switches)
   String _selectedCategory = 'All';
   String _eventSearchQuery = '';
@@ -88,15 +92,16 @@ class _FeedsScreenState extends State<FeedsScreen>
     super.dispose();
   }
 
-  Future<void> _fetchData() async {
+  Future<void> _fetchData({bool force = false}) async {
     try {
-      final postsData = await _apiService.getFeeds();
+      final postsData = await _apiService.getFeeds(force: force);
       final eventsData = await _apiService.getEvents();
       final counts = await _apiService.getUnreadCounts();
 
       if (mounted) {
         setState(() {
           posts = postsData;
+          _hasMorePosts = postsData.length >= ApiService.feedPageSize;
           events = eventsData;
           unreadNotifications = counts['notifications'] ?? 0;
           isLoading = false;
@@ -300,18 +305,44 @@ class _FeedsScreenState extends State<FeedsScreen>
     );
   }
 
+  /// Loads the next page when the user reaches the end of the feed.
+  Future<void> _loadMorePosts() async {
+    if (_loadingMorePosts || !_hasMorePosts) return;
+    _loadingMorePosts = true;
+    try {
+      final page = await _apiService.getFeeds(offset: posts.length);
+      if (!mounted) return;
+      final known = posts.map((p) => p['id']).toSet();
+      setState(() {
+        // Ranking can shift between requests; skip anything already shown.
+        posts = [...posts, ...page.where((p) => !known.contains(p['id']))];
+        _hasMorePosts = page.length >= ApiService.feedPageSize;
+      });
+    } catch (_) {
+      // Leave _hasMorePosts as-is so scrolling back down retries.
+    } finally {
+      _loadingMorePosts = false;
+    }
+  }
+
   Widget _buildFeedsList() {
     return RefreshIndicator(
-      onRefresh: _fetchData,
+      onRefresh: () => _fetchData(force: true),
       color: AppColors.primary,
       child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-        itemCount: posts.length + 2,
+        itemCount: posts.length + 2 + (_hasMorePosts && posts.isNotEmpty ? 1 : 0),
         itemBuilder: (context, index) {
           // index 0 = compose box
           if (index == 0) return _buildComposeBox();
           // index 1 = trending tags strip
           if (index == 1) return _buildTrendingStrip();
+          // Last row: reaching it loads the next page.
+          if (index == posts.length + 2) {
+            WidgetsBinding.instance.addPostFrameCallback((_) => _loadMorePosts());
+            return const SizedBox(height: 120, child: SkeletonList(count: 1, thumbSize: 44, padding: EdgeInsets.zero));
+          }
           final post = posts[index - 2];
           return _FeedCard(
             key: ValueKey(post['id']),

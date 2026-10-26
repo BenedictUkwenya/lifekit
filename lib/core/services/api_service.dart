@@ -1015,13 +1015,19 @@ class ApiService {
         [];
   }
 
-  Future<List<dynamic>> getFeeds() async {
+  static const feedPageSize = 20;
+
+  /// One page of the ranked feed. Only the first page is cached; [force]
+  /// skips the cache (pull-to-refresh).
+  Future<List<dynamic>> getFeeds({int offset = 0, bool force = false}) async {
     const key = 'feeds';
-    final cached = AppCache.instance.get<List<dynamic>>(key);
-    if (cached != null) return cached;
-    final data = await _authenticatedGet('/feeds/posts');
+    if (offset == 0 && !force) {
+      final cached = AppCache.instance.get<List<dynamic>>(key);
+      if (cached != null) return cached;
+    }
+    final data = await _authenticatedGet('/feeds/posts?limit=$feedPageSize&offset=$offset');
     final result = data is List ? data : [];
-    AppCache.instance.set(key, result, ttl: AppCache.ttlMedium);
+    if (offset == 0) AppCache.instance.set(key, result, ttl: AppCache.ttlMedium);
     return result;
   }
 
