@@ -104,7 +104,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          "Edit Profile",
+          AppLocalizations.of(context).profileEdit,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -186,7 +186,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 child: isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
-                        "Save Changes",
+                        AppLocalizations.of(context).txSaveChanges,
                         style: GoogleFonts.poppins(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
@@ -214,7 +215,7 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
         title: Column(
           children: [
             Text(
-              "Service Categories",
+              AppLocalizations.of(context).txServiceCategories,
               style: GoogleFonts.poppins(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
@@ -266,7 +267,7 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
                                 onPressed: () =>
                                     setState(() => _selectedIds.clear()),
                                 child: Text(
-                                  "Deselect all",
+                                  AppLocalizations.of(context).txDeselectAll,
                                   style: GoogleFonts.poppins(
                                     fontSize: 12,
                                     color: Colors.black,

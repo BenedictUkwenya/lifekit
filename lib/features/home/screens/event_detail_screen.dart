@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/app_toast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -360,7 +361,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                     ),
                                   ),
                                   child: Text(
-                                    "View on Map",
+                                    AppLocalizations.of(context).txViewOnMap,
                                     style: GoogleFonts.poppins(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w500,
@@ -387,7 +388,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "About This Event",
+                        AppLocalizations.of(context).txAboutThisEvent,
                         style: GoogleFonts.poppins(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -479,7 +480,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
                       // ── Discussion / Comments section ──────────────
                       Text(
-                        "Discussion",
+                        AppLocalizations.of(context).txDiscussion,
                         style: GoogleFonts.poppins(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
@@ -500,7 +501,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           child: Text(
-                            "No questions yet. Be the first to ask!",
+                            AppLocalizations.of(context).txNoQuestionsYetBeTheFirst,
                             style: GoogleFonts.poppins(
                               color: Colors.grey[600],
                               fontSize: 12,
@@ -655,7 +656,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            "Starting from",
+                            AppLocalizations.of(context).txStartingFrom,
                             style: GoogleFonts.poppins(
                               color: Colors.grey,
                               fontSize: 12,

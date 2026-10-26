@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/app_toast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -61,7 +62,7 @@ class _EventBookingScreenState extends State<EventBookingScreen> {
         elevation: 0,
         leading: const BackButton(color: Colors.black),
         title: Text(
-          "Checkout",
+          AppLocalizations.of(context).txCheckout,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -132,7 +133,7 @@ class _EventBookingScreenState extends State<EventBookingScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Number of Tickets",
+                  AppLocalizations.of(context).txNumberOfTickets,
                   style: GoogleFonts.poppins(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -181,7 +182,7 @@ class _EventBookingScreenState extends State<EventBookingScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Total",
+                  AppLocalizations.of(context).cartTotal,
                   style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -215,7 +216,7 @@ class _EventBookingScreenState extends State<EventBookingScreen> {
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
-                        "Pay with Wallet",
+                        AppLocalizations.of(context).txPayWithWallet,
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/app_toast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -347,7 +348,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    "Share a Service",
+                    AppLocalizations.of(context).txShareAService,
                     style: GoogleFonts.nunito(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
@@ -1311,7 +1312,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                     minimumSize: const Size(60, 30),
                   ),
                   child: Text(
-                    "View",
+                    AppLocalizations.of(context).aiActionViewFallback,
                     style: GoogleFonts.nunito(
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
@@ -1413,7 +1414,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      "Image attached 📎",
+                      AppLocalizations.of(context).txImageAttached,
                       style: GoogleFonts.nunito(
                         color: _T.textPri,
                         fontSize: 13,
@@ -1680,7 +1681,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                 children: [
                   const Text("🌸 ", style: TextStyle(fontSize: 16)),
                   Text(
-                    "Join this Community",
+                    AppLocalizations.of(context).txJoinThisCommunity,
                     style: GoogleFonts.nunito(
                       color: Colors.white,
                       fontWeight: FontWeight.w800,
@@ -1711,7 +1712,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
           ),
           const SizedBox(height: 16),
           Text(
-            "Nothing here yet",
+            AppLocalizations.of(context).txNothingHereYet,
             style: GoogleFonts.nunito(
               color: _T.textPri,
               fontSize: 18,
@@ -1720,7 +1721,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
           ),
           const SizedBox(height: 6),
           Text(
-            "Start the conversation ✨",
+            AppLocalizations.of(context).txStartTheConversation,
             style: GoogleFonts.nunito(color: _T.textSec, fontSize: 13.5),
           ),
         ],
@@ -1815,7 +1816,7 @@ class _PlanLimitDetailSheet extends StatelessWidget {
           const SizedBox(height: 18),
 
           Text(
-            'Hub Limit Reached',
+            AppLocalizations.of(context).txHubLimitReached,
             style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.w800,
@@ -1891,7 +1892,7 @@ class _PlanLimitDetailSheet extends StatelessWidget {
                     const Icon(Icons.rocket_launch_rounded, size: 18),
                     const SizedBox(width: 8),
                     Text(
-                      'Upgrade Now — Unlock More Hubs',
+                      AppLocalizations.of(context).txUpgradeNowUnlockMoreHubs,
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -1906,7 +1907,7 @@ class _PlanLimitDetailSheet extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Maybe later',
+              AppLocalizations.of(context).maybeLater,
               style: GoogleFonts.poppins(color: Colors.grey[500], fontSize: 13),
             ),
           ),
@@ -1963,7 +1964,7 @@ class _TierCell extends StatelessWidget {
             ),
             if (isCurrent)
               Text(
-                'Current',
+                AppLocalizations.of(context).txCurrent,
                 style: GoogleFonts.poppins(
                   fontSize: 8.5,
                   color: Colors.grey[400],

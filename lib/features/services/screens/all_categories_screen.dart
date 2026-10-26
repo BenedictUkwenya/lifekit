@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -171,7 +172,7 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
         centerTitle: true,
         leading: const BackButton(color: Colors.black),
         title: Text(
-          "All Categories",
+          AppLocalizations.of(context).txAllCategories,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -49,7 +50,7 @@ class _SavedPostsScreenState extends State<SavedPostsScreen> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
         title: Text(
-          'Saved posts',
+          AppLocalizations.of(context).txSavedPosts,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -71,7 +72,7 @@ class _SavedPostsScreenState extends State<SavedPostsScreen> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'No saved posts yet',
+                        AppLocalizations.of(context).txNoSavedPostsYet,
                         style: GoogleFonts.poppins(
                           color: Colors.grey[600],
                           fontSize: 14,

@@ -243,7 +243,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                     ),
                     const SizedBox(height: 14),
                     Text(
-                      'Skill Swap Hub',
+                      AppLocalizations.of(context).txSkillSwapHub,
                       style: GoogleFonts.poppins(
                         color: Colors.white,
                         fontSize: 22,
@@ -253,7 +253,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Trade skills. Build your world.',
+                      AppLocalizations.of(context).txTradeSkillsBuildYourWorld,
                       style: GoogleFonts.poppins(
                         color: Colors.white54,
                         fontSize: 12,
@@ -438,7 +438,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Find My AI Match',
+                    AppLocalizations.of(context).txFindMyAiMatch,
                     style: GoogleFonts.poppins(
                       color: Colors.white,
                       fontWeight: FontWeight.w800,
@@ -447,7 +447,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'AI ranks the best swap partners for your skills',
+                    AppLocalizations.of(context).txAiRanksTheBestSwapPartners,
                     style: GoogleFonts.poppins(
                       color: Colors.white54,
                       fontSize: 11,
@@ -495,7 +495,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                   ),
                 ),
                 Text(
-                  'Pending Proposals',
+                  AppLocalizations.of(context).txPendingProposals,
                   style: GoogleFonts.poppins(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
@@ -509,7 +509,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                 MaterialPageRoute(builder: (_) => const SwapBoardScreen()),
               ).then((_) => _load()),
               child: Text(
-                'See All',
+                AppLocalizations.of(context).txSeeAll,
                 style: GoogleFonts.poppins(
                   color: AppColors.primary,
                   fontWeight: FontWeight.w600,
@@ -631,7 +631,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                     padding: const EdgeInsets.symmetric(vertical: 8),
                   ),
                   child: Text(
-                    'Decline',
+                    AppLocalizations.of(context).skillSwapDecline,
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.w600,
                       fontSize: 12,
@@ -653,7 +653,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                     elevation: 0,
                   ),
                   child: Text(
-                    'Accept ✓',
+                    AppLocalizations.of(context).txAccept,
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.w700,
                       fontSize: 12,
@@ -737,7 +737,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Browse the Swap Board',
+                    AppLocalizations.of(context).txBrowseTheSwapBoard,
                     style: GoogleFonts.poppins(
                       color: Colors.white,
                       fontWeight: FontWeight.w800,
@@ -745,7 +745,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                     ),
                   ),
                   Text(
-                    'See all open swap proposals & post your own',
+                    AppLocalizations.of(context).txSeeAllOpenSwapProposalsPost,
                     style: GoogleFonts.poppins(
                       color: Colors.white70,
                       fontSize: 11,
@@ -784,7 +784,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                   ),
                 ),
                 Text(
-                  'Services open to skill trading',
+                  AppLocalizations.of(context).txServicesOpenToSkillTrading,
                   style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey),
                 ),
               ],
@@ -979,7 +979,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                             ),
                             child: Center(
                               child: Text(
-                                '✨ AI Pitch',
+                                AppLocalizations.of(context).txAiPitch,
                                 style: GoogleFonts.poppins(
                                   color: Colors.white,
                                   fontSize: 10,
@@ -1022,7 +1022,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
           const Icon(Icons.person_rounded, color: Colors.white, size: 9),
           const SizedBox(width: 3),
           Text(
-            'Yours',
+            AppLocalizations.of(context).swapYoursLabel,
             style: GoogleFonts.poppins(
               color: Colors.white,
               fontSize: 9,
@@ -1094,7 +1094,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                 const Text('\u2728', style: TextStyle(fontSize: 20)),
                 const SizedBox(width: 8),
                 Text(
-                  'AI Pitch Generator',
+                  AppLocalizations.of(context).txAiPitchGenerator,
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
@@ -1117,7 +1117,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                   ),
                   const SizedBox(height: 14),
                   Text(
-                    'What service are you offering?',
+                    AppLocalizations.of(context).txWhatServiceAreYouOffering,
                     style: GoogleFonts.poppins(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -1172,7 +1172,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                 TextButton.icon(
                   icon: const Icon(Icons.copy_rounded, size: 14),
                   label: Text(
-                    'Copy',
+                    AppLocalizations.of(context).txCopy,
                     style: GoogleFonts.poppins(
                       fontSize: 12,
                       color: Colors.black54,
@@ -1268,7 +1268,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
               ),
               const SizedBox(width: 8),
               Text(
-                'How Skill Swap Works',
+                AppLocalizations.of(context).txHowSkillSwapWorks,
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,

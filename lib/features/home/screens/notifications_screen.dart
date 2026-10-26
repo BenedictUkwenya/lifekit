@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/skeleton.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -73,7 +74,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               const Icon(Icons.check_circle_outline, color: Colors.white),
               const SizedBox(width: 10),
               Text(
-                "All notifications marked as read",
+                AppLocalizations.of(context).txAllNotificationsMarkedAsRead,
                 style: GoogleFonts.poppins(
                   color: Colors.white,
                   fontWeight: FontWeight.w500,
@@ -113,7 +114,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               const Icon(Icons.delete_outline, color: Colors.white),
               const SizedBox(width: 10),
               Text(
-                "Notification deleted",
+                AppLocalizations.of(context).txNotificationDeleted,
                 style: GoogleFonts.poppins(
                   color: Colors.white,
                   fontWeight: FontWeight.w500,
@@ -200,7 +201,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         elevation: 0,
         leading: const BackButton(color: Colors.black),
         title: Text(
-          "Notifications",
+          AppLocalizations.of(context).settingsNotifications,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -213,7 +214,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             TextButton(
               onPressed: _markAllRead,
               child: Text(
-                "Mark all read",
+                AppLocalizations.of(context).txMarkAllRead,
                 style: GoogleFonts.poppins(
                   color: AppColors.primary,
                   fontWeight: FontWeight.w600,
@@ -272,7 +273,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            "No notifications yet",
+            AppLocalizations.of(context).txNoNotificationsYet,
             style: GoogleFonts.poppins(color: Colors.grey),
           ),
         ],

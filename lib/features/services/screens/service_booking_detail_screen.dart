@@ -25,7 +25,15 @@ class ServiceBookingDetailScreen extends StatefulWidget {
   final String providerName;
   final String? providerPic;
 
+  /// Optional: the card's cover image + a unique Hero tag. When given, the
+  /// image glides from the card into this screen's header and is shown
+  /// immediately while the rest of the service loads.
+  final String? heroImageUrl;
+  final String? heroTag;
+
   const ServiceBookingDetailScreen({
+    this.heroImageUrl,
+    this.heroTag,
     super.key,
     required this.providerId,
     required this.serviceId,
@@ -256,6 +264,38 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
     }
   }
 
+  Widget _heroWrap(Widget child) => widget.heroTag == null
+      ? child
+      : Hero(tag: widget.heroTag!, child: child);
+
+  /// Header shows the card's image straight away; details load underneath.
+  Widget _loadingWithHero() {
+    return Column(
+      children: [
+        SizedBox(
+          height: 250 + MediaQuery.of(context).padding.top,
+          width: double.infinity,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              _heroWrap(CachedNetworkImage(
+                imageUrl: widget.heroImageUrl!,
+                fit: BoxFit.cover,
+                errorWidget: (_, _, _) => Container(color: Colors.grey[300]),
+              )),
+              const Positioned(
+                left: 4,
+                top: 0,
+                child: SafeArea(child: BackButton(color: Colors.black)),
+              ),
+            ],
+          ),
+        ),
+        const Expanded(child: Center(child: LifeKitLoader(showSlowHint: false))),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     const Color brandColor = Color(0xFF89273B); // Use consistent brand color
@@ -271,7 +311,9 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       body: isLoading
-          ? const Center(child: LifeKitLoader())
+          ? (widget.heroTag != null && widget.heroImageUrl != null
+              ? _loadingWithHero()
+              : const Center(child: LifeKitLoader()))
           : NestedScrollView(
               headerSliverBuilder: (context, innerBoxIsScrolled) => [
                 SliverAppBar(
@@ -298,7 +340,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
                     ),
                   ],
                   flexibleSpace: FlexibleSpaceBar(
-                    background: Stack(
+                    background: _heroWrap(Stack(
                       fit: StackFit.expand,
                       children: [
                         // --- IMAGE CAROUSEL LOGIC ---
@@ -334,7 +376,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
                         // Dim Overlay for text readability (optional)
                         Container(color: Colors.black.withOpacity(0.1)),
                       ],
-                    ),
+                    )),
                   ),
                 ),
                 SliverToBoxAdapter(
@@ -749,7 +791,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Available Options:",
+                      AppLocalizations.of(context).txAvailableOptions,
                       style: GoogleFonts.poppins(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,

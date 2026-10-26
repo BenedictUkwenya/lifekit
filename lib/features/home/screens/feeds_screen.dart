@@ -1255,7 +1255,7 @@ class _ServiceCTABlock extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        'SERVICE',
+                        AppLocalizations.of(context).txService,
                         style: GoogleFonts.poppins(
                           color: Colors.white,
                           fontSize: 9,
@@ -2196,7 +2196,7 @@ class _ComposePostSheetState extends State<_ComposePostSheet> {
               const Spacer(),
               // Tag label
               Text(
-                'Tag:',
+                AppLocalizations.of(context).txTag,
                 style: GoogleFonts.poppins(
                   color: Colors.grey[400],
                   fontSize: 12,

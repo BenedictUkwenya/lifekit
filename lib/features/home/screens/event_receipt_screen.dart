@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 
@@ -29,7 +30,7 @@ class EventReceiptScreen extends StatelessWidget {
               const Icon(Icons.check_circle, color: Colors.green, size: 80),
               const SizedBox(height: 24),
               Text(
-                "Payment Successful!",
+                AppLocalizations.of(context).txPaymentSuccessful2,
                 style: GoogleFonts.poppins(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -37,7 +38,7 @@ class EventReceiptScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                "Your tickets have been sent to your email.",
+                AppLocalizations.of(context).txYourTicketsHaveBeenSentTo,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(color: Colors.grey),
               ),
@@ -108,7 +109,7 @@ class EventReceiptScreen extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    "Done",
+                    AppLocalizations.of(context).done,
                     style: GoogleFonts.poppins(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

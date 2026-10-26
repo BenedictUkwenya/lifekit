@@ -5409,6 +5409,1020 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Type your message...'**
   String get chatTypeMessage;
+
+  /// No description provided for @txAiMatchScore.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Match Score: '**
+  String get txAiMatchScore;
+
+  /// No description provided for @txAiPitchGenerator.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Pitch Generator'**
+  String get txAiPitchGenerator;
+
+  /// No description provided for @txAiIsAnalysingYourProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'AI is analysing your profile...'**
+  String get txAiIsAnalysingYourProfile;
+
+  /// No description provided for @txAiRanksTheBestSwapPartners.
+  ///
+  /// In en, this message translates to:
+  /// **'AI ranks the best swap partners for your skills'**
+  String get txAiRanksTheBestSwapPartners;
+
+  /// No description provided for @txAiPoweredSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'AI-Powered Suggestions'**
+  String get txAiPoweredSuggestions;
+
+  /// No description provided for @txAboutThisEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'About This Event'**
+  String get txAboutThisEvent;
+
+  /// No description provided for @txAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept ✓'**
+  String get txAccept;
+
+  /// No description provided for @txActionNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Action not allowed'**
+  String get txActionNotAllowed;
+
+  /// No description provided for @txAddGroupCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Group Cover'**
+  String get txAddGroupCover;
+
+  /// No description provided for @txAddOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Option'**
+  String get txAddOption;
+
+  /// No description provided for @txAddPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Photo'**
+  String get txAddPhoto;
+
+  /// No description provided for @txAddServiceOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Service Option'**
+  String get txAddServiceOption;
+
+  /// No description provided for @txAddServicePhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Service Photos'**
+  String get txAddServicePhotos;
+
+  /// No description provided for @txAddMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Add more'**
+  String get txAddMore;
+
+  /// No description provided for @txAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get txAdmin;
+
+  /// No description provided for @txAllCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'All Categories'**
+  String get txAllCategories;
+
+  /// No description provided for @txAllNotificationsMarkedAsRead.
+  ///
+  /// In en, this message translates to:
+  /// **'All notifications marked as read'**
+  String get txAllNotificationsMarkedAsRead;
+
+  /// No description provided for @txAllowAllMembersToPostIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow all members to post in this group'**
+  String get txAllowAllMembersToPostIn;
+
+  /// No description provided for @txAutofillWithAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Autofill with AI'**
+  String get txAutofillWithAi;
+
+  /// No description provided for @txAvailableOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Options:'**
+  String get txAvailableOptions;
+
+  /// No description provided for @txAvailableForSkillSwap.
+  ///
+  /// In en, this message translates to:
+  /// **'Available for Skill Swap'**
+  String get txAvailableForSkillSwap;
+
+  /// No description provided for @txBoostServiceVisibility.
+  ///
+  /// In en, this message translates to:
+  /// **'Boost Service Visibility'**
+  String get txBoostServiceVisibility;
+
+  /// No description provided for @txBrowseTheSwapBoard.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse the Swap Board'**
+  String get txBrowseTheSwapBoard;
+
+  /// No description provided for @txBuyBoost.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy Boost'**
+  String get txBuyBoost;
+
+  /// No description provided for @txByCreatingAGroupYouAgree.
+  ///
+  /// In en, this message translates to:
+  /// **'By creating a group, you agree to follow LifeKit community guidelines.'**
+  String get txByCreatingAGroupYouAgree;
+
+  /// No description provided for @txCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get txCalendar;
+
+  /// No description provided for @txCancelProposal.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Proposal'**
+  String get txCancelProposal;
+
+  /// No description provided for @txChangeAccountSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Change account setup'**
+  String get txChangeAccountSetup;
+
+  /// No description provided for @txCheckYourConnectionAndTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again.'**
+  String get txCheckYourConnectionAndTryAgain;
+
+  /// No description provided for @txCheckout.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkout'**
+  String get txCheckout;
+
+  /// No description provided for @txChooseCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Category'**
+  String get txChooseCategory;
+
+  /// No description provided for @txChooseABoostDurationToRank.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a boost duration to rank this service higher.'**
+  String get txChooseABoostDurationToRank;
+
+  /// No description provided for @txClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get txClosed;
+
+  /// No description provided for @txComments.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments'**
+  String get txComments;
+
+  /// No description provided for @txCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get txCopy;
+
+  /// No description provided for @txCopyInviteLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Invite Link'**
+  String get txCopyInviteLink;
+
+  /// No description provided for @txCouldNotLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load'**
+  String get txCouldNotLoad;
+
+  /// No description provided for @txCreateGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Group'**
+  String get txCreateGroup;
+
+  /// No description provided for @txCreateNewService.
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Service'**
+  String get txCreateNewService;
+
+  /// No description provided for @txCreateNewServicesToShowcaseYour.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new services to showcase your skills and connect with more customers'**
+  String get txCreateNewServicesToShowcaseYour;
+
+  /// No description provided for @txCreateOneToGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Create one to get started!'**
+  String get txCreateOneToGetStarted;
+
+  /// No description provided for @txCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get txCurrent;
+
+  /// No description provided for @txDeleteGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Group'**
+  String get txDeleteGroup;
+
+  /// No description provided for @txDeleteService.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Service?'**
+  String get txDeleteService;
+
+  /// No description provided for @txDescribeTheServiceYouWantTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the service you want to offer and AI will fill in the details for you.'**
+  String get txDescribeTheServiceYouWantTo;
+
+  /// No description provided for @txDeselectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect all'**
+  String get txDeselectAll;
+
+  /// No description provided for @txDetailsOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Details (optional)'**
+  String get txDetailsOptional;
+
+  /// No description provided for @txDisableSkillSwap.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable Skill Swap?'**
+  String get txDisableSkillSwap;
+
+  /// No description provided for @txDiscussion.
+  ///
+  /// In en, this message translates to:
+  /// **'Discussion'**
+  String get txDiscussion;
+
+  /// No description provided for @txDownloadPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Download PDF'**
+  String get txDownloadPdf;
+
+  /// No description provided for @txEditLimitReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Limit Reached'**
+  String get txEditLimitReached;
+
+  /// No description provided for @txEditService.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Service'**
+  String get txEditService;
+
+  /// No description provided for @txEnterAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Amount'**
+  String get txEnterAmount;
+
+  /// No description provided for @txExpandYourReach.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand Your Reach'**
+  String get txExpandYourReach;
+
+  /// No description provided for @txFeatured.
+  ///
+  /// In en, this message translates to:
+  /// **'Featured'**
+  String get txFeatured;
+
+  /// No description provided for @txFindMyAiMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Find My AI Match'**
+  String get txFindMyAiMatch;
+
+  /// No description provided for @txFindingTheBestOpportunitiesForYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding the best opportunities for you'**
+  String get txFindingTheBestOpportunitiesForYou;
+
+  /// No description provided for @txGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate'**
+  String get txGenerate;
+
+  /// No description provided for @txHowSkillSwapWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'How Skill Swap Works'**
+  String get txHowSkillSwapWorks;
+
+  /// No description provided for @txHowWasYourExperienceWith.
+  ///
+  /// In en, this message translates to:
+  /// **'How was your experience with:'**
+  String get txHowWasYourExperienceWith;
+
+  /// No description provided for @txHubLimitReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Hub Limit Reached'**
+  String get txHubLimitReached;
+
+  /// No description provided for @txImageAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'Image attached 📎'**
+  String get txImageAttached;
+
+  /// No description provided for @txInsufficientBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Insufficient Balance'**
+  String get txInsufficientBalance;
+
+  /// No description provided for @txJoinHub.
+  ///
+  /// In en, this message translates to:
+  /// **'Join Hub'**
+  String get txJoinHub;
+
+  /// No description provided for @txJoinThisCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Join this Community'**
+  String get txJoinThisCommunity;
+
+  /// No description provided for @txKeepOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Off'**
+  String get txKeepOff;
+
+  /// No description provided for @txLast7Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 Days'**
+  String get txLast7Days;
+
+  /// No description provided for @txLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get txLater;
+
+  /// No description provided for @txLeaveGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave Group'**
+  String get txLeaveGroup;
+
+  /// No description provided for @txLifekitWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'LifeKit Wallet'**
+  String get txLifekitWallet;
+
+  /// No description provided for @txLoadingYourResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your results…'**
+  String get txLoadingYourResults;
+
+  /// No description provided for @txLoadingYourServices.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your services...'**
+  String get txLoadingYourServices;
+
+  /// No description provided for @txMarkAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all read'**
+  String get txMarkAllRead;
+
+  /// No description provided for @txMarkAsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as Done?'**
+  String get txMarkAsDone;
+
+  /// No description provided for @txMessagingIsDisabledForCompletedOr.
+  ///
+  /// In en, this message translates to:
+  /// **'Messaging is disabled for completed or cancelled services.'**
+  String get txMessagingIsDisabledForCompletedOr;
+
+  /// No description provided for @txMyHubs.
+  ///
+  /// In en, this message translates to:
+  /// **'My Hubs'**
+  String get txMyHubs;
+
+  /// No description provided for @txMyServices.
+  ///
+  /// In en, this message translates to:
+  /// **'My Services'**
+  String get txMyServices;
+
+  /// No description provided for @txNoAiSuggestionsRightNow.
+  ///
+  /// In en, this message translates to:
+  /// **'No AI suggestions right now.'**
+  String get txNoAiSuggestionsRightNow;
+
+  /// No description provided for @txNoAvailabilityFoundProposalWillBe.
+  ///
+  /// In en, this message translates to:
+  /// **'No availability found — proposal will be sent without a date.'**
+  String get txNoAvailabilityFoundProposalWillBe;
+
+  /// No description provided for @txNoCommentsYetBeTheFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'No comments yet. Be the first!'**
+  String get txNoCommentsYetBeTheFirst;
+
+  /// No description provided for @txNoCommunitiesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No communities yet.'**
+  String get txNoCommunitiesYet;
+
+  /// No description provided for @txNoNotificationsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications yet'**
+  String get txNoNotificationsYet;
+
+  /// No description provided for @txNoOptionsAddedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No options added yet'**
+  String get txNoOptionsAddedYet;
+
+  /// No description provided for @txNoOtherServices.
+  ///
+  /// In en, this message translates to:
+  /// **'No other services.'**
+  String get txNoOtherServices;
+
+  /// No description provided for @txNoPlacesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No places found.'**
+  String get txNoPlacesFound;
+
+  /// No description provided for @txNoQuestionsYetBeTheFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'No questions yet. Be the first to ask!'**
+  String get txNoQuestionsYetBeTheFirst;
+
+  /// No description provided for @txNoSavedPostsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved posts yet'**
+  String get txNoSavedPostsYet;
+
+  /// No description provided for @txNoServicesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No services yet'**
+  String get txNoServicesYet;
+
+  /// No description provided for @txNoteOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get txNoteOptional;
+
+  /// No description provided for @txNothingHereYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here yet'**
+  String get txNothingHereYet;
+
+  /// No description provided for @txNotificationDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification deleted'**
+  String get txNotificationDeleted;
+
+  /// No description provided for @txNumberOfTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of Tickets'**
+  String get txNumberOfTickets;
+
+  /// No description provided for @txOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get txOnline;
+
+  /// No description provided for @txOnly3CommissionUpTo5.
+  ///
+  /// In en, this message translates to:
+  /// **'Only 3% commission & up to 5 services!'**
+  String get txOnly3CommissionUpTo5;
+
+  /// No description provided for @txOpenPosting.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Posting'**
+  String get txOpenPosting;
+
+  /// No description provided for @txOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening...'**
+  String get txOpening;
+
+  /// No description provided for @txOurAiHasBeenTrackingDemand.
+  ///
+  /// In en, this message translates to:
+  /// **'Our AI has been tracking demand in your area. New service opportunities are waiting for you!'**
+  String get txOurAiHasBeenTrackingDemand;
+
+  /// No description provided for @txOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get txOwner;
+
+  /// No description provided for @txPayWithWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay with Wallet'**
+  String get txPayWithWallet;
+
+  /// No description provided for @txPaymentSuccessful.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Successful'**
+  String get txPaymentSuccessful;
+
+  /// No description provided for @txPaymentSuccessful2.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Successful!'**
+  String get txPaymentSuccessful2;
+
+  /// No description provided for @txPendingProposals.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Proposals'**
+  String get txPendingProposals;
+
+  /// No description provided for @txPermanentlyRemovesAllContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently removes all content'**
+  String get txPermanentlyRemovesAllContent;
+
+  /// No description provided for @txPlanLimitReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan Limit Reached'**
+  String get txPlanLimitReached;
+
+  /// No description provided for @txPostYourFirstServiceStartEarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Post your first service\n& start earning!'**
+  String get txPostYourFirstServiceStartEarning;
+
+  /// No description provided for @txPriceNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Price not set'**
+  String get txPriceNotSet;
+
+  /// No description provided for @txProviders.
+  ///
+  /// In en, this message translates to:
+  /// **'Providers'**
+  String get txProviders;
+
+  /// No description provided for @txReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get txReason;
+
+  /// No description provided for @txReportIssue.
+  ///
+  /// In en, this message translates to:
+  /// **'Report Issue'**
+  String get txReportIssue;
+
+  /// No description provided for @txReportUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Report User'**
+  String get txReportUser;
+
+  /// No description provided for @txRequestACategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Request a Category'**
+  String get txRequestACategory;
+
+  /// No description provided for @txReviewsFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews for'**
+  String get txReviewsFor;
+
+  /// No description provided for @txReviewsWillAppearHere.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews will appear here'**
+  String get txReviewsWillAppearHere;
+
+  /// No description provided for @txService.
+  ///
+  /// In en, this message translates to:
+  /// **'SERVICE'**
+  String get txService;
+
+  /// No description provided for @txSuggested.
+  ///
+  /// In en, this message translates to:
+  /// **'SUGGESTED'**
+  String get txSuggested;
+
+  /// No description provided for @txSaveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get txSaveChanges;
+
+  /// No description provided for @txSaveTimeByInsertingPreWritten.
+  ///
+  /// In en, this message translates to:
+  /// **'Save time by inserting pre-written templates.'**
+  String get txSaveTimeByInsertingPreWritten;
+
+  /// No description provided for @txSavedReplies.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved Replies'**
+  String get txSavedReplies;
+
+  /// No description provided for @txSavedPosts.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved posts'**
+  String get txSavedPosts;
+
+  /// No description provided for @txSayHello.
+  ///
+  /// In en, this message translates to:
+  /// **'Say Hello!'**
+  String get txSayHello;
+
+  /// No description provided for @txSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See All'**
+  String get txSeeAll;
+
+  /// No description provided for @txSeeAllOpenSwapProposalsPost.
+  ///
+  /// In en, this message translates to:
+  /// **'See all open swap proposals & post your own'**
+  String get txSeeAllOpenSwapProposalsPost;
+
+  /// No description provided for @txServiceCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Categories'**
+  String get txServiceCategories;
+
+  /// No description provided for @txServiceFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Fee'**
+  String get txServiceFee;
+
+  /// No description provided for @txServiceVisibility.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Visibility'**
+  String get txServiceVisibility;
+
+  /// No description provided for @txServicesOpenToSkillTrading.
+  ///
+  /// In en, this message translates to:
+  /// **'Services open to skill trading'**
+  String get txServicesOpenToSkillTrading;
+
+  /// No description provided for @txShareAService.
+  ///
+  /// In en, this message translates to:
+  /// **'Share a Service'**
+  String get txShareAService;
+
+  /// No description provided for @txShareYourProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your profile'**
+  String get txShareYourProfile;
+
+  /// No description provided for @txSkillSwapContract.
+  ///
+  /// In en, this message translates to:
+  /// **'Skill Swap Contract'**
+  String get txSkillSwapContract;
+
+  /// No description provided for @txSkillSwapHub.
+  ///
+  /// In en, this message translates to:
+  /// **'Skill Swap Hub'**
+  String get txSkillSwapHub;
+
+  /// No description provided for @txSortResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort Results'**
+  String get txSortResults;
+
+  /// No description provided for @txStartACommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a Community'**
+  String get txStartACommunity;
+
+  /// No description provided for @txStartTheConversationToDiscussDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the conversation to discuss details.'**
+  String get txStartTheConversationToDiscussDetails;
+
+  /// No description provided for @txStartTheConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the conversation ✨'**
+  String get txStartTheConversation;
+
+  /// No description provided for @txStartingFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting from'**
+  String get txStartingFrom;
+
+  /// No description provided for @txSubmitDispute.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Dispute'**
+  String get txSubmitDispute;
+
+  /// No description provided for @txSubmitReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Report'**
+  String get txSubmitReport;
+
+  /// No description provided for @txSubmitRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Request'**
+  String get txSubmitRequest;
+
+  /// No description provided for @txTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag:'**
+  String get txTag;
+
+  /// No description provided for @txTapToSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to search'**
+  String get txTapToSearch;
+
+  /// No description provided for @txTapToUploadUpTo5.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to upload up to 5 photos'**
+  String get txTapToUploadUpTo5;
+
+  /// No description provided for @txTheGroupOwnerCannotBeRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'The group owner cannot be removed.'**
+  String get txTheGroupOwnerCannotBeRemoved;
+
+  /// No description provided for @txThisServiceIsNowLockedPlease.
+  ///
+  /// In en, this message translates to:
+  /// **'This service is now locked. Please contact support to request further changes.'**
+  String get txThisServiceIsNowLockedPlease;
+
+  /// No description provided for @txThisWillFreeUpASlot.
+  ///
+  /// In en, this message translates to:
+  /// **'This will free up a slot in your plan, but this action is permanent.'**
+  String get txThisWillFreeUpASlot;
+
+  /// No description provided for @txThisWillMarkTheBookingAs.
+  ///
+  /// In en, this message translates to:
+  /// **'This will mark the booking as completed.'**
+  String get txThisWillMarkTheBookingAs;
+
+  /// No description provided for @txTipTapOnAServiceItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Tap on a service item to view full details.'**
+  String get txTipTapOnAServiceItem;
+
+  /// No description provided for @txTradeSkillsBuildYourWorld.
+  ///
+  /// In en, this message translates to:
+  /// **'Trade skills. Build your world.'**
+  String get txTradeSkillsBuildYourWorld;
+
+  /// No description provided for @txTradingSkillsIsTheFastestWay.
+  ///
+  /// In en, this message translates to:
+  /// **'Trading skills is the fastest way to grow your network and get free services!'**
+  String get txTradingSkillsIsTheFastestWay;
+
+  /// No description provided for @txTransactionReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Receipt'**
+  String get txTransactionReceipt;
+
+  /// No description provided for @txTryUpdatingYourProfileBioAnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Try updating your profile bio and skills.'**
+  String get txTryUpdatingYourProfileBioAnd;
+
+  /// No description provided for @txTurnOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn On ⚡'**
+  String get txTurnOn;
+
+  /// No description provided for @txUpdatingService.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating service…'**
+  String get txUpdatingService;
+
+  /// No description provided for @txUpgradeNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade Now'**
+  String get txUpgradeNow;
+
+  /// No description provided for @txUpgradeNowUnlockMoreHubs.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade Now — Unlock More Hubs'**
+  String get txUpgradeNowUnlockMoreHubs;
+
+  /// No description provided for @txUpgradeToProToUseSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Pro to use Saved Replies'**
+  String get txUpgradeToProToUseSaved;
+
+  /// No description provided for @txUpgradeToUnlockThisHub.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to unlock this hub'**
+  String get txUpgradeToUnlockThisHub;
+
+  /// No description provided for @txViewMap.
+  ///
+  /// In en, this message translates to:
+  /// **'View Map'**
+  String get txViewMap;
+
+  /// No description provided for @txViewPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'View Plans'**
+  String get txViewPlans;
+
+  /// No description provided for @txViewOnMap.
+  ///
+  /// In en, this message translates to:
+  /// **'View on Map'**
+  String get txViewOnMap;
+
+  /// No description provided for @txWaitingForTheOtherPartyTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the other party to confirm'**
+  String get txWaitingForTheOtherPartyTo;
+
+  /// No description provided for @txWhatServiceAreYouOffering.
+  ///
+  /// In en, this message translates to:
+  /// **'What service are you offering?'**
+  String get txWhatServiceAreYouOffering;
+
+  /// No description provided for @txYouNeedMoreWalletBalanceTo.
+  ///
+  /// In en, this message translates to:
+  /// **'You need more wallet balance to continue. Add money now?'**
+  String get txYouNeedMoreWalletBalanceTo;
+
+  /// No description provided for @txYourServices.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Services'**
+  String get txYourServices;
+
+  /// No description provided for @txYourTicketsHaveBeenSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Your tickets have been sent to your email.'**
+  String get txYourTicketsHaveBeenSentTo;
+
+  /// No description provided for @txCreateService.
+  ///
+  /// In en, this message translates to:
+  /// **'✨ Create Service'**
+  String get txCreateService;
+
+  /// No description provided for @txAiPitch.
+  ///
+  /// In en, this message translates to:
+  /// **'✨ AI Pitch'**
+  String get txAiPitch;
+
+  /// No description provided for @txViewAiOpportunityRadar.
+  ///
+  /// In en, this message translates to:
+  /// **'✨ View AI Opportunity Radar'**
+  String get txViewAiOpportunityRadar;
+
+  /// No description provided for @txLaunchSpecialLimitedTime.
+  ///
+  /// In en, this message translates to:
+  /// **'🎉 Launch Special — Limited Time'**
+  String get txLaunchSpecialLimitedTime;
+
+  /// No description provided for @txTrendingThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'🔥 Trending This Week'**
+  String get txTrendingThisWeek;
 }
 
 class _AppLocalizationsDelegate

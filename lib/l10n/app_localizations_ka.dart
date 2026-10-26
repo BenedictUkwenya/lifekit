@@ -2853,4 +2853,543 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get chatTypeMessage => 'დაწერეთ შეტყობინება...';
+
+  @override
+  String get txAiMatchScore => 'AI თავსებადობა: ';
+
+  @override
+  String get txAiPitchGenerator => 'AI შეთავაზების გენერატორი';
+
+  @override
+  String get txAiIsAnalysingYourProfile => 'AI აანალიზებს თქვენს პროფილს...';
+
+  @override
+  String get txAiRanksTheBestSwapPartners =>
+      'AI არჩევს საუკეთესო პარტნიორებს თქვენი უნარებისთვის';
+
+  @override
+  String get txAiPoweredSuggestions => 'AI რეკომენდაციები';
+
+  @override
+  String get txAboutThisEvent => 'ღონისძიების შესახებ';
+
+  @override
+  String get txAccept => 'მიღება ✓';
+
+  @override
+  String get txActionNotAllowed => 'მოქმედება დაუშვებელია';
+
+  @override
+  String get txAddGroupCover => 'ჯგუფის ყდის დამატება';
+
+  @override
+  String get txAddOption => 'ოფციის დამატება';
+
+  @override
+  String get txAddPhoto => 'ფოტოს დამატება';
+
+  @override
+  String get txAddServiceOption => 'მომსახურების ოფციის დამატება';
+
+  @override
+  String get txAddServicePhotos => 'მომსახურების ფოტოების დამატება';
+
+  @override
+  String get txAddMore => 'მეტის დამატება';
+
+  @override
+  String get txAdmin => 'ადმინი';
+
+  @override
+  String get txAllCategories => 'ყველა კატეგორია';
+
+  @override
+  String get txAllNotificationsMarkedAsRead =>
+      'ყველა შეტყობინება მონიშნულია წაკითხულად';
+
+  @override
+  String get txAllowAllMembersToPostIn =>
+      'ყველა წევრს შეუძლია პოსტის გამოქვეყნება';
+
+  @override
+  String get txAutofillWithAi => 'AI-ით შევსება';
+
+  @override
+  String get txAvailableOptions => 'ხელმისაწვდომი ოფციები:';
+
+  @override
+  String get txAvailableForSkillSwap => 'ხელმისაწვდომია უნარების გაცვლისთვის';
+
+  @override
+  String get txBoostServiceVisibility => 'მომსახურების ხილვადობის გაზრდა';
+
+  @override
+  String get txBrowseTheSwapBoard => 'გაცვლის დაფის დათვალიერება';
+
+  @override
+  String get txBuyBoost => 'ბუსტის ყიდვა';
+
+  @override
+  String get txByCreatingAGroupYouAgree =>
+      'ჯგუფის შექმნით ეთანხმებით LifeKit-ის საზოგადოების წესებს.';
+
+  @override
+  String get txCalendar => 'კალენდარი';
+
+  @override
+  String get txCancelProposal => 'შეთავაზების გაუქმება';
+
+  @override
+  String get txChangeAccountSetup => 'ანგარიშის პარამეტრების შეცვლა';
+
+  @override
+  String get txCheckYourConnectionAndTryAgain =>
+      'შეამოწმეთ კავშირი და სცადეთ ხელახლა.';
+
+  @override
+  String get txCheckout => 'გადახდა';
+
+  @override
+  String get txChooseCategory => 'აირჩიეთ კატეგორია';
+
+  @override
+  String get txChooseABoostDurationToRank =>
+      'აირჩიეთ ბუსტის ხანგრძლივობა, რომ მომსახურება უფრო მაღლა გამოჩნდეს.';
+
+  @override
+  String get txClosed => 'დახურულია';
+
+  @override
+  String get txComments => 'კომენტარები';
+
+  @override
+  String get txCopy => 'კოპირება';
+
+  @override
+  String get txCopyInviteLink => 'მოწვევის ბმულის კოპირება';
+
+  @override
+  String get txCouldNotLoad => 'ჩატვირთვა ვერ მოხერხდა';
+
+  @override
+  String get txCreateGroup => 'ჯგუფის შექმნა';
+
+  @override
+  String get txCreateNewService => 'ახალი მომსახურების შექმნა';
+
+  @override
+  String get txCreateNewServicesToShowcaseYour =>
+      'შექმენით მომსახურებები, აჩვენეთ უნარები და მოიზიდეთ მეტი კლიენტი';
+
+  @override
+  String get txCreateOneToGetStarted => 'შექმენით პირველი და დაიწყეთ!';
+
+  @override
+  String get txCurrent => 'მიმდინარე';
+
+  @override
+  String get txDeleteGroup => 'ჯგუფის წაშლა';
+
+  @override
+  String get txDeleteService => 'წავშალოთ მომსახურება?';
+
+  @override
+  String get txDescribeTheServiceYouWantTo =>
+      'აღწერეთ მომსახურება და AI შეავსებს დეტალებს თქვენთვის.';
+
+  @override
+  String get txDeselectAll => 'მონიშვნის მოხსნა';
+
+  @override
+  String get txDetailsOptional => 'დეტალები (არასავალდებულო)';
+
+  @override
+  String get txDisableSkillSwap => 'გამოვრთოთ უნარების გაცვლა?';
+
+  @override
+  String get txDiscussion => 'დისკუსია';
+
+  @override
+  String get txDownloadPdf => 'PDF-ის ჩამოტვირთვა';
+
+  @override
+  String get txEditLimitReached => 'რედაქტირების ლიმიტი ამოიწურა';
+
+  @override
+  String get txEditService => 'მომსახურების რედაქტირება';
+
+  @override
+  String get txEnterAmount => 'შეიყვანეთ თანხა';
+
+  @override
+  String get txExpandYourReach => 'გააფართოვეთ თქვენი წვდომა';
+
+  @override
+  String get txFeatured => 'რჩეული';
+
+  @override
+  String get txFindMyAiMatch => 'იპოვე ჩემი AI წყვილი';
+
+  @override
+  String get txFindingTheBestOpportunitiesForYou =>
+      'ვეძებთ საუკეთესო შესაძლებლობებს თქვენთვის';
+
+  @override
+  String get txGenerate => 'გენერირება';
+
+  @override
+  String get txHowSkillSwapWorks => 'როგორ მუშაობს უნარების გაცვლა';
+
+  @override
+  String get txHowWasYourExperienceWith => 'როგორი იყო თქვენი გამოცდილება:';
+
+  @override
+  String get txHubLimitReached => 'ჰაბების ლიმიტი ამოიწურა';
+
+  @override
+  String get txImageAttached => 'სურათი მიმაგრებულია 📎';
+
+  @override
+  String get txInsufficientBalance => 'არასაკმარისი ბალანსი';
+
+  @override
+  String get txJoinHub => 'ჰაბში შესვლა';
+
+  @override
+  String get txJoinThisCommunity => 'შეუერთდით საზოგადოებას';
+
+  @override
+  String get txKeepOff => 'დარჩეს გამორთული';
+
+  @override
+  String get txLast7Days => 'ბოლო 7 დღე';
+
+  @override
+  String get txLater => 'მოგვიანებით';
+
+  @override
+  String get txLeaveGroup => 'ჯგუფის დატოვება';
+
+  @override
+  String get txLifekitWallet => 'LifeKit საფულე';
+
+  @override
+  String get txLoadingYourResults => 'იტვირთება შედეგები…';
+
+  @override
+  String get txLoadingYourServices => 'იტვირთება თქვენი მომსახურებები...';
+
+  @override
+  String get txMarkAllRead => 'ყველას წაკითხულად მონიშვნა';
+
+  @override
+  String get txMarkAsDone => 'მოვნიშნოთ შესრულებულად?';
+
+  @override
+  String get txMessagingIsDisabledForCompletedOr =>
+      'დასრულებულ ან გაუქმებულ მომსახურებებზე მიმოწერა გამორთულია.';
+
+  @override
+  String get txMyHubs => 'ჩემი ჰაბები';
+
+  @override
+  String get txMyServices => 'ჩემი მომსახურებები';
+
+  @override
+  String get txNoAiSuggestionsRightNow => 'ამჟამად AI რეკომენდაციები არ არის.';
+
+  @override
+  String get txNoAvailabilityFoundProposalWillBe =>
+      'თავისუფალი დრო ვერ მოიძებნა — შეთავაზება თარიღის გარეშე გაიგზავნება.';
+
+  @override
+  String get txNoCommentsYetBeTheFirst =>
+      'კომენტარები ჯერ არ არის. იყავით პირველი!';
+
+  @override
+  String get txNoCommunitiesYet => 'საზოგადოებები ჯერ არ არის.';
+
+  @override
+  String get txNoNotificationsYet => 'შეტყობინებები ჯერ არ არის';
+
+  @override
+  String get txNoOptionsAddedYet => 'ოფციები ჯერ არ დამატებულა';
+
+  @override
+  String get txNoOtherServices => 'სხვა მომსახურებები არ არის.';
+
+  @override
+  String get txNoPlacesFound => 'ადგილები ვერ მოიძებნა.';
+
+  @override
+  String get txNoQuestionsYetBeTheFirst =>
+      'კითხვები ჯერ არ არის. იყავით პირველი!';
+
+  @override
+  String get txNoSavedPostsYet => 'შენახული პოსტები ჯერ არ არის';
+
+  @override
+  String get txNoServicesYet => 'მომსახურებები ჯერ არ არის';
+
+  @override
+  String get txNoteOptional => 'შენიშვნა (არასავალდებულო)';
+
+  @override
+  String get txNothingHereYet => 'აქ ჯერ არაფერია';
+
+  @override
+  String get txNotificationDeleted => 'შეტყობინება წაიშალა';
+
+  @override
+  String get txNumberOfTickets => 'ბილეთების რაოდენობა';
+
+  @override
+  String get txOnline => 'ონლაინ';
+
+  @override
+  String get txOnly3CommissionUpTo5 =>
+      'მხოლოდ 3% საკომისიო და 5-მდე მომსახურება!';
+
+  @override
+  String get txOpenPosting => 'ღია გამოქვეყნება';
+
+  @override
+  String get txOpening => 'იხსნება...';
+
+  @override
+  String get txOurAiHasBeenTrackingDemand =>
+      'ჩვენი AI თვალს ადევნებს მოთხოვნას თქვენს რეგიონში. ახალი შესაძლებლობები გელოდებათ!';
+
+  @override
+  String get txOwner => 'მფლობელი';
+
+  @override
+  String get txPayWithWallet => 'საფულით გადახდა';
+
+  @override
+  String get txPaymentSuccessful => 'გადახდა წარმატებულია';
+
+  @override
+  String get txPaymentSuccessful2 => 'გადახდა წარმატებულია!';
+
+  @override
+  String get txPendingProposals => 'მომლოდინე შეთავაზებები';
+
+  @override
+  String get txPermanentlyRemovesAllContent => 'სამუდამოდ შლის მთელ კონტენტს';
+
+  @override
+  String get txPlanLimitReached => 'გეგმის ლიმიტი ამოიწურა';
+
+  @override
+  String get txPostYourFirstServiceStartEarning =>
+      'გამოაქვეყნეთ პირველი მომსახურება\nდა დაიწყეთ შემოსავალი!';
+
+  @override
+  String get txPriceNotSet => 'ფასი არ არის მითითებული';
+
+  @override
+  String get txProviders => 'პროვაიდერები';
+
+  @override
+  String get txReason => 'მიზეზი';
+
+  @override
+  String get txReportIssue => 'პრობლემის შეტყობინება';
+
+  @override
+  String get txReportUser => 'მომხმარებელზე საჩივარი';
+
+  @override
+  String get txRequestACategory => 'კატეგორიის მოთხოვნა';
+
+  @override
+  String get txReviewsFor => 'შეფასებები:';
+
+  @override
+  String get txReviewsWillAppearHere => 'შეფასებები აქ გამოჩნდება';
+
+  @override
+  String get txService => 'მომსახურება';
+
+  @override
+  String get txSuggested => 'შემოთავაზებული';
+
+  @override
+  String get txSaveChanges => 'ცვლილებების შენახვა';
+
+  @override
+  String get txSaveTimeByInsertingPreWritten =>
+      'დაზოგეთ დრო მზა შაბლონების ჩასმით.';
+
+  @override
+  String get txSavedReplies => 'შენახული პასუხები';
+
+  @override
+  String get txSavedPosts => 'შენახული პოსტები';
+
+  @override
+  String get txSayHello => 'მიესალმეთ!';
+
+  @override
+  String get txSeeAll => 'ყველას ნახვა';
+
+  @override
+  String get txSeeAllOpenSwapProposalsPost =>
+      'ნახეთ ღია შეთავაზებები და გამოაქვეყნეთ თქვენი';
+
+  @override
+  String get txServiceCategories => 'მომსახურების კატეგორიები';
+
+  @override
+  String get txServiceFee => 'მომსახურების საფასური';
+
+  @override
+  String get txServiceVisibility => 'მომსახურების ხილვადობა';
+
+  @override
+  String get txServicesOpenToSkillTrading =>
+      'უნარების გაცვლისთვის ღია მომსახურებები';
+
+  @override
+  String get txShareAService => 'მომსახურების გაზიარება';
+
+  @override
+  String get txShareYourProfile => 'გააზიარეთ პროფილი';
+
+  @override
+  String get txSkillSwapContract => 'უნარების გაცვლის შეთანხმება';
+
+  @override
+  String get txSkillSwapHub => 'უნარების გაცვლის ჰაბი';
+
+  @override
+  String get txSortResults => 'შედეგების დალაგება';
+
+  @override
+  String get txStartACommunity => 'საზოგადოების შექმნა';
+
+  @override
+  String get txStartTheConversationToDiscussDetails =>
+      'დაიწყეთ საუბარი დეტალების განსახილველად.';
+
+  @override
+  String get txStartTheConversation => 'დაიწყეთ საუბარი ✨';
+
+  @override
+  String get txStartingFrom => 'დაწყებული';
+
+  @override
+  String get txSubmitDispute => 'დავის გაგზავნა';
+
+  @override
+  String get txSubmitReport => 'საჩივრის გაგზავნა';
+
+  @override
+  String get txSubmitRequest => 'მოთხოვნის გაგზავნა';
+
+  @override
+  String get txTag => 'თეგი:';
+
+  @override
+  String get txTapToSearch => 'შეეხეთ ძიებისთვის';
+
+  @override
+  String get txTapToUploadUpTo5 => 'შეეხეთ 5-მდე ფოტოს ასატვირთად';
+
+  @override
+  String get txTheGroupOwnerCannotBeRemoved =>
+      'ჯგუფის მფლობელის წაშლა შეუძლებელია.';
+
+  @override
+  String get txThisServiceIsNowLockedPlease =>
+      'მომსახურება დაბლოკილია. დამატებითი ცვლილებებისთვის მიმართეთ მხარდაჭერას.';
+
+  @override
+  String get txThisWillFreeUpASlot =>
+      'ეს გაათავისუფლებს ადგილს თქვენს გეგმაში, მაგრამ მოქმედება შეუქცევადია.';
+
+  @override
+  String get txThisWillMarkTheBookingAs => 'ჯავშანი მოინიშნება დასრულებულად.';
+
+  @override
+  String get txTipTapOnAServiceItem =>
+      'რჩევა: შეეხეთ მომსახურებას სრული დეტალების სანახავად.';
+
+  @override
+  String get txTradeSkillsBuildYourWorld =>
+      'გაცვალეთ უნარები. შექმენით თქვენი სამყარო.';
+
+  @override
+  String get txTradingSkillsIsTheFastestWay =>
+      'უნარების გაცვლა ქსელის გაფართოებისა და უფასო მომსახურების უსწრაფესი გზაა!';
+
+  @override
+  String get txTransactionReceipt => 'ტრანზაქციის ქვითარი';
+
+  @override
+  String get txTryUpdatingYourProfileBioAnd =>
+      'სცადეთ პროფილის აღწერისა და უნარების განახლება.';
+
+  @override
+  String get txTurnOn => 'ჩართვა ⚡';
+
+  @override
+  String get txUpdatingService => 'მომსახურება ახლდება…';
+
+  @override
+  String get txUpgradeNow => 'გეგმის განახლება';
+
+  @override
+  String get txUpgradeNowUnlockMoreHubs => 'განაახლეთ — მეტი ჰაბი';
+
+  @override
+  String get txUpgradeToProToUseSaved =>
+      'შენახული პასუხებისთვის გადადით Pro-ზე';
+
+  @override
+  String get txUpgradeToUnlockThisHub => 'განაახლეთ ამ ჰაბის გასახსნელად';
+
+  @override
+  String get txViewMap => 'რუკის ნახვა';
+
+  @override
+  String get txViewPlans => 'გეგმების ნახვა';
+
+  @override
+  String get txViewOnMap => 'რუკაზე ნახვა';
+
+  @override
+  String get txWaitingForTheOtherPartyTo =>
+      'ველოდებით მეორე მხარის დადასტურებას';
+
+  @override
+  String get txWhatServiceAreYouOffering => 'რა მომსახურებას სთავაზობთ?';
+
+  @override
+  String get txYouNeedMoreWalletBalanceTo =>
+      'გასაგრძელებლად საფულეში მეტი თანხაა საჭირო. შევავსოთ ახლა?';
+
+  @override
+  String get txYourServices => 'თქვენი მომსახურებები';
+
+  @override
+  String get txYourTicketsHaveBeenSentTo =>
+      'ბილეთები გაიგზავნა თქვენს ელფოსტაზე.';
+
+  @override
+  String get txCreateService => '✨ მომსახურების შექმნა';
+
+  @override
+  String get txAiPitch => '✨ AI შეთავაზება';
+
+  @override
+  String get txViewAiOpportunityRadar => '✨ AI შესაძლებლობების რადარი';
+
+  @override
+  String get txLaunchSpecialLimitedTime =>
+      '🎉 გაშვების აქცია — შეზღუდული დროით';
+
+  @override
+  String get txTrendingThisWeek => '🔥 ამ კვირის ტრენდები';
 }

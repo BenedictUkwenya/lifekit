@@ -88,7 +88,7 @@ class _LeaveReviewScreenState extends State<LeaveReviewScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              "How was your experience with:",
+              AppLocalizations.of(context).txHowWasYourExperienceWith,
               style: GoogleFonts.poppins(color: Colors.grey),
             ),
             const SizedBox(height: 8),
@@ -150,7 +150,7 @@ class _LeaveReviewScreenState extends State<LeaveReviewScreen> {
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
-                        "Submit Review",
+                        AppLocalizations.of(context).reviewsSubmit,
                         style: GoogleFonts.poppins(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,

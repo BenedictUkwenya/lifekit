@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -318,7 +319,7 @@ class PlaceDetailScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
-                                "View Map",
+                                AppLocalizations.of(context).txViewMap,
                                 style: GoogleFonts.poppins(
                                   color: Colors.white,
                                   fontSize: 12,

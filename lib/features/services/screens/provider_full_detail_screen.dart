@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import '../../../core/utils/share_profile.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -346,7 +347,7 @@ class _ProviderFullDetailScreenState extends State<ProviderFullDetailScreen>
                         children: [
                           if (currentService != null) ...[
                             Text(
-                              "Service Description",
+                              AppLocalizations.of(context).providerDescription,
                               style: GoogleFonts.poppins(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
@@ -367,7 +368,7 @@ class _ProviderFullDetailScreenState extends State<ProviderFullDetailScreen>
                             const SizedBox(height: 20),
                           ],
                           Text(
-                            "About Provider",
+                            AppLocalizations.of(context).providerAboutProvider,
                             style: GoogleFonts.poppins(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
@@ -390,7 +391,7 @@ class _ProviderFullDetailScreenState extends State<ProviderFullDetailScreen>
                     reviews.isEmpty
                         ? Center(
                             child: Text(
-                              "No reviews yet.",
+                              AppLocalizations.of(context).reviewsNoReviews,
                               style: GoogleFonts.poppins(color: Colors.grey),
                             ),
                           )
@@ -599,7 +600,7 @@ class _ProviderFullDetailScreenState extends State<ProviderFullDetailScreen>
                     ),
                   ),
                   child: Text(
-                    "Book Now",
+                    AppLocalizations.of(context).serviceBookNow,
                     style: GoogleFonts.poppins(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,

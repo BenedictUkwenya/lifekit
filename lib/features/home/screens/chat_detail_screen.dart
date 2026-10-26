@@ -322,7 +322,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Upgrade to Pro to use Saved Replies',
+                  AppLocalizations.of(context).txUpgradeToProToUseSaved,
                   style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -331,7 +331,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Save time by inserting pre-written templates.',
+                  AppLocalizations.of(context).txSaveTimeByInsertingPreWritten,
                   style: GoogleFonts.poppins(
                     fontSize: 13,
                     height: 1.45,
@@ -361,7 +361,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
                       shadowColor: AppColors.primary.withOpacity(0.35),
                     ),
                     child: Text(
-                      'Upgrade Now',
+                      AppLocalizations.of(context).txUpgradeNow,
                       style: GoogleFonts.poppins(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
@@ -407,7 +407,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
                 ),
                 const SizedBox(height: 18),
                 Text(
-                  'Saved Replies',
+                  AppLocalizations.of(context).txSavedReplies,
                   style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -594,7 +594,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
                 ),
                 if (!isChatLocked)
                   Text(
-                    "Online",
+                    AppLocalizations.of(context).txOnline,
                     style: GoogleFonts.poppins(
                       fontSize: 12,
                       color: Colors.green,
@@ -699,7 +699,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Skill Swap Contract',
+                  AppLocalizations.of(context).txSkillSwapContract,
                   style: GoogleFonts.poppins(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -708,7 +708,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
                 ),
                 if (status == 'pending')
                   Text(
-                    'Waiting for the other party to confirm',
+                    AppLocalizations.of(context).txWaitingForTheOtherPartyTo,
                     style: GoogleFonts.poppins(
                       fontSize: 10,
                       color: Colors.black45,
@@ -1062,11 +1062,11 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(
-          'Mark as Done?',
+          AppLocalizations.of(context).txMarkAsDone,
           style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
         ),
         content: Text(
-          'This will mark the booking as completed.',
+          AppLocalizations.of(context).txThisWillMarkTheBookingAs,
           style: GoogleFonts.poppins(),
         ),
         actions: [
@@ -1080,7 +1080,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
               backgroundColor: const Color(0xFF22C55E),
             ),
             child: Text(
-              'Mark Done',
+              AppLocalizations.of(context).markDone,
               style: GoogleFonts.poppins(color: Colors.white),
             ),
           ),
@@ -1238,7 +1238,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
             ),
           ),
           Text(
-            "Messaging is disabled for completed or cancelled services.",
+            AppLocalizations.of(context).txMessagingIsDisabledForCompletedOr,
             style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
             textAlign: TextAlign.center,
           ),
@@ -1268,14 +1268,14 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
           ),
           const SizedBox(height: 16),
           Text(
-            "Say Hello!",
+            AppLocalizations.of(context).txSayHello,
             style: GoogleFonts.poppins(
               fontWeight: FontWeight.bold,
               color: Colors.grey,
             ),
           ),
           Text(
-            "Start the conversation to discuss details.",
+            AppLocalizations.of(context).txStartTheConversationToDiscussDetails,
             style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[400]),
           ),
         ],

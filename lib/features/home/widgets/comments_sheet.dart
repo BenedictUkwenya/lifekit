@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
@@ -159,7 +160,7 @@ class _CommentsSheetState extends State<CommentsSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Comments",
+                  AppLocalizations.of(context).txComments,
                   style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -181,7 +182,7 @@ class _CommentsSheetState extends State<CommentsSheet> {
                 : comments.isEmpty
                 ? Center(
                     child: Text(
-                      "No comments yet. Be the first!",
+                      AppLocalizations.of(context).txNoCommentsYetBeTheFirst,
                       style: GoogleFonts.poppins(color: Colors.grey),
                     ),
                   )

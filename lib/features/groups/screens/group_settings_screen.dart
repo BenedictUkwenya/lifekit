@@ -269,7 +269,7 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
                         ),
                         if (isCreator)
                           Text(
-                            'Owner',
+                            AppLocalizations.of(context).txOwner,
                             style: GoogleFonts.poppins(
                               fontSize: 11,
                               color: AppColors.primary,
@@ -277,7 +277,7 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
                           )
                         else if (isThisAdmin)
                           Text(
-                            'Admin',
+                            AppLocalizations.of(context).txAdmin,
                             style: GoogleFonts.poppins(
                               fontSize: 11,
                               color: Colors.blue,
@@ -314,7 +314,7 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    'The group owner cannot be removed.',
+                    AppLocalizations.of(context).txTheGroupOwnerCannotBeRemoved,
                     style: GoogleFonts.poppins(
                       fontSize: 12,
                       color: Colors.grey,
@@ -471,7 +471,7 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
                 : TextButton(
                     onPressed: _saveChanges,
                     child: Text(
-                      'Save',
+                      AppLocalizations.of(context).save,
                       style: GoogleFonts.poppins(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
@@ -709,7 +709,7 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
           child: const Icon(Icons.link, color: Colors.blue, size: 20),
         ),
         title: Text(
-          'Copy Invite Link',
+          AppLocalizations.of(context).txCopyInviteLink,
           style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500),
         ),
         subtitle: Text(
@@ -867,7 +867,7 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
               ),
             ),
             title: Text(
-              'Leave Group',
+              AppLocalizations.of(context).txLeaveGroup,
               style: GoogleFonts.poppins(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -896,7 +896,7 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
               ),
             ),
             title: Text(
-              'Delete Group',
+              AppLocalizations.of(context).txDeleteGroup,
               style: GoogleFonts.poppins(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -904,7 +904,7 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
               ),
             ),
             subtitle: Text(
-              'Permanently removes all content',
+              AppLocalizations.of(context).txPermanentlyRemovesAllContent,
               style: GoogleFonts.poppins(
                 fontSize: 11.5,
                 color: Colors.grey[500],

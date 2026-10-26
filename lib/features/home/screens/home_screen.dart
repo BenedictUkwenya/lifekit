@@ -333,7 +333,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              'Our AI has been tracking demand in your area. New service opportunities are waiting for you!',
+                              AppLocalizations.of(context).txOurAiHasBeenTrackingDemand,
                               style: GoogleFonts.poppins(
                                 fontSize: 13,
                                 color: Colors.white70,
@@ -381,7 +381,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   child: Text(
-                    '✨ View AI Opportunity Radar',
+                    AppLocalizations.of(context).txViewAiOpportunityRadar,
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
@@ -393,7 +393,7 @@ class _HomeScreenState extends State<HomeScreen> {
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text(
-                  'Maybe later',
+                  AppLocalizations.of(context).maybeLater,
                   style: GoogleFonts.poppins(
                     color: Colors.grey.shade600,
                     fontSize: 13,
@@ -1872,7 +1872,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const Text('🔄', style: TextStyle(fontSize: 9)),
           const SizedBox(width: 3),
           Text(
-            'Swappable',
+            AppLocalizations.of(context).badgeSwappable,
             style: GoogleFonts.poppins(
               color: Colors.white,
               fontSize: 9,
@@ -2593,7 +2593,7 @@ class _HomeScreenState extends State<HomeScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Recent searches',
+          AppLocalizations.of(context).recentSearches,
           style: GoogleFonts.poppins(
             fontSize: 16,
             fontWeight: FontWeight.w700,
@@ -2701,7 +2701,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Tap to search',
+                    AppLocalizations.of(context).txTapToSearch,
                     style: GoogleFonts.poppins(
                       fontSize: 10,
                       color: Colors.grey[400],
@@ -2968,7 +2968,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Icon(Icons.place_outlined, size: 40, color: Colors.grey[300]),
               const SizedBox(height: 8),
               Text(
-                'No places nearby',
+                AppLocalizations.of(context).noPlacesNearby,
                 style: GoogleFonts.poppins(
                   color: Colors.grey[400],
                   fontSize: 13,

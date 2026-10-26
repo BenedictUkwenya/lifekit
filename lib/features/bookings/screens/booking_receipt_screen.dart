@@ -46,7 +46,7 @@ class BookingReceiptScreen extends StatelessWidget {
         elevation: 0,
         leading: const BackButton(color: Colors.black),
         title: Text(
-          "Transaction Receipt",
+          AppLocalizations.of(context).txTransactionReceipt,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -83,7 +83,7 @@ class BookingReceiptScreen extends StatelessWidget {
               ),
             ),
             Text(
-              "Payment Successful",
+              AppLocalizations.of(context).txPaymentSuccessful,
               style: GoogleFonts.poppins(color: Colors.grey),
             ),
 
@@ -154,7 +154,7 @@ class BookingReceiptScreen extends StatelessWidget {
               },
               icon: const Icon(Icons.download, color: Colors.black),
               label: Text(
-                "Download PDF",
+                AppLocalizations.of(context).txDownloadPdf,
                 style: GoogleFonts.poppins(color: Colors.black),
               ),
               style: OutlinedButton.styleFrom(

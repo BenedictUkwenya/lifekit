@@ -125,7 +125,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               ),
               const SizedBox(height: 24),
               Text(
-                "Insufficient Balance",
+                AppLocalizations.of(context).txInsufficientBalance,
                 style: GoogleFonts.poppins(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -345,7 +345,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Service Fee",
+                              AppLocalizations.of(context).txServiceFee,
                               style: GoogleFonts.poppins(color: Colors.grey),
                             ),
                             Text(
@@ -387,7 +387,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "LifeKit Wallet",
+                                AppLocalizations.of(context).txLifekitWallet,
                                 style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,

@@ -237,7 +237,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                   TextButton(
                     onPressed: () => Navigator.pop(context),
                     child: Text(
-                      'Cancel',
+                      AppLocalizations.of(context).cancel,
                       style: GoogleFonts.poppins(
                         color: Colors.black54,
                         fontSize: 15,
@@ -245,7 +245,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                     ),
                   ),
                   Text(
-                    'Select Time',
+                    AppLocalizations.of(context).bookSelectTime,
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
@@ -257,7 +257,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                       Navigator.pop(context);
                     },
                     child: Text(
-                      'Done',
+                      AppLocalizations.of(context).done,
                       style: GoogleFonts.poppins(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
@@ -471,7 +471,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                       const Text('✨', style: TextStyle(fontSize: 22)),
                       const SizedBox(width: 8),
                       Text(
-                        'Autofill with AI',
+                        AppLocalizations.of(context).txAutofillWithAi,
                         style: GoogleFonts.poppins(
                           fontSize: 17,
                           fontWeight: FontWeight.w700,
@@ -482,7 +482,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Describe the service you want to offer and AI will fill in the details for you.',
+                    AppLocalizations.of(context).txDescribeTheServiceYouWantTo,
                     style: GoogleFonts.poppins(
                       fontSize: 13,
                       color: Colors.black54,
@@ -538,7 +538,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                               ),
                             )
                           : Text(
-                              'Generate',
+                              AppLocalizations.of(context).txGenerate,
                               style: GoogleFonts.poppins(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
@@ -582,7 +582,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
             const Text('✨', style: TextStyle(fontSize: 18)),
             const SizedBox(width: 8),
             Text(
-              'Autofill with AI',
+              AppLocalizations.of(context).txAutofillWithAi,
               style: GoogleFonts.poppins(
                 color: Colors.white,
                 fontSize: 15,
@@ -611,7 +611,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
   AppBar _buildAppBar() {
     return AppBar(
       title: Text(
-        'Edit Service',
+        AppLocalizations.of(context).txEditService,
         style: GoogleFonts.poppins(
           color: Colors.black87,
           fontSize: 17,
@@ -646,7 +646,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                 ),
               ),
               child: Text(
-                'Save',
+                AppLocalizations.of(context).save,
                 style: GoogleFonts.poppins(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
@@ -669,7 +669,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
           ),
           const SizedBox(height: 20),
           Text(
-            'Updating service…',
+            AppLocalizations.of(context).txUpdatingService,
             style: GoogleFonts.poppins(
               fontSize: 14,
               color: Colors.black54,
@@ -737,7 +737,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Edit Limit Reached',
+                  AppLocalizations.of(context).txEditLimitReached,
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
@@ -746,7 +746,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  'This service is now locked. Please contact support to request further changes.',
+                  AppLocalizations.of(context).txThisServiceIsNowLockedPlease,
                   style: GoogleFonts.poppins(
                     fontSize: 12,
                     color: const Color(0xFFB91C1C),
@@ -957,7 +957,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Add Service Photos',
+              AppLocalizations.of(context).txAddServicePhotos,
               style: GoogleFonts.poppins(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -966,7 +966,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Tap to upload up to 5 photos',
+              AppLocalizations.of(context).txTapToUploadUpTo5,
               style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey[500]),
             ),
           ],
@@ -1133,7 +1133,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'Add Photo',
+                      AppLocalizations.of(context).txAddPhoto,
                       style: GoogleFonts.poppins(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -1401,7 +1401,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
             Icon(Icons.list_alt_outlined, size: 36, color: Colors.grey[300]),
             const SizedBox(height: 8),
             Text(
-              'No options added yet',
+              AppLocalizations.of(context).txNoOptionsAddedYet,
               style: GoogleFonts.poppins(color: Colors.grey[500], fontSize: 13),
             ),
           ],
@@ -1526,7 +1526,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
             ),
             const SizedBox(width: 8),
             Text(
-              'Add Service Option',
+              AppLocalizations.of(context).txAddServiceOption,
               style: GoogleFonts.poppins(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -1574,7 +1574,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Add Option',
+                  AppLocalizations.of(context).txAddOption,
                   style: GoogleFonts.poppins(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
@@ -1589,7 +1589,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
             if (_availableSubTasks.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
-                'SUGGESTED',
+                AppLocalizations.of(context).txSuggested,
                 style: GoogleFonts.poppins(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
@@ -1745,7 +1745,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Service Type',
+                  AppLocalizations.of(context).bookServiceType,
                   style: GoogleFonts.poppins(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
@@ -1865,7 +1865,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
               if (!active)
                 Expanded(
                   child: Text(
-                    'Closed',
+                    AppLocalizations.of(context).txClosed,
                     style: GoogleFonts.poppins(
                       fontSize: 13,
                       color: Colors.grey[400],
@@ -1990,7 +1990,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                   children: [
                     Flexible(
                       child: Text(
-                        'Available for Skill Swap',
+                        AppLocalizations.of(context).txAvailableForSkillSwap,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.poppins(
                           fontSize: 14,
@@ -2090,7 +2090,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Disable Skill Swap?',
+                    AppLocalizations.of(context).txDisableSkillSwap,
                     style: GoogleFonts.poppins(
                       color: Colors.white,
                       fontWeight: FontWeight.w800,
@@ -2114,7 +2114,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Trading skills is the fastest way to grow your network and get free services!',
+                    AppLocalizations.of(context).txTradingSkillsIsTheFastestWay,
                     style: GoogleFonts.poppins(
                       fontSize: 12,
                       color: Colors.grey[600],
@@ -2136,7 +2136,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                           child: Text(
-                            'Keep Off',
+                            AppLocalizations.of(context).txKeepOff,
                             style: GoogleFonts.poppins(
                               fontWeight: FontWeight.w600,
                               color: Colors.grey[700],
@@ -2159,7 +2159,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                           child: Text(
-                            'Turn On ⚡',
+                            AppLocalizations.of(context).txTurnOn,
                             style: GoogleFonts.poppins(
                               fontWeight: FontWeight.w700,
                               fontSize: 13,
@@ -2222,7 +2222,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Service Visibility',
+                      AppLocalizations.of(context).txServiceVisibility,
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,

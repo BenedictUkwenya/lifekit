@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../core/services/api_service.dart';
@@ -198,7 +199,7 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
-        "Dashboard",
+        AppLocalizations.of(context).providerDashboard,
         style: GoogleFonts.poppins(
           color: Colors.black87,
           fontWeight: FontWeight.w700,
@@ -301,7 +302,7 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
                           ),
                           const SizedBox(width: 5),
                           Text(
-                            'Wallet',
+                            AppLocalizations.of(context).walletTitle,
                             style: GoogleFonts.poppins(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
@@ -315,7 +316,7 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  "Total Earnings",
+                  AppLocalizations.of(context).totalEarnings,
                   style: GoogleFonts.poppins(
                     color: Colors.white.withOpacity(0.75),
                     fontSize: 13,
@@ -697,7 +698,7 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
           Row(
             children: [
               Text(
-                "Last 7 Days",
+                AppLocalizations.of(context).txLast7Days,
                 style: GoogleFonts.poppins(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -868,7 +869,7 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'AI Opportunity Radar',
+                AppLocalizations.of(context).aiOpportunityRadar,
                 style: GoogleFonts.poppins(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
@@ -876,7 +877,7 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
                 ),
               ),
               Text(
-                'Services you could offer right now',
+                AppLocalizations.of(context).servicesYouCouldOffer,
                 style: GoogleFonts.poppins(
                   fontSize: 11,
                   color: Colors.grey.shade500,
@@ -923,7 +924,7 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
             ),
             const SizedBox(height: 10),
             Text(
-              'No opportunities found right now.',
+              AppLocalizations.of(context).noOpportunitiesFound,
               style: GoogleFonts.poppins(
                 fontSize: 13,
                 color: Colors.grey.shade400,
@@ -971,7 +972,7 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '🎉 Launch Special — Limited Time',
+                  AppLocalizations.of(context).txLaunchSpecialLimitedTime,
                   style: GoogleFonts.poppins(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -981,7 +982,7 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Only 3% commission & up to 5 services!',
+                  AppLocalizations.of(context).txOnly3CommissionUpTo5,
                   style: GoogleFonts.poppins(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
@@ -1207,7 +1208,7 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
                       ),
                       icon: const Icon(Icons.add_rounded, size: 15),
                       label: Text(
-                        'Create Service',
+                        AppLocalizations.of(context).createService,
                         style: GoogleFonts.poppins(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,

@@ -1623,7 +1623,7 @@ class _FindingMatchAnimationScreenState
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Loading your results\u2026',
+                          AppLocalizations.of(context).txLoadingYourResults,
                           style: GoogleFonts.poppins(
                             fontSize: 13,
                             color: Colors.white.withOpacity(0.6),
@@ -1989,7 +1989,7 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
                           Row(
                             children: [
                               Text(
-                                'AI Match Score: ',
+                                AppLocalizations.of(context).txAiMatchScore,
                                 style: GoogleFonts.poppins(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -2753,7 +2753,7 @@ class _SwapProposalSheetState extends State<_SwapProposalSheet> {
                     )
                   : availableDates.isEmpty
                   ? Text(
-                      'No availability found \u2014 proposal will be sent without a date.',
+                      AppLocalizations.of(context).txNoAvailabilityFoundProposalWillBe,
                       style: GoogleFonts.poppins(
                         fontSize: 12,
                         color: Colors.grey,
@@ -2829,7 +2829,7 @@ class _SwapProposalSheetState extends State<_SwapProposalSheet> {
               const SizedBox(height: 16),
 
               Text(
-                'Note (optional)',
+                AppLocalizations.of(context).txNoteOptional,
                 style: GoogleFonts.poppins(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -3941,7 +3941,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                       size: 15,
                     ),
                     label: Text(
-                      'Message',
+                      AppLocalizations.of(context).helpMessage,
                       style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                     ),
                     style: OutlinedButton.styleFrom(
@@ -3968,7 +3968,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                       size: 15,
                     ),
                     label: Text(
-                      'Mark Done',
+                      AppLocalizations.of(context).markDone,
                       style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -4088,7 +4088,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                   ),
                 ),
                 child: Text(
-                  'Cancel Proposal',
+                  AppLocalizations.of(context).txCancelProposal,
                   style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                 ),
               ),
@@ -4112,7 +4112,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                       size: 15,
                     ),
                     label: Text(
-                      'Message',
+                      AppLocalizations.of(context).helpMessage,
                       style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                     ),
                     style: OutlinedButton.styleFrom(
@@ -4139,7 +4139,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                       size: 15,
                     ),
                     label: Text(
-                      'Mark Done',
+                      AppLocalizations.of(context).markDone,
                       style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -4210,7 +4210,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
           Icon(Icons.wifi_off_rounded, size: 52, color: Colors.grey[300]),
           const SizedBox(height: 12),
           Text(
-            'Could not load',
+            AppLocalizations.of(context).txCouldNotLoad,
             style: GoogleFonts.poppins(
               fontSize: 15,
               fontWeight: FontWeight.w600,
@@ -4219,7 +4219,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
           ),
           const SizedBox(height: 6),
           Text(
-            'Check your connection and try again.',
+            AppLocalizations.of(context).txCheckYourConnectionAndTryAgain,
             style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[400]),
           ),
           const SizedBox(height: 16),

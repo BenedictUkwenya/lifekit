@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
@@ -147,7 +148,7 @@ class _CommunitiesScreenState extends State<CommunitiesScreen>
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
-                                        'Create',
+                                        AppLocalizations.of(context).groupsCreateGroup,
                                         style: GoogleFonts.poppins(
                                           color: Colors.white,
                                           fontWeight: FontWeight.w600,
@@ -162,7 +163,7 @@ class _CommunitiesScreenState extends State<CommunitiesScreen>
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'Communities',
+                            AppLocalizations.of(context).communities,
                             style: GoogleFonts.poppins(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -170,7 +171,7 @@ class _CommunitiesScreenState extends State<CommunitiesScreen>
                             ),
                           ),
                           Text(
-                            'Find your people, share your world',
+                            AppLocalizations.of(context).findYourPeople,
                             style: GoogleFonts.poppins(
                               color: Colors.white.withOpacity(0.8),
                               fontSize: 13,
@@ -184,7 +185,7 @@ class _CommunitiesScreenState extends State<CommunitiesScreen>
               ),
               title: innerBoxIsScrolled
                   ? Text(
-                      'Communities',
+                      AppLocalizations.of(context).communities,
                       style: GoogleFonts.poppins(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,

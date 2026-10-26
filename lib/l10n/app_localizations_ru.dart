@@ -2848,4 +2848,542 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get chatTypeMessage => 'Введите сообщение...';
+
+  @override
+  String get txAiMatchScore => 'AI-совпадение: ';
+
+  @override
+  String get txAiPitchGenerator => 'AI-генератор предложений';
+
+  @override
+  String get txAiIsAnalysingYourProfile => 'AI анализирует ваш профиль...';
+
+  @override
+  String get txAiRanksTheBestSwapPartners =>
+      'AI подбирает лучших партнёров для обмена вашими навыками';
+
+  @override
+  String get txAiPoweredSuggestions => 'Рекомендации AI';
+
+  @override
+  String get txAboutThisEvent => 'О событии';
+
+  @override
+  String get txAccept => 'Принять ✓';
+
+  @override
+  String get txActionNotAllowed => 'Действие недоступно';
+
+  @override
+  String get txAddGroupCover => 'Добавить обложку группы';
+
+  @override
+  String get txAddOption => 'Добавить опцию';
+
+  @override
+  String get txAddPhoto => 'Добавить фото';
+
+  @override
+  String get txAddServiceOption => 'Добавить опцию услуги';
+
+  @override
+  String get txAddServicePhotos => 'Добавить фото услуги';
+
+  @override
+  String get txAddMore => 'Добавить ещё';
+
+  @override
+  String get txAdmin => 'Админ';
+
+  @override
+  String get txAllCategories => 'Все категории';
+
+  @override
+  String get txAllNotificationsMarkedAsRead =>
+      'Все уведомления отмечены как прочитанные';
+
+  @override
+  String get txAllowAllMembersToPostIn =>
+      'Разрешить всем участникам публиковать посты';
+
+  @override
+  String get txAutofillWithAi => 'Заполнить с AI';
+
+  @override
+  String get txAvailableOptions => 'Доступные опции:';
+
+  @override
+  String get txAvailableForSkillSwap => 'Доступно для обмена навыками';
+
+  @override
+  String get txBoostServiceVisibility => 'Повысить видимость услуги';
+
+  @override
+  String get txBrowseTheSwapBoard => 'Доска обмена';
+
+  @override
+  String get txBuyBoost => 'Купить продвижение';
+
+  @override
+  String get txByCreatingAGroupYouAgree =>
+      'Создавая группу, вы соглашаетесь соблюдать правила сообщества LifeKit.';
+
+  @override
+  String get txCalendar => 'Календарь';
+
+  @override
+  String get txCancelProposal => 'Отменить предложение';
+
+  @override
+  String get txChangeAccountSetup => 'Изменить настройку аккаунта';
+
+  @override
+  String get txCheckYourConnectionAndTryAgain =>
+      'Проверьте подключение и попробуйте снова.';
+
+  @override
+  String get txCheckout => 'Оформление';
+
+  @override
+  String get txChooseCategory => 'Выберите категорию';
+
+  @override
+  String get txChooseABoostDurationToRank =>
+      'Выберите срок продвижения, чтобы услуга была выше в выдаче.';
+
+  @override
+  String get txClosed => 'Закрыто';
+
+  @override
+  String get txComments => 'Комментарии';
+
+  @override
+  String get txCopy => 'Копировать';
+
+  @override
+  String get txCopyInviteLink => 'Скопировать ссылку-приглашение';
+
+  @override
+  String get txCouldNotLoad => 'Не удалось загрузить';
+
+  @override
+  String get txCreateGroup => 'Создать группу';
+
+  @override
+  String get txCreateNewService => 'Создать новую услугу';
+
+  @override
+  String get txCreateNewServicesToShowcaseYour =>
+      'Создавайте услуги, чтобы показать навыки и найти больше клиентов';
+
+  @override
+  String get txCreateOneToGetStarted => 'Создайте первую, чтобы начать!';
+
+  @override
+  String get txCurrent => 'Текущий';
+
+  @override
+  String get txDeleteGroup => 'Удалить группу';
+
+  @override
+  String get txDeleteService => 'Удалить услугу?';
+
+  @override
+  String get txDescribeTheServiceYouWantTo =>
+      'Опишите услугу, и AI заполнит детали за вас.';
+
+  @override
+  String get txDeselectAll => 'Снять выбор';
+
+  @override
+  String get txDetailsOptional => 'Подробности (необязательно)';
+
+  @override
+  String get txDisableSkillSwap => 'Отключить обмен навыками?';
+
+  @override
+  String get txDiscussion => 'Обсуждение';
+
+  @override
+  String get txDownloadPdf => 'Скачать PDF';
+
+  @override
+  String get txEditLimitReached => 'Лимит правок исчерпан';
+
+  @override
+  String get txEditService => 'Редактировать услугу';
+
+  @override
+  String get txEnterAmount => 'Введите сумму';
+
+  @override
+  String get txExpandYourReach => 'Расширьте охват';
+
+  @override
+  String get txFeatured => 'Рекомендуемое';
+
+  @override
+  String get txFindMyAiMatch => 'Найти AI-совпадение';
+
+  @override
+  String get txFindingTheBestOpportunitiesForYou =>
+      'Ищем лучшие возможности для вас';
+
+  @override
+  String get txGenerate => 'Сгенерировать';
+
+  @override
+  String get txHowSkillSwapWorks => 'Как работает обмен навыками';
+
+  @override
+  String get txHowWasYourExperienceWith => 'Как прошло ваше взаимодействие с:';
+
+  @override
+  String get txHubLimitReached => 'Лимит хабов исчерпан';
+
+  @override
+  String get txImageAttached => 'Изображение прикреплено 📎';
+
+  @override
+  String get txInsufficientBalance => 'Недостаточно средств';
+
+  @override
+  String get txJoinHub => 'Вступить в хаб';
+
+  @override
+  String get txJoinThisCommunity => 'Вступить в сообщество';
+
+  @override
+  String get txKeepOff => 'Оставить выключенным';
+
+  @override
+  String get txLast7Days => 'Последние 7 дней';
+
+  @override
+  String get txLater => 'Позже';
+
+  @override
+  String get txLeaveGroup => 'Покинуть группу';
+
+  @override
+  String get txLifekitWallet => 'Кошелёк LifeKit';
+
+  @override
+  String get txLoadingYourResults => 'Загружаем результаты…';
+
+  @override
+  String get txLoadingYourServices => 'Загружаем ваши услуги...';
+
+  @override
+  String get txMarkAllRead => 'Прочитать все';
+
+  @override
+  String get txMarkAsDone => 'Отметить как выполненное?';
+
+  @override
+  String get txMessagingIsDisabledForCompletedOr =>
+      'Переписка недоступна для завершённых или отменённых услуг.';
+
+  @override
+  String get txMyHubs => 'Мои хабы';
+
+  @override
+  String get txMyServices => 'Мои услуги';
+
+  @override
+  String get txNoAiSuggestionsRightNow => 'Пока нет рекомендаций AI.';
+
+  @override
+  String get txNoAvailabilityFoundProposalWillBe =>
+      'Свободное время не найдено — предложение будет отправлено без даты.';
+
+  @override
+  String get txNoCommentsYetBeTheFirst =>
+      'Комментариев пока нет. Будьте первым!';
+
+  @override
+  String get txNoCommunitiesYet => 'Сообществ пока нет.';
+
+  @override
+  String get txNoNotificationsYet => 'Уведомлений пока нет';
+
+  @override
+  String get txNoOptionsAddedYet => 'Опции ещё не добавлены';
+
+  @override
+  String get txNoOtherServices => 'Других услуг нет.';
+
+  @override
+  String get txNoPlacesFound => 'Места не найдены.';
+
+  @override
+  String get txNoQuestionsYetBeTheFirst =>
+      'Вопросов пока нет. Спросите первым!';
+
+  @override
+  String get txNoSavedPostsYet => 'Сохранённых постов пока нет';
+
+  @override
+  String get txNoServicesYet => 'Услуг пока нет';
+
+  @override
+  String get txNoteOptional => 'Заметка (необязательно)';
+
+  @override
+  String get txNothingHereYet => 'Здесь пока пусто';
+
+  @override
+  String get txNotificationDeleted => 'Уведомление удалено';
+
+  @override
+  String get txNumberOfTickets => 'Количество билетов';
+
+  @override
+  String get txOnline => 'В сети';
+
+  @override
+  String get txOnly3CommissionUpTo5 => 'Всего 3% комиссии и до 5 услуг!';
+
+  @override
+  String get txOpenPosting => 'Открытые публикации';
+
+  @override
+  String get txOpening => 'Открываем...';
+
+  @override
+  String get txOurAiHasBeenTrackingDemand =>
+      'Наш AI отслеживает спрос в вашем районе. Вас ждут новые возможности!';
+
+  @override
+  String get txOwner => 'Владелец';
+
+  @override
+  String get txPayWithWallet => 'Оплатить из кошелька';
+
+  @override
+  String get txPaymentSuccessful => 'Оплата прошла успешно';
+
+  @override
+  String get txPaymentSuccessful2 => 'Оплата прошла успешно!';
+
+  @override
+  String get txPendingProposals => 'Ожидающие предложения';
+
+  @override
+  String get txPermanentlyRemovesAllContent =>
+      'Безвозвратно удаляет всё содержимое';
+
+  @override
+  String get txPlanLimitReached => 'Лимит тарифа исчерпан';
+
+  @override
+  String get txPostYourFirstServiceStartEarning =>
+      'Опубликуйте первую услугу\nи начните зарабатывать!';
+
+  @override
+  String get txPriceNotSet => 'Цена не указана';
+
+  @override
+  String get txProviders => 'Исполнители';
+
+  @override
+  String get txReason => 'Причина';
+
+  @override
+  String get txReportIssue => 'Сообщить о проблеме';
+
+  @override
+  String get txReportUser => 'Пожаловаться на пользователя';
+
+  @override
+  String get txRequestACategory => 'Запросить категорию';
+
+  @override
+  String get txReviewsFor => 'Отзывы о';
+
+  @override
+  String get txReviewsWillAppearHere => 'Отзывы появятся здесь';
+
+  @override
+  String get txService => 'УСЛУГА';
+
+  @override
+  String get txSuggested => 'РЕКОМЕНДУЕМОЕ';
+
+  @override
+  String get txSaveChanges => 'Сохранить изменения';
+
+  @override
+  String get txSaveTimeByInsertingPreWritten =>
+      'Экономьте время с готовыми шаблонами.';
+
+  @override
+  String get txSavedReplies => 'Сохранённые ответы';
+
+  @override
+  String get txSavedPosts => 'Сохранённые посты';
+
+  @override
+  String get txSayHello => 'Поздоровайтесь!';
+
+  @override
+  String get txSeeAll => 'Смотреть все';
+
+  @override
+  String get txSeeAllOpenSwapProposalsPost =>
+      'Смотрите открытые предложения и публикуйте свои';
+
+  @override
+  String get txServiceCategories => 'Категории услуг';
+
+  @override
+  String get txServiceFee => 'Сервисный сбор';
+
+  @override
+  String get txServiceVisibility => 'Видимость услуги';
+
+  @override
+  String get txServicesOpenToSkillTrading => 'Услуги, открытые для обмена';
+
+  @override
+  String get txShareAService => 'Поделиться услугой';
+
+  @override
+  String get txShareYourProfile => 'Поделиться профилем';
+
+  @override
+  String get txSkillSwapContract => 'Договор об обмене навыками';
+
+  @override
+  String get txSkillSwapHub => 'Хаб обмена навыками';
+
+  @override
+  String get txSortResults => 'Сортировка';
+
+  @override
+  String get txStartACommunity => 'Создать сообщество';
+
+  @override
+  String get txStartTheConversationToDiscussDetails =>
+      'Начните переписку, чтобы обсудить детали.';
+
+  @override
+  String get txStartTheConversation => 'Начните разговор ✨';
+
+  @override
+  String get txStartingFrom => 'От';
+
+  @override
+  String get txSubmitDispute => 'Отправить спор';
+
+  @override
+  String get txSubmitReport => 'Отправить жалобу';
+
+  @override
+  String get txSubmitRequest => 'Отправить запрос';
+
+  @override
+  String get txTag => 'Тег:';
+
+  @override
+  String get txTapToSearch => 'Нажмите для поиска';
+
+  @override
+  String get txTapToUploadUpTo5 => 'Нажмите, чтобы загрузить до 5 фото';
+
+  @override
+  String get txTheGroupOwnerCannotBeRemoved =>
+      'Владельца группы нельзя удалить.';
+
+  @override
+  String get txThisServiceIsNowLockedPlease =>
+      'Услуга заблокирована. Для изменений обратитесь в поддержку.';
+
+  @override
+  String get txThisWillFreeUpASlot =>
+      'Это освободит место в тарифе, но действие необратимо.';
+
+  @override
+  String get txThisWillMarkTheBookingAs =>
+      'Бронирование будет отмечено как завершённое.';
+
+  @override
+  String get txTipTapOnAServiceItem =>
+      'Совет: нажмите на услугу, чтобы увидеть подробности.';
+
+  @override
+  String get txTradeSkillsBuildYourWorld =>
+      'Обменивайтесь навыками. Стройте свой мир.';
+
+  @override
+  String get txTradingSkillsIsTheFastestWay =>
+      'Обмен навыками — самый быстрый способ расширить круг общения и получить услуги бесплатно!';
+
+  @override
+  String get txTransactionReceipt => 'Квитанция об операции';
+
+  @override
+  String get txTryUpdatingYourProfileBioAnd =>
+      'Попробуйте обновить описание профиля и навыки.';
+
+  @override
+  String get txTurnOn => 'Включить ⚡';
+
+  @override
+  String get txUpdatingService => 'Обновляем услугу…';
+
+  @override
+  String get txUpgradeNow => 'Улучшить сейчас';
+
+  @override
+  String get txUpgradeNowUnlockMoreHubs => 'Улучшить — больше хабов';
+
+  @override
+  String get txUpgradeToProToUseSaved =>
+      'Перейдите на Pro, чтобы использовать сохранённые ответы';
+
+  @override
+  String get txUpgradeToUnlockThisHub => 'Улучшите тариф, чтобы открыть хаб';
+
+  @override
+  String get txViewMap => 'Открыть карту';
+
+  @override
+  String get txViewPlans => 'Тарифы';
+
+  @override
+  String get txViewOnMap => 'Показать на карте';
+
+  @override
+  String get txWaitingForTheOtherPartyTo =>
+      'Ожидаем подтверждения другой стороны';
+
+  @override
+  String get txWhatServiceAreYouOffering => 'Какую услугу вы предлагаете?';
+
+  @override
+  String get txYouNeedMoreWalletBalanceTo =>
+      'Для продолжения нужно больше средств. Пополнить сейчас?';
+
+  @override
+  String get txYourServices => 'Ваши услуги';
+
+  @override
+  String get txYourTicketsHaveBeenSentTo => 'Билеты отправлены на вашу почту.';
+
+  @override
+  String get txCreateService => '✨ Создать услугу';
+
+  @override
+  String get txAiPitch => '✨ AI-предложение';
+
+  @override
+  String get txViewAiOpportunityRadar => '✨ AI-радар возможностей';
+
+  @override
+  String get txLaunchSpecialLimitedTime =>
+      '🎉 Акция к запуску — ограниченное время';
+
+  @override
+  String get txTrendingThisWeek => '🔥 В тренде на этой неделе';
 }

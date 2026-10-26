@@ -13,7 +13,7 @@ class ShareProfileScreen extends StatelessWidget {
       backgroundColor: const Color(0xFF1E1E1E), // Dark background as per Figma
       appBar: AppBar(
         title: Text(
-          "Share your profile",
+          AppLocalizations.of(context).txShareYourProfile,
           style: GoogleFonts.poppins(color: Colors.white),
         ),
         backgroundColor: Colors.transparent,

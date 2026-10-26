@@ -195,18 +195,18 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          'Delete Service?',
+          AppLocalizations.of(context).txDeleteService,
           style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
         ),
         content: Text(
-          'This will free up a slot in your plan, but this action is permanent.',
+          AppLocalizations.of(context).txThisWillFreeUpASlot,
           style: GoogleFonts.poppins(height: 1.45),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(
-              'Cancel',
+              AppLocalizations.of(context).cancel,
               style: GoogleFonts.poppins(color: Colors.grey.shade700),
             ),
           ),
@@ -219,7 +219,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
               ),
             ),
             child: Text(
-              'Delete',
+              AppLocalizations.of(context).delete,
               style: GoogleFonts.poppins(color: Colors.white),
             ),
           ),
@@ -280,7 +280,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              "Later",
+              AppLocalizations.of(context).txLater,
               style: GoogleFonts.poppins(color: Colors.grey.shade700),
             ),
           ),
@@ -296,7 +296,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
             child: Text(
-              "View Plans",
+              AppLocalizations.of(context).txViewPlans,
               style: GoogleFonts.poppins(color: Colors.white),
             ),
           ),
@@ -311,18 +311,18 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          "Insufficient Funds",
+          AppLocalizations.of(context).subscriptionInsufficientFundsTitle,
           style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
         ),
         content: Text(
-          "You need more wallet balance to continue. Add money now?",
+          AppLocalizations.of(context).txYouNeedMoreWalletBalanceTo,
           style: GoogleFonts.poppins(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              "Cancel",
+              AppLocalizations.of(context).cancel,
               style: GoogleFonts.poppins(color: Colors.grey.shade700),
             ),
           ),
@@ -336,7 +336,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
             child: Text(
-              "Add Money",
+              AppLocalizations.of(context).addMoney,
               style: GoogleFonts.poppins(color: Colors.white),
             ),
           ),
@@ -384,7 +384,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                "Boost Service Visibility",
+                AppLocalizations.of(context).txBoostServiceVisibility,
                 style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -392,7 +392,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
               ),
               const SizedBox(height: 6),
               Text(
-                "Choose a boost duration to rank this service higher.",
+                AppLocalizations.of(context).txChooseABoostDurationToRank,
                 style: GoogleFonts.poppins(color: Colors.black54, fontSize: 13),
               ),
               const SizedBox(height: 16),
@@ -465,7 +465,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                           ),
                         )
                       : Text(
-                          "Buy Boost",
+                          AppLocalizations.of(context).txBuyBoost,
                           style: GoogleFonts.poppins(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
@@ -499,7 +499,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          "My Services",
+          AppLocalizations.of(context).txMyServices,
           style: GoogleFonts.poppins(
             color: Colors.black87,
             fontWeight: FontWeight.w600,
@@ -519,7 +519,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    "Loading your services...",
+                    AppLocalizations.of(context).txLoadingYourServices,
                     style: GoogleFonts.poppins(
                       color: Colors.black54,
                       fontSize: 14,
@@ -548,7 +548,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "Your Services",
+                            AppLocalizations.of(context).txYourServices,
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -627,7 +627,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
           ),
           const SizedBox(height: 20),
           Text(
-            "Expand Your Reach",
+            AppLocalizations.of(context).txExpandYourReach,
             style: GoogleFonts.poppins(
               fontSize: 18,
               fontWeight: FontWeight.w700,
@@ -636,7 +636,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            "Create new services to showcase your skills and connect with more customers",
+            AppLocalizations.of(context).txCreateNewServicesToShowcaseYour,
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               fontSize: 13,
@@ -673,7 +673,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      "Opening...",
+                      AppLocalizations.of(context).txOpening,
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w600,
                         fontSize: 15,
@@ -683,7 +683,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                     const Icon(Icons.add_circle_outline, size: 20),
                     const SizedBox(width: 10),
                     Text(
-                      "Create New Service",
+                      AppLocalizations.of(context).txCreateNewService,
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w600,
                         fontSize: 15,
@@ -737,7 +737,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    'AI-Powered Suggestions',
+                    AppLocalizations.of(context).txAiPoweredSuggestions,
                     style: GoogleFonts.poppins(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -749,7 +749,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
               ),
               const SizedBox(height: 14),
               Text(
-                'Post your first service\n& start earning!',
+                AppLocalizations.of(context).txPostYourFirstServiceStartEarning,
                 style: GoogleFonts.poppins(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
@@ -803,7 +803,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
           ),
           const SizedBox(height: 18),
           Text(
-            'AI is analysing your profile...',
+            AppLocalizations.of(context).txAiIsAnalysingYourProfile,
             style: GoogleFonts.poppins(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -812,7 +812,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Finding the best opportunities for you',
+            AppLocalizations.of(context).txFindingTheBestOpportunitiesForYou,
             style: GoogleFonts.poppins(fontSize: 12, color: Colors.black45),
           ),
         ],
@@ -833,12 +833,12 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
           const Icon(Icons.search_off_rounded, size: 40, color: Colors.grey),
           const SizedBox(height: 12),
           Text(
-            'No AI suggestions right now.',
+            AppLocalizations.of(context).txNoAiSuggestionsRightNow,
             style: GoogleFonts.poppins(fontSize: 14, color: Colors.black54),
           ),
           const SizedBox(height: 4),
           Text(
-            'Try updating your profile bio and skills.',
+            AppLocalizations.of(context).txTryUpdatingYourProfileBioAnd,
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(fontSize: 12, color: Colors.black38),
           ),
@@ -997,7 +997,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                           ),
                         ),
                         child: Text(
-                          '\u2728 Create Service',
+                          AppLocalizations.of(context).txCreateService,
                           style: GoogleFonts.poppins(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -1152,7 +1152,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                     )
                   else
                     Text(
-                      "Price not set",
+                      AppLocalizations.of(context).txPriceNotSet,
                       style: GoogleFonts.poppins(
                         fontSize: 12,
                         color: Colors.grey.shade500,

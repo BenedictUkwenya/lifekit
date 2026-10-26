@@ -56,7 +56,7 @@ class _ReportUserScreenState extends State<ReportUserScreen> {
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
         title: Text(
-          "Report User",
+          AppLocalizations.of(context).txReportUser,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -73,7 +73,7 @@ class _ReportUserScreenState extends State<ReportUserScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Reason",
+              AppLocalizations.of(context).txReason,
               style: GoogleFonts.poppins(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -115,7 +115,7 @@ class _ReportUserScreenState extends State<ReportUserScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              "Details (optional)",
+              AppLocalizations.of(context).txDetailsOptional,
               style: GoogleFonts.poppins(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -151,7 +151,7 @@ class _ReportUserScreenState extends State<ReportUserScreen> {
                 child: _isSubmitting
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
-                        "Submit Report",
+                        AppLocalizations.of(context).txSubmitReport,
                         style: GoogleFonts.poppins(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,

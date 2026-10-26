@@ -1255,7 +1255,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
           const Text('🔄', style: TextStyle(fontSize: 10)),
           const SizedBox(width: 4),
           Text(
-            'Swappable',
+            AppLocalizations.of(context).badgeSwappable,
             style: GoogleFonts.poppins(
               color: Colors.white,
               fontSize: 10,

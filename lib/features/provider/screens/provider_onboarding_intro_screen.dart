@@ -52,7 +52,7 @@ class _ProviderOnboardingIntroScreenState
         ),
         leadingWidth: 80,
         title: Text(
-          "Change account setup",
+          AppLocalizations.of(context).txChangeAccountSetup,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -64,7 +64,7 @@ class _ProviderOnboardingIntroScreenState
           TextButton(
             onPressed: isLoading ? null : _upgradeAccount,
             child: Text(
-              "Next",
+              AppLocalizations.of(context).next,
               style: GoogleFonts.poppins(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,

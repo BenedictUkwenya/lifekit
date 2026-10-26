@@ -216,7 +216,7 @@ class _PlacesListScreenState extends State<PlacesListScreen>
         centerTitle: true,
         leading: const BackButton(color: Colors.black),
         title: Text(
-          "Places",
+          AppLocalizations.of(context).placesTitle,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -417,7 +417,7 @@ class _PlacesListScreenState extends State<PlacesListScreen>
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          "No places found.",
+                          AppLocalizations.of(context).txNoPlacesFound,
                           style: GoogleFonts.poppins(color: Colors.grey),
                         ),
                       ],
@@ -552,7 +552,7 @@ class _PlacesListScreenState extends State<PlacesListScreen>
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            "Popular",
+                            AppLocalizations.of(context).popular,
                             style: GoogleFonts.poppins(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,

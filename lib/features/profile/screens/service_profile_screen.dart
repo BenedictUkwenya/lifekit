@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import '../../../core/widgets/app_toast.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -394,7 +395,7 @@ class _ServiceProfileScreenState extends State<ServiceProfileScreen>
                         elevation: 5,
                       ),
                       child: Text(
-                        "Book Now",
+                        AppLocalizations.of(context).serviceBookNow,
                         style: GoogleFonts.poppins(
                           color: Colors.white,
                           fontSize: 16,
@@ -446,7 +447,7 @@ class _ServiceProfileScreenState extends State<ServiceProfileScreen>
         child: Padding(
           padding: const EdgeInsets.only(bottom: 50),
           child: Text(
-            "No reviews yet.",
+            AppLocalizations.of(context).reviewsNoReviews,
             style: GoogleFonts.poppins(color: Colors.grey),
           ),
         ),
@@ -527,7 +528,7 @@ class _ServiceProfileScreenState extends State<ServiceProfileScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Calendar",
+            AppLocalizations.of(context).txCalendar,
             style: GoogleFonts.poppins(
               fontWeight: FontWeight.bold,
               fontSize: 14,
@@ -590,7 +591,7 @@ class _ServiceProfileScreenState extends State<ServiceProfileScreen>
         child: Padding(
           padding: const EdgeInsets.only(bottom: 50),
           child: Text(
-            "No other services.",
+            AppLocalizations.of(context).txNoOtherServices,
             style: GoogleFonts.poppins(color: Colors.grey),
           ),
         ),

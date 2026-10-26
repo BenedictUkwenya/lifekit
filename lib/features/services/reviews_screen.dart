@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/services/api_service.dart';
@@ -75,7 +76,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
         elevation: 0,
         leading: const BackButton(color: Colors.black),
         title: Text(
-          "Reviews",
+          AppLocalizations.of(context).serviceReviews,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -90,7 +91,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Reviews for",
+                    AppLocalizations.of(context).txReviewsFor,
                     style: GoogleFonts.poppins(color: Colors.grey),
                   ),
                   Text(
@@ -148,7 +149,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                       child: Padding(
                         padding: const EdgeInsets.only(top: 20),
                         child: Text(
-                          "No reviews yet.",
+                          AppLocalizations.of(context).reviewsNoReviews,
                           style: GoogleFonts.poppins(color: Colors.grey),
                         ),
                       ),

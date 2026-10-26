@@ -213,7 +213,7 @@ class _SelectMainCategoryScreenState extends State<SelectMainCategoryScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Request a Category",
+                  AppLocalizations.of(context).txRequestACategory,
                   style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -293,7 +293,7 @@ class _SelectMainCategoryScreenState extends State<SelectMainCategoryScreen> {
                             ),
                           )
                         : Text(
-                            "Submit Request",
+                            AppLocalizations.of(context).txSubmitRequest,
                             style: GoogleFonts.poppins(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -325,7 +325,7 @@ class _SelectMainCategoryScreenState extends State<SelectMainCategoryScreen> {
         centerTitle: true,
         leading: const BackButton(color: Colors.black),
         title: Text(
-          "Choose Category",
+          AppLocalizations.of(context).txChooseCategory,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,

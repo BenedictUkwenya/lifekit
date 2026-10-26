@@ -125,7 +125,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Enter Amount",
+                    AppLocalizations.of(context).txEnterAmount,
                     style: GoogleFonts.poppins(
                       fontSize: 14,
                       color: Colors.grey[600],
@@ -186,7 +186,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                         ),
                       )
                     : Text(
-                        "Pay with Card",
+                        AppLocalizations.of(context).payWithCard,
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -204,7 +204,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
                 const Icon(Icons.lock, size: 14, color: Colors.grey),
                 const SizedBox(width: 6),
                 Text(
-                  "Secured by Stripe",
+                  AppLocalizations.of(context).securedByStripe,
                   style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
                 ),
               ],

@@ -73,7 +73,7 @@ class CartScreen extends StatelessWidget {
                       onTap: () =>
                           Navigator.pop(context), // Go back to add more
                       child: Text(
-                        "Add more",
+                        AppLocalizations.of(context).txAddMore,
                         style: GoogleFonts.poppins(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w600,
@@ -104,7 +104,7 @@ class CartScreen extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        "Tip: Tap on a service item to view full details.",
+                        AppLocalizations.of(context).txTipTapOnAServiceItem,
                         style: GoogleFonts.poppins(
                           fontSize: 12,
                           color: Colors.orange[800],

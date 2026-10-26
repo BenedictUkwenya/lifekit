@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -84,7 +85,7 @@ class _SubCategorySelectionScreenState
         title: Column(
           children: [
             Text(
-              "Service Categories",
+              AppLocalizations.of(context).txServiceCategories,
               style: GoogleFonts.poppins(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
@@ -140,7 +141,7 @@ class _SubCategorySelectionScreenState
                       GestureDetector(
                         onTap: () => setState(() => selectedIds.clear()),
                         child: Text(
-                          "Deselect all",
+                          AppLocalizations.of(context).txDeselectAll,
                           style: GoogleFonts.poppins(
                             color: Colors.black,
                             fontWeight: FontWeight.w500,
@@ -242,7 +243,7 @@ class _SubCategorySelectionScreenState
                         ),
                       ),
                       child: Text(
-                        "Next",
+                        AppLocalizations.of(context).next,
                         style: GoogleFonts.poppins(
                           color: Colors.white,
                           fontSize: 16,

@@ -2836,4 +2836,539 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chatTypeMessage => 'Type your message...';
+
+  @override
+  String get txAiMatchScore => 'AI Match Score: ';
+
+  @override
+  String get txAiPitchGenerator => 'AI Pitch Generator';
+
+  @override
+  String get txAiIsAnalysingYourProfile => 'AI is analysing your profile...';
+
+  @override
+  String get txAiRanksTheBestSwapPartners =>
+      'AI ranks the best swap partners for your skills';
+
+  @override
+  String get txAiPoweredSuggestions => 'AI-Powered Suggestions';
+
+  @override
+  String get txAboutThisEvent => 'About This Event';
+
+  @override
+  String get txAccept => 'Accept ✓';
+
+  @override
+  String get txActionNotAllowed => 'Action not allowed';
+
+  @override
+  String get txAddGroupCover => 'Add Group Cover';
+
+  @override
+  String get txAddOption => 'Add Option';
+
+  @override
+  String get txAddPhoto => 'Add Photo';
+
+  @override
+  String get txAddServiceOption => 'Add Service Option';
+
+  @override
+  String get txAddServicePhotos => 'Add Service Photos';
+
+  @override
+  String get txAddMore => 'Add more';
+
+  @override
+  String get txAdmin => 'Admin';
+
+  @override
+  String get txAllCategories => 'All Categories';
+
+  @override
+  String get txAllNotificationsMarkedAsRead =>
+      'All notifications marked as read';
+
+  @override
+  String get txAllowAllMembersToPostIn =>
+      'Allow all members to post in this group';
+
+  @override
+  String get txAutofillWithAi => 'Autofill with AI';
+
+  @override
+  String get txAvailableOptions => 'Available Options:';
+
+  @override
+  String get txAvailableForSkillSwap => 'Available for Skill Swap';
+
+  @override
+  String get txBoostServiceVisibility => 'Boost Service Visibility';
+
+  @override
+  String get txBrowseTheSwapBoard => 'Browse the Swap Board';
+
+  @override
+  String get txBuyBoost => 'Buy Boost';
+
+  @override
+  String get txByCreatingAGroupYouAgree =>
+      'By creating a group, you agree to follow LifeKit community guidelines.';
+
+  @override
+  String get txCalendar => 'Calendar';
+
+  @override
+  String get txCancelProposal => 'Cancel Proposal';
+
+  @override
+  String get txChangeAccountSetup => 'Change account setup';
+
+  @override
+  String get txCheckYourConnectionAndTryAgain =>
+      'Check your connection and try again.';
+
+  @override
+  String get txCheckout => 'Checkout';
+
+  @override
+  String get txChooseCategory => 'Choose Category';
+
+  @override
+  String get txChooseABoostDurationToRank =>
+      'Choose a boost duration to rank this service higher.';
+
+  @override
+  String get txClosed => 'Closed';
+
+  @override
+  String get txComments => 'Comments';
+
+  @override
+  String get txCopy => 'Copy';
+
+  @override
+  String get txCopyInviteLink => 'Copy Invite Link';
+
+  @override
+  String get txCouldNotLoad => 'Could not load';
+
+  @override
+  String get txCreateGroup => 'Create Group';
+
+  @override
+  String get txCreateNewService => 'Create New Service';
+
+  @override
+  String get txCreateNewServicesToShowcaseYour =>
+      'Create new services to showcase your skills and connect with more customers';
+
+  @override
+  String get txCreateOneToGetStarted => 'Create one to get started!';
+
+  @override
+  String get txCurrent => 'Current';
+
+  @override
+  String get txDeleteGroup => 'Delete Group';
+
+  @override
+  String get txDeleteService => 'Delete Service?';
+
+  @override
+  String get txDescribeTheServiceYouWantTo =>
+      'Describe the service you want to offer and AI will fill in the details for you.';
+
+  @override
+  String get txDeselectAll => 'Deselect all';
+
+  @override
+  String get txDetailsOptional => 'Details (optional)';
+
+  @override
+  String get txDisableSkillSwap => 'Disable Skill Swap?';
+
+  @override
+  String get txDiscussion => 'Discussion';
+
+  @override
+  String get txDownloadPdf => 'Download PDF';
+
+  @override
+  String get txEditLimitReached => 'Edit Limit Reached';
+
+  @override
+  String get txEditService => 'Edit Service';
+
+  @override
+  String get txEnterAmount => 'Enter Amount';
+
+  @override
+  String get txExpandYourReach => 'Expand Your Reach';
+
+  @override
+  String get txFeatured => 'Featured';
+
+  @override
+  String get txFindMyAiMatch => 'Find My AI Match';
+
+  @override
+  String get txFindingTheBestOpportunitiesForYou =>
+      'Finding the best opportunities for you';
+
+  @override
+  String get txGenerate => 'Generate';
+
+  @override
+  String get txHowSkillSwapWorks => 'How Skill Swap Works';
+
+  @override
+  String get txHowWasYourExperienceWith => 'How was your experience with:';
+
+  @override
+  String get txHubLimitReached => 'Hub Limit Reached';
+
+  @override
+  String get txImageAttached => 'Image attached 📎';
+
+  @override
+  String get txInsufficientBalance => 'Insufficient Balance';
+
+  @override
+  String get txJoinHub => 'Join Hub';
+
+  @override
+  String get txJoinThisCommunity => 'Join this Community';
+
+  @override
+  String get txKeepOff => 'Keep Off';
+
+  @override
+  String get txLast7Days => 'Last 7 Days';
+
+  @override
+  String get txLater => 'Later';
+
+  @override
+  String get txLeaveGroup => 'Leave Group';
+
+  @override
+  String get txLifekitWallet => 'LifeKit Wallet';
+
+  @override
+  String get txLoadingYourResults => 'Loading your results…';
+
+  @override
+  String get txLoadingYourServices => 'Loading your services...';
+
+  @override
+  String get txMarkAllRead => 'Mark all read';
+
+  @override
+  String get txMarkAsDone => 'Mark as Done?';
+
+  @override
+  String get txMessagingIsDisabledForCompletedOr =>
+      'Messaging is disabled for completed or cancelled services.';
+
+  @override
+  String get txMyHubs => 'My Hubs';
+
+  @override
+  String get txMyServices => 'My Services';
+
+  @override
+  String get txNoAiSuggestionsRightNow => 'No AI suggestions right now.';
+
+  @override
+  String get txNoAvailabilityFoundProposalWillBe =>
+      'No availability found — proposal will be sent without a date.';
+
+  @override
+  String get txNoCommentsYetBeTheFirst => 'No comments yet. Be the first!';
+
+  @override
+  String get txNoCommunitiesYet => 'No communities yet.';
+
+  @override
+  String get txNoNotificationsYet => 'No notifications yet';
+
+  @override
+  String get txNoOptionsAddedYet => 'No options added yet';
+
+  @override
+  String get txNoOtherServices => 'No other services.';
+
+  @override
+  String get txNoPlacesFound => 'No places found.';
+
+  @override
+  String get txNoQuestionsYetBeTheFirst =>
+      'No questions yet. Be the first to ask!';
+
+  @override
+  String get txNoSavedPostsYet => 'No saved posts yet';
+
+  @override
+  String get txNoServicesYet => 'No services yet';
+
+  @override
+  String get txNoteOptional => 'Note (optional)';
+
+  @override
+  String get txNothingHereYet => 'Nothing here yet';
+
+  @override
+  String get txNotificationDeleted => 'Notification deleted';
+
+  @override
+  String get txNumberOfTickets => 'Number of Tickets';
+
+  @override
+  String get txOnline => 'Online';
+
+  @override
+  String get txOnly3CommissionUpTo5 => 'Only 3% commission & up to 5 services!';
+
+  @override
+  String get txOpenPosting => 'Open Posting';
+
+  @override
+  String get txOpening => 'Opening...';
+
+  @override
+  String get txOurAiHasBeenTrackingDemand =>
+      'Our AI has been tracking demand in your area. New service opportunities are waiting for you!';
+
+  @override
+  String get txOwner => 'Owner';
+
+  @override
+  String get txPayWithWallet => 'Pay with Wallet';
+
+  @override
+  String get txPaymentSuccessful => 'Payment Successful';
+
+  @override
+  String get txPaymentSuccessful2 => 'Payment Successful!';
+
+  @override
+  String get txPendingProposals => 'Pending Proposals';
+
+  @override
+  String get txPermanentlyRemovesAllContent =>
+      'Permanently removes all content';
+
+  @override
+  String get txPlanLimitReached => 'Plan Limit Reached';
+
+  @override
+  String get txPostYourFirstServiceStartEarning =>
+      'Post your first service\n& start earning!';
+
+  @override
+  String get txPriceNotSet => 'Price not set';
+
+  @override
+  String get txProviders => 'Providers';
+
+  @override
+  String get txReason => 'Reason';
+
+  @override
+  String get txReportIssue => 'Report Issue';
+
+  @override
+  String get txReportUser => 'Report User';
+
+  @override
+  String get txRequestACategory => 'Request a Category';
+
+  @override
+  String get txReviewsFor => 'Reviews for';
+
+  @override
+  String get txReviewsWillAppearHere => 'Reviews will appear here';
+
+  @override
+  String get txService => 'SERVICE';
+
+  @override
+  String get txSuggested => 'SUGGESTED';
+
+  @override
+  String get txSaveChanges => 'Save Changes';
+
+  @override
+  String get txSaveTimeByInsertingPreWritten =>
+      'Save time by inserting pre-written templates.';
+
+  @override
+  String get txSavedReplies => 'Saved Replies';
+
+  @override
+  String get txSavedPosts => 'Saved posts';
+
+  @override
+  String get txSayHello => 'Say Hello!';
+
+  @override
+  String get txSeeAll => 'See All';
+
+  @override
+  String get txSeeAllOpenSwapProposalsPost =>
+      'See all open swap proposals & post your own';
+
+  @override
+  String get txServiceCategories => 'Service Categories';
+
+  @override
+  String get txServiceFee => 'Service Fee';
+
+  @override
+  String get txServiceVisibility => 'Service Visibility';
+
+  @override
+  String get txServicesOpenToSkillTrading => 'Services open to skill trading';
+
+  @override
+  String get txShareAService => 'Share a Service';
+
+  @override
+  String get txShareYourProfile => 'Share your profile';
+
+  @override
+  String get txSkillSwapContract => 'Skill Swap Contract';
+
+  @override
+  String get txSkillSwapHub => 'Skill Swap Hub';
+
+  @override
+  String get txSortResults => 'Sort Results';
+
+  @override
+  String get txStartACommunity => 'Start a Community';
+
+  @override
+  String get txStartTheConversationToDiscussDetails =>
+      'Start the conversation to discuss details.';
+
+  @override
+  String get txStartTheConversation => 'Start the conversation ✨';
+
+  @override
+  String get txStartingFrom => 'Starting from';
+
+  @override
+  String get txSubmitDispute => 'Submit Dispute';
+
+  @override
+  String get txSubmitReport => 'Submit Report';
+
+  @override
+  String get txSubmitRequest => 'Submit Request';
+
+  @override
+  String get txTag => 'Tag:';
+
+  @override
+  String get txTapToSearch => 'Tap to search';
+
+  @override
+  String get txTapToUploadUpTo5 => 'Tap to upload up to 5 photos';
+
+  @override
+  String get txTheGroupOwnerCannotBeRemoved =>
+      'The group owner cannot be removed.';
+
+  @override
+  String get txThisServiceIsNowLockedPlease =>
+      'This service is now locked. Please contact support to request further changes.';
+
+  @override
+  String get txThisWillFreeUpASlot =>
+      'This will free up a slot in your plan, but this action is permanent.';
+
+  @override
+  String get txThisWillMarkTheBookingAs =>
+      'This will mark the booking as completed.';
+
+  @override
+  String get txTipTapOnAServiceItem =>
+      'Tip: Tap on a service item to view full details.';
+
+  @override
+  String get txTradeSkillsBuildYourWorld => 'Trade skills. Build your world.';
+
+  @override
+  String get txTradingSkillsIsTheFastestWay =>
+      'Trading skills is the fastest way to grow your network and get free services!';
+
+  @override
+  String get txTransactionReceipt => 'Transaction Receipt';
+
+  @override
+  String get txTryUpdatingYourProfileBioAnd =>
+      'Try updating your profile bio and skills.';
+
+  @override
+  String get txTurnOn => 'Turn On ⚡';
+
+  @override
+  String get txUpdatingService => 'Updating service…';
+
+  @override
+  String get txUpgradeNow => 'Upgrade Now';
+
+  @override
+  String get txUpgradeNowUnlockMoreHubs => 'Upgrade Now — Unlock More Hubs';
+
+  @override
+  String get txUpgradeToProToUseSaved => 'Upgrade to Pro to use Saved Replies';
+
+  @override
+  String get txUpgradeToUnlockThisHub => 'Upgrade to unlock this hub';
+
+  @override
+  String get txViewMap => 'View Map';
+
+  @override
+  String get txViewPlans => 'View Plans';
+
+  @override
+  String get txViewOnMap => 'View on Map';
+
+  @override
+  String get txWaitingForTheOtherPartyTo =>
+      'Waiting for the other party to confirm';
+
+  @override
+  String get txWhatServiceAreYouOffering => 'What service are you offering?';
+
+  @override
+  String get txYouNeedMoreWalletBalanceTo =>
+      'You need more wallet balance to continue. Add money now?';
+
+  @override
+  String get txYourServices => 'Your Services';
+
+  @override
+  String get txYourTicketsHaveBeenSentTo =>
+      'Your tickets have been sent to your email.';
+
+  @override
+  String get txCreateService => '✨ Create Service';
+
+  @override
+  String get txAiPitch => '✨ AI Pitch';
+
+  @override
+  String get txViewAiOpportunityRadar => '✨ View AI Opportunity Radar';
+
+  @override
+  String get txLaunchSpecialLimitedTime => '🎉 Launch Special — Limited Time';
+
+  @override
+  String get txTrendingThisWeek => '🔥 Trending This Week';
 }

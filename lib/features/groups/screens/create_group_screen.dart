@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/app_toast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -108,7 +109,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         elevation: 0,
         leading: const BackButton(color: Colors.black),
         title: Text(
-          "Start a Community",
+          AppLocalizations.of(context).txStartACommunity,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -151,7 +152,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  "Add Group Cover",
+                                  AppLocalizations.of(context).txAddGroupCover,
                                   style: GoogleFonts.poppins(
                                     color: Colors.grey,
                                     fontSize: 12,
@@ -203,14 +204,14 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Open Posting",
+                                AppLocalizations.of(context).txOpenPosting,
                                 style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
                                 ),
                               ),
                               Text(
-                                "Allow all members to post in this group",
+                                AppLocalizations.of(context).txAllowAllMembersToPostIn,
                                 style: GoogleFonts.poppins(
                                   fontSize: 11,
                                   color: Colors.grey,
@@ -245,7 +246,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                       ),
                       onPressed: _handleCreate,
                       child: Text(
-                        "Create Group",
+                        AppLocalizations.of(context).txCreateGroup,
                         style: GoogleFonts.poppins(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -257,7 +258,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   const SizedBox(height: 20),
                   Center(
                     child: Text(
-                      "By creating a group, you agree to follow LifeKit community guidelines.",
+                      AppLocalizations.of(context).txByCreatingAGroupYouAgree,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(
                         fontSize: 10,

@@ -70,7 +70,7 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Report Issue",
+                    AppLocalizations.of(context).txReportIssue,
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
@@ -136,7 +136,7 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
                       child: _isDisputeSubmitting
                           ? const CircularProgressIndicator(color: Colors.white)
                           : Text(
-                              "Submit Dispute",
+                              AppLocalizations.of(context).txSubmitDispute,
                               style: GoogleFonts.poppins(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,

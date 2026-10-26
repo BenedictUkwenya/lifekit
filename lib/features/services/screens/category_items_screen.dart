@@ -103,7 +103,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              "Sort Results",
+              AppLocalizations.of(context).txSortResults,
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
@@ -373,11 +373,11 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
             context: context,
             builder: (context) => AlertDialog(
               title: Text(
-                "Action not allowed",
+                AppLocalizations.of(context).txActionNotAllowed,
                 style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
               ),
               content: Text(
-                "You cannot book your own service.",
+                AppLocalizations.of(context).providerRestrictedBody,
                 style: GoogleFonts.poppins(),
               ),
               actions: [
@@ -404,6 +404,8 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
               providerName: providerName,
               providerPic: providerPic,
               serviceTitle: service['title'],
+              heroImageUrl: coverImage,
+              heroTag: 'svc-${service['id']}-${identityHashCode(service)}',
             ),
           ),
         );
@@ -444,10 +446,10 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
                       height: 150,
                       color: Colors.grey[200],
                       child: coverImage != null
-                          ? CachedNetworkImage(
+                          ? Hero(tag: 'svc-${service['id']}-${identityHashCode(service)}', child: CachedNetworkImage(
                               imageUrl: coverImage,
                               fit: BoxFit.cover,
-                            )
+                            ))
                           : const Icon(Icons.image, color: Colors.grey),
                     ),
                   ),
@@ -533,7 +535,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
                           border: Border.all(color: premiumBorderColor),
                         ),
                         child: Text(
-                          "Featured",
+                          AppLocalizations.of(context).txFeatured,
                           style: GoogleFonts.poppins(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,

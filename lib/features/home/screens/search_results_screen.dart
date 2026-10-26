@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -78,7 +79,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: Text(
-                      "Services",
+                      AppLocalizations.of(context).servicesTitle,
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -94,7 +95,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: Text(
-                      "Providers",
+                      AppLocalizations.of(context).txProviders,
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -116,7 +117,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           const Icon(Icons.search_off, size: 60, color: Colors.grey),
           const SizedBox(height: 16),
           Text(
-            "No results found.",
+            AppLocalizations.of(context).noResults,
             style: GoogleFonts.poppins(color: Colors.grey),
           ),
         ],
@@ -164,11 +165,11 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             context: context,
             builder: (context) => AlertDialog(
               title: Text(
-                "Action not allowed",
+                AppLocalizations.of(context).txActionNotAllowed,
                 style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
               ),
               content: Text(
-                "You cannot book your own service.",
+                AppLocalizations.of(context).providerRestrictedBody,
                 style: GoogleFonts.poppins(),
               ),
               actions: [
@@ -194,6 +195,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
               providerName: providerName,
               providerPic: providerPic,
               serviceTitle: service['title'],
+              heroImageUrl: coverImage,
+              heroTag: 'svc-${service['id']}-${identityHashCode(service)}',
             ),
           ),
         );
@@ -233,10 +236,10 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                       height: 150,
                       color: Colors.grey[200],
                       child: coverImage != null
-                          ? CachedNetworkImage(
+                          ? Hero(tag: 'svc-${service['id']}-${identityHashCode(service)}', child: CachedNetworkImage(
                               imageUrl: coverImage,
                               fit: BoxFit.cover,
-                            )
+                            ))
                           : const Icon(Icons.image, color: Colors.grey),
                     ),
                   ),
@@ -289,7 +292,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          "Your Listing",
+                          AppLocalizations.of(context).categoryYourListing,
                           style: GoogleFonts.poppins(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,

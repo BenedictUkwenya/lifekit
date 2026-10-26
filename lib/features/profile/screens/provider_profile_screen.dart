@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import '../../../core/utils/share_profile.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -226,7 +227,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen>
                   services.isEmpty
                       ? Center(
                           child: Text(
-                            "No services yet",
+                            AppLocalizations.of(context).txNoServicesYet,
                             style: GoogleFonts.poppins(color: Colors.grey),
                           ),
                         )
@@ -249,7 +250,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen>
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          "Reviews will appear here",
+                          AppLocalizations.of(context).txReviewsWillAppearHere,
                           style: GoogleFonts.poppins(color: Colors.grey),
                         ),
                       ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -156,7 +157,7 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
                   ),
                   Expanded(
                     child: Text(
-                      'Comments',
+                      AppLocalizations.of(context).txComments,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.bold,
@@ -212,7 +213,7 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
                       padding: const EdgeInsets.all(32),
                       child: Center(
                         child: Text(
-                          'No comments yet. Be the first!',
+                          AppLocalizations.of(context).txNoCommentsYetBeTheFirst,
                           style: GoogleFonts.poppins(color: Colors.grey),
                         ),
                       ),

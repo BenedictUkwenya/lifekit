@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -167,14 +168,14 @@ class _AllGroupsTabState extends State<AllGroupsTab> {
             Icon(Icons.hub_outlined, size: 64, color: Colors.grey[300]),
             const SizedBox(height: 16),
             Text(
-              'No communities yet.',
+              AppLocalizations.of(context).txNoCommunitiesYet,
               style: GoogleFonts.poppins(
                 color: Colors.grey,
                 fontWeight: FontWeight.w600,
               ),
             ),
             Text(
-              'Create one to get started!',
+              AppLocalizations.of(context).txCreateOneToGetStarted,
               style: GoogleFonts.poppins(color: Colors.grey, fontSize: 12),
             ),
           ],
@@ -221,7 +222,7 @@ class _AllGroupsTabState extends State<AllGroupsTab> {
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      'My Hubs',
+                      AppLocalizations.of(context).txMyHubs,
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -314,7 +315,7 @@ class _AllGroupsTabState extends State<AllGroupsTab> {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    'Discover',
+                    AppLocalizations.of(context).swapTabDiscover,
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -569,7 +570,7 @@ class _TrendingSpotlightCard extends StatelessWidget {
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              '🔥 Trending This Week',
+                              AppLocalizations.of(context).txTrendingThisWeek,
                               style: GoogleFonts.poppins(
                                 color: Colors.white,
                                 fontSize: 10,
@@ -656,7 +657,7 @@ class _TrendingSpotlightCard extends StatelessWidget {
                                 ),
                               )
                             : Text(
-                                'Join',
+                                AppLocalizations.of(context).groupsJoin,
                                 style: GoogleFonts.poppins(
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.w800,
@@ -941,7 +942,7 @@ class _VipGroupCard extends StatelessWidget {
                                         color: Colors.white, size: 16),
                                     const SizedBox(width: 5),
                                     Text(
-                                      'Join Hub',
+                                      AppLocalizations.of(context).txJoinHub,
                                       style: GoogleFonts.poppins(
                                         color: Colors.white,
                                         fontWeight: FontWeight.w700,
@@ -1096,7 +1097,7 @@ class _PlanLimitSheet extends StatelessWidget {
           const SizedBox(height: 16),
 
           Text(
-            'Plan Limit Reached',
+            AppLocalizations.of(context).txPlanLimitReached,
             style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.w800,
@@ -1198,7 +1199,7 @@ class _PlanLimitSheet extends StatelessWidget {
                           color: Colors.white, size: 13),
                       const SizedBox(width: 5),
                       Text(
-                        'Upgrade to unlock this hub',
+                        AppLocalizations.of(context).txUpgradeToUnlockThisHub,
                         style: GoogleFonts.poppins(
                           color: Colors.white,
                           fontSize: 11,
@@ -1258,7 +1259,7 @@ class _PlanLimitSheet extends StatelessWidget {
                     const Icon(Icons.rocket_launch_rounded, size: 18),
                     const SizedBox(width: 8),
                     Text(
-                      'Upgrade Now — Unlock More Hubs',
+                      AppLocalizations.of(context).txUpgradeNowUnlockMoreHubs,
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -1273,7 +1274,7 @@ class _PlanLimitSheet extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Maybe later',
+              AppLocalizations.of(context).maybeLater,
               style: GoogleFonts.poppins(
                 color: Colors.grey[500],
                 fontSize: 13,
@@ -1333,7 +1334,7 @@ class _PlanPill extends StatelessWidget {
             ),
             if (isCurrent)
               Text(
-                'Current',
+                AppLocalizations.of(context).txCurrent,
                 style: GoogleFonts.poppins(
                     fontSize: 8.5, color: Colors.grey[400]),
               ),
