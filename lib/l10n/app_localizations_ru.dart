@@ -3386,4 +3386,31 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get txTrendingThisWeek => '🔥 В тренде на этой неделе';
+
+  @override
+  String get chatSendPhoto => 'Отправить фото';
+
+  @override
+  String get timeJustNow => 'Только что';
+
+  @override
+  String timeMinutesAgo(int n) {
+    return '$n мин назад';
+  }
+
+  @override
+  String timeHoursAgo(int n) {
+    return '$n ч назад';
+  }
+
+  @override
+  String timeDaysAgo(int n) {
+    return '$n дн назад';
+  }
+
+  @override
+  String get dateToday => 'Сегодня';
+
+  @override
+  String get dateYesterday => 'Вчера';
 }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/time_ago.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 
@@ -107,12 +107,7 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
   String _timeAgo(String? dateStr) {
     if (dateStr == null) return '';
     try {
-      final dt = DateTime.parse(dateStr);
-      final diff = DateTime.now().difference(dt);
-      if (diff.inDays >= 1) return DateFormat('MMM d').format(dt);
-      if (diff.inHours >= 1) return '${diff.inHours}hrs ago';
-      if (diff.inMinutes >= 1) return '${diff.inMinutes}m ago';
-      return 'Just now';
+      return formatTimeAgo(context, DateTime.parse(dateStr));
     } catch (_) {
       return '';
     }

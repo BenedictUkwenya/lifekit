@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/time_ago.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/skeleton.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/app_cache.dart';
@@ -446,12 +446,5 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     );
   }
 
-  String _getTimeAgo(DateTime date) {
-    final Duration diff = DateTime.now().difference(date);
-    if (diff.inMinutes < 1) return "Just now";
-    if (diff.inMinutes < 60) return "${diff.inMinutes}m ago";
-    if (diff.inHours < 24) return "${diff.inHours}h ago";
-    if (diff.inDays < 7) return "${diff.inDays}d ago";
-    return DateFormat('MMM dd').format(date);
-  }
+  String _getTimeAgo(DateTime date) => formatTimeAgo(context, date);
 }

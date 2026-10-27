@@ -6423,6 +6423,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'🔥 Trending This Week'**
   String get txTrendingThisWeek;
+
+  /// No description provided for @chatSendPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a photo'**
+  String get chatSendPhoto;
+
+  /// No description provided for @timeJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get timeJustNow;
+
+  /// No description provided for @timeMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{n}m ago'**
+  String timeMinutesAgo(int n);
+
+  /// No description provided for @timeHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{n}h ago'**
+  String timeHoursAgo(int n);
+
+  /// No description provided for @timeDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{n}d ago'**
+  String timeDaysAgo(int n);
+
+  /// No description provided for @dateToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get dateToday;
+
+  /// No description provided for @dateYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get dateYesterday;
 }
 
 class _AppLocalizationsDelegate

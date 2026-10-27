@@ -3371,4 +3371,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get txTrendingThisWeek => '🔥 Trending This Week';
+
+  @override
+  String get chatSendPhoto => 'Send a photo';
+
+  @override
+  String get timeJustNow => 'Just now';
+
+  @override
+  String timeMinutesAgo(int n) {
+    return '${n}m ago';
+  }
+
+  @override
+  String timeHoursAgo(int n) {
+    return '${n}h ago';
+  }
+
+  @override
+  String timeDaysAgo(int n) {
+    return '${n}d ago';
+  }
+
+  @override
+  String get dateToday => 'Today';
+
+  @override
+  String get dateYesterday => 'Yesterday';
 }

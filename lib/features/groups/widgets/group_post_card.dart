@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/time_ago.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
@@ -121,13 +121,7 @@ class _GroupPostCardState extends State<GroupPostCard> {
     }
   }
 
-  String _timeAgo(DateTime date) {
-    final diff = DateTime.now().difference(date);
-    if (diff.inDays >= 1) return DateFormat('MMM dd').format(date);
-    if (diff.inHours >= 1) return '${diff.inHours}h ago';
-    if (diff.inMinutes >= 1) return '${diff.inMinutes}m ago';
-    return 'Just now';
-  }
+  String _timeAgo(DateTime date) => formatTimeAgo(context, date);
 
   @override
   Widget build(BuildContext context) {

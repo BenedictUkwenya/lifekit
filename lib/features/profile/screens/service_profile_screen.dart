@@ -149,10 +149,7 @@ class _ServiceProfileScreenState extends State<ServiceProfileScreen>
                       color: AppColors.primary,
                     ),
                   )
-                : const Icon(
-                    Icons.campaign_outlined,
-                    color: AppColors.primary,
-                  ),
+                : const Icon(Icons.campaign_outlined, color: AppColors.primary),
           ),
         ],
         title: Text(
@@ -168,203 +165,212 @@ class _ServiceProfileScreenState extends State<ServiceProfileScreen>
           ? const Center(child: LifeKitLoader())
           : Stack(
               children: [
-                NestedScrollView(
-                  headerSliverBuilder: (context, innerBoxIsScrolled) => [
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 10),
-                            // --- 1. HERO IMAGE & AVATAR ---
-                            Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                // Cover Image
-                                Container(
-                                  height: 200,
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(24),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.05),
-                                        blurRadius: 15,
-                                        offset: const Offset(0, 5),
+                RefreshIndicator(
+                  color: AppColors.primary,
+                  // Inner lists of the NestedScrollView report at depth 1.
+                  notificationPredicate: (n) => n.depth <= 1,
+                  onRefresh: _fetchData,
+                  child: NestedScrollView(
+                    headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 10),
+                              // --- 1. HERO IMAGE & AVATAR ---
+                              Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  // Cover Image
+                                  Container(
+                                    height: 200,
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(24),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.05),
+                                          blurRadius: 15,
+                                          offset: const Offset(0, 5),
+                                        ),
+                                      ],
+                                      image: DecorationImage(
+                                        image:
+                                            (widget.service['image_urls']
+                                                    as List)
+                                                .isNotEmpty
+                                            ? CachedNetworkImageProvider(
+                                                widget.service['image_urls'][0],
+                                              )
+                                            : const AssetImage(
+                                                    'assets/images/home_bg.png',
+                                                  )
+                                                  as ImageProvider,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                  // Avatar with Clean Border
+                                  Positioned(
+                                    bottom: -30,
+                                    left: 20,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(
+                                        4,
+                                      ), // Thicker white border
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: CircleAvatar(
+                                        radius: 32,
+                                        backgroundColor: Colors.grey[200],
+                                        backgroundImage:
+                                            widget.providerPic != null
+                                            ? CachedNetworkImageProvider(
+                                                widget.providerPic!,
+                                              )
+                                            : null,
+                                        child: widget.providerPic == null
+                                            ? const Icon(
+                                                Icons.person,
+                                                color: Colors.grey,
+                                              )
+                                            : null,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 40),
+
+                              // --- 2. PROVIDER INFO ---
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        widget.providerName,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.star,
+                                            color: Colors.amber,
+                                            size: 16,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            "$rating ($totalReviews Reviews)",
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 12,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.location_on_outlined,
+                                            color: Colors.grey,
+                                            size: 16,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            location,
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 12,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
-                                    image: DecorationImage(
-                                      image:
-                                          (widget.service['image_urls'] as List)
-                                              .isNotEmpty
-                                          ? CachedNetworkImageProvider(
-                                              widget.service['image_urls'][0],
-                                            )
-                                          : const AssetImage(
-                                                  'assets/images/home_bg.png',
-                                                )
-                                                as ImageProvider,
-                                      fit: BoxFit.cover,
-                                    ),
                                   ),
-                                ),
-                                // Avatar with Clean Border
-                                Positioned(
-                                  bottom: -30,
-                                  left: 20,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(
-                                      4,
-                                    ), // Thicker white border
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: CircleAvatar(
-                                      radius: 32,
-                                      backgroundColor: Colors.grey[200],
-                                      backgroundImage:
-                                          widget.providerPic != null
-                                          ? CachedNetworkImageProvider(
-                                              widget.providerPic!,
-                                            )
-                                          : null,
-                                      child: widget.providerPic == null
-                                          ? const Icon(
-                                              Icons.person,
-                                              color: Colors.grey,
-                                            )
-                                          : null,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 40),
-
-                            // --- 2. PROVIDER INFO ---
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      widget.providerName,
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
+                                  // Action Buttons
+                                  Row(
+                                    children: [
+                                      _buildCircleBtn(
+                                        Icons.calendar_today,
+                                        brandColor,
+                                        isPrimary: true,
                                       ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.star,
-                                          color: Colors.amber,
-                                          size: 16,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          "$rating ($totalReviews Reviews)",
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 12,
-                                            color: Colors.black87,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.location_on_outlined,
-                                          color: Colors.grey,
-                                          size: 16,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          location,
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 12,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                // Action Buttons
-                                Row(
-                                  children: [
-                                    _buildCircleBtn(
-                                      Icons.calendar_today,
-                                      brandColor,
-                                      isPrimary: true,
-                                    ),
-                                    const SizedBox(width: 10),
-                                    _buildCircleBtn(
-                                      Icons.chat_bubble_outline,
-                                      Colors.grey[200]!,
-                                      isPrimary: false,
-                                      iconColor: Colors.black,
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                      const SizedBox(width: 10),
+                                      _buildCircleBtn(
+                                        Icons.chat_bubble_outline,
+                                        Colors.grey[200]!,
+                                        isPrimary: false,
+                                        iconColor: Colors.black,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 24),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // --- 3. STICKY TABS (CORRECTED ALIGNMENT) ---
+                      SliverPersistentHeader(
+                        delegate: _SliverAppBarDelegate(
+                          TabBar(
+                            controller: _tabController,
+                            isScrollable: true,
+                            labelColor: Colors.white,
+                            unselectedLabelColor: Colors.black,
+                            labelStyle: GoogleFonts.poppins(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
                             ),
-                            const SizedBox(height: 24),
-                          ],
+                            indicatorSize: TabBarIndicatorSize.tab,
+                            indicator: BoxDecoration(
+                              color: brandColor,
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            // FIX: Removed 'padding' property on TabBar (it causes centering/offset issues)
+                            // Instead, we handle alignment in the delegate container or labelPadding
+                            labelPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                            ),
+                            dividerColor: Colors.transparent,
+                            // Ensures tabs start from the left
+                            tabAlignment: TabAlignment.start,
+                            tabs: const [
+                              Tab(text: "About"),
+                              Tab(text: "Reviews"),
+                              Tab(text: "Availability"),
+                              Tab(text: "Services"),
+                            ],
+                          ),
                         ),
+                        pinned: true,
                       ),
-                    ),
-
-                    // --- 3. STICKY TABS (CORRECTED ALIGNMENT) ---
-                    SliverPersistentHeader(
-                      delegate: _SliverAppBarDelegate(
-                        TabBar(
-                          controller: _tabController,
-                          isScrollable: true,
-                          labelColor: Colors.white,
-                          unselectedLabelColor: Colors.black,
-                          labelStyle: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          indicatorSize: TabBarIndicatorSize.tab,
-                          indicator: BoxDecoration(
-                            color: brandColor,
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          // FIX: Removed 'padding' property on TabBar (it causes centering/offset issues)
-                          // Instead, we handle alignment in the delegate container or labelPadding
-                          labelPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                          ),
-                          dividerColor: Colors.transparent,
-                          // Ensures tabs start from the left
-                          tabAlignment: TabAlignment.start,
-                          tabs: const [
-                            Tab(text: "About"),
-                            Tab(text: "Reviews"),
-                            Tab(text: "Availability"),
-                            Tab(text: "Services"),
-                          ],
-                        ),
-                      ),
-                      pinned: true,
-                    ),
-                  ],
-
-                  body: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildAboutTab(),
-                      _buildReviewsTab(),
-                      _buildAvailabilityTab(brandColor),
-                      _buildServicesTab(),
                     ],
+
+                    body: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildAboutTab(),
+                        _buildReviewsTab(),
+                        _buildAvailabilityTab(brandColor),
+                        _buildServicesTab(),
+                      ],
+                    ),
                   ),
                 ),
 

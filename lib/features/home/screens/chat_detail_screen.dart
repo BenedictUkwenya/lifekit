@@ -4,6 +4,9 @@ import '../../../core/widgets/app_toast.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/error_handler.dart';
 import 'dart:async';
+import 'dart:io';
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -42,6 +45,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
   List<dynamic> messages = [];
   bool isLoading = true;
   bool isSending = false;
+  bool _sendingPhoto = false;
   bool _isOtherUserTyping = false;
   bool _isTypingBroadcastActive = false;
   String _subscriptionTier = 'free';
@@ -200,6 +204,44 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
       if (!mounted) return;
       AppToast.info(context, appErrorMessage(context, e));
     }
+  }
+
+  /// Pick a photo, upload it, and send it (with any typed text as caption).
+  Future<void> _sendPhoto() async {
+    if (isChatLocked || _sendingPhoto) return;
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1600,
+      imageQuality: 80,
+    );
+    if (picked == null || !mounted) return;
+    HapticFeedback.selectionClick();
+    final caption = _messageController.text.trim();
+    setState(() => _sendingPhoto = true);
+    try {
+      final url = await _apiService.uploadChatImage(File(picked.path));
+      await _apiService.sendMessage(currentBooking['id'], caption, imageUrl: url);
+      if (!mounted) return;
+      _messageController.clear();
+      _fetchMessages(isPolling: true);
+      _scrollToBottom();
+    } catch (e) {
+      if (mounted) AppToast.error(context, appErrorMessage(context, e));
+    } finally {
+      if (mounted) setState(() => _sendingPhoto = false);
+    }
+  }
+
+  void _openPhoto(String url) {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        opaque: false,
+        barrierColor: Colors.black,
+        pageBuilder: (_, _, _) => _PhotoViewer(url: url),
+        transitionsBuilder: (_, anim, _, child) => FadeTransition(opacity: anim, child: child),
+      ),
+    );
   }
 
   void _onMessageInputChanged() {
@@ -891,6 +933,12 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
     );
   }
 
+  /// Photo messages store "📷 Photo" as text for chat-list previews; the
+  /// bubble shows the photo instead of that placeholder.
+  bool _isPhotoPlaceholder(dynamic msg) =>
+      (msg['image_url'] ?? '').toString().isNotEmpty &&
+      (msg['content'] ?? '').toString().trim() == '📷 Photo';
+
   Widget _buildMessageBubble(dynamic msg, bool isMe) {
     // null sender_id = system-generated pill (booking confirmed, disputed, etc.)
     // The legacy 'SYSTEM' string check keeps old database rows rendering correctly.
@@ -957,13 +1005,45 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
               ? CrossAxisAlignment.end
               : CrossAxisAlignment.start,
           children: [
-            Text(
-              msg['content'],
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: isMe ? Colors.white : Colors.black87,
+            if ((msg['image_url'] ?? '').toString().startsWith('http')) ...[
+              GestureDetector(
+                onTap: () => _openPhoto(msg['image_url'].toString()),
+                child: Hero(
+                  tag: 'chat-img-${msg['id'] ?? msg['image_url']}',
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: CachedNetworkImage(
+                      imageUrl: msg['image_url'].toString(),
+                      width: 220,
+                      height: 220,
+                      fit: BoxFit.cover,
+                      fadeInDuration: const Duration(milliseconds: 250),
+                      placeholder: (_, _) => Container(
+                        width: 220,
+                        height: 220,
+                        color: isMe ? Colors.white24 : Colors.grey.shade200,
+                      ),
+                      errorWidget: (_, _, _) => const SizedBox(
+                        width: 220,
+                        height: 120,
+                        child: Icon(Icons.broken_image_outlined),
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            ),
+            ],
+            if (!_isPhotoPlaceholder(msg))
+              Padding(
+                padding: EdgeInsets.only(top: (msg['image_url'] ?? '').toString().isNotEmpty ? 8 : 0),
+                child: Text(
+                  (msg['content'] ?? '').toString(),
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: isMe ? Colors.white : Colors.black87,
+                  ),
+                ),
+              ),
             if (messageTime.isNotEmpty) const SizedBox(height: 6),
             if (messageTime.isNotEmpty)
               Row(
@@ -1167,6 +1247,17 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
                     ),
                   ),
                   IconButton(
+                    tooltip: AppLocalizations.of(context).chatSendPhoto,
+                    icon: _sendingPhoto
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Icon(Icons.image_outlined, color: Colors.grey[600]),
+                    onPressed: _sendingPhoto ? null : _sendPhoto,
+                  ),
+                  IconButton(
                     icon: Icon(
                       Icons.bolt_rounded,
                       color: AppColors.primary.withOpacity(0.9),
@@ -1288,5 +1379,33 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
     if (status == 'completed') return AppColors.primary;
     if (status == 'cancelled') return Colors.red;
     return Colors.orange;
+  }
+}
+
+/// Full-screen photo with pinch-to-zoom; tap or swipe back to close.
+class _PhotoViewer extends StatelessWidget {
+  final String url;
+  const _PhotoViewer({required this.url});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: GestureDetector(
+        onTap: () => Navigator.pop(context),
+        child: Center(
+          child: InteractiveViewer(
+            minScale: 1,
+            maxScale: 4,
+            child: CachedNetworkImage(imageUrl: url, fit: BoxFit.contain),
+          ),
+        ),
+      ),
+    );
   }
 }

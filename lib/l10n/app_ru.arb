@@ -2053,5 +2053,12 @@
   "txAiPitch": "✨ AI-предложение",
   "txViewAiOpportunityRadar": "✨ AI-радар возможностей",
   "txLaunchSpecialLimitedTime": "🎉 Акция к запуску — ограниченное время",
-  "txTrendingThisWeek": "🔥 В тренде на этой неделе"
+  "txTrendingThisWeek": "🔥 В тренде на этой неделе",
+  "chatSendPhoto": "Отправить фото",
+  "timeJustNow": "Только что",
+  "timeMinutesAgo": "{n} мин назад",
+  "timeHoursAgo": "{n} ч назад",
+  "timeDaysAgo": "{n} дн назад",
+  "dateToday": "Сегодня",
+  "dateYesterday": "Вчера"
 }

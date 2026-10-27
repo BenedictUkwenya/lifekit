@@ -126,137 +126,147 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen>
       ),
       body: isLoading
           ? const Center(child: LifeKitLoader())
-          : NestedScrollView(
-              headerSliverBuilder: (context, innerBoxIsScrolled) => [
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        CircleAvatar(
-                          radius: 40,
-                          backgroundColor: Colors.grey[200],
-                          backgroundImage: widget.providerPic != null
-                              ? CachedNetworkImageProvider(widget.providerPic!)
-                              : null,
-                          child: widget.providerPic == null
-                              ? const Icon(
-                                  Icons.person,
-                                  size: 40,
-                                  color: Colors.grey,
-                                )
-                              : null,
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              widget.providerName,
-                              style: GoogleFonts.poppins(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
+          : RefreshIndicator(
+              color: AppColors.primary,
+              // Inner lists of the NestedScrollView report at depth 1.
+              notificationPredicate: (n) => n.depth <= 1,
+              onRefresh: _fetchProviderDetails,
+              child: NestedScrollView(
+                headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          CircleAvatar(
+                            radius: 40,
+                            backgroundColor: Colors.grey[200],
+                            backgroundImage: widget.providerPic != null
+                                ? CachedNetworkImageProvider(
+                                    widget.providerPic!,
+                                  )
+                                : null,
+                            child: widget.providerPic == null
+                                ? const Icon(
+                                    Icons.person,
+                                    size: 40,
+                                    color: Colors.grey,
+                                  )
+                                : null,
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                widget.providerName,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 6),
-                            const Icon(
-                              Icons.verified,
-                              color: Colors.blue,
-                              size: 20,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          profileData?['bio'] ??
-                              "Professional service provider on LifeKit.",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.poppins(
-                            color: Colors.grey,
-                            fontSize: 13,
+                              const SizedBox(width: 6),
+                              const Icon(
+                                Icons.verified,
+                                color: Colors.blue,
+                                size: 20,
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(height: 24),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _buildStatItem(
-                              calculatedRating, // Dynamic
-                              "Rating",
-                              Icons.star,
-                              Colors.amber,
+                          const SizedBox(height: 8),
+                          Text(
+                            profileData?['bio'] ??
+                                "Professional service provider on LifeKit.",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(
+                              color: Colors.grey,
+                              fontSize: 13,
                             ),
-                            _buildStatItem(
-                              "${services.length}",
-                              "Services",
-                              Icons.work,
-                              Colors.blue,
-                            ),
-                            _buildStatItem(
-                              experienceStr, // Dynamic
-                              "Exp.",
-                              Icons.timer,
-                              Colors.green,
-                            ),
-                          ],
-                        ),
-                      ],
+                          ),
+                          const SizedBox(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _buildStatItem(
+                                calculatedRating, // Dynamic
+                                "Rating",
+                                Icons.star,
+                                Colors.amber,
+                              ),
+                              _buildStatItem(
+                                "${services.length}",
+                                "Services",
+                                Icons.work,
+                                Colors.blue,
+                              ),
+                              _buildStatItem(
+                                experienceStr, // Dynamic
+                                "Exp.",
+                                Icons.timer,
+                                Colors.green,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                SliverPersistentHeader(
-                  delegate: _SliverAppBarDelegate(
-                    TabBar(
-                      controller: _tabController,
-                      labelColor: AppColors.primary,
-                      unselectedLabelColor: Colors.grey,
-                      indicatorColor: AppColors.primary,
-                      tabs: const [
-                        Tab(text: "Services"),
-                        Tab(text: "Reviews"),
-                      ],
+                  SliverPersistentHeader(
+                    delegate: _SliverAppBarDelegate(
+                      TabBar(
+                        controller: _tabController,
+                        labelColor: AppColors.primary,
+                        unselectedLabelColor: Colors.grey,
+                        indicatorColor: AppColors.primary,
+                        tabs: const [
+                          Tab(text: "Services"),
+                          Tab(text: "Reviews"),
+                        ],
+                      ),
                     ),
-                  ),
-                  pinned: true,
-                ),
-              ],
-              body: TabBarView(
-                controller: _tabController,
-                children: [
-                  // Services Tab
-                  services.isEmpty
-                      ? Center(
-                          child: Text(
-                            AppLocalizations.of(context).txNoServicesYet,
-                            style: GoogleFonts.poppins(color: Colors.grey),
-                          ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(20),
-                          itemCount: services.length,
-                          itemBuilder: (context, index) =>
-                              _buildServiceCard(services[index]),
-                        ),
-
-                  // Reviews Tab (Placeholder for now)
-                  Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.rate_review_outlined,
-                          color: Colors.grey,
-                          size: 40,
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          AppLocalizations.of(context).txReviewsWillAppearHere,
-                          style: GoogleFonts.poppins(color: Colors.grey),
-                        ),
-                      ],
-                    ),
+                    pinned: true,
                   ),
                 ],
+                body: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    // Services Tab
+                    services.isEmpty
+                        ? Center(
+                            child: Text(
+                              AppLocalizations.of(context).txNoServicesYet,
+                              style: GoogleFonts.poppins(color: Colors.grey),
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.all(20),
+                            itemCount: services.length,
+                            itemBuilder: (context, index) =>
+                                _buildServiceCard(services[index]),
+                          ),
+
+                    // Reviews Tab (Placeholder for now)
+                    Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.rate_review_outlined,
+                            color: Colors.grey,
+                            size: 40,
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            AppLocalizations.of(
+                              context,
+                            ).txReviewsWillAppearHere,
+                            style: GoogleFonts.poppins(color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
     );

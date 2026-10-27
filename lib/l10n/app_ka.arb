@@ -2053,5 +2053,12 @@
   "txAiPitch": "✨ AI შეთავაზება",
   "txViewAiOpportunityRadar": "✨ AI შესაძლებლობების რადარი",
   "txLaunchSpecialLimitedTime": "🎉 გაშვების აქცია — შეზღუდული დროით",
-  "txTrendingThisWeek": "🔥 ამ კვირის ტრენდები"
+  "txTrendingThisWeek": "🔥 ამ კვირის ტრენდები",
+  "chatSendPhoto": "ფოტოს გაგზავნა",
+  "timeJustNow": "ახლახან",
+  "timeMinutesAgo": "{n} წთ-ის წინ",
+  "timeHoursAgo": "{n} სთ-ის წინ",
+  "timeDaysAgo": "{n} დღის წინ",
+  "dateToday": "დღეს",
+  "dateYesterday": "გუშინ"
 }

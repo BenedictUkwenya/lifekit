@@ -1,6 +1,7 @@
 ﻿import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../../core/utils/time_ago.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import '../../../core/widgets/app_toast.dart';
@@ -4245,15 +4246,5 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
     return EmptyState(icon: icon, title: title, message: sub);
   }
 
-  String _timeAgo(dynamic ts) {
-    if (ts == null) return '';
-    final dt = DateTime.tryParse(ts.toString());
-    if (dt == null) return '';
-    final diff = DateTime.now().difference(dt.toLocal());
-    if (diff.inMinutes < 1) return 'Just now';
-    if (diff.inHours < 1) return '${diff.inMinutes}m ago';
-    if (diff.inDays < 1) return '${diff.inHours}h ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
-    return '${dt.day}/${dt.month}';
-  }
+  String _timeAgo(dynamic ts) => formatTimeAgoRaw(context, ts);
 }

@@ -869,13 +869,13 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     final check = DateTime(date.year, date.month, date.day);
     String text;
     if (check == today)
-      text = "Today";
+      text = AppLocalizations.of(context).dateToday;
     else if (check == yesterday)
-      text = "Yesterday";
+      text = AppLocalizations.of(context).dateYesterday;
     else if (now.difference(check).inDays < 7)
-      text = DateFormat('EEEE').format(date);
+      text = DateFormat('EEEE', Localizations.localeOf(context).languageCode).format(date);
     else
-      text = DateFormat('MMM d, yyyy').format(date);
+      text = DateFormat('d MMM yyyy', Localizations.localeOf(context).languageCode).format(date);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20),

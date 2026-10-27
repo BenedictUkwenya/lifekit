@@ -1849,5 +1849,15 @@
   "txAiPitch": "✨ AI Pitch",
   "txViewAiOpportunityRadar": "✨ View AI Opportunity Radar",
   "txLaunchSpecialLimitedTime": "🎉 Launch Special — Limited Time",
-  "txTrendingThisWeek": "🔥 Trending This Week"
+  "txTrendingThisWeek": "🔥 Trending This Week",
+  "chatSendPhoto": "Send a photo",
+  "timeJustNow": "Just now",
+  "timeMinutesAgo": "{n}m ago",
+  "@timeMinutesAgo": {"placeholders":{"n":{"type":"int"}}},
+  "timeHoursAgo": "{n}h ago",
+  "@timeHoursAgo": {"placeholders":{"n":{"type":"int"}}},
+  "timeDaysAgo": "{n}d ago",
+  "@timeDaysAgo": {"placeholders":{"n":{"type":"int"}}},
+  "dateToday": "Today",
+  "dateYesterday": "Yesterday"
 }

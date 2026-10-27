@@ -3392,4 +3392,31 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get txTrendingThisWeek => '🔥 ამ კვირის ტრენდები';
+
+  @override
+  String get chatSendPhoto => 'ფოტოს გაგზავნა';
+
+  @override
+  String get timeJustNow => 'ახლახან';
+
+  @override
+  String timeMinutesAgo(int n) {
+    return '$n წთ-ის წინ';
+  }
+
+  @override
+  String timeHoursAgo(int n) {
+    return '$n სთ-ის წინ';
+  }
+
+  @override
+  String timeDaysAgo(int n) {
+    return '$n დღის წინ';
+  }
+
+  @override
+  String get dateToday => 'დღეს';
+
+  @override
+  String get dateYesterday => 'გუშინ';
 }

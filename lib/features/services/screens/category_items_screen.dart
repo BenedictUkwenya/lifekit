@@ -287,32 +287,41 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
 
                 Expanded(
                   child: filteredServices.isEmpty
-                      ? Center(child: Text(AppLocalizations.of(context).msgNoServicesFound))
-                      : ListView(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 10,
+                      ? Center(
+                          child: Text(
+                            AppLocalizations.of(context).msgNoServicesFound,
                           ),
-                          children: [
-                            if (featuredServices.isNotEmpty) ...[
-                              _buildSectionHeader("Featured Providers"),
-                              ...featuredServices.map(
-                                (service) => _buildProviderCard(
-                                  service,
-                                  isPremium: true,
+                        )
+                      : RefreshIndicator(
+                          color: AppColors.primary,
+                          onRefresh: _fetchData,
+                          child: ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 10,
+                            ),
+                            children: [
+                              if (featuredServices.isNotEmpty) ...[
+                                _buildSectionHeader("Featured Providers"),
+                                ...featuredServices.map(
+                                  (service) => _buildProviderCard(
+                                    service,
+                                    isPremium: true,
+                                  ),
                                 ),
-                              ),
-                            ],
-                            if (standardServices.isNotEmpty) ...[
-                              _buildSectionHeader(l10n.categoryMoreProviders),
-                              ...standardServices.map(
-                                (service) => _buildProviderCard(
-                                  service,
-                                  isPremium: false,
+                              ],
+                              if (standardServices.isNotEmpty) ...[
+                                _buildSectionHeader(l10n.categoryMoreProviders),
+                                ...standardServices.map(
+                                  (service) => _buildProviderCard(
+                                    service,
+                                    isPremium: false,
+                                  ),
                                 ),
-                              ),
+                              ],
                             ],
-                          ],
+                          ),
                         ),
                 ),
               ],
@@ -446,10 +455,14 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
                       height: 150,
                       color: Colors.grey[200],
                       child: coverImage != null
-                          ? Hero(tag: 'svc-${service['id']}-${identityHashCode(service)}', child: CachedNetworkImage(
-                              imageUrl: coverImage,
-                              fit: BoxFit.cover,
-                            ))
+                          ? Hero(
+                              tag:
+                                  'svc-${service['id']}-${identityHashCode(service)}',
+                              child: CachedNetworkImage(
+                                imageUrl: coverImage,
+                                fit: BoxFit.cover,
+                              ),
+                            )
                           : const Icon(Icons.image, color: Colors.grey),
                     ),
                   ),

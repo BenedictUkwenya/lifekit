@@ -892,12 +892,15 @@ class ApiService {
     await _authenticatedPut('/chats/$bookingId/read', {});
   }
 
-  Future<void> sendMessage(String bookingId, String content) async {
+  Future<void> sendMessage(String bookingId, String content, {String? imageUrl}) async {
     await _authenticatedPost('/chats/message', {
       "booking_id": bookingId,
       "content": content,
+      if (imageUrl != null) "image_url": imageUrl,
     });
   }
+
+  Future<String> uploadChatImage(File imageFile) => _uploadFile('chats', imageFile);
 
   // ===========================================================================
   // SKILL SWAP
