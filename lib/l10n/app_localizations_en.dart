@@ -2173,7 +2173,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planPlusFeature3 => 'Priority listing boost ready';
 
   @override
-  String get planProFeature1 => '5 services';
+  String get planProFeature1 => '3 services';
 
   @override
   String get planProFeature2 => 'Max 5 communities';
@@ -3129,7 +3129,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get txOnline => 'Online';
 
   @override
-  String get txOnly3CommissionUpTo5 => 'Only 3% commission & up to 5 services!';
+  String get txOnly3CommissionUpTo5 => 'Only 3% commission & up to 3 services!';
 
   @override
   String get txOpenPosting => 'Open Posting';

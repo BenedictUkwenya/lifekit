@@ -2186,7 +2186,7 @@ class AppLocalizationsKa extends AppLocalizations {
   String get planPlusFeature3 => 'სიის პრიორიტეტული წახალისება';
 
   @override
-  String get planProFeature1 => '5 სერვისი';
+  String get planProFeature1 => '3 სერვისი';
 
   @override
   String get planProFeature2 => 'მაქს. 5 თემი';
@@ -3148,7 +3148,7 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get txOnly3CommissionUpTo5 =>
-      'მხოლოდ 3% საკომისიო და 5-მდე მომსახურება!';
+      'მხოლოდ 3% საკომისიო და 3-მდე მომსახურება!';
 
   @override
   String get txOpenPosting => 'ღია გამოქვეყნება';

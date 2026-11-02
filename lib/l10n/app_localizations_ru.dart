@@ -2185,7 +2185,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get planPlusFeature3 => 'Готовность к продвижению';
 
   @override
-  String get planProFeature1 => '5 услуг';
+  String get planProFeature1 => '3 услуги';
 
   @override
   String get planProFeature2 => 'Максимум 5 сообществ';
@@ -3142,7 +3142,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get txOnline => 'В сети';
 
   @override
-  String get txOnly3CommissionUpTo5 => 'Всего 3% комиссии и до 5 услуг!';
+  String get txOnly3CommissionUpTo5 => 'Всего 3% комиссии и до 3 услуг!';
 
   @override
   String get txOpenPosting => 'Открытые публикации';

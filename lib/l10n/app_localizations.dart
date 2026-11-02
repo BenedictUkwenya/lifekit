@@ -4219,7 +4219,7 @@ abstract class AppLocalizations {
   /// No description provided for @planProFeature1.
   ///
   /// In en, this message translates to:
-  /// **'5 services'**
+  /// **'3 services'**
   String get planProFeature1;
 
   /// No description provided for @planProFeature2.
@@ -5971,7 +5971,7 @@ abstract class AppLocalizations {
   /// No description provided for @txOnly3CommissionUpTo5.
   ///
   /// In en, this message translates to:
-  /// **'Only 3% commission & up to 5 services!'**
+  /// **'Only 3% commission & up to 3 services!'**
   String get txOnly3CommissionUpTo5;
 
   /// No description provided for @txOpenPosting.
