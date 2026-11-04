@@ -48,7 +48,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
   bool isLoading = true;
   bool _isFabExtended = true;
 
-  String _flagEmoji = '🇳🇬';
+  String _flagEmoji = '🇬🇪';
   int _unreadNotifications = 0;
   String? _currentUserId;
 
@@ -89,14 +89,10 @@ class _ServicesListScreenState extends State<ServicesListScreen>
       final Map<String, dynamic> profileData = results[0];
       final Map<String, dynamic> countsData = results[1];
       final profileCountry =
-          profileData['profile']?['country']?.toString() ?? 'NG';
+          profileData['profile']?['country']?.toString() ?? '';
       if (mounted) {
         setState(() {
-          _flagEmoji = _getFlagEmoji(
-            profileCountry.trim().length == 2
-                ? profileCountry.trim().toUpperCase()
-                : 'NG',
-          );
+          _flagEmoji = _getFlagEmoji(_countryCodeFor(profileCountry));
           _unreadNotifications = countsData['notifications'] ?? 0;
           _currentUserId = profileData['profile']?['id']?.toString();
         });
@@ -133,12 +129,34 @@ class _ServicesListScreenState extends State<ServicesListScreen>
     } catch (_) {}
   }
 
+  /// Profiles store either a two-letter code or a country name ("Georgia").
+  /// Unknown values fall back to Georgia, where LifeKit launches.
+  static const Map<String, String> _countryNames = {
+    'georgia': 'GE',
+    'nigeria': 'NG',
+    'russia': 'RU',
+    'ukraine': 'UA',
+    'armenia': 'AM',
+    'azerbaijan': 'AZ',
+    'turkey': 'TR',
+    'türkiye': 'TR',
+    'united kingdom': 'GB',
+    'united states': 'US',
+    'germany': 'DE',
+  };
+
+  String _countryCodeFor(String country) {
+    final trimmed = country.trim();
+    if (trimmed.length == 2) return trimmed.toUpperCase();
+    return _countryNames[trimmed.toLowerCase()] ?? 'GE';
+  }
+
   String _getFlagEmoji(String countryCode) {
     final normalized = countryCode.toUpperCase().trim();
     final isValid =
         normalized.length == 2 &&
         normalized.codeUnits.every((c) => c >= 0x41 && c <= 0x5A);
-    final safeCode = isValid ? normalized : 'NG';
+    final safeCode = isValid ? normalized : 'GE';
     const int flagOffset = 0x1F1E6;
     const int asciiOffset = 0x41;
     final int firstChar = safeCode.codeUnitAt(0) - asciiOffset + flagOffset;
@@ -529,7 +547,8 @@ class _ServicesListScreenState extends State<ServicesListScreen>
               SliverToBoxAdapter(
                 child: Container(
                   margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                  height: 140,
+                  // Grows with the text: a fixed 140 overflowed on larger fonts and in Georgian.
+                  constraints: const BoxConstraints(minHeight: 140),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [

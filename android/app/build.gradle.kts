@@ -42,8 +42,8 @@ android {
     }
 
     defaultConfig {
-        // Matches the iOS bundle identifier. Google Play rejects com.example.*
-        applicationId = "com.lifekit.app"
+        // Must match the package name registered in Google Play Console. Google Play rejects com.example.*
+        applicationId = "com.rosclan.lifekit"
         // minSdk 21 is required by flutter_stripe and FlutterSecureStorage.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion

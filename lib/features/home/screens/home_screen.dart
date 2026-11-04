@@ -495,22 +495,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ]);
 
       final profileData = results[0] as Map<String, dynamic>;
-      var offersData = results[1] as List<dynamic>;
+      // Only real offers from the admin dashboard are shown. There is no
+      // built-in discount, so the old "20% off" placeholder card is gone.
+      final offersData = results[1] as List<dynamic>;
       final catsData = results[2] as List<dynamic>;
       final popData = results[3] as List<dynamic>;
-
-      if (offersData.isEmpty) {
-        // Use null titles/descriptions so the UI falls back to the localised
-        // defaults from the ARB file (homeOfferTitle, homeOfferValidUntil).
-        offersData = [
-          {
-            'title': null,
-            'image_url':
-                'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
-            'description': null,
-          },
-        ];
-      }
 
       if (mounted) {
         setState(() {
@@ -1561,7 +1550,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     Text(
-                      offer['description'] ?? AppLocalizations.of(context)!.homeOfferValidUntil,
+                      offer['description'] ?? '',
                       style: GoogleFonts.poppins(
                         fontSize: 11,
                         color: Colors.grey[500],
@@ -1599,7 +1588,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            offer['title'] ?? AppLocalizations.of(context)!.homeOfferTitle,
+            offer['title'] ?? '',
             style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.bold,

@@ -84,7 +84,7 @@ class AppLocalizationsKa extends AppLocalizations {
   String get signUp => 'რეგისტრაცია';
 
   @override
-  String get createAccount => 'Შექმენი ანგარიში';
+  String get createAccount => 'შექმენი ანგარიში';
 
   @override
   String get forgotPassword => 'პაროლი დაგავიწყდა?';
@@ -117,7 +117,7 @@ class AppLocalizationsKa extends AppLocalizations {
   String get loginTitle => 'ეჲბპვ ეჲქლთ ჲბპარნჲ.';
 
   @override
-  String get loginSubtitle => 'Გასაგრძელებლად შედით სისტემაში';
+  String get loginSubtitle => 'გასაგრძელებლად შედით სისტემაში';
 
   @override
   String get loginButton => 'შესვლა';
@@ -130,10 +130,10 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get registerSubtitle =>
-      'Ანგარიშის შესაქმნელად შეავსეთ ქვემოთ მოცემული ინფორმაცია';
+      'ანგარიშის შესაქმნელად შეავსეთ ქვემოთ მოცემული ინფორმაცია';
 
   @override
-  String get registerButton => 'Შექმენი ანგარიში';
+  String get registerButton => 'შექმენი ანგარიში';
 
   @override
   String get haveAccountPrompt => 'უკვე დარეგისტრირებული ხართ?';
@@ -154,11 +154,11 @@ class AppLocalizationsKa extends AppLocalizations {
   String get errorPasswordRequired => 'შეიყვანეთ პაროლი!';
 
   @override
-  String get errorPasswordShort => 'Პაროლი უნდა შეიცავდეს მინიმუმ 6 სიმბოლოს.';
+  String get errorPasswordShort => 'პაროლი უნდა შეიცავდეს მინიმუმ 6 სიმბოლოს.';
 
   @override
   String get errorPasswordMatch =>
-      'Პაროლები არ ემთხვევა ერთმანეთს. სცადეთ ხელახლა.';
+      'პაროლები არ ემთხვევა ერთმანეთს. სცადეთ ხელახლა.';
 
   @override
   String get errorNameRequired => 'გთხოვთ შეიყვანოთ თქვენი სახელი.';
@@ -168,44 +168,44 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get loginSlideWelcomeBackSubtitle =>
-      'Სასიამოვნოა თქვენი კიდევ ერთხელ ხილვა 👋';
+      'სასიამოვნოა თქვენი კიდევ ერთხელ ხილვა 👋';
 
   @override
   String get welcomeBackToast => 'გილოცავ ჩვენთან დაბრუნებას!';
 
   @override
-  String get signInFailed => 'Შესვლა ვერ მოხერხდა. სცადეთ ხელახლა.';
+  String get signInFailed => 'შესვლა ვერ მოხერხდა. სცადეთ ხელახლა.';
 
   @override
-  String get verifyYourEmail => 'Დაადასტურეთ ელფოსტის მისამართი';
+  String get verifyYourEmail => 'დაადასტურეთ ელფოსტის მისამართი';
 
   @override
-  String get didntGetCodeResend => 'Არ მიგიღიათ კოდი? ხელახლა გაგზავნა';
+  String get didntGetCodeResend => 'არ მიგიღიათ კოდი? ხელახლა გაგზავნა';
 
   @override
   String get almostDone => 'ოჲფრთ ჟგყპქთჳმვ.';
 
   @override
   String get addProfilePictureOptional =>
-      'Დაამატეთ პროფილის სურათი — ამის გამოტოვება ყოველთვის შეგიძლიათ';
+      'დაამატეთ პროფილის სურათი — ამის გამოტოვება ყოველთვის შეგიძლიათ';
 
   @override
-  String get welcomeToLifeKit => 'Მოგესალმებათ LifeKit! 🎉';
+  String get welcomeToLifeKit => 'მოგესალმებათ LifeKit! 🎉';
 
   @override
   String get allSetWelcome =>
-      'Ყველაფერი მზადაა! კეთილი იყოს თქვენი მობრძანება LifeKit-ში 🎉';
+      'ყველაფერი მზადაა! კეთილი იყოს თქვენი მობრძანება LifeKit-ში 🎉';
 
   @override
   String get signupWelcomeTitle =>
-      'Გამარჯობა, კეთილი იყოს თქვენი მობრძანება LifeKit-ში';
+      'გამარჯობა, კეთილი იყოს თქვენი მობრძანება LifeKit-ში';
 
   @override
   String get choosePasswordTitle => 'შეიყვანეთ პაროლი:';
 
   @override
   String get choosePasswordSubtitle =>
-      'Აირჩიეთ რაიმე დაცული (მინიმუმ 6 სიმბოლო)';
+      'აირჩიეთ რაიმე დაცული (მინიმუმ 6 სიმბოლო)';
 
   @override
   String get splashTagline =>
@@ -213,27 +213,27 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get onboardingOfferSkillsTitle =>
-      'Შესთავაზეთ თქვენი უნარები.\nᲛიიღეთ შემოსავალი პირობებით';
+      'შესთავაზეთ თქვენი უნარები.\nმიიღეთ შემოსავალი პირობებით';
 
   @override
   String get onboardingOfferSkillsDesc =>
-      'Აქციეთ თქვენი ნიჭი შემოსავლად და შესთავაზეთ თქვენი მომსახურება ენერგიულ საზოგადოებას, რომელიც აფასებს თქვენს საქმიანობას.';
+      'აქციეთ თქვენი ნიჭი შემოსავლად და შესთავაზეთ თქვენი მომსახურება ენერგიულ საზოგადოებას, რომელიც აფასებს თქვენს საქმიანობას.';
 
   @override
   String get onboardingBookServicesTitle =>
-      'Სანდო დაჯავშნა\nᲛომსახურება ნებისმიერ დროს,\nᲜებისმიერ ადგილას';
+      'სანდო დაჯავშნა\nმომსახურება ნებისმიერ დროს,\nნებისმიერ ადგილას';
 
   @override
   String get onboardingBookServicesDesc =>
-      'Ისარგებლეთ ახლომდებარე საიმედო მომსახურებებით - სილამაზით, სახლის რემონტით, გაჯანსაღებით, პირადი ჰიგიენით და სხვა - ყველაფერი ერთ აპში.';
+      'ისარგებლეთ ახლომდებარე საიმედო მომსახურებებით - სილამაზით, სახლის რემონტით, გაჯანსაღებით, პირადი ჰიგიენით და სხვა - ყველაფერი ერთ აპში.';
 
   @override
   String get onboardingCommunityTitle =>
-      'Სად გაერთიანება\nᲐკმაყოფილებს შესაძლებლობას';
+      'სად გაერთიანება\nაკმაყოფილებს შესაძლებლობას';
 
   @override
   String get onboardingCommunityDesc =>
-      'Დაუკავშირდით, გაუზიარეთ და გაიზარდეთ იმ ადამიანებთან ერთად, რომლებიც გყავთ.';
+      'დაუკავშირდით, გაუზიარეთ და გაიზარდეთ იმ ადამიანებთან ერთად, რომლებიც გყავთ.';
 
   @override
   String get getStarted => 'დაწყება';
@@ -243,16 +243,16 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get resetPasswordInstructions =>
-      'Მიუთითეთ თქვენს ანგარიშთან დაკავშირებული ელფოსტის მისამართი. პაროლის გადასაყენებლად ბმულს გამოგიგზავნით.';
+      'მიუთითეთ თქვენს ანგარიშთან დაკავშირებული ელფოსტის მისამართი. პაროლის გადასაყენებლად ბმულს გამოგიგზავნით.';
 
   @override
-  String get sendResetLink => 'Გადატვირთვის ბმულის გაგზავნა';
+  String get sendResetLink => 'გადატვირთვის ბმულის გაგზავნა';
 
   @override
   String get checkYourEmail => 'შეამოწმეთ თქვენი ელ - ფოსტა';
 
   @override
-  String get checkSpamFolder => 'Არ მიგიღიათ? შეამოწმეთ სპამის საქაღალდე.';
+  String get checkSpamFolder => 'არ მიგიღიათ? შეამოწმეთ სპამის საქაღალდე.';
 
   @override
   String get backToLogin => 'დაბრუნება შესვლა';
@@ -296,37 +296,37 @@ class AppLocalizationsKa extends AppLocalizations {
   String get aiAnalyzingProfile => 'AI აანალიზებს თქვენს პროფილს...';
 
   @override
-  String get yourGoals => 'Თქვენი მიზნები';
+  String get yourGoals => 'თქვენი მიზნები';
 
   @override
   String get yourGoalsHint =>
       'მაგ., მიიღეთ დამატებითი შემოსავალი, იპოვეთ სანდო მომსახურების მომწოდებლები';
 
   @override
-  String get yourSkills => 'Თქვენი უნარები';
+  String get yourSkills => 'თქვენი უნარები';
 
   @override
   String get yourSkillsHint =>
       'მაგ. საჭმლის მომზადება, სანტექნიკა, სწავლება, გრაფიკული დიზაინი';
 
   @override
-  String get yourInterests => 'Თქვენი ინტერესები';
+  String get yourInterests => 'თქვენი ინტერესები';
 
   @override
   String get yourInterestsHint => 'მაგ. მუსიკა, საკვები, ფიტნესი, ტექნოლოგია';
 
   @override
-  String get generateMySevenDayPlan => 'Ჩემი 7-დღიანი გეგმის შექმნა';
+  String get generateMySevenDayPlan => 'ჩემი 7-დღიანი გეგმის შექმნა';
 
   @override
-  String get finishAndGoToHome => 'Დაასრულეთ და გადადით სახლში';
+  String get finishAndGoToHome => 'დაასრულეთ და გადადით სახლში';
 
   @override
   String get takeAction => 'ქმედების განხორციელება';
 
   @override
   String get failedToGeneratePlan =>
-      'Ვერ მოხერხდა გეგმის შექმნა. სცადეთ ხელახლა.';
+      'ვერ მოხერხდა გეგმის შექმნა. სცადეთ ხელახლა.';
 
   @override
   String get navHome => 'საწყისი';
@@ -359,19 +359,19 @@ class AppLocalizationsKa extends AppLocalizations {
   String get homeTabProfile => 'პროფილი';
 
   @override
-  String get homeAIRecommended => 'Რეკომენდებულია თქვენთვის';
+  String get homeAIRecommended => 'რეკომენდებულია თქვენთვის';
 
   @override
   String get homeTrending => 'ტრენდული';
 
   @override
-  String get homeNearYou => 'Თქვენთან ახლოს';
+  String get homeNearYou => 'თქვენთან ახლოს';
 
   @override
-  String get searchServicesProviders => 'Სერვისების, პროვაიდერების ძებნა...';
+  String get searchServicesProviders => 'სერვისების, პროვაიდერების ძებნა...';
 
   @override
-  String get myBookings => 'Ჩემი ჯავშნები';
+  String get myBookings => 'ჩემი ჯავშნები';
 
   @override
   String get rewards => 'ქულები';
@@ -383,13 +383,13 @@ class AppLocalizationsKa extends AppLocalizations {
   String get popular => 'პოპულარული';
 
   @override
-  String get communities => 'Მუნიციპალიტეტები';
+  String get communities => 'ჯგუფები';
 
   @override
-  String get findYourTribe => 'Იპოვეთ თქვენი ტომი და გააზიარეთ თქვენი სამყარო';
+  String get findYourTribe => 'იპოვეთ თქვენი ტომი და გააზიარეთ თქვენი სამყარო';
 
   @override
-  String get popularProviders => 'Პოპულარული პროვაიდერები';
+  String get popularProviders => 'პოპულარული პროვაიდერები';
 
   @override
   String get recentSearches => 'ბოლო ძებნები';
@@ -407,16 +407,16 @@ class AppLocalizationsKa extends AppLocalizations {
   String get bookingPast => 'წარსული';
 
   @override
-  String get bookingPending => 'დარჩენილი';
+  String get bookingPending => 'მოლოდინში';
 
   @override
-  String get clientRequests => 'Კლიენტის მოთხოვნები';
+  String get clientRequests => 'კლიენტის მოთხოვნები';
 
   @override
-  String get mySwaps => 'Ჩემი სვოპები';
+  String get mySwaps => 'ჩემი სვოპები';
 
   @override
-  String get bookingStatusPending => 'დარჩენილი';
+  String get bookingStatusPending => 'მოლოდინში';
 
   @override
   String get bookingStatusConfirmed => 'დადასტურებული';
@@ -431,13 +431,13 @@ class AppLocalizationsKa extends AppLocalizations {
   String get bookingCancelButton => 'გააუქმეთ დაჯავშნა';
 
   @override
-  String get bookingConfirmCancel => 'Ნამდვილად გსურთ ამ ჯავშნის გაუქმება?';
+  String get bookingConfirmCancel => 'ნამდვილად გსურთ ამ ჯავშნის გაუქმება?';
 
   @override
-  String get bookingNoUpcoming => 'Მომსახურება ჯერ არ დაჯავშნილა.';
+  String get bookingNoUpcoming => 'მომსახურება ჯერ არ დაჯავშნილა.';
 
   @override
-  String get bookingNoPast => 'Მოთხოვნები ჯერ არ მიუღიათ.';
+  String get bookingNoPast => 'მოთხოვნები ჯერ არ მიუღიათ.';
 
   @override
   String get filterOngoing => 'მიმდინარე';
@@ -449,10 +449,10 @@ class AppLocalizationsKa extends AppLocalizations {
   String get filterUpcoming => 'მოახლოებული';
 
   @override
-  String get requestAccepted => 'Მოთხოვნა მიღებულია! კლიენტმა შეატყობინა.';
+  String get requestAccepted => 'მოთხოვნა მიღებულია! კლიენტმა შეატყობინა.';
 
   @override
-  String get requestRejected => 'Მოთხოვნა უარყოფილია.';
+  String get requestRejected => 'მოთხოვნა უარყოფილია.';
 
   @override
   String get reject => 'უარყოფა';
@@ -461,10 +461,10 @@ class AppLocalizationsKa extends AppLocalizations {
   String get accept => 'დასტური';
 
   @override
-  String get trackStatus => 'Ტრეკის სტატუსი';
+  String get trackStatus => 'ტრეკის სტატუსი';
 
   @override
-  String get happeningNow => '🔴 Ხდება!';
+  String get happeningNow => '🔴 ხდება!';
 
   @override
   String get tomorrow => 'ხვალ';
@@ -476,20 +476,20 @@ class AppLocalizationsKa extends AppLocalizations {
   String get skillSwap => 'უნარების გაცვლა';
 
   @override
-  String get noSwapsYet => 'Სვოპები ჯერ არ არის';
+  String get noSwapsYet => 'სვოპები ჯერ არ არის';
 
   @override
   String get noSwapsYetDescription =>
-      'Უნარ-ჩვევების სხვებთან გაცვლა.\nᲓაათვალიერეთ სვოპ დაფა და იპოვეთ თქვენი პირველი დამთხვევა.';
+      'უნარ-ჩვევების სხვებთან გაცვლა.\nდაათვალიერეთ სვოპ დაფა და იპოვეთ თქვენი პირველი დამთხვევა.';
 
   @override
-  String get browseSwapBoard => 'Სვოპ დაფის დათვალიერება';
+  String get browseSwapBoard => 'სვოპ დაფის დათვალიერება';
 
   @override
-  String get swapActive => 'Აქტიური სვოპი';
+  String get swapActive => 'აქტიური სვოპი';
 
   @override
-  String get markDone => 'Მარკ მზადაა';
+  String get markDone => 'მარკ მზადაა';
 
   @override
   String get servicesTitle => 'სერვისები';
@@ -516,11 +516,11 @@ class AppLocalizationsKa extends AppLocalizations {
   String get serviceReviews => 'მიმოხილვები';
 
   @override
-  String get noServicesFound => 'Მომსახურებები ვერ მოიძებნა';
+  String get noServicesFound => 'მომსახურებები ვერ მოიძებნა';
 
   @override
   String get noServicesFoundSubtitle =>
-      'Ხელმისაწვდომობის შემდეგ აქ გამოჩნდება ახალი სერვისები.';
+      'ხელმისაწვდომობის შემდეგ აქ გამოჩნდება ახალი სერვისები.';
 
   @override
   String get createService => 'შექმენით მომსახურება';
@@ -529,7 +529,7 @@ class AppLocalizationsKa extends AppLocalizations {
   String get addService => 'სერვისის დამატება';
 
   @override
-  String get myServices => 'Ჩემი\nᲛომსახურება';
+  String get myServices => 'ჩემი\nმომსახურება';
 
   @override
   String get cartTitle => 'კალათა';
@@ -541,7 +541,7 @@ class AppLocalizationsKa extends AppLocalizations {
   String get cartTotal => 'სულ';
 
   @override
-  String get cartCheckout => 'Დაჯავშნის დადასტურება';
+  String get cartCheckout => 'დაჯავშნის დადასტურება';
 
   @override
   String get cartRemoveItem => '_წაშლა';
@@ -553,10 +553,10 @@ class AppLocalizationsKa extends AppLocalizations {
   String get paymentConfirm => 'დაადასტურეთ გადახდა';
 
   @override
-  String get paymentSuccess => 'Ჯავშანი დადასტურებულია!';
+  String get paymentSuccess => 'ჯავშანი დადასტურებულია!';
 
   @override
-  String get paymentFailed => 'Გადახდა ვერ მოხერხდა. სცადეთ ხელახლა.';
+  String get paymentFailed => 'გადახდა ვერ მოხერხდა. სცადეთ ხელახლა.';
 
   @override
   String get paymentCancelled => 'გადახდა გაუქმებულია';
@@ -568,7 +568,7 @@ class AppLocalizationsKa extends AppLocalizations {
   String get profileEdit => 'პროფილის რედაქტირება';
 
   @override
-  String get profileBookings => 'Ჩემი ჯავშნები';
+  String get profileBookings => 'ჩემი ჯავშნები';
 
   @override
   String get profileLogout => 'გასვლა';
@@ -592,28 +592,28 @@ class AppLocalizationsKa extends AppLocalizations {
   String get profileUnfollow => 'გამოწერის გაუქმება';
 
   @override
-  String get failedToLoadProfile => 'Პროფილის ჩატვირთვა ვერ მოხერხდა';
+  String get failedToLoadProfile => 'პროფილის ჩატვირთვა ვერ მოხერხდა';
 
   @override
-  String get noBioAdded => 'Ბიოგრაფია არ არის დამატებული';
+  String get noBioAdded => 'ბიოგრაფია არ არის დამატებული';
 
   @override
   String get walletBalance => 'ბალანსი საფულეში';
 
   @override
-  String get launchOfferProTrial => 'Შეთავაზების გაშვება: Pro Trial Active';
+  String get launchOfferProTrial => 'შეთავაზების გაშვება: Pro Trial Active';
 
   @override
-  String get accountUsage => 'Ანგარიშის გამოყენება';
+  String get accountUsage => 'ანგარიშის გამოყენება';
 
   @override
-  String get upgradePlan => 'Გეგმის განახლება';
+  String get upgradePlan => 'გეგმის განახლება';
 
   @override
-  String get foundingMember => '🌟 Დამფუძნებელი წევრი';
+  String get foundingMember => '🌟 დამფუძნებელი წევრი';
 
   @override
-  String get businessTools => 'Ბიზნეს ხელსაწყოები';
+  String get businessTools => 'ბიზნეს ხელსაწყოები';
 
   @override
   String get editProfile => 'პროფილის რედაქტირება';
@@ -634,7 +634,7 @@ class AppLocalizationsKa extends AppLocalizations {
   String get settingsNotifications => 'გაფრთხილებები';
 
   @override
-  String get settingsSecurity => 'Პაროლი და უსაფრთხოება';
+  String get settingsSecurity => 'პაროლი და უსაფრთხოება';
 
   @override
   String get settingsHelp => 'დახმარების ცენტრი';
@@ -658,7 +658,7 @@ class AppLocalizationsKa extends AppLocalizations {
   String get walletTitle => 'საფულე';
 
   @override
-  String get walletTopUp => 'Შევსება';
+  String get walletTopUp => 'შევსება';
 
   @override
   String get walletWithdraw => 'გატანა';
@@ -667,38 +667,38 @@ class AppLocalizationsKa extends AppLocalizations {
   String get walletTransactions => 'გადარიცხვების ისტორია';
 
   @override
-  String get walletNoTransactions => 'Ტრანზაქციები ჯერ არ განხორციელებულა.';
+  String get walletNoTransactions => 'ტრანზაქციები ჯერ არ განხორციელებულა.';
 
   @override
   String get walletSettingsComingSoon =>
-      'Საფულის პარამეტრები მალე მოახლოვდება!';
+      'საფულის პარამეტრები მალე მოახლოვდება!';
 
   @override
   String get withdraw => 'თანხის მოხსნა';
 
   @override
-  String get enterAmount => 'Მიუთითეთ თანხა';
+  String get enterAmount => 'მიუთითეთ თანხა';
 
   @override
-  String get enterValidAmount => 'Მიუთითეთ სწორი თანხა.';
+  String get enterValidAmount => 'მიუთითეთ სწორი თანხა.';
 
   @override
-  String get amountExceedsBalance => 'Თანხა აღემატება ნაშთს.';
+  String get amountExceedsBalance => 'თანხა აღემატება ნაშთს.';
 
   @override
-  String get withdrawalCompleted => 'Მოხსნა დასრულებულია.';
+  String get withdrawalCompleted => 'მოხსნა დასრულებულია.';
 
   @override
-  String get weeklyIncome => 'Ყოველკვირეული შემოსავალი';
+  String get weeklyIncome => 'ყოველკვირეული შემოსავალი';
 
   @override
   String get points => 'წერტილები';
 
   @override
-  String get addMoney => 'Თანხის დამატება';
+  String get addMoney => 'თანხის დამატება';
 
   @override
-  String get setupPayouts => 'Ანაზღაურების დაყენება';
+  String get setupPayouts => 'ანაზღაურების დაყენება';
 
   @override
   String get scan => 'სკანირება';
@@ -707,25 +707,25 @@ class AppLocalizationsKa extends AppLocalizations {
   String get qrScanComingSoon => 'QR სკანირების გადახდები მალე დაიწყება!';
 
   @override
-  String get fundWallet => 'Ფონდის საფულე';
+  String get fundWallet => 'ფონდის საფულე';
 
   @override
-  String get minimumDepositFive => 'Მინიმალური დეპოზიტია 5 \$';
+  String get minimumDepositFive => 'მინიმალური დეპოზიტია 5 \$';
 
   @override
-  String get walletFundedSuccessfully => 'Საფულე წარმატებით დაფინანსდა!';
+  String get walletFundedSuccessfully => 'საფულე წარმატებით დაფინანსდა!';
 
   @override
-  String get minimumDepositAmount => 'Მინიმალური დეპოზიტი: 5.00 \$';
+  String get minimumDepositAmount => 'მინიმალური დეპოზიტი: 5.00 \$';
 
   @override
-  String get payWithCard => 'Ბარათით გადახდა';
+  String get payWithCard => 'ბარათით გადახდა';
 
   @override
-  String get securedByStripe => 'Უზრუნველყოფილია Stripe-ით';
+  String get securedByStripe => 'უზრუნველყოფილია Stripe-ით';
 
   @override
-  String get groupsTitle => 'Მუნიციპალიტეტები';
+  String get groupsTitle => 'ჯგუფები';
 
   @override
   String get groupsJoin => 'შეერთება';
@@ -743,13 +743,13 @@ class AppLocalizationsKa extends AppLocalizations {
   String get groupsNoGroups => 'ჯგუფები ვერ მოიძებნა.';
 
   @override
-  String get findYourPeople => 'Იპოვეთ თქვენი ხალხი, გააზიარეთ თქვენი სამყარო';
+  String get findYourPeople => 'იპოვეთ თქვენი ხალხი, გააზიარეთ თქვენი სამყარო';
 
   @override
   String get feedTitle => 'ლენტები';
 
   @override
-  String get feedNewPost => 'Გააზიარეთ რამე…';
+  String get feedNewPost => 'გააზიარეთ რამე…';
 
   @override
   String get feedLike => 'მომწონს';
@@ -761,23 +761,23 @@ class AppLocalizationsKa extends AppLocalizations {
   String get feedShare => 'გაზიარება ';
 
   @override
-  String get feedNoPost => 'Პოსტები ჯერ არ არის. პირველმა გააზიარე!';
+  String get feedNoPost => 'პოსტები ჯერ არ არის. პირველმა გააზიარე!';
 
   @override
   String get placesTitle => 'ადგილები';
 
   @override
-  String get searchPlacesHint => 'Მოიძიეთ რესტორნები, კაფეები, სასტუმროები...';
+  String get searchPlacesHint => 'მოიძიეთ რესტორნები, კაფეები, სასტუმროები...';
 
   @override
-  String get noPlacesNearby => 'Ახლომდებარე საცხოვრებლები არ არის';
+  String get noPlacesNearby => 'ახლომდებარე საცხოვრებლები არ არის';
 
   @override
-  String get locatingYou => 'Თქვენი მდებარეობა...';
+  String get locatingYou => 'თქვენი მდებარეობა...';
 
   @override
   String get findingPlacesNearYou =>
-      'Თქვენთან ახლოს მდებარე საცხოვრებლების პოვნა...';
+      'თქვენთან ახლოს მდებარე საცხოვრებლების პოვნა...';
 
   @override
   String get categoryAll => 'ყველა';
@@ -786,7 +786,7 @@ class AppLocalizationsKa extends AppLocalizations {
   String get categoryRestaurant => 'რესტორანი';
 
   @override
-  String get categoryCafe => 'Კაფე';
+  String get categoryCafe => 'კაფე';
 
   @override
   String get categoryHotel => 'სასტუმრო';
@@ -795,7 +795,7 @@ class AppLocalizationsKa extends AppLocalizations {
   String get notificationsTitle => 'გაფრთხილებები';
 
   @override
-  String get notificationsEmpty => 'Გაფრთხილებები ჯერ არ არის.';
+  String get notificationsEmpty => 'გაფრთხილებები ჯერ არ არის.';
 
   @override
   String get notificationsMarkAllRead => 'ყველას წაკითხულად მონიშვნა';
@@ -834,41 +834,41 @@ class AppLocalizationsKa extends AppLocalizations {
   String get chatTitle => 'შეტყობინებები';
 
   @override
-  String get chatInputPlaceholder => 'Აკრიფეთ შეტყობინება…';
+  String get chatInputPlaceholder => 'აკრიფეთ შეტყობინება…';
 
   @override
   String get chatSend => 'გაგზავნა';
 
   @override
-  String get chatNoMessages => 'Შეტყობინებები ჯერ არ არის. დაიწყე საუბარი!';
+  String get chatNoMessages => 'შეტყობინებები ჯერ არ არის. დაიწყე საუბარი!';
 
   @override
   String get providerDashboard => 'სამუშაო დაფა';
 
   @override
-  String get quickActions => 'Სწრაფი მოქმედებები';
+  String get quickActions => 'სწრაფი მოქმედებები';
 
   @override
-  String get totalEarnings => 'Ჯამური შემოსავალი';
+  String get totalEarnings => 'ჯამური შემოსავალი';
 
   @override
   String get thisWeek => 'ამ კვირაში';
 
   @override
-  String get jobsDone => 'Დავალებები შესრულებულია';
+  String get jobsDone => 'დავალებები შესრულებულია';
 
   @override
-  String get avgRating => 'Საშუალო შეფასება';
+  String get avgRating => 'საშუალო შეფასება';
 
   @override
   String get aiOpportunityRadar => 'AI შესაძლებლობების რადარი';
 
   @override
   String get servicesYouCouldOffer =>
-      'Მომსახურება, რომლის შეთავაზებაც ახლავე შეგიძლიათ';
+      'მომსახურება, რომლის შეთავაზებაც ახლავე შეგიძლიათ';
 
   @override
-  String get noOpportunitiesFound => 'Ამჟამად შესაძლებლობები ვერ მოიძებნა.';
+  String get noOpportunitiesFound => 'ამჟამად შესაძლებლობები ვერ მოიძებნა.';
 
   @override
   String get createServiceButton => 'შექმენით მომსახურება';
@@ -880,10 +880,10 @@ class AppLocalizationsKa extends AppLocalizations {
   String get reviewsWriteReview => 'შეფასების დაწერა';
 
   @override
-  String get reviewsNoReviews => 'Მიმოხილვები ჯერ არ არის.';
+  String get reviewsNoReviews => 'მიმოხილვები ჯერ არ არის.';
 
   @override
-  String get reviewsRatePlaceholder => 'Დაწერეთ კომენტარი (არასავალდებულო)...';
+  String get reviewsRatePlaceholder => 'დაწერეთ კომენტარი (არასავალდებულო)...';
 
   @override
   String get reviewsSubmit => 'მიმოხილვის შეტანა';
@@ -895,13 +895,13 @@ class AppLocalizationsKa extends AppLocalizations {
   String get anonymous => 'ანონიმურად';
 
   @override
-  String get skillSwapTitle => 'Უნარ-ჩვევების სვოპი';
+  String get skillSwapTitle => 'უნარ-ჩვევების სვოპი';
 
   @override
-  String get skillSwapDiscover => 'Სვოპების აღმოჩენა';
+  String get skillSwapDiscover => 'სვოპების აღმოჩენა';
 
   @override
-  String get skillSwapPropose => 'Სვოპის შეთავაზება';
+  String get skillSwapPropose => 'სვოპის შეთავაზება';
 
   @override
   String get skillSwapAccept => 'დასტური';
@@ -910,13 +910,13 @@ class AppLocalizationsKa extends AppLocalizations {
   String get skillSwapDecline => 'უარყოფა';
 
   @override
-  String get skillSwapNoSwaps => 'Სვოპის შემოთავაზებები არ არის ხელმისაწვდომი.';
+  String get skillSwapNoSwaps => 'სვოპის შემოთავაზებები არ არის ხელმისაწვდომი.';
 
   @override
   String get aiAssistantTitle => 'AI ასისტენტი: ';
 
   @override
-  String get aiAssistantPlaceholder => 'Მკითხეთ რამე LifeKit-ის შესახებ...';
+  String get aiAssistantPlaceholder => 'მკითხეთ რამე LifeKit-ის შესახებ...';
 
   @override
   String get aiAssistantSend => 'გაგზავნა';
@@ -940,7 +940,7 @@ class AppLocalizationsKa extends AppLocalizations {
   String get cancelled => 'შეწყვეტილია';
 
   @override
-  String get pending => 'დარჩენილი';
+  String get pending => 'მოლოდინში';
 
   @override
   String get confirmed => 'დადასტურებული';

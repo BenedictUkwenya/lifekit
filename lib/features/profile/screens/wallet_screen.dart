@@ -21,6 +21,7 @@ class WalletScreen extends StatefulWidget {
 class _WalletScreenState extends State<WalletScreen> {
   final ApiService _apiService = ApiService();
   double balance = 0.00;
+  double weeklyIncome = 0.00;
   List<dynamic> transactions = [];
   bool isLoading = true;
   bool isProvider = false;
@@ -45,6 +46,8 @@ class _WalletScreenState extends State<WalletScreen> {
       final data = await _apiService.getWallet();
       setState(() {
         balance = double.parse(data['balance'].toString());
+        weeklyIncome =
+            double.tryParse(data['weekly_income']?.toString() ?? '') ?? 0;
         transactions = data['transactions'] ?? [];
         isProvider = data['is_provider'] == true;
         isStripeConnected = data['stripe_connected'] == true;
@@ -210,22 +213,15 @@ class _WalletScreenState extends State<WalletScreen> {
                               color: Colors.white,
                             ),
                           ),
-                          const SizedBox(height: 20),
-                          Row(
-                            children: [
-                              _buildSmallStats(
-                                l10n.walletWeeklyIncome,
-                                "\$3,142",
-                                "+2.6%",
-                              ),
-                              const SizedBox(width: 12),
-                              _buildSmallStats(
-                                l10n.walletPoints,
-                                "48",
-                                l10n.walletPointsOf("500"),
-                              ),
-                            ],
-                          ),
+                          // Earnings from completed bookings in the last 7 days.
+                          if (isProvider) ...[
+                            const SizedBox(height: 20),
+                            _buildSmallStats(
+                              l10n.walletWeeklyIncome,
+                              "\$${weeklyIncome.toStringAsFixed(2)}",
+                              "",
+                            ),
+                          ],
                         ],
                       ),
                     ),
