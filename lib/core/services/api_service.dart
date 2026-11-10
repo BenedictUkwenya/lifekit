@@ -679,10 +679,12 @@ class ApiService {
   Future<Map<String, dynamic>> createDraftServices(
     List<String> categoryIds,
   ) async {
-    return await _authenticatedPost('/services', {
+    final result = await _authenticatedPost('/services', {
       "category_ids": categoryIds,
       "currency": "USD",
     });
+    AppCache.instance.invalidate('my_services');
+    return result;
   }
 
   Future<void> updateService(
@@ -750,6 +752,10 @@ class ApiService {
       "service_type": serviceType,
       "comments": comments,
     });
+    // The new booking must show up straight away, and the wallet was charged.
+    AppCache.instance.invalidate('client_bookings');
+    AppCache.instance.invalidate('provider_requests');
+    AppCache.instance.invalidate('wallet');
   }
 
   Future<List<dynamic>> getClientBookings() async {
@@ -929,7 +935,7 @@ class ApiService {
     double aiMatchScore = 0,
     String aiMatchReason = '',
   }) async {
-    return await _authenticatedPost('/swap-requests', {
+    final result = await _authenticatedPost('/swap-requests', {
       'proposer_service_id': proposerServiceId,
       'target_user_id': targetUserId,
       if (targetServiceId != null) 'target_service_id': targetServiceId,
@@ -942,6 +948,8 @@ class ApiService {
       'ai_match_score': aiMatchScore,
       'ai_match_reason': aiMatchReason,
     });
+    AppCache.instance.invalidate('outgoing_swaps');
+    return result;
   }
 
   Future<List<dynamic>> getIncomingSwaps() async {
@@ -1083,11 +1091,13 @@ class ApiService {
     required int quantity,
     required double totalPrice,
   }) async {
-    return await _authenticatedPost('/events/buy-ticket', {
+    final result = await _authenticatedPost('/events/buy-ticket', {
       "event_id": eventId,
       "quantity": quantity,
       "total_price": totalPrice,
     });
+    AppCache.instance.invalidate('wallet');
+    return result;
   }
 
   Future<Map<String, dynamic>> toggleLike(String postId) async {

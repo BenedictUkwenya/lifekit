@@ -640,14 +640,6 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
                     color: Colors.black,
                   ),
                 ),
-                if (!isChatLocked)
-                  Text(
-                    AppLocalizations.of(context).txOnline,
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: Colors.green,
-                    ),
-                  ),
               ],
             ),
           ),

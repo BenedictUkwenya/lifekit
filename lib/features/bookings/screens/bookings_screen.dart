@@ -295,6 +295,9 @@ class _BookingsScreenState extends State<BookingsScreen>
                 children: [
                   _buildHeroBookingCard(clientBookings.first, isClient: true)
                       .fadeSlideIn(),
+                  // Filters only apply to the bookings below the hero card;
+                  // with just one booking they'd show "Nothing here".
+                  if (clientBookings.length > 1) ...[
                   const SizedBox(height: 24),
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
@@ -338,6 +341,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                       },
                     ),
                   ),
+                  ],
                 ],
               ),
             ),
