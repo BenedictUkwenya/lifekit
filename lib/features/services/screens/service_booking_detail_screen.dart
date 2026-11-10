@@ -576,15 +576,6 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
                               color: Colors.grey[600],
                             ),
                           ),
-                          const SizedBox(height: 20),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              _buildTag(l10n.providerInstantConfirmation),
-                              _buildTag(l10n.providerVerifiedProvider),
-                            ],
-                          ),
                         ],
                       ),
                     ),

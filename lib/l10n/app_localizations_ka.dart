@@ -1631,7 +1631,7 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String providerBeFirstReview(int points) {
-    return 'იყავი პირველი შემფასებელი და მიიღე $points ჯილდოს ქულა';
+    return 'შეფასებები აქ გამოჩნდება დასრულებული ჯავშნების შემდეგ.';
   }
 
   @override
@@ -2102,7 +2102,7 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String trialBannerSubtitle(int days, String date) {
-    return 'განახლდება $days დღეში • სრულდება $date';
+    return 'დარჩა $days დღე • სრულდება $date';
   }
 
   @override

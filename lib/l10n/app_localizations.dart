@@ -3181,7 +3181,7 @@ abstract class AppLocalizations {
   /// No description provided for @providerBeFirstReview.
   ///
   /// In en, this message translates to:
-  /// **'Be the first to review and get {points} reward points'**
+  /// **'Reviews appear here after completed bookings.'**
   String providerBeFirstReview(int points);
 
   /// No description provided for @bookTitle.
@@ -4063,7 +4063,7 @@ abstract class AppLocalizations {
   /// No description provided for @trialBannerSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Renews in {days} days • Ends {date}'**
+  /// **'{days} days left • Ends {date}'**
   String trialBannerSubtitle(int days, String date);
 
   /// No description provided for @trialPerkServices.

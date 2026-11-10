@@ -1277,7 +1277,7 @@
   "providerUserFallback": "User",
   "providerVerifiedService": "Verified Service",
   "providerNoReviews": "No reviews yet",
-  "providerBeFirstReview": "Be the first to review and get {points} reward points",
+  "providerBeFirstReview": "Reviews appear here after completed bookings.",
   "@providerBeFirstReview": { "placeholders": { "points": { "type": "int" } } },
 
   "bookTitle": "Book Service",
@@ -1435,7 +1435,7 @@
   "@walletRenewsInDays": { "placeholders": { "days": { "type": "int" } } },
   "walletUpgradePlan": "Upgrade Plan",
   "trialBannerTitle": "Launch Offer: Pro Trial Active",
-  "trialBannerSubtitle": "Renews in {days} days • Ends {date}",
+  "trialBannerSubtitle": "{days} days left • Ends {date}",
   "@trialBannerSubtitle": { "placeholders": { "days": { "type": "int" }, "date": { "type": "String" } } },
   "trialPerkServices": "✔ 5 Services",
   "trialPerkCommission": "✔ 3% Commission",

@@ -1498,7 +1498,7 @@
   "providerUserFallback": "Пользователь",
   "providerVerifiedService": "Проверенная услуга",
   "providerNoReviews": "Отзывов пока нет",
-  "providerBeFirstReview": "Будьте первым, кто оставит отзыв, и получите {points} баллов",
+  "providerBeFirstReview": "Отзывы появятся здесь после завершённых бронирований.",
   "@providerBeFirstReview": { "placeholders": { "points": { "type": "int" } } },
 
   "bookTitle": "Забронировать услугу",
@@ -1656,7 +1656,7 @@
   "@walletRenewsInDays": { "placeholders": { "days": { "type": "int" } } },
   "walletUpgradePlan": "Улучшить план",
   "trialBannerTitle": "Стартовое предложение: Pro-пробный активен",
-  "trialBannerSubtitle": "Продление через {days} дн. • Заканчивается {date}",
+  "trialBannerSubtitle": "Осталось {days} дн. • Заканчивается {date}",
   "@trialBannerSubtitle": { "placeholders": { "days": { "type": "int" }, "date": { "type": "String" } } },
   "trialPerkServices": "✔ 5 услуг",
   "trialPerkCommission": "✔ 3% комиссии",

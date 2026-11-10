@@ -263,7 +263,7 @@ class ApiService {
       }
 
       var response = await send(await _requireToken());
-      if (response.statusCode == 401) {
+      if (_isExpiredLogin(response)) {
         final newToken = await _refreshToken();
         if (newToken == null) throw Exception("Session Expired");
         response = await send(newToken);
@@ -271,6 +271,13 @@ class ApiService {
       return _processResponse(response);
     });
   }
+
+  /// The backend has answered an expired access token with 403 "Invalid or
+  /// expired token." rather than 401, so treat both as a cue to refresh.
+  static bool _isExpiredLogin(http.Response response) =>
+      response.statusCode == 401 ||
+      (response.statusCode == 403 &&
+          response.body.toLowerCase().contains("token"));
 
   Future<dynamic> _authenticatedGet(String endpoint) =>
       _authenticatedRequest('GET', endpoint);
@@ -312,7 +319,7 @@ class ApiService {
       }
 
       var response = await send(await _requireToken());
-      if (response.statusCode == 401) {
+      if (_isExpiredLogin(response)) {
         final newToken = await _refreshToken();
         if (newToken == null) throw Exception("Session Expired");
         response = await send(newToken);

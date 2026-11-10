@@ -1619,7 +1619,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String providerBeFirstReview(int points) {
-    return 'Be the first to review and get $points reward points';
+    return 'Reviews appear here after completed bookings.';
   }
 
   @override
@@ -2088,7 +2088,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String trialBannerSubtitle(int days, String date) {
-    return 'Renews in $days days • Ends $date';
+    return '$days days left • Ends $date';
   }
 
   @override

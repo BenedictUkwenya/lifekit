@@ -66,7 +66,7 @@ class CartScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "${cart.items.length} Items",
+                      "${cart.items.length} ${cart.items.length == 1 ? 'item' : 'items'}",
                       style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
                     ),
                     GestureDetector(
@@ -237,7 +237,7 @@ class CartScreen extends StatelessWidget {
                       ),
                       Text(
                         // Just show the rate here
-                        "\$${item.price} Total",
+                        "\$${item.price.toStringAsFixed(2)} each",
                         style: GoogleFonts.poppins(
                           fontSize: 11,
                           color: Colors.grey,

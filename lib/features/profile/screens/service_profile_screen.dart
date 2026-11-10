@@ -437,9 +437,7 @@ class _ServiceProfileScreenState extends State<ServiceProfileScreen>
             spacing: 8,
             runSpacing: 8,
             children: [
-              _buildTag("Instant Confirmation"),
               _buildTag("Secure Payment"),
-              _buildTag("Verified Provider"),
             ],
           ),
         ],

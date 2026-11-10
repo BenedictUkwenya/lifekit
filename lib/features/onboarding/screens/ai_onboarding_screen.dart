@@ -32,6 +32,17 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
   String? _errorMessage;
 
   @override
+  void initState() {
+    super.initState();
+    // Clear a stale "fill in all fields" / error message once the user edits.
+    for (final c in [_goalsController, _skillsController, _interestsController]) {
+      c.addListener(() {
+        if (_errorMessage != null && mounted) setState(() => _errorMessage = null);
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _goalsController.dispose();
     _skillsController.dispose();

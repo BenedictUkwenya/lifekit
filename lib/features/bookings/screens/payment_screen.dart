@@ -26,7 +26,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
   final ApiService _apiService = ApiService();
   double walletBalance = 0.0;
   bool isLoading = true;
-  double transactionFee = 23.00;
 
   @override
   void initState() {
@@ -48,13 +47,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
     }
   }
 
-  double _calculateTotal() {
-    double subtotal = widget.itemsToBook.fold(
-      0,
-      (sum, item) => sum + (item.price * item.quantity),
-    );
-    return subtotal + transactionFee;
-  }
+  // Clients pay the service price only; the platform commission comes out of
+  // the provider's earnings (see bookingRoutes), so there is no client fee.
+  double _calculateTotal() => widget.itemsToBook.fold(
+        0,
+        (sum, item) => sum + (item.price * item.quantity),
+      );
 
   // --- UPDATED PROCESS PAYMENT LOGIC ---
   Future<void> _processPayment() async {
@@ -339,22 +337,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               ],
                             ),
                           ),
-                        ),
-                        const Divider(height: 24),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              AppLocalizations.of(context).txServiceFee,
-                              style: GoogleFonts.poppins(color: Colors.grey),
-                            ),
-                            Text(
-                              "\$$transactionFee",
-                              style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
                         ),
                       ],
                     ),

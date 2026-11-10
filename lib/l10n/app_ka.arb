@@ -1498,7 +1498,7 @@
   "providerUserFallback": "მომხმარებელი",
   "providerVerifiedService": "დადასტურებული სერვისი",
   "providerNoReviews": "შეფასებები ჯერ არ არის",
-  "providerBeFirstReview": "იყავი პირველი შემფასებელი და მიიღე {points} ჯილდოს ქულა",
+  "providerBeFirstReview": "შეფასებები აქ გამოჩნდება დასრულებული ჯავშნების შემდეგ.",
   "@providerBeFirstReview": { "placeholders": { "points": { "type": "int" } } },
 
   "bookTitle": "სერვისის ჯავშანი",
@@ -1656,7 +1656,7 @@
   "@walletRenewsInDays": { "placeholders": { "days": { "type": "int" } } },
   "walletUpgradePlan": "გეგმის გაუმჯობესება",
   "trialBannerTitle": "გაშვების შეთავაზება: Pro ცდის რეჟიმი აქტიურია",
-  "trialBannerSubtitle": "განახლდება {days} დღეში • სრულდება {date}",
+  "trialBannerSubtitle": "დარჩა {days} დღე • სრულდება {date}",
   "@trialBannerSubtitle": { "placeholders": { "days": { "type": "int" }, "date": { "type": "String" } } },
   "trialPerkServices": "✔ 5 სერვისი",
   "trialPerkCommission": "✔ 3% საკომისიო",

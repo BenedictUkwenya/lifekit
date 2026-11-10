@@ -1630,7 +1630,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String providerBeFirstReview(int points) {
-    return 'Будьте первым, кто оставит отзыв, и получите $points баллов';
+    return 'Отзывы появятся здесь после завершённых бронирований.';
   }
 
   @override
@@ -2100,7 +2100,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String trialBannerSubtitle(int days, String date) {
-    return 'Продление через $days дн. • Заканчивается $date';
+    return 'Осталось $days дн. • Заканчивается $date';
   }
 
   @override
