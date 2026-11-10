@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/utils/store_rules.dart';
 import 'select_main_category_screen.dart';
 import 'select_sub_category_screen.dart';
 import 'edit_service_screen.dart';
@@ -263,6 +264,11 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
   }
 
   Future<void> _showPlanLimitDialog({String? message}) async {
+    // iOS: no upgrade prompts until Apple In-App Purchase exists (see StoreRules).
+    if (!StoreRules.showUpgrades) {
+      AppToast.info(context, AppLocalizations.of(context).planLimitReached);
+      return;
+    }
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -346,6 +352,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
   }
 
   Future<void> _showBoostSheet(dynamic service) async {
+    if (!StoreRules.showUpgrades) return;
     final serviceId = service['id']?.toString();
     if (serviceId == null || serviceId.isEmpty) return;
 
@@ -1232,7 +1239,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                     ),
                   ],
                 ),
-                if (status == 'active' && !isDraft) ...[
+                if (status == 'active' && !isDraft && StoreRules.showUpgrades) ...[
                   const SizedBox(height: 8),
                   SizedBox(
                     height: 28,

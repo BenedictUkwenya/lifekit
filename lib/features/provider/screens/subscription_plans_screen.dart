@@ -4,6 +4,7 @@ import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/utils/store_rules.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../wallet/screens/add_money_screen.dart';
 
@@ -321,7 +322,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
             width: double.infinity,
             height: 48,
             child: ElevatedButton(
-              onPressed: isFree || isLoading || isCurrent
+              onPressed: isFree || isLoading || isCurrent || !StoreRules.showUpgrades
                   ? null
                   : () => _buyPlan(tier),
               style: ElevatedButton.styleFrom(

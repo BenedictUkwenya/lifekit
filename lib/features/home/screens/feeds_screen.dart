@@ -21,6 +21,7 @@ import 'saved_posts_screen.dart';
 import '../../services/screens/service_booking_detail_screen.dart';
 import '../../services/screens/skill_swap_dashboard_screen.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/utils/dates.dart';
 
 // ─────────────────────────────────────────────
 // FEEDS SCREEN
@@ -992,7 +993,7 @@ class _FeedCardState extends State<_FeedCard> with TickerProviderStateMixin {
     String dateLabel = '';
     if (createdAt != null) {
       try {
-        final dt = DateTime.parse(createdAt);
+        final dt = parseApiDate(createdAt);
         final now = DateTime.now();
         final diff = now.difference(dt);
         if (diff.inMinutes < 1) {
@@ -1753,7 +1754,7 @@ class _EventGridCard extends StatelessWidget {
     String dayStr = '';
     String monthStr = '';
     try {
-      date = DateTime.parse(event['event_date']);
+      date = parseApiDate(event['event_date']);
       dayStr = DateFormat('dd').format(date);
       monthStr = DateFormat('MMM').format(date);
     } catch (_) {}

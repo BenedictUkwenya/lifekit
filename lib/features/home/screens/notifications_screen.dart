@@ -6,6 +6,7 @@ import '../../../core/widgets/skeleton.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/utils/store_rules.dart';
 import '../../../core/services/app_cache.dart';
 
 // Navigation Targets
@@ -15,6 +16,7 @@ import '../../provider/screens/subscription_plans_screen.dart';
 import '../../services/screens/skill_swap_dashboard_screen.dart';
 import 'chats_list_screen.dart';
 import 'feeds_screen.dart';
+import '../../../core/utils/dates.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -169,9 +171,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         context,
         MaterialPageRoute(builder: (_) => const MyServicesListScreen()),
       );
-    } else if (type == 'trial_expired' ||
-        type == 'ai_nudge_no_services' ||
-        type == 'ai_nudge_inactive') {
+    } else if (StoreRules.showUpgrades &&
+        (type == 'trial_expired' ||
+            type == 'ai_nudge_no_services' ||
+            type == 'ai_nudge_inactive')) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const SubscriptionPlansScreen()),
@@ -280,7 +283,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Widget _buildNotificationItem(dynamic notif) {
     final bool isRead = notif['is_read'] ?? false;
     final String type = notif['type'] ?? 'system';
-    final DateTime created = DateTime.parse(notif['created_at']);
+    final DateTime created = parseApiDate(notif['created_at']);
     final String timeAgo = _getTimeAgo(created);
 
     // Types that navigate somewhere on tap

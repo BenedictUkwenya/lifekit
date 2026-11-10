@@ -7,6 +7,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:lifekit_frontend/features/profile/screens/service_profile_screen.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/utils/dates.dart';
 
 class ProviderProfileScreen extends StatefulWidget {
   final String providerId;
@@ -97,7 +98,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen>
     }
 
     if (dateStr != null) {
-      final joinedDate = DateTime.parse(dateStr);
+      final joinedDate = parseApiDate(dateStr);
       final diff = DateTime.now().difference(joinedDate);
       if (diff.inDays > 365) {
         experienceStr = "${(diff.inDays / 365).floor()}yr";

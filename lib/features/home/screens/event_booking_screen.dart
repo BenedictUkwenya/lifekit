@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/utils/error_handler.dart';
+import '../../../core/utils/dates.dart';
 import 'event_receipt_screen.dart'; // We will create this next
 
 class EventBookingScreen extends StatefulWidget {
@@ -113,7 +114,7 @@ class _EventBookingScreenState extends State<EventBookingScreen> {
                         Text(
                           DateFormat(
                             'MMM d, yyyy • h:mm a',
-                          ).format(DateTime.parse(widget.event['event_date'])),
+                          ).format(parseApiDate(widget.event['event_date'])),
                           style: GoogleFonts.poppins(
                             color: Colors.grey,
                             fontSize: 12,

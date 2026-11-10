@@ -1249,7 +1249,7 @@
   "@homeHelloGreeting": {
     "placeholders": { "name": { "type": "String" } }
   },
-  "homeWelcomeTagline": "Откройте для себя берега океанов дельты",
+  "homeWelcomeTagline": "Находите услуги и людей рядом с вами",
   "homeSpecialOfferAwaits": "{name}, вас ждёт специальное предложение!",
   "@homeSpecialOfferAwaits": {
     "placeholders": { "name": { "type": "String" } }
@@ -1934,7 +1934,7 @@
   "txDetailsOptional": "Подробности (необязательно)",
   "txDisableSkillSwap": "Отключить обмен навыками?",
   "txDiscussion": "Обсуждение",
-  "txDownloadPdf": "Скачать PDF",
+  "txDownloadPdf": "Поделиться чеком",
   "txEditLimitReached": "Лимит правок исчерпан",
   "txEditService": "Редактировать услугу",
   "txEnterAmount": "Введите сумму",
@@ -2048,7 +2048,7 @@
   "txWhatServiceAreYouOffering": "Какую услугу вы предлагаете?",
   "txYouNeedMoreWalletBalanceTo": "Для продолжения нужно больше средств. Пополнить сейчас?",
   "txYourServices": "Ваши услуги",
-  "txYourTicketsHaveBeenSentTo": "Билеты отправлены на вашу почту.",
+  "txYourTicketsHaveBeenSentTo": "Покажите этот QR-код на входе.",
   "txCreateService": "✨ Создать услугу",
   "txAiPitch": "✨ AI-предложение",
   "txViewAiOpportunityRadar": "✨ AI-радар возможностей",
@@ -2060,5 +2060,7 @@
   "timeHoursAgo": "{n} ч назад",
   "timeDaysAgo": "{n} дн назад",
   "dateToday": "Сегодня",
-  "dateYesterday": "Вчера"
+  "dateYesterday": "Вчера",
+  "planLimitReached": "Вы достигли лимита для вашего аккаунта.",
+  "featureNotAvailable": "Эта функция пока недоступна для вашего аккаунта."
 }

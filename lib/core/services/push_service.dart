@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -109,8 +110,26 @@ class PushService {
 
   /// Ask permission (first time only) and register this device for the
   /// signed-in user. Safe to call on every app open.
+  static const _enabledKey = 'push_enabled';
+
+  /// The user's choice in Settings → Notifications (on by default).
+  Future<bool> isUserEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_enabledKey) ?? true;
+  }
+
+  Future<void> setEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_enabledKey, enabled);
+    try {
+      enabled ? await registerForUser() : await unregister();
+    } catch (e) {
+      debugPrint('Push toggle failed: $e');
+    }
+  }
+
   Future<void> registerForUser() async {
-    if (!_ready) return;
+    if (!_ready || !await isUserEnabled()) return;
     try {
       final settings = await FirebaseMessaging.instance.requestPermission();
       if (settings.authorizationStatus == AuthorizationStatus.denied) return;

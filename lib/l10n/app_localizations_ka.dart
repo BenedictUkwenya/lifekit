@@ -1003,7 +1003,8 @@ class AppLocalizationsKa extends AppLocalizations {
   }
 
   @override
-  String get homeWelcomeTagline => 'გამოიკვლიე დელტას ოკეანეების ნაპირები';
+  String get homeWelcomeTagline =>
+      'აღმოაჩინე სერვისები და ადამიანები შენს ახლოს';
 
   @override
   String homeSpecialOfferAwaits(String name) {
@@ -3010,7 +3011,7 @@ class AppLocalizationsKa extends AppLocalizations {
   String get txDiscussion => 'დისკუსია';
 
   @override
-  String get txDownloadPdf => 'PDF-ის ჩამოტვირთვა';
+  String get txDownloadPdf => 'ქვითრის გაზიარება';
 
   @override
   String get txEditLimitReached => 'რედაქტირების ლიმიტი ამოიწურა';
@@ -3374,8 +3375,7 @@ class AppLocalizationsKa extends AppLocalizations {
   String get txYourServices => 'თქვენი მომსახურებები';
 
   @override
-  String get txYourTicketsHaveBeenSentTo =>
-      'ბილეთები გაიგზავნა თქვენს ელფოსტაზე.';
+  String get txYourTicketsHaveBeenSentTo => 'შესასვლელთან აჩვენეთ ეს QR კოდი.';
 
   @override
   String get txCreateService => '✨ მომსახურების შექმნა';
@@ -3419,4 +3419,11 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get dateYesterday => 'გუშინ';
+
+  @override
+  String get planLimitReached => 'თქვენს ანგარიშზე ლიმიტი ამოიწურა.';
+
+  @override
+  String get featureNotAvailable =>
+      'ეს ფუნქცია თქვენი ანგარიშისთვის ჯერ ხელმისაწვდომი არ არის.';
 }

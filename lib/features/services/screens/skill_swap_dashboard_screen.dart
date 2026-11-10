@@ -8,6 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/utils/store_rules.dart';
 import '../../../core/widgets/service_action_sheet.dart';
 import 'skill_swap_screens.dart';
 import 'service_booking_detail_screen.dart';
@@ -1065,6 +1066,10 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
               setDialogState(() => isGenerating = false);
               if (e is UpgradeRequiredException && ctx.mounted && mounted) {
                 Navigator.pop(ctx);
+                if (!StoreRules.showUpgrades) {
+                  AppToast.info(context, AppLocalizations.of(context).featureNotAvailable);
+                  return;
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(

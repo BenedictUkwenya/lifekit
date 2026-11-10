@@ -996,7 +996,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get homeWelcomeTagline => 'Explore the shores of delta oceans';
+  String get homeWelcomeTagline => 'Discover services and people near you';
 
   @override
   String homeSpecialOfferAwaits(String name) {
@@ -2993,7 +2993,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get txDiscussion => 'Discussion';
 
   @override
-  String get txDownloadPdf => 'Download PDF';
+  String get txDownloadPdf => 'Share receipt';
 
   @override
   String get txEditLimitReached => 'Edit Limit Reached';
@@ -3355,7 +3355,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get txYourTicketsHaveBeenSentTo =>
-      'Your tickets have been sent to your email.';
+      'Show this QR code at the entrance.';
 
   @override
   String get txCreateService => '✨ Create Service';
@@ -3398,4 +3398,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dateYesterday => 'Yesterday';
+
+  @override
+  String get planLimitReached => 'You have reached the limit for your account.';
+
+  @override
+  String get featureNotAvailable =>
+      'This feature is not available for your account yet.';
 }

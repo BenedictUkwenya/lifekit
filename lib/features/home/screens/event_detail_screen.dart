@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import 'event_booking_screen.dart';
+import '../../../core/utils/dates.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final dynamic event;
@@ -31,7 +32,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
   String get _formattedDate {
     try {
-      final dt = DateTime.parse(widget.event['event_date']);
+      final dt = parseApiDate(widget.event['event_date']);
       return DateFormat('MMM d/yyyy').format(dt);
     } catch (_) {
       return widget.event['event_date'] ?? '';

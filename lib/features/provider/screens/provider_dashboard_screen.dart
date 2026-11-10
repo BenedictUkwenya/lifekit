@@ -493,15 +493,6 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
           MaterialPageRoute(builder: (_) => const BookingsScreen()),
         ),
       ),
-      _QuickAction(
-        icon: Icons.star_outline_rounded,
-        label: "Reviews",
-        color: Colors.amber.shade700,
-        bgColor: Colors.amber.shade50,
-        onTap: () {
-          // TODO: Navigate to reviews screen
-        },
-      ),
     ];
 
     return Row(

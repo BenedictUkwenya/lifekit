@@ -12,6 +12,7 @@ import 'package:http/http.dart' as http;
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/utils/store_rules.dart';
 import 'subscription_plans_screen.dart';
 
 class EditServiceScreen extends StatefulWidget {
@@ -424,6 +425,10 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
               if (e is UpgradeRequiredException) {
                 if (!ctx.mounted || !mounted) return;
                 Navigator.pop(ctx); // close bottom sheet
+                if (!StoreRules.showUpgrades) {
+                  AppToast.info(context, AppLocalizations.of(context).featureNotAvailable);
+                  return;
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(

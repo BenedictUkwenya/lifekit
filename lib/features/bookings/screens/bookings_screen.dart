@@ -18,6 +18,7 @@ import '../../../l10n/app_localizations.dart';
 import 'booking_tracking_screen.dart';
 import '../../home/screens/chat_detail_screen.dart';
 import '../../services/screens/skill_swap_screens.dart';
+import '../../../core/utils/dates.dart';
 
 class BookingsScreen extends StatefulWidget {
   const BookingsScreen({super.key});
@@ -136,17 +137,17 @@ class _BookingsScreenState extends State<BookingsScreen>
           cBookings.removeWhere(_isSwap);
           pRequests.removeWhere(_isSwap);
           cBookings.sort((a, b) {
-            final dateA = DateTime.parse(a['scheduled_time']);
-            final dateB = DateTime.parse(b['scheduled_time']);
+            final dateA = parseApiDate(a['scheduled_time']);
+            final dateB = parseApiDate(b['scheduled_time']);
             return dateB.compareTo(dateA);
           });
 
           pRequests.sort((a, b) {
             if (a['status'] == 'pending' && b['status'] != 'pending') return -1;
             if (a['status'] != 'pending' && b['status'] == 'pending') return 1;
-            return DateTime.parse(
+            return parseApiDate(
               b['scheduled_time'],
-            ).compareTo(DateTime.parse(a['scheduled_time']));
+            ).compareTo(parseApiDate(a['scheduled_time']));
           });
 
           clientBookings = cBookings;
@@ -535,7 +536,7 @@ class _BookingsScreenState extends State<BookingsScreen>
 
   Widget _buildHeroBookingCard(dynamic booking, {required bool isClient}) {
     final l10n = AppLocalizations.of(context)!;
-    final dateObj = DateTime.parse(booking['scheduled_time']);
+    final dateObj = parseApiDate(booking['scheduled_time']);
     final dateStr = DateFormat('dd MMM').format(dateObj);
     final num price = booking['total_price'] ?? 0;
     final serviceName = booking['services']['title'];
@@ -800,7 +801,7 @@ class _BookingsScreenState extends State<BookingsScreen>
     final l10n = AppLocalizations.of(context)!;
     final serviceName = booking['services']['title'];
     final num price = booking['total_price'] ?? 0;
-    final dateObj = DateTime.parse(booking['scheduled_time']);
+    final dateObj = parseApiDate(booking['scheduled_time']);
     final dateStr = DateFormat('MMM dd, hh:mm a').format(dateObj);
     final status = booking['status'];
     final isOverdue = _isOverdueBooking(booking);

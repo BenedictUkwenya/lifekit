@@ -78,7 +78,7 @@ class _PlacesListScreenState extends State<PlacesListScreen>
       }
       if (permission == LocationPermission.denied ||
           permission == LocationPermission.deniedForever) {
-        _fallback("Location permission denied. Showing Lagos, Nigeria.");
+        _fallback("Location permission denied. Showing Tbilisi, Georgia.");
         return;
       }
 
@@ -91,16 +91,16 @@ class _PlacesListScreenState extends State<PlacesListScreen>
       _userLng = pos.longitude;
       await _fetchAll(_userLat!, _userLng!);
     } on TimeoutException {
-      _fallback("Location timeout. Showing Lagos, Nigeria.");
+      _fallback("Location timeout. Showing Tbilisi, Georgia.");
     } catch (e) {
       debugPrint("Location error: $e");
-      _fallback("Could not get location. Showing Lagos, Nigeria.");
+      _fallback("Could not get location. Showing Tbilisi, Georgia.");
     }
   }
 
   void _fallback(String message) {
     setState(() => statusMessage = message);
-    _fetchAll(6.5244, 3.3792);
+    _fetchAll(41.7151, 44.8271); // Tbilisi
   }
 
   Future<void> _loadCachedPlaces() async {

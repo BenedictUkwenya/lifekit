@@ -1003,7 +1003,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get homeWelcomeTagline => 'Откройте для себя берега океанов дельты';
+  String get homeWelcomeTagline => 'Находите услуги и людей рядом с вами';
 
   @override
   String homeSpecialOfferAwaits(String name) {
@@ -3005,7 +3005,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get txDiscussion => 'Обсуждение';
 
   @override
-  String get txDownloadPdf => 'Скачать PDF';
+  String get txDownloadPdf => 'Поделиться чеком';
 
   @override
   String get txEditLimitReached => 'Лимит правок исчерпан';
@@ -3369,7 +3369,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get txYourServices => 'Ваши услуги';
 
   @override
-  String get txYourTicketsHaveBeenSentTo => 'Билеты отправлены на вашу почту.';
+  String get txYourTicketsHaveBeenSentTo => 'Покажите этот QR-код на входе.';
 
   @override
   String get txCreateService => '✨ Создать услугу';
@@ -3413,4 +3413,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get dateYesterday => 'Вчера';
+
+  @override
+  String get planLimitReached => 'Вы достигли лимита для вашего аккаунта.';
+
+  @override
+  String get featureNotAvailable =>
+      'Эта функция пока недоступна для вашего аккаунта.';
 }

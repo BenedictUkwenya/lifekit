@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/app_toast.dart';
+import '../../../core/utils/store_rules.dart';
+import '../../../features/provider/screens/subscription_plans_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
@@ -15,6 +17,7 @@ import '../../../core/services/api_service.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import 'group_settings_screen.dart';
 import '../../home/widgets/comments_sheet.dart';
+import '../../../core/utils/dates.dart';
 
 // ─── Soft Pastel Design Tokens ──────────────────────────────────
 class _T {
@@ -204,7 +207,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
       final createdRaw = post['created_at']?.toString();
       if (userId == null || createdRaw == null) continue;
       try {
-        final createdAt = DateTime.parse(createdRaw).toLocal();
+        final createdAt = parseApiDate(createdRaw).toLocal();
         if (createdAt.isAfter(cutoff)) {
           final existing = _memberActivity[userId];
           if (existing == null || createdAt.isAfter(existing)) {
@@ -278,6 +281,11 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
   }
 
   void _showPlanLimitSheet() {
+    // iOS: no upgrade prompts until Apple In-App Purchase exists (see StoreRules).
+    if (!StoreRules.showUpgrades) {
+      AppToast.info(context, AppLocalizations.of(context).planLimitReached);
+      return;
+    }
     final String groupName = groupData?['name'] ?? 'this hub';
     final String? imageUrl = groupData?['image_url'];
     final int memberCount = groupData?['member_count'] ?? 0;
@@ -794,14 +802,6 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                     ),
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.more_horiz_rounded,
-                    color: _T.textSec,
-                    size: 22,
-                  ),
-                  onPressed: () {},
-                ),
               ],
             ),
           ),
@@ -840,12 +840,12 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
         itemCount: filtered.length,
         itemBuilder: (context, index) {
           final post = filtered[index];
-          final current = DateTime.parse(post['created_at']);
+          final current = parseApiDate(post['created_at']);
           bool showDate = false;
           if (index == filtered.length - 1) {
             showDate = true;
           } else {
-            final next = DateTime.parse(filtered[index + 1]['created_at']);
+            final next = parseApiDate(filtered[index + 1]['created_at']);
             if (current.day != next.day ||
                 current.month != next.month ||
                 current.year != next.year)
@@ -970,7 +970,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     final String? pic = profile['profile_picture_url'];
     final String content = post['content'] ?? '';
     final String? image = post['image_url'];
-    final DateTime time = DateTime.parse(post['created_at']);
+    final DateTime time = parseApiDate(post['created_at']);
     final String timeStr = DateFormat('h:mm a').format(time);
     final service = post['services'];
     final parent = post['parent'];
@@ -1876,7 +1876,12 @@ class _PlanLimitDetailSheet extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  // TODO: navigate to subscription/upgrade screen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const SubscriptionPlansScreen(),
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,

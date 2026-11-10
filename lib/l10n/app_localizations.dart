@@ -2023,7 +2023,7 @@ abstract class AppLocalizations {
   /// Sub-heading under the home greeting
   ///
   /// In en, this message translates to:
-  /// **'Explore the shores of delta oceans'**
+  /// **'Discover services and people near you'**
   String get homeWelcomeTagline;
 
   /// Headline on the offer banner
@@ -5707,7 +5707,7 @@ abstract class AppLocalizations {
   /// No description provided for @txDownloadPdf.
   ///
   /// In en, this message translates to:
-  /// **'Download PDF'**
+  /// **'Share receipt'**
   String get txDownloadPdf;
 
   /// No description provided for @txEditLimitReached.
@@ -6391,7 +6391,7 @@ abstract class AppLocalizations {
   /// No description provided for @txYourTicketsHaveBeenSentTo.
   ///
   /// In en, this message translates to:
-  /// **'Your tickets have been sent to your email.'**
+  /// **'Show this QR code at the entrance.'**
   String get txYourTicketsHaveBeenSentTo;
 
   /// No description provided for @txCreateService.
@@ -6465,6 +6465,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Yesterday'**
   String get dateYesterday;
+
+  /// Shown on iOS instead of an upgrade prompt when a plan limit is hit
+  ///
+  /// In en, this message translates to:
+  /// **'You have reached the limit for your account.'**
+  String get planLimitReached;
+
+  /// Shown on iOS instead of an upgrade prompt for paid features
+  ///
+  /// In en, this message translates to:
+  /// **'This feature is not available for your account yet.'**
+  String get featureNotAvailable;
 }
 
 class _AppLocalizationsDelegate

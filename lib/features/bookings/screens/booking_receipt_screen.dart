@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../core/widgets/app_toast.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/utils/dates.dart';
 
 class BookingReceiptScreen extends StatelessWidget {
   final dynamic booking;
@@ -19,7 +20,7 @@ class BookingReceiptScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final status = booking['status'];
     final price = booking['total_price'];
-    final dateObj = DateTime.parse(booking['scheduled_time']);
+    final dateObj = parseApiDate(booking['scheduled_time']);
     final dateStr = DateFormat('MMMM dd, yyyy').format(dateObj);
     final timeStr = DateFormat('hh:mm a').format(dateObj);
     final serviceName = booking['services']['title'];
@@ -147,12 +148,15 @@ class BookingReceiptScreen extends StatelessWidget {
 
             const SizedBox(height: 40),
 
-            // DOWNLOAD BUTTON (Mock)
             OutlinedButton.icon(
-              onPressed: () {
-                AppToast.info(context, AppLocalizations.of(context).msgReceiptDownloaded);
-              },
-              icon: const Icon(Icons.download, color: Colors.black),
+              onPressed: () => Share.share(
+                'LifeKit receipt\n'
+                'Service: $serviceName\n'
+                'Date: $dateStr, $timeStr\n'
+                'Status: $status\n'
+                'Total: \$$price',
+              ),
+              icon: const Icon(Icons.ios_share, color: Colors.black),
               label: Text(
                 AppLocalizations.of(context).txDownloadPdf,
                 style: GoogleFonts.poppins(color: Colors.black),

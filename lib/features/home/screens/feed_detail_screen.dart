@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/utils/dates.dart';
 
 class FeedDetailScreen extends StatefulWidget {
   final dynamic post;
@@ -107,7 +108,7 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
   String _timeAgo(String? dateStr) {
     if (dateStr == null) return '';
     try {
-      return formatTimeAgo(context, DateTime.parse(dateStr));
+      return formatTimeAgo(context, parseApiDate(dateStr));
     } catch (_) {
       return '';
     }

@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/utils/store_rules.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/motion.dart';
 import '../../../l10n/app_localizations.dart';
@@ -199,6 +200,11 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
 
   void _showUpgradeDialog() {
     final l10n = AppLocalizations.of(context);
+    // iOS: no upgrade prompts until Apple In-App Purchase exists (see StoreRules).
+    if (!StoreRules.showUpgrades) {
+      AppToast.info(context, l10n.featureNotAvailable);
+      return;
+    }
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -763,9 +769,10 @@ class _ProBanner extends StatelessWidget {
           const Text('✨', style: TextStyle(fontSize: 18)),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(l10n.aiFreeBanner, style: GoogleFonts.poppins(fontSize: 12, height: 1.35, color: const Color(0xFF7C2D12))),
+            child: Text(StoreRules.showUpgrades ? l10n.aiFreeBanner : l10n.featureNotAvailable, style: GoogleFonts.poppins(fontSize: 12, height: 1.35, color: const Color(0xFF7C2D12))),
           ),
-          TextButton(onPressed: onTap, child: Text(l10n.aiSeePlans)),
+          if (StoreRules.showUpgrades)
+            TextButton(onPressed: onTap, child: Text(l10n.aiSeePlans)),
         ],
       ),
     );

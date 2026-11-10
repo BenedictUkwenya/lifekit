@@ -466,6 +466,7 @@ class ApiService {
     String? username,
     String? phone,
     String? bio,
+    bool? emailNotifications,
   }) async {
     final Map<String, dynamic> body = {};
     if (fullName != null) body['full_name'] = fullName;
@@ -473,6 +474,9 @@ class ApiService {
     if (username != null) body['username'] = username;
     if (phone != null) body['phone_number'] = phone;
     if (bio != null) body['bio'] = bio;
+    if (emailNotifications != null) {
+      body['email_notifications_enabled'] = emailNotifications;
+    }
     if (body.isEmpty) return;
     await _authenticatedPut('/users/profile', body);
     AppCache.instance.invalidate('user_profile');

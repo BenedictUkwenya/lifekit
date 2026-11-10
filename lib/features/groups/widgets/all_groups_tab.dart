@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/app_toast.dart';
+import '../../../core/utils/store_rules.dart';
+import '../../../features/provider/screens/subscription_plans_screen.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -135,6 +137,11 @@ class _AllGroupsTabState extends State<AllGroupsTab> {
   }
 
   void _showPlanLimitSheet(dynamic group) {
+    // iOS: no upgrade prompts until Apple In-App Purchase exists (see StoreRules).
+    if (!StoreRules.showUpgrades) {
+      AppToast.info(context, AppLocalizations.of(context).planLimitReached);
+      return;
+    }
     final String groupName = group['name'] ?? 'this hub';
     final String? imageUrl = group['image_url'];
     final int memberCount = group['members_count'] ?? 0;
@@ -1243,7 +1250,12 @@ class _PlanLimitSheet extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  // TODO: navigate to subscription/upgrade screen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const SubscriptionPlansScreen(),
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,

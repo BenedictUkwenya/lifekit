@@ -1249,7 +1249,7 @@
   "@homeHelloGreeting": {
     "placeholders": { "name": { "type": "String" } }
   },
-  "homeWelcomeTagline": "გამოიკვლიე დელტას ოკეანეების ნაპირები",
+  "homeWelcomeTagline": "აღმოაჩინე სერვისები და ადამიანები შენს ახლოს",
   "homeSpecialOfferAwaits": "{name}, განსაკუთრებული შეთავაზება გელოდება!",
   "@homeSpecialOfferAwaits": {
     "placeholders": { "name": { "type": "String" } }
@@ -1934,7 +1934,7 @@
   "txDetailsOptional": "დეტალები (არასავალდებულო)",
   "txDisableSkillSwap": "გამოვრთოთ უნარების გაცვლა?",
   "txDiscussion": "დისკუსია",
-  "txDownloadPdf": "PDF-ის ჩამოტვირთვა",
+  "txDownloadPdf": "ქვითრის გაზიარება",
   "txEditLimitReached": "რედაქტირების ლიმიტი ამოიწურა",
   "txEditService": "მომსახურების რედაქტირება",
   "txEnterAmount": "შეიყვანეთ თანხა",
@@ -2048,7 +2048,7 @@
   "txWhatServiceAreYouOffering": "რა მომსახურებას სთავაზობთ?",
   "txYouNeedMoreWalletBalanceTo": "გასაგრძელებლად საფულეში მეტი თანხაა საჭირო. შევავსოთ ახლა?",
   "txYourServices": "თქვენი მომსახურებები",
-  "txYourTicketsHaveBeenSentTo": "ბილეთები გაიგზავნა თქვენს ელფოსტაზე.",
+  "txYourTicketsHaveBeenSentTo": "შესასვლელთან აჩვენეთ ეს QR კოდი.",
   "txCreateService": "✨ მომსახურების შექმნა",
   "txAiPitch": "✨ AI შეთავაზება",
   "txViewAiOpportunityRadar": "✨ AI შესაძლებლობების რადარი",
@@ -2060,5 +2060,7 @@
   "timeHoursAgo": "{n} სთ-ის წინ",
   "timeDaysAgo": "{n} დღის წინ",
   "dateToday": "დღეს",
-  "dateYesterday": "გუშინ"
+  "dateYesterday": "გუშინ",
+  "planLimitReached": "თქვენს ანგარიშზე ლიმიტი ამოიწურა.",
+  "featureNotAvailable": "ეს ფუნქცია თქვენი ანგარიშისთვის ჯერ ხელმისაწვდომი არ არის."
 }

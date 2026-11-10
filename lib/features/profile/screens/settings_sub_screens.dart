@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/providers/locale_provider.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/services/push_service.dart';
 import 'blocked_users_screen.dart';
 import '../../auth/screens/forgot_password_screen.dart';
 import '../../auth/screens/login_screen.dart';
@@ -361,9 +362,41 @@ class NotificationSettingsScreen extends StatefulWidget {
 
 class _NotificationSettingsScreenState
     extends State<NotificationSettingsScreen> {
+  final ApiService _apiService = ApiService();
   bool push = true;
   bool email = true;
-  bool promo = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final pushOn = await PushService.instance.isUserEnabled();
+    if (mounted) setState(() => push = pushOn);
+    try {
+      final data = await _apiService.getUserProfile();
+      final emailOn = data['profile']?['email_notifications_enabled'];
+      if (mounted && emailOn is bool) setState(() => email = emailOn);
+    } catch (_) {}
+  }
+
+  Future<void> _setPush(bool value) async {
+    setState(() => push = value);
+    await PushService.instance.setEnabled(value);
+  }
+
+  Future<void> _setEmail(bool value) async {
+    setState(() => email = value);
+    try {
+      await _apiService.updateProfile(emailNotifications: value);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => email = !value);
+      AppToast.error(context, appErrorMessage(context, e));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -397,21 +430,14 @@ class _NotificationSettingsScreenState
                 l10n.notifPush,
                 l10n.notifPushSubtitle,
                 push,
-                (v) => setState(() => push = v),
+                _setPush,
               ),
               const Divider(height: 1),
               _buildSwitch(
                 l10n.notifEmail,
                 l10n.notifEmailSubtitle,
                 email,
-                (v) => setState(() => email = v),
-              ),
-              const Divider(height: 1),
-              _buildSwitch(
-                l10n.notifPromo,
-                l10n.notifPromoSubtitle,
-                promo,
-                (v) => setState(() => promo = v),
+                _setEmail,
               ),
             ],
           ),

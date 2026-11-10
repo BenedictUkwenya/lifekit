@@ -45,6 +45,7 @@ import '../../../core/widgets/service_action_sheet.dart';
 import '../../services/screens/skill_swap_screens.dart'
     show SkillSwapBottomSheet;
 import '../../../l10n/app_localizations.dart';
+import '../../../core/utils/dates.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -525,7 +526,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       // Non-critical: places
       try {
-        final placesData = await _apiService.getNearbyPlaces(6.5244, 3.3792);
+        final placesData = await _apiService.getNearbyPlaces(41.7151, 44.8271);
         if (mounted) setState(() => nearbyPlaces = placesData);
       } catch (_) {}
 
@@ -553,9 +554,9 @@ class _HomeScreenState extends State<HomeScreen> {
               t.isAfter(now.subtract(const Duration(minutes: 30)));
         }).toList();
         upcoming.sort(
-          (a, b) => DateTime.parse(
+          (a, b) => parseApiDate(
             a['scheduled_time'],
-          ).compareTo(DateTime.parse(b['scheduled_time'])),
+          ).compareTo(parseApiDate(b['scheduled_time'])),
         );
         if (mounted) {
           setState(
@@ -1435,12 +1436,6 @@ class _HomeScreenState extends State<HomeScreen> {
               context,
               MaterialPageRoute(builder: (_) => const PlacesListScreen()),
             ),
-          ),
-          const SizedBox(width: 10),
-          _buildQuickChip(
-            icon: Icons.card_giftcard_outlined,
-            label: l10n.rewards,
-            onTap: () {},
           ),
         ],
       ),

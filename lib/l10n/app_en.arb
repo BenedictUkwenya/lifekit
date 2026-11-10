@@ -967,7 +967,7 @@
     "placeholders": { "name": { "type": "String" } }
   },
 
-  "homeWelcomeTagline": "Explore the shores of delta oceans",
+  "homeWelcomeTagline": "Discover services and people near you",
   "@homeWelcomeTagline": { "description": "Sub-heading under the home greeting" },
 
   "homeSpecialOfferAwaits": "{name}, a special offer awaits!",
@@ -1730,7 +1730,7 @@
   "txDetailsOptional": "Details (optional)",
   "txDisableSkillSwap": "Disable Skill Swap?",
   "txDiscussion": "Discussion",
-  "txDownloadPdf": "Download PDF",
+  "txDownloadPdf": "Share receipt",
   "txEditLimitReached": "Edit Limit Reached",
   "txEditService": "Edit Service",
   "txEnterAmount": "Enter Amount",
@@ -1844,7 +1844,7 @@
   "txWhatServiceAreYouOffering": "What service are you offering?",
   "txYouNeedMoreWalletBalanceTo": "You need more wallet balance to continue. Add money now?",
   "txYourServices": "Your Services",
-  "txYourTicketsHaveBeenSentTo": "Your tickets have been sent to your email.",
+  "txYourTicketsHaveBeenSentTo": "Show this QR code at the entrance.",
   "txCreateService": "✨ Create Service",
   "txAiPitch": "✨ AI Pitch",
   "txViewAiOpportunityRadar": "✨ View AI Opportunity Radar",
@@ -1859,5 +1859,9 @@
   "timeDaysAgo": "{n}d ago",
   "@timeDaysAgo": {"placeholders":{"n":{"type":"int"}}},
   "dateToday": "Today",
-  "dateYesterday": "Yesterday"
+  "dateYesterday": "Yesterday",
+  "planLimitReached": "You have reached the limit for your account.",
+  "@planLimitReached": { "description": "Shown on iOS instead of an upgrade prompt when a plan limit is hit" },
+  "featureNotAvailable": "This feature is not available for your account yet.",
+  "@featureNotAvailable": { "description": "Shown on iOS instead of an upgrade prompt for paid features" }
 }

@@ -12,6 +12,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/utils/store_rules.dart';
 import '../../provider/screens/subscription_plans_screen.dart';
 import 'report_user_screen.dart';
 
@@ -314,6 +315,11 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
   }
 
   void _showUpgradeToProSheet() {
+    // iOS: no upgrade prompts until Apple In-App Purchase exists (see StoreRules).
+    if (!StoreRules.showUpgrades) {
+      AppToast.info(context, AppLocalizations.of(context).featureNotAvailable);
+      return;
+    }
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

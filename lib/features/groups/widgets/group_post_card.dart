@@ -8,6 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/utils/dates.dart';
 
 class GroupPostCard extends StatefulWidget {
   final dynamic post;
@@ -132,7 +133,7 @@ class _GroupPostCardState extends State<GroupPostCard> {
     final String content = widget.post['content'] ?? '';
     final String? imageUrl = widget.post['image_url'];
     final int commentsCount = widget.post['comments_count'] ?? 0;
-    final DateTime createdAt = DateTime.parse(widget.post['created_at']);
+    final DateTime createdAt = parseApiDate(widget.post['created_at']);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),

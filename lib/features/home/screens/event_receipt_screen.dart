@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/constants/app_colors.dart';
 
 class EventReceiptScreen extends StatelessWidget {
@@ -73,23 +74,10 @@ class EventReceiptScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     const Divider(),
                     const SizedBox(height: 16),
-                    // Fake QR Code
-                    Container(
-                      height: 80,
-                      width: 200,
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          "||| || ||| | ||||",
-                          style: TextStyle(
-                            color: Colors.white,
-                            letterSpacing: 4,
-                          ),
-                        ),
-                      ),
+                    QrImageView(
+                      data: '${ticket['ticket_code'] ?? ''}',
+                      size: 180,
+                      backgroundColor: Colors.white,
                     ),
                   ],
                 ),

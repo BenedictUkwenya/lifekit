@@ -56,13 +56,11 @@
 		</dict>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>Lifekit needs camera access to take photos for your profile and bookings.</string>
+	<string>LifeKit uses the camera so you can take photos for your profile, services and posts.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Lifekit needs photo library access to choose images for your profile and bookings.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Lifekit needs microphone access when you record video.</string>
+	<string>LifeKit uses your photo library so you can choose images for your profile, services, posts and chats.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Lifekit uses your location while you use the app to show nearby services and improve bookings.</string>
+	<string>LifeKit uses your location while you use the app to show places and services near you.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

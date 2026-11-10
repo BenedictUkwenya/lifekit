@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/legal_links.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/utils/store_rules.dart';
 import '../../../core/services/app_cache.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 
@@ -521,6 +522,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ),
                                   ),
                                   const SizedBox(width: 12),
+                                  if (StoreRules.showUpgrades)
                                   GestureDetector(
                                     onTap: () async {
                                       await Navigator.push(

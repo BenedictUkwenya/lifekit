@@ -1,8 +1,15 @@
 workflows:
   ios-release:
-    name: iOS IPA Build
+    name: iOS App Store release
     max_build_duration: 60
+    integrations:
+      # Name of the App Store Connect API key added in Codemagic
+      # (Team settings → Integrations → App Store Connect).
+      app_store_connect: codemagic-asc
     environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.lifekit.app
       flutter: stable
       xcode: latest
       cocoapods: default
@@ -13,36 +20,24 @@ workflows:
       - name: Install CocoaPods
         script: cd ios && pod install
 
+      - name: Use signing profiles
+        script: xcode-project use-profiles
+
       - name: Flutter analyze
         script: flutter analyze --no-fatal-infos --no-fatal-warnings
 
-      - name: Build iOS
-        script: |
-          flutter build ios --release --no-codesign
-
-      - name: Archive
-        script: |
-          xcodebuild \
-            -workspace ios/Runner.xcworkspace \
-            -scheme Runner \
-            -sdk iphoneos \
-            -configuration Release \
-            -archivePath $CM_BUILD_DIR/Runner.xcarchive \
-            archive \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
-
-      - name: Package IPA manually
-        script: |
-          mkdir -p $CM_BUILD_DIR/Payload
-          cp -r "$CM_BUILD_DIR/Runner.xcarchive/Products/Applications/Runner.app" $CM_BUILD_DIR/Payload/
-          cd $CM_BUILD_DIR && zip -r Lifekit.ipa Payload
+      - name: Build signed IPA
+        # Every upload needs a higher build number; Codemagic's counter does that.
+        script: flutter build ipa --release --build-number=$BUILD_NUMBER --export-options-plist=/Users/builder/export_options.plist
 
     artifacts:
-      - $CM_BUILD_DIR/Lifekit.ipa
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
 
     publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
       email:
         recipients:
           - ukwenzyb@gmail.com
