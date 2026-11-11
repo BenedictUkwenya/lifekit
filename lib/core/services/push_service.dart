@@ -55,7 +55,7 @@ class PushService {
       appId: appId,
       messagingSenderId: sender,
       projectId: project,
-      iosBundleId: ios ? 'com.lifekit.app' : null,
+      iosBundleId: ios ? 'com.rosclan.lifekit' : null,
     );
   }
 
