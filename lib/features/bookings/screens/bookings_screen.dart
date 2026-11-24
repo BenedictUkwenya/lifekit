@@ -72,8 +72,10 @@ class _BookingsScreenState extends State<BookingsScreen>
     final pr = AppCache.instance.get<List<dynamic>>('provider_requests');
     if ((cb != null || pr != null) && mounted) {
       setState(() {
-        if (cb != null) clientBookings = List<dynamic>.from(cb);
-        if (pr != null) providerRequests = List<dynamic>.from(pr);
+        bool isSwap(b) =>
+            (double.tryParse(b['total_price']?.toString() ?? '0') ?? 0) == 0;
+        if (cb != null) clientBookings = cb.where((b) => !isSwap(b)).toList();
+        if (pr != null) providerRequests = pr.where((b) => !isSwap(b)).toList();
         isLoading = false;
       });
     }
@@ -87,8 +89,10 @@ class _BookingsScreenState extends State<BookingsScreen>
         _apiService.getIncomingSwaps(),
         _apiService.getOutgoingSwaps(),
       ]);
-      final cBookings = results[0];
-      final pRequests = results[1];
+      // Copies: these lists live in AppCache, and the swap split below
+      // removes items. Editing the cached list made swaps vanish on the next visit.
+      final cBookings = List<dynamic>.from(results[0]);
+      final pRequests = List<dynamic>.from(results[1]);
       final incomingSwaps = results[2];
       final outgoingSwaps = results[3];
 

@@ -2933,6 +2933,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
   List<dynamic> incomingSwaps = [];
   List<dynamic> outgoingSwaps = [];
   String? _currentUserId;
+  bool _boardError = false;
 
   @override
   void initState() {
@@ -2954,25 +2955,27 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
   Future<void> _loadAll() => Future.wait([_loadBoard(), _loadMine()]);
 
   Future<void> _loadBoard() async {
-    try {
-      final results = await Future.wait([
-        _apiService.getAiRankedSwapBoard(),
-        _apiService.getSwapAvailableServices(),
-        _apiService.getUserProfile(),
-      ]);
-      if (mounted) {
-        setState(() {
-          boardItems = results[0] as List<dynamic>;
-          availableServices = results[1] as List<dynamic>;
-          _currentUserId =
-              (results[2] as Map<String, dynamic>)['profile']?['id']
-                  ?.toString();
-          isLoadingBoard = false;
+    // Each request on its own: the AI ranking can be slow or fail, and that
+    // used to blank the whole tab as "No swaps yet".
+    var failed = 0;
+    Future<Object?> safe(Future<Object?> f) => f.catchError((_) {
+          failed++;
+          return null;
         });
-      }
-    } catch (_) {
-      if (mounted) setState(() => isLoadingBoard = false);
-    }
+    final results = await Future.wait([
+      safe(_apiService.getAiRankedSwapBoard()),
+      safe(_apiService.getSwapAvailableServices()),
+      safe(_apiService.getUserProfile()),
+    ]);
+    if (!mounted) return;
+    setState(() {
+      boardItems = (results[0] as List<dynamic>?) ?? [];
+      availableServices = (results[1] as List<dynamic>?) ?? [];
+      final profile = results[2];
+      if (profile is Map) _currentUserId = profile['profile']?['id']?.toString();
+      _boardError = failed > 0 && boardItems.isEmpty && availableServices.isEmpty;
+      isLoadingBoard = false;
+    });
   }
 
   Future<void> _loadMine() async {
@@ -2988,7 +2991,8 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
       ]);
       if (mounted) {
         setState(() {
-          incomingSwaps = results[0] as List<dynamic>;
+          incomingSwaps = List<dynamic>.from(results[0] as List<dynamic>)
+            ..sort((a, b) => _statusRank(a).compareTo(_statusRank(b)));
           outgoingSwaps = results[1] as List<dynamic>;
           isLoadingMine = false;
           _mineLoadError = false;
@@ -3185,6 +3189,12 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
             onRefresh: _loadBoard,
             child: isLoadingBoard
                 ? const Center(child: LifeKitLoader(showSlowHint: false))
+                : _boardError
+                ? _buildEmpty(
+                    l10n.swapLoadFailed,
+                    '',
+                    Icons.wifi_off_rounded,
+                  )
                 : (boardItems.isEmpty && availableServices.isEmpty)
                 ? _buildEmpty(
                     l10n.swapNoSwapsYet,
@@ -3784,7 +3794,8 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
     final service = swap['proposer_service'] ?? {};
     final name = proposer['full_name'] ?? l10n.swapUnknown;
     final pic = proposer['profile_picture_url'];
-    final status = swap['status'] ?? 'pending';
+    final status = _effectiveStatus(swap);
+    final iConfirmed = swap['booking']?['client_confirmed'] == true;
     final isPending = status == 'pending';
 
     return Container(
@@ -3838,7 +3849,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                       ),
                     ),
                     Text(
-                      'wants to swap with you',
+                      l10n.swapWantsToSwapWithYou,
                       style: GoogleFonts.poppins(
                         fontSize: 11,
                         color: Colors.grey,
@@ -3856,14 +3867,14 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
           Row(
             children: [
               _offerWantChip(
-                '\u{1F4E6} Their Offer',
+                '\u{1F4E6} ${l10n.swapTheirOffer}',
                 service['title'] ?? '\u2014',
                 _kGold,
               ),
               const SizedBox(width: 8),
               _offerWantChip(
-                '\u{1F50D} Wants',
-                swap['target_category_name'] ?? '\u2014',
+                '\u{1F50D} ${l10n.swapWants}',
+                _wantedLabel(swap),
                 _kBlue,
               ),
             ],
@@ -3927,7 +3938,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
           ],
 
           // For accepted swaps: chat + mark done
-          if (status == 'accepted') ...[
+          if (status == 'accepted' || status == 'completed') ...[
             const SizedBox(height: 12),
             Row(
               children: [
@@ -3970,7 +3981,9 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                       size: 15,
                     ),
                     label: Text(
-                      AppLocalizations.of(context).markDone,
+                      (status == 'completed' || iConfirmed)
+                          ? AppLocalizations.of(context).swapViewBooking
+                          : AppLocalizations.of(context).markDone,
                       style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -3994,9 +4007,11 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
   Widget _buildOutgoingCard(dynamic swap) {
     final target = swap['target_user'] ?? {};
     final service = swap['proposer_service'] ?? {};
-    final name = target['full_name'] ?? 'Unknown';
+    final l10n = AppLocalizations.of(context);
+    final name = target['full_name'] ?? l10n.swapUnknown;
     final pic = target['profile_picture_url'];
-    final status = swap['status'] ?? 'pending';
+    final status = _effectiveStatus(swap);
+    final iConfirmed = swap['booking']?['provider_confirmed'] == true;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -4063,14 +4078,14 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
           Row(
             children: [
               _offerWantChip(
-                '\u{1F4E6} You Offered',
+                '\u{1F4E6} ${l10n.swapYouOffered}',
                 service['title'] ?? '\u2014',
                 _kGold,
               ),
               const SizedBox(width: 8),
               _offerWantChip(
-                '\u{1F50D} Wanted',
-                swap['target_category_name'] ?? '\u2014',
+                '\u{1F50D} ${l10n.swapWanted}',
+                _wantedLabel(swap),
                 _kBlue,
               ),
             ],
@@ -4098,7 +4113,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
           ],
 
           // For accepted swaps: chat + mark done
-          if (status == 'accepted') ...[
+          if (status == 'accepted' || status == 'completed') ...[
             const SizedBox(height: 12),
             Row(
               children: [
@@ -4141,7 +4156,9 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                       size: 15,
                     ),
                     label: Text(
-                      AppLocalizations.of(context).markDone,
+                      (status == 'completed' || iConfirmed)
+                          ? AppLocalizations.of(context).swapViewBooking
+                          : AppLocalizations.of(context).markDone,
                       style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -4162,7 +4179,27 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
     );
   }
 
+  /// The swap row stays "accepted" forever; the booking says whether it's done.
+  String _effectiveStatus(dynamic swap) {
+    final bookingStatus = swap['booking']?['status'];
+    if (bookingStatus == 'completed') return 'completed';
+    if (bookingStatus == 'cancelled') return 'cancelled';
+    return (swap['status'] ?? 'pending').toString();
+  }
+
+  int _statusRank(dynamic swap) => switch (_effectiveStatus(swap)) {
+        'pending' => 0,
+        'accepted' => 1,
+        _ => 2,
+      };
+
+  /// What they asked for: a specific service if one was picked, else a category.
+  String _wantedLabel(dynamic swap) =>
+      (swap['target_service']?['title'] ?? swap['target_category_name'] ?? '\u2014')
+          .toString();
+
   Widget _statusPill(String status) {
+    final l10n = AppLocalizations.of(context);
     Color bg;
     Color fg;
     String label;
@@ -4170,22 +4207,27 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
       case 'accepted':
         bg = Colors.green.shade50;
         fg = Colors.green.shade700;
-        label = '\u2713 Accepted';
+        label = l10n.swapStatusAccepted;
+        break;
+      case 'completed':
+        bg = Colors.blue.shade50;
+        fg = Colors.blue.shade700;
+        label = l10n.swapStatusCompleted;
         break;
       case 'declined':
         bg = Colors.red.shade50;
         fg = Colors.red.shade700;
-        label = '\u2717 Declined';
+        label = l10n.swapStatusDeclined;
         break;
       case 'cancelled':
         bg = Colors.grey.shade100;
         fg = Colors.grey;
-        label = 'Cancelled';
+        label = l10n.swapStatusCancelled;
         break;
       default:
         bg = AppColors.primary.withOpacity(0.1);
         fg = AppColors.primary;
-        label = '\u23F3 Pending';
+        label = l10n.swapStatusPending;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

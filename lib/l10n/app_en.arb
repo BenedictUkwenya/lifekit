@@ -460,6 +460,18 @@
   "swapActive": "Swap Active",
   "@swapActive": { "description": "Confirmed swap status" },
 
+  "swapTheirOffer": "Their offer",
+  "swapWants": "Wants",
+  "swapYouOffered": "You offered",
+  "swapWanted": "Wanted",
+  "swapWantsToSwapWithYou": "wants to swap with you",
+  "swapViewBooking": "View booking",
+  "swapStatusAccepted": "✓ Accepted",
+  "swapStatusDeclined": "✗ Declined",
+  "swapStatusCancelled": "Cancelled",
+  "swapStatusPending": "⏳ Pending",
+  "swapStatusCompleted": "✓ Completed",
+  "swapLoadFailed": "Couldn't load swaps. Pull down to try again.",
   "markDone": "Mark Done",
   "@markDone": { "description": "Complete swap/task button" },
 

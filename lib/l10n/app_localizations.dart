@@ -1012,6 +1012,78 @@ abstract class AppLocalizations {
   /// **'Swap Active'**
   String get swapActive;
 
+  /// No description provided for @swapTheirOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Their offer'**
+  String get swapTheirOffer;
+
+  /// No description provided for @swapWants.
+  ///
+  /// In en, this message translates to:
+  /// **'Wants'**
+  String get swapWants;
+
+  /// No description provided for @swapYouOffered.
+  ///
+  /// In en, this message translates to:
+  /// **'You offered'**
+  String get swapYouOffered;
+
+  /// No description provided for @swapWanted.
+  ///
+  /// In en, this message translates to:
+  /// **'Wanted'**
+  String get swapWanted;
+
+  /// No description provided for @swapWantsToSwapWithYou.
+  ///
+  /// In en, this message translates to:
+  /// **'wants to swap with you'**
+  String get swapWantsToSwapWithYou;
+
+  /// No description provided for @swapViewBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'View booking'**
+  String get swapViewBooking;
+
+  /// No description provided for @swapStatusAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'✓ Accepted'**
+  String get swapStatusAccepted;
+
+  /// No description provided for @swapStatusDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'✗ Declined'**
+  String get swapStatusDeclined;
+
+  /// No description provided for @swapStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get swapStatusCancelled;
+
+  /// No description provided for @swapStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'⏳ Pending'**
+  String get swapStatusPending;
+
+  /// No description provided for @swapStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'✓ Completed'**
+  String get swapStatusCompleted;
+
+  /// No description provided for @swapLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load swaps. Pull down to try again.'**
+  String get swapLoadFailed;
+
   /// Complete swap/task button
   ///
   /// In en, this message translates to:

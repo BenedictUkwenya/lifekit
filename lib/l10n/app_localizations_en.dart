@@ -484,6 +484,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get swapActive => 'Swap Active';
 
   @override
+  String get swapTheirOffer => 'Their offer';
+
+  @override
+  String get swapWants => 'Wants';
+
+  @override
+  String get swapYouOffered => 'You offered';
+
+  @override
+  String get swapWanted => 'Wanted';
+
+  @override
+  String get swapWantsToSwapWithYou => 'wants to swap with you';
+
+  @override
+  String get swapViewBooking => 'View booking';
+
+  @override
+  String get swapStatusAccepted => '✓ Accepted';
+
+  @override
+  String get swapStatusDeclined => '✗ Declined';
+
+  @override
+  String get swapStatusCancelled => 'Cancelled';
+
+  @override
+  String get swapStatusPending => '⏳ Pending';
+
+  @override
+  String get swapStatusCompleted => '✓ Completed';
+
+  @override
+  String get swapLoadFailed => 'Couldn\'t load swaps. Pull down to try again.';
+
+  @override
   String get markDone => 'Mark Done';
 
   @override

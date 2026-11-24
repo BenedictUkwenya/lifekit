@@ -489,6 +489,43 @@ class AppLocalizationsKa extends AppLocalizations {
   String get swapActive => 'აქტიური სვოპი';
 
   @override
+  String get swapTheirOffer => 'მათი შეთავაზება';
+
+  @override
+  String get swapWants => 'სურს';
+
+  @override
+  String get swapYouOffered => 'თქვენ შესთავაზეთ';
+
+  @override
+  String get swapWanted => 'სასურველი';
+
+  @override
+  String get swapWantsToSwapWithYou => 'გთავაზობთ გაცვლას';
+
+  @override
+  String get swapViewBooking => 'ჯავშნის ნახვა';
+
+  @override
+  String get swapStatusAccepted => '✓ მიღებული';
+
+  @override
+  String get swapStatusDeclined => '✗ უარყოფილი';
+
+  @override
+  String get swapStatusCancelled => 'გაუქმებული';
+
+  @override
+  String get swapStatusPending => '⏳ მოლოდინში';
+
+  @override
+  String get swapStatusCompleted => '✓ დასრულებული';
+
+  @override
+  String get swapLoadFailed =>
+      'გაცვლები ვერ ჩაიტვირთა. ჩამოწიეთ ხელახლა საცდელად.';
+
+  @override
   String get markDone => 'მარკ მზადაა';
 
   @override

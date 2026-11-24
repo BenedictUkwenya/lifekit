@@ -485,6 +485,43 @@ class AppLocalizationsRu extends AppLocalizations {
   String get swapActive => 'Замена активна';
 
   @override
+  String get swapTheirOffer => 'Их предложение';
+
+  @override
+  String get swapWants => 'Хочет';
+
+  @override
+  String get swapYouOffered => 'Вы предложили';
+
+  @override
+  String get swapWanted => 'Хотели';
+
+  @override
+  String get swapWantsToSwapWithYou => 'предлагает обмен';
+
+  @override
+  String get swapViewBooking => 'Открыть бронь';
+
+  @override
+  String get swapStatusAccepted => '✓ Принято';
+
+  @override
+  String get swapStatusDeclined => '✗ Отклонено';
+
+  @override
+  String get swapStatusCancelled => 'Отменено';
+
+  @override
+  String get swapStatusPending => '⏳ Ожидает';
+
+  @override
+  String get swapStatusCompleted => '✓ Завершено';
+
+  @override
+  String get swapLoadFailed =>
+      'Не удалось загрузить обмены. Потяните вниз, чтобы повторить.';
+
+  @override
   String get markDone => 'Отметка Готово';
 
   @override
