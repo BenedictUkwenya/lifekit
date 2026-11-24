@@ -3405,4 +3405,49 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get featureNotAvailable =>
       'This feature is not available for your account yet.';
+
+  @override
+  String get bookAddressHint => 'Address or meeting point';
+
+  @override
+  String get bookAddressRequired => 'Please add the address or meeting point.';
+
+  @override
+  String get trackLocation => 'Location';
+
+  @override
+  String get trackNotes => 'Notes';
+
+  @override
+  String get trackType => 'Type';
+
+  @override
+  String get trackEditBooking => 'Edit booking';
+
+  @override
+  String get trackCancelBooking => 'Cancel booking';
+
+  @override
+  String get trackCancelConfirmTitle => 'Cancel this booking?';
+
+  @override
+  String get trackCancelConfirmBody =>
+      'The provider hasn’t accepted yet. Your money goes straight back to your wallet.';
+
+  @override
+  String get trackKeepBooking => 'Keep it';
+
+  @override
+  String get trackCancelledRefunded =>
+      'Booking cancelled. Your money is back in your wallet.';
+
+  @override
+  String get trackChangeTime => 'Date & time';
+
+  @override
+  String get trackSaveChanges => 'Save changes';
+
+  @override
+  String get trackBookingUpdated =>
+      'Booking updated. The provider has been notified.';
 }

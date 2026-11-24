@@ -41,6 +41,10 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
   TimeOfDay _selectedTime = const TimeOfDay(hour: 9, minute: 0);
   String _serviceType = "Default";
   final TextEditingController _commentController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+
+  // Home and outdoor services happen somewhere specific; ask where.
+  bool get _needsAddress => _serviceType == 'Home' || _serviceType == 'Outdoor';
   int _durationHours = 1;
 
   // --- NEW: STANDALONE OPTIONS STATE ---
@@ -67,6 +71,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
   @override
   void dispose() {
     _commentController.dispose();
+    _addressController.dispose();
     super.dispose();
   }
 
@@ -380,6 +385,11 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
       return;
     }
 
+    if (_needsAddress && _addressController.text.trim().isEmpty) {
+      _showModernAlert(AppLocalizations.of(context)!.bookAddressRequired, true);
+      return;
+    }
+
     final cart = Provider.of<CartProvider>(context, listen: false);
 
     double finalPrice = 0.0;
@@ -415,6 +425,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
         date: _selectedDay!,
         time: _selectedTime,
         serviceType: _serviceType,
+        location: _needsAddress ? _addressController.text.trim() : null,
         comments: _commentController.text,
         quantity: 1,
       ),
@@ -1688,6 +1699,42 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
 
                   const SizedBox(height: 16),
 
+                  if (_needsAddress) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.location_on_outlined, color: AppColors.primary, size: 20),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextField(
+                              controller: _addressController,
+                              textInputAction: TextInputAction.done,
+                              style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
+                              decoration: InputDecoration(
+                                hintText: l10n.bookAddressHint,
+                                hintStyle: GoogleFonts.poppins(color: Colors.grey[400], fontSize: 14),
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.zero,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   // 6. COMMENT
                   Container(
                     padding: const EdgeInsets.symmetric(

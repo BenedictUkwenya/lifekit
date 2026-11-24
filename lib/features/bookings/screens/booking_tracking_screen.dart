@@ -11,6 +11,7 @@ import '../../../core/services/api_service.dart';
 import '../../reviews/screens/leave_review_screen.dart';
 import '../../../core/widgets/motion.dart';
 import '../booking_progress.dart';
+import '../../../core/utils/dates.dart';
 
 class BookingTrackingScreen extends StatefulWidget {
   final dynamic booking;
@@ -45,6 +46,147 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
   void dispose() {
     _disputeReasonController.dispose();
     super.dispose();
+  }
+
+  Future<void> _cancelAsClient() async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.trackCancelConfirmTitle),
+        content: Text(l10n.trackCancelConfirmBody),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.trackKeepBooking)),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red[700]),
+            child: Text(l10n.trackCancelBooking),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    setState(() => _isLoading = true);
+    try {
+      await _apiService.cancelBookingAsClient(_currentBooking['id'].toString());
+      if (!mounted) return;
+      setState(() => _currentBooking = {..._currentBooking, 'status': 'cancelled'});
+      AppToast.success(context, l10n.trackCancelledRefunded);
+    } catch (e) {
+      if (mounted) AppToast.error(context, appErrorMessage(context, e));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _openEditSheet() {
+    final l10n = AppLocalizations.of(context);
+    final lang = Localizations.localeOf(context).languageCode;
+    DateTime when = parseApiDate(_currentBooking['scheduled_time']).toLocal();
+    final addressCtrl = TextEditingController(
+      text: _currentBooking['location_details'] == 'Address via Chat'
+          ? ''
+          : (_currentBooking['location_details'] ?? '').toString(),
+    );
+    final notesCtrl = TextEditingController(text: (_currentBooking['comments'] ?? '').toString());
+    bool saving = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (sheetContext, setSheet) => Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(l10n.trackEditBooking,
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 18)),
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.event_outlined),
+                label: Text('${l10n.trackChangeTime}: ${DateFormat('d MMM, HH:mm', lang).format(when)}'),
+                onPressed: () async {
+                  final day = await showDatePicker(
+                    context: sheetContext,
+                    initialDate: when.isBefore(DateTime.now()) ? DateTime.now() : when,
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 180)),
+                  );
+                  if (day == null || !sheetContext.mounted) return;
+                  final time = await showTimePicker(
+                    context: sheetContext,
+                    initialTime: TimeOfDay.fromDateTime(when),
+                  );
+                  if (time == null) return;
+                  setSheet(() => when = DateTime(day.year, day.month, day.day, time.hour, time.minute));
+                },
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: addressCtrl,
+                decoration: InputDecoration(
+                  labelText: l10n.trackLocation,
+                  hintText: l10n.bookAddressHint,
+                  prefixIcon: const Icon(Icons.location_on_outlined),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: notesCtrl,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  labelText: l10n.trackNotes,
+                  prefixIcon: const Icon(Icons.notes_outlined),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: saving
+                      ? null
+                      : () async {
+                          setSheet(() => saving = true);
+                          try {
+                            final updated = await _apiService.editBookingDetails(
+                              _currentBooking['id'].toString(),
+                              scheduledTime: when,
+                              locationDetails: addressCtrl.text,
+                              comments: notesCtrl.text,
+                            );
+                            if (!mounted) return;
+                            setState(() => _currentBooking = {..._currentBooking, ...updated});
+                            if (sheetContext.mounted) Navigator.pop(sheetContext);
+                            AppToast.success(context, l10n.trackBookingUpdated);
+                          } catch (e) {
+                            setSheet(() => saving = false);
+                            if (mounted) AppToast.error(context, appErrorMessage(context, e));
+                          }
+                        },
+                  child: saving
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : Text(l10n.trackSaveChanges),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _openDisputeSheet() {
@@ -246,6 +388,31 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
               amount: num.tryParse('${_currentBooking['total_price']}') ?? 0,
               isSwap: progress.isSwap,
             ).fadeSlideIn(index: 2),
+            const SizedBox(height: 14),
+            _DetailsCard(booking: _currentBooking).fadeSlideIn(index: 2),
+            if (widget.isClient && status == 'pending') ...[
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _isLoading ? null : _openEditSheet,
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      label: Text(l10n.trackEditBooking),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _isLoading ? null : _cancelAsClient,
+                      style: OutlinedButton.styleFrom(foregroundColor: Colors.red[700]),
+                      icon: const Icon(Icons.close_rounded, size: 18),
+                      label: Text(l10n.trackCancelBooking),
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 14),
             _Timeline(progress: progress, otherName: otherName).fadeSlideIn(index: 3),
             const SizedBox(height: 24),
@@ -609,6 +776,53 @@ class _FactsCard extends StatelessWidget {
                     )),
         ],
       ),
+    );
+  }
+}
+
+/// Where, what kind and any notes — so both sides see the full request.
+class _DetailsCard extends StatelessWidget {
+  final dynamic booking;
+  const _DetailsCard({required this.booking});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final location = (booking['location_details'] ?? '').toString().trim();
+    final type = (booking['service_type'] ?? '').toString().trim();
+    final notes = (booking['comments'] ?? '').toString().trim();
+    Widget row(IconData icon, String label, String value) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, size: 18, color: Colors.grey[500]),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(label.toUpperCase(),
+                        style: GoogleFonts.poppins(
+                            fontSize: 10, letterSpacing: 0.5, fontWeight: FontWeight.w600, color: Colors.grey[500])),
+                    const SizedBox(height: 2),
+                    Text(value, style: GoogleFonts.poppins(fontSize: 14, color: AppColors.textDark)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+    final rows = <Widget>[
+      if (location.isNotEmpty) row(Icons.location_on_outlined, l10n.trackLocation, location),
+      if (type.isNotEmpty && type != 'Default') row(Icons.category_outlined, l10n.trackType, type),
+      if (notes.isNotEmpty) row(Icons.notes_outlined, l10n.trackNotes, notes),
+    ];
+    if (rows.isEmpty) return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: _cardDecoration,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: rows),
     );
   }
 }

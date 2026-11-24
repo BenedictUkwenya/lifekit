@@ -778,6 +778,31 @@ class ApiService {
     return result;
   }
 
+  /// Client changes time, address or notes before the provider responds.
+  Future<Map<String, dynamic>> editBookingDetails(
+    String bookingId, {
+    DateTime? scheduledTime,
+    String? locationDetails,
+    String? comments,
+  }) async {
+    final result = await _authenticatedPut('/bookings/$bookingId/details', {
+      if (scheduledTime != null) 'scheduled_time': scheduledTime.toUtc().toIso8601String(),
+      if (locationDetails != null) 'location_details': locationDetails,
+      if (comments != null) 'comments': comments,
+    });
+    AppCache.instance.invalidate('client_bookings');
+    return (result is Map && result['booking'] is Map)
+        ? Map<String, dynamic>.from(result['booking'])
+        : <String, dynamic>{};
+  }
+
+  /// Client cancels before the provider responds; the money is refunded.
+  Future<void> cancelBookingAsClient(String bookingId) async {
+    await _authenticatedPut('/bookings/$bookingId/cancel', {});
+    AppCache.instance.invalidate('client_bookings');
+    AppCache.instance.invalidate('wallet');
+  }
+
   Future<void> updateBookingStatus(String bookingId, String status) async {
     await _authenticatedPut('/bookings/$bookingId/status', {"status": status});
     AppCache.instance.invalidate('client_bookings');

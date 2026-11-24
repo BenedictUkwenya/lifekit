@@ -3420,4 +3420,50 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get featureNotAvailable =>
       'Эта функция пока недоступна для вашего аккаунта.';
+
+  @override
+  String get bookAddressHint => 'Адрес или место встречи';
+
+  @override
+  String get bookAddressRequired =>
+      'Пожалуйста, укажите адрес или место встречи.';
+
+  @override
+  String get trackLocation => 'Место';
+
+  @override
+  String get trackNotes => 'Примечания';
+
+  @override
+  String get trackType => 'Тип';
+
+  @override
+  String get trackEditBooking => 'Изменить бронирование';
+
+  @override
+  String get trackCancelBooking => 'Отменить бронирование';
+
+  @override
+  String get trackCancelConfirmTitle => 'Отменить это бронирование?';
+
+  @override
+  String get trackCancelConfirmBody =>
+      'Исполнитель ещё не подтвердил. Деньги сразу вернутся в ваш кошелёк.';
+
+  @override
+  String get trackKeepBooking => 'Оставить';
+
+  @override
+  String get trackCancelledRefunded =>
+      'Бронирование отменено. Деньги возвращены в кошелёк.';
+
+  @override
+  String get trackChangeTime => 'Дата и время';
+
+  @override
+  String get trackSaveChanges => 'Сохранить изменения';
+
+  @override
+  String get trackBookingUpdated =>
+      'Бронирование обновлено. Исполнитель уведомлён.';
 }

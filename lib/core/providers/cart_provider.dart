@@ -46,6 +46,7 @@ class CartItem {
       'time_minute': time.minute,
       'serviceType': serviceType,
       'comments': comments, // <--- 3. Added to JSON export
+      'location': location,
       'quantity': quantity,
     };
   }
@@ -62,6 +63,7 @@ class CartItem {
       date: DateTime.parse(json['date']),
       time: TimeOfDay(hour: json['time_hour'], minute: json['time_minute']),
       serviceType: json['serviceType'] ?? 'Default',
+      location: json['location'] as String?,
       comments:
           json['comments'] ??
           '', // <--- 4. Added to JSON import (with safety check)

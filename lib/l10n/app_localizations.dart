@@ -6477,6 +6477,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This feature is not available for your account yet.'**
   String get featureNotAvailable;
+
+  /// Booking screen: address field for home/outdoor services
+  ///
+  /// In en, this message translates to:
+  /// **'Address or meeting point'**
+  String get bookAddressHint;
+
+  /// Booking screen: address missing for home/outdoor services
+  ///
+  /// In en, this message translates to:
+  /// **'Please add the address or meeting point.'**
+  String get bookAddressRequired;
+
+  /// No description provided for @trackLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get trackLocation;
+
+  /// No description provided for @trackNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get trackNotes;
+
+  /// No description provided for @trackType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get trackType;
+
+  /// No description provided for @trackEditBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit booking'**
+  String get trackEditBooking;
+
+  /// No description provided for @trackCancelBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel booking'**
+  String get trackCancelBooking;
+
+  /// No description provided for @trackCancelConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this booking?'**
+  String get trackCancelConfirmTitle;
+
+  /// No description provided for @trackCancelConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The provider hasn’t accepted yet. Your money goes straight back to your wallet.'**
+  String get trackCancelConfirmBody;
+
+  /// No description provided for @trackKeepBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep it'**
+  String get trackKeepBooking;
+
+  /// No description provided for @trackCancelledRefunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking cancelled. Your money is back in your wallet.'**
+  String get trackCancelledRefunded;
+
+  /// No description provided for @trackChangeTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Date & time'**
+  String get trackChangeTime;
+
+  /// No description provided for @trackSaveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get trackSaveChanges;
+
+  /// No description provided for @trackBookingUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking updated. The provider has been notified.'**
+  String get trackBookingUpdated;
 }
 
 class _AppLocalizationsDelegate

@@ -3426,4 +3426,49 @@ class AppLocalizationsKa extends AppLocalizations {
   @override
   String get featureNotAvailable =>
       'ეს ფუნქცია თქვენი ანგარიშისთვის ჯერ ხელმისაწვდომი არ არის.';
+
+  @override
+  String get bookAddressHint => 'მისამართი ან შეხვედრის ადგილი';
+
+  @override
+  String get bookAddressRequired =>
+      'გთხოვთ, მიუთითოთ მისამართი ან შეხვედრის ადგილი.';
+
+  @override
+  String get trackLocation => 'ადგილი';
+
+  @override
+  String get trackNotes => 'შენიშვნები';
+
+  @override
+  String get trackType => 'ტიპი';
+
+  @override
+  String get trackEditBooking => 'ჯავშნის რედაქტირება';
+
+  @override
+  String get trackCancelBooking => 'ჯავშნის გაუქმება';
+
+  @override
+  String get trackCancelConfirmTitle => 'გავაუქმოთ ეს ჯავშანი?';
+
+  @override
+  String get trackCancelConfirmBody =>
+      'სერვისის მომწოდებელს ჯერ არ დაუდასტურებია. თანხა დაგიბრუნდებათ საფულეში.';
+
+  @override
+  String get trackKeepBooking => 'დატოვება';
+
+  @override
+  String get trackCancelledRefunded =>
+      'ჯავშანი გაუქმდა. თანხა დაბრუნდა საფულეში.';
+
+  @override
+  String get trackChangeTime => 'თარიღი და დრო';
+
+  @override
+  String get trackSaveChanges => 'ცვლილებების შენახვა';
+
+  @override
+  String get trackBookingUpdated => 'ჯავშანი განახლდა. მომწოდებელს ეცნობა.';
 }

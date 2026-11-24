@@ -68,10 +68,21 @@ class _PaymentScreenState extends State<PaymentScreen> {
     try {
       for (var item in widget.itemsToBook) {
         // Now passing real data from the CartItem to the API
+        // The chosen day plus the chosen time slot, sent as UTC. Sending only
+        // item.date saved "now" (for Today) or midnight instead of the slot.
+        final scheduled = DateTime(
+          item.date.year,
+          item.date.month,
+          item.date.day,
+          item.time.hour,
+          item.time.minute,
+        );
         await _apiService.createBooking(
           serviceId: item.serviceId,
-          scheduledTime: item.date.toIso8601String(),
-          locationDetails: item.location ?? "Address via Chat",
+          scheduledTime: scheduled.toUtc().toIso8601String(),
+          locationDetails: (item.location?.trim().isNotEmpty ?? false)
+              ? item.location!.trim()
+              : "Address via Chat",
           totalPrice: item.price * item.quantity,
           serviceType: item.serviceType, // REAL DATA
           comments: item.comments, // REAL DATA

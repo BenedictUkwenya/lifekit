@@ -2062,5 +2062,19 @@
   "dateToday": "Сегодня",
   "dateYesterday": "Вчера",
   "planLimitReached": "Вы достигли лимита для вашего аккаунта.",
-  "featureNotAvailable": "Эта функция пока недоступна для вашего аккаунта."
+  "featureNotAvailable": "Эта функция пока недоступна для вашего аккаунта.",
+  "bookAddressHint": "Адрес или место встречи",
+  "bookAddressRequired": "Пожалуйста, укажите адрес или место встречи.",
+  "trackLocation": "Место",
+  "trackNotes": "Примечания",
+  "trackType": "Тип",
+  "trackEditBooking": "Изменить бронирование",
+  "trackCancelBooking": "Отменить бронирование",
+  "trackCancelConfirmTitle": "Отменить это бронирование?",
+  "trackCancelConfirmBody": "Исполнитель ещё не подтвердил. Деньги сразу вернутся в ваш кошелёк.",
+  "trackKeepBooking": "Оставить",
+  "trackCancelledRefunded": "Бронирование отменено. Деньги возвращены в кошелёк.",
+  "trackChangeTime": "Дата и время",
+  "trackSaveChanges": "Сохранить изменения",
+  "trackBookingUpdated": "Бронирование обновлено. Исполнитель уведомлён."
 }

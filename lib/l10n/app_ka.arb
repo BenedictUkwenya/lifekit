@@ -2062,5 +2062,19 @@
   "dateToday": "დღეს",
   "dateYesterday": "გუშინ",
   "planLimitReached": "თქვენს ანგარიშზე ლიმიტი ამოიწურა.",
-  "featureNotAvailable": "ეს ფუნქცია თქვენი ანგარიშისთვის ჯერ ხელმისაწვდომი არ არის."
+  "featureNotAvailable": "ეს ფუნქცია თქვენი ანგარიშისთვის ჯერ ხელმისაწვდომი არ არის.",
+  "bookAddressHint": "მისამართი ან შეხვედრის ადგილი",
+  "bookAddressRequired": "გთხოვთ, მიუთითოთ მისამართი ან შეხვედრის ადგილი.",
+  "trackLocation": "ადგილი",
+  "trackNotes": "შენიშვნები",
+  "trackType": "ტიპი",
+  "trackEditBooking": "ჯავშნის რედაქტირება",
+  "trackCancelBooking": "ჯავშნის გაუქმება",
+  "trackCancelConfirmTitle": "გავაუქმოთ ეს ჯავშანი?",
+  "trackCancelConfirmBody": "სერვისის მომწოდებელს ჯერ არ დაუდასტურებია. თანხა დაგიბრუნდებათ საფულეში.",
+  "trackKeepBooking": "დატოვება",
+  "trackCancelledRefunded": "ჯავშანი გაუქმდა. თანხა დაბრუნდა საფულეში.",
+  "trackChangeTime": "თარიღი და დრო",
+  "trackSaveChanges": "ცვლილებების შენახვა",
+  "trackBookingUpdated": "ჯავშანი განახლდა. მომწოდებელს ეცნობა."
 }

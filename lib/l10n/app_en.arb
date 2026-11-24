@@ -1863,5 +1863,21 @@
   "planLimitReached": "You have reached the limit for your account.",
   "@planLimitReached": { "description": "Shown on iOS instead of an upgrade prompt when a plan limit is hit" },
   "featureNotAvailable": "This feature is not available for your account yet.",
-  "@featureNotAvailable": { "description": "Shown on iOS instead of an upgrade prompt for paid features" }
+  "@featureNotAvailable": { "description": "Shown on iOS instead of an upgrade prompt for paid features" },
+  "bookAddressHint": "Address or meeting point",
+  "@bookAddressHint": { "description": "Booking screen: address field for home/outdoor services" },
+  "bookAddressRequired": "Please add the address or meeting point.",
+  "@bookAddressRequired": { "description": "Booking screen: address missing for home/outdoor services" },
+  "trackLocation": "Location",
+  "trackNotes": "Notes",
+  "trackType": "Type",
+  "trackEditBooking": "Edit booking",
+  "trackCancelBooking": "Cancel booking",
+  "trackCancelConfirmTitle": "Cancel this booking?",
+  "trackCancelConfirmBody": "The provider hasn’t accepted yet. Your money goes straight back to your wallet.",
+  "trackKeepBooking": "Keep it",
+  "trackCancelledRefunded": "Booking cancelled. Your money is back in your wallet.",
+  "trackChangeTime": "Date & time",
+  "trackSaveChanges": "Save changes",
+  "trackBookingUpdated": "Booking updated. The provider has been notified."
 }

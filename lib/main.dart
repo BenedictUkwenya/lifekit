@@ -99,6 +99,7 @@ class MyApp extends StatelessWidget {
         title: 'LifeKit',
         debugShowCheckedModeBanner: false,
         navigatorKey: rootNavigatorKey,
+        navigatorObservers: [_KeyboardDismissObserver()],
 
         // ── Localisation ─────────────────────────────────────────────
         locale: locale,
@@ -132,4 +133,20 @@ class MyApp extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Closes the keyboard whenever the screen changes. Without this, a keyboard
+/// opened on one screen (e.g. the top-up amount) stayed up on the next ones,
+/// where there was no text box to dismiss it from.
+class _KeyboardDismissObserver extends NavigatorObserver {
+  void _dismiss() => FocusManager.instance.primaryFocus?.unfocus();
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) => _dismiss();
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) => _dismiss();
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) => _dismiss();
 }
