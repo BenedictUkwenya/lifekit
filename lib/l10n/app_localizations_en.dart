@@ -2298,6 +2298,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trackStepConfirmedSub => 'The provider accepted the booking';
 
   @override
+  String get trackWaitingForYou => 'Waiting for you to accept';
+
+  @override
   String get trackStepConfirmedPending => 'Waiting for the provider to accept';
 
   @override

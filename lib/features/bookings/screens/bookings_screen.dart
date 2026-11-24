@@ -40,6 +40,8 @@ class _BookingsScreenState extends State<BookingsScreen>
   List<dynamic> swapBookings = [];
   List<dynamic> pendingSwaps = [];
   int _incomingPendingCount = 0;
+  int _pendingRequestCount = 0;
+  bool _autoTabDone = false;
   bool isLoading = true;
 
   @override
@@ -152,8 +154,19 @@ class _BookingsScreenState extends State<BookingsScreen>
 
           clientBookings = cBookings;
           providerRequests = pRequests;
+          _pendingRequestCount =
+              pRequests.where((b) => b['status'] == 'pending').length;
           isLoading = false;
         });
+        // Open straight on the tab that needs the user, the first time only.
+        if (!_autoTabDone && _tabController.index == 0) {
+          _autoTabDone = true;
+          if (_pendingRequestCount > 0) {
+            _tabController.animateTo(1);
+          } else if (_incomingPendingCount > 0) {
+            _tabController.animateTo(2);
+          }
+        }
       }
     } catch (e) {
       if (mounted) setState(() => isLoading = false);
@@ -234,10 +247,33 @@ class _BookingsScreenState extends State<BookingsScreen>
           unselectedLabelColor: Colors.grey,
           indicatorColor: AppColors.primary,
           indicatorWeight: 3,
+          isScrollable: true,
+          tabAlignment: TabAlignment.center,
           labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600),
           tabs: [
             Tab(text: l10n.bookingsMyBookings),
-            Tab(text: l10n.bookingsClientRequests),
+            Tab(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(l10n.bookingsClientRequests),
+                  if (_pendingRequestCount > 0) ...[
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '$_pendingRequestCount',
+                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
             Tab(
               child: Row(
                 mainAxisSize: MainAxisSize.min,

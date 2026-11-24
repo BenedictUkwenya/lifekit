@@ -414,7 +414,7 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
               ),
             ],
             const SizedBox(height: 14),
-            _Timeline(progress: progress, otherName: otherName).fadeSlideIn(index: 3),
+            _Timeline(progress: progress, otherName: otherName, isClient: widget.isClient).fadeSlideIn(index: 3),
             const SizedBox(height: 24),
 
             // ── Primary action ────────────────────────────────────────────
@@ -842,7 +842,8 @@ class _Timeline extends StatelessWidget {
   final BookingProgress progress;
   final String otherName;
 
-  const _Timeline({required this.progress, required this.otherName});
+  final bool isClient;
+  const _Timeline({required this.progress, required this.otherName, required this.isClient});
 
   @override
   Widget build(BuildContext context) {
@@ -855,7 +856,7 @@ class _Timeline extends StatelessWidget {
         case BookingStep.requested:
           return (l10n.trackStepRequested, l10n.trackStepRequestedSub);
         case BookingStep.confirmed:
-          return (l10n.trackStepConfirmed, p.isDone(s) ? l10n.trackStepConfirmedSub : l10n.trackStepConfirmedPending);
+          return (l10n.trackStepConfirmed, p.isDone(s) ? l10n.trackStepConfirmedSub : (isClient ? l10n.trackStepConfirmedPending : l10n.trackWaitingForYou));
         case BookingStep.serviceDay:
           return (
             l10n.trackStepServiceDay,

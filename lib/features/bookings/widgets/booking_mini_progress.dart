@@ -24,7 +24,7 @@ class BookingMiniProgress extends StatelessWidget {
       _ => AppColors.primary,
     };
     final label = switch (p.phase) {
-      BookingPhase.requested => l10n.trackStepConfirmedPending,
+      BookingPhase.requested => isClient ? l10n.trackStepConfirmedPending : l10n.trackWaitingForYou,
       BookingPhase.upcoming => l10n.trackHdrUpcomingTitle,
       BookingPhase.awaitingConfirmation =>
         p.iConfirmed ? l10n.trackHdrWaitingSub : l10n.trackHdrActionTitle,

@@ -1724,6 +1724,7 @@
   "trackStepRequestedSub": "Запрос на бронирование отправлен",
   "trackStepConfirmed": "Принято",
   "trackStepConfirmedSub": "Исполнитель принял бронирование",
+  "trackWaitingForYou": "Ждёт вашего подтверждения",
   "trackStepConfirmedPending": "Ждём, пока исполнитель примет",
   "trackStepServiceDay": "День услуги",
   "trackStepBothConfirm": "Подтверждение сторон",

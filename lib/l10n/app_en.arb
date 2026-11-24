@@ -1504,6 +1504,7 @@
   "trackStepRequestedSub": "Booking request sent",
   "trackStepConfirmed": "Accepted",
   "trackStepConfirmedSub": "The provider accepted the booking",
+  "trackWaitingForYou": "Waiting for you to accept",
   "trackStepConfirmedPending": "Waiting for the provider to accept",
   "trackStepServiceDay": "Service day",
   "trackStepBothConfirm": "Both confirm",

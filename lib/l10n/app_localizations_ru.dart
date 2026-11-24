@@ -2307,6 +2307,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get trackStepConfirmedSub => 'Исполнитель принял бронирование';
 
   @override
+  String get trackWaitingForYou => 'Ждёт вашего подтверждения';
+
+  @override
   String get trackStepConfirmedPending => 'Ждём, пока исполнитель примет';
 
   @override

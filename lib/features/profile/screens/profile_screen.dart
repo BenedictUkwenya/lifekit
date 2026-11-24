@@ -42,6 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isUsageLoading = true;
   double? _walletBalance;
   int _activeServicesCount = 0;
+  int _pendingRequests = 0;
 
   @override
   void initState() {
@@ -52,6 +53,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // path didn't trigger them (e.g. first load with no cache, or right after
     // a language change cleared the cache).
     _fetchMonetizationData();
+    _fetchPendingRequests();
+  }
+
+  /// Booking requests waiting for this user's answer (badge on My Bookings).
+  Future<void> _fetchPendingRequests() async {
+    try {
+      final reqs = await _apiService.getProviderRequests();
+      final n = reqs.where((b) => b['status'] == 'pending').length;
+      if (mounted) setState(() => _pendingRequests = n);
+    } catch (_) {}
   }
 
   Map<String, dynamic>? _parseProfile(Map<String, dynamic> data) {
@@ -903,7 +914,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           MaterialPageRoute(
                             builder: (_) => const BookingsScreen(),
                           ),
-                        ),
+                        ).then((_) => _fetchPendingRequests()),
+                        badge: _pendingRequests,
                       ),
                       _buildDivider(),
                       _buildSettingTile(
@@ -1151,6 +1163,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     bool isDestructive = false,
     Color? iconColor,
     String? subtitle,
+    int badge = 0,
   }) {
     return ListTile(
       onTap: onTap,
@@ -1185,10 +1198,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[500]),
             )
           : null,
-      trailing: Icon(
-        Icons.chevron_right_rounded,
-        color: Colors.grey[400],
-        size: 22,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (badge > 0)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '$badge',
+                style: GoogleFonts.poppins(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
+              ),
+            ),
+          Icon(Icons.chevron_right_rounded, color: Colors.grey[400], size: 22),
+        ],
       ),
     );
   }

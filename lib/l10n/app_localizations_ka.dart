@@ -2310,6 +2310,9 @@ class AppLocalizationsKa extends AppLocalizations {
   String get trackStepConfirmedSub => 'პროვაიდერმა ჯავშანი მიიღო';
 
   @override
+  String get trackWaitingForYou => 'ელოდება თქვენს თანხმობას';
+
+  @override
   String get trackStepConfirmedPending => 'ველოდებით პროვაიდერის თანხმობას';
 
   @override

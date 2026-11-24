@@ -4444,6 +4444,12 @@ abstract class AppLocalizations {
   /// **'The provider accepted the booking'**
   String get trackStepConfirmedSub;
 
+  /// No description provided for @trackWaitingForYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for you to accept'**
+  String get trackWaitingForYou;
+
   /// No description provided for @trackStepConfirmedPending.
   ///
   /// In en, this message translates to:

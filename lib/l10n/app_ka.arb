@@ -1724,6 +1724,7 @@
   "trackStepRequestedSub": "ჯავშნის მოთხოვნა გაიგზავნა",
   "trackStepConfirmed": "მიღებულია",
   "trackStepConfirmedSub": "პროვაიდერმა ჯავშანი მიიღო",
+  "trackWaitingForYou": "ელოდება თქვენს თანხმობას",
   "trackStepConfirmedPending": "ველოდებით პროვაიდერის თანხმობას",
   "trackStepServiceDay": "მომსახურების დღე",
   "trackStepBothConfirm": "ორივე ადასტურებს",
