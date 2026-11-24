@@ -6561,6 +6561,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Booking updated. The provider has been notified.'**
   String get trackBookingUpdated;
+
+  /// No description provided for @reviewRateProviderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate your provider'**
+  String get reviewRateProviderTitle;
+
+  /// No description provided for @reviewRateClientTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate your client'**
+  String get reviewRateClientTitle;
+
+  /// No description provided for @reviewTapToRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a star to rate'**
+  String get reviewTapToRate;
+
+  /// No description provided for @reviewRating1.
+  ///
+  /// In en, this message translates to:
+  /// **'Terrible'**
+  String get reviewRating1;
+
+  /// No description provided for @reviewRating2.
+  ///
+  /// In en, this message translates to:
+  /// **'Poor'**
+  String get reviewRating2;
+
+  /// No description provided for @reviewRating3.
+  ///
+  /// In en, this message translates to:
+  /// **'Okay'**
+  String get reviewRating3;
+
+  /// No description provided for @reviewRating4.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get reviewRating4;
+
+  /// No description provided for @reviewRating5.
+  ///
+  /// In en, this message translates to:
+  /// **'Excellent'**
+  String get reviewRating5;
+
+  /// No description provided for @reviewWhatStoodOut.
+  ///
+  /// In en, this message translates to:
+  /// **'What stood out?'**
+  String get reviewWhatStoodOut;
+
+  /// No description provided for @reviewTellMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell others more (optional)'**
+  String get reviewTellMore;
+
+  /// No description provided for @reviewCommentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What went well? What could be better?'**
+  String get reviewCommentHint;
+
+  /// No description provided for @reviewTagOnTime.
+  ///
+  /// In en, this message translates to:
+  /// **'On time'**
+  String get reviewTagOnTime;
+
+  /// No description provided for @reviewTagFriendly.
+  ///
+  /// In en, this message translates to:
+  /// **'Friendly'**
+  String get reviewTagFriendly;
+
+  /// No description provided for @reviewTagQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Great quality'**
+  String get reviewTagQuality;
+
+  /// No description provided for @reviewTagValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Good value'**
+  String get reviewTagValue;
+
+  /// No description provided for @reviewTagProfessional.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional'**
+  String get reviewTagProfessional;
+
+  /// No description provided for @reviewTagCommunication.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear communication'**
+  String get reviewTagCommunication;
+
+  /// No description provided for @reviewTagRespectful.
+  ///
+  /// In en, this message translates to:
+  /// **'Respectful'**
+  String get reviewTagRespectful;
+
+  /// No description provided for @reviewTagEasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy to work with'**
+  String get reviewTagEasy;
 }
 
 class _AppLocalizationsDelegate

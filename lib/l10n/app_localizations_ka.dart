@@ -3471,4 +3471,61 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get trackBookingUpdated => 'ჯავშანი განახლდა. მომწოდებელს ეცნობა.';
+
+  @override
+  String get reviewRateProviderTitle => 'შეაფასეთ მომწოდებელი';
+
+  @override
+  String get reviewRateClientTitle => 'შეაფასეთ კლიენტი';
+
+  @override
+  String get reviewTapToRate => 'შესაფასებლად შეეხეთ ვარსკვლავს';
+
+  @override
+  String get reviewRating1 => 'საშინელი';
+
+  @override
+  String get reviewRating2 => 'ცუდი';
+
+  @override
+  String get reviewRating3 => 'ნორმალური';
+
+  @override
+  String get reviewRating4 => 'კარგი';
+
+  @override
+  String get reviewRating5 => 'შესანიშნავი';
+
+  @override
+  String get reviewWhatStoodOut => 'რა გამოირჩეოდა?';
+
+  @override
+  String get reviewTellMore => 'მოუყევით სხვებს მეტი (არასავალდებულო)';
+
+  @override
+  String get reviewCommentHint => 'რა იყო კარგი? რა შეიძლება იყოს უკეთესი?';
+
+  @override
+  String get reviewTagOnTime => 'დროულად';
+
+  @override
+  String get reviewTagFriendly => 'მეგობრული';
+
+  @override
+  String get reviewTagQuality => 'მაღალი ხარისხი';
+
+  @override
+  String get reviewTagValue => 'კარგი ფასი';
+
+  @override
+  String get reviewTagProfessional => 'პროფესიონალური';
+
+  @override
+  String get reviewTagCommunication => 'მკაფიო კომუნიკაცია';
+
+  @override
+  String get reviewTagRespectful => 'პატივისცემით';
+
+  @override
+  String get reviewTagEasy => 'ადვილი თანამშრომლობა';
 }

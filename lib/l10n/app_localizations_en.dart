@@ -3450,4 +3450,61 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get trackBookingUpdated =>
       'Booking updated. The provider has been notified.';
+
+  @override
+  String get reviewRateProviderTitle => 'Rate your provider';
+
+  @override
+  String get reviewRateClientTitle => 'Rate your client';
+
+  @override
+  String get reviewTapToRate => 'Tap a star to rate';
+
+  @override
+  String get reviewRating1 => 'Terrible';
+
+  @override
+  String get reviewRating2 => 'Poor';
+
+  @override
+  String get reviewRating3 => 'Okay';
+
+  @override
+  String get reviewRating4 => 'Good';
+
+  @override
+  String get reviewRating5 => 'Excellent';
+
+  @override
+  String get reviewWhatStoodOut => 'What stood out?';
+
+  @override
+  String get reviewTellMore => 'Tell others more (optional)';
+
+  @override
+  String get reviewCommentHint => 'What went well? What could be better?';
+
+  @override
+  String get reviewTagOnTime => 'On time';
+
+  @override
+  String get reviewTagFriendly => 'Friendly';
+
+  @override
+  String get reviewTagQuality => 'Great quality';
+
+  @override
+  String get reviewTagValue => 'Good value';
+
+  @override
+  String get reviewTagProfessional => 'Professional';
+
+  @override
+  String get reviewTagCommunication => 'Clear communication';
+
+  @override
+  String get reviewTagRespectful => 'Respectful';
+
+  @override
+  String get reviewTagEasy => 'Easy to work with';
 }

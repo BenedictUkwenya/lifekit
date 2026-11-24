@@ -3466,4 +3466,61 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get trackBookingUpdated =>
       'Бронирование обновлено. Исполнитель уведомлён.';
+
+  @override
+  String get reviewRateProviderTitle => 'Оцените исполнителя';
+
+  @override
+  String get reviewRateClientTitle => 'Оцените клиента';
+
+  @override
+  String get reviewTapToRate => 'Нажмите на звезду, чтобы оценить';
+
+  @override
+  String get reviewRating1 => 'Ужасно';
+
+  @override
+  String get reviewRating2 => 'Плохо';
+
+  @override
+  String get reviewRating3 => 'Нормально';
+
+  @override
+  String get reviewRating4 => 'Хорошо';
+
+  @override
+  String get reviewRating5 => 'Отлично';
+
+  @override
+  String get reviewWhatStoodOut => 'Что запомнилось?';
+
+  @override
+  String get reviewTellMore => 'Расскажите подробнее (необязательно)';
+
+  @override
+  String get reviewCommentHint => 'Что понравилось? Что можно улучшить?';
+
+  @override
+  String get reviewTagOnTime => 'Вовремя';
+
+  @override
+  String get reviewTagFriendly => 'Дружелюбно';
+
+  @override
+  String get reviewTagQuality => 'Отличное качество';
+
+  @override
+  String get reviewTagValue => 'Хорошая цена';
+
+  @override
+  String get reviewTagProfessional => 'Профессионально';
+
+  @override
+  String get reviewTagCommunication => 'Понятное общение';
+
+  @override
+  String get reviewTagRespectful => 'Уважительно';
+
+  @override
+  String get reviewTagEasy => 'Легко работать';
 }
