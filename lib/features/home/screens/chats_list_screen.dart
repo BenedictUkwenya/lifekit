@@ -116,14 +116,16 @@ class _ChatsListScreenState extends State<ChatsListScreen>
     }
   }
 
-  void _navigateToDetail(dynamic otherUser, List bookings) {
-    Navigator.push(
+  Future<void> _navigateToDetail(dynamic otherUser, List bookings) async {
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) =>
             ChatDetailScreen(otherUser: otherUser, bookings: bookings),
       ),
     );
+    // Back from the chat: refresh so read chats lose their unread badge.
+    if (mounted) _fetchChats();
   }
 
   @override

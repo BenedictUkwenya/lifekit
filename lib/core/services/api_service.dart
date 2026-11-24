@@ -932,6 +932,10 @@ class ApiService {
 
   Future<void> markChatAsRead(String bookingId) async {
     await _authenticatedPut('/chats/$bookingId/read', {});
+    // Drop the cached list and badge counts, or the chat keeps showing as
+    // unread until the cache expires.
+    AppCache.instance.invalidate('conversations');
+    AppCache.instance.invalidate('unread_counts');
   }
 
   Future<void> sendMessage(String bookingId, String content, {String? imageUrl}) async {
@@ -940,6 +944,7 @@ class ApiService {
       "content": content,
       if (imageUrl != null) "image_url": imageUrl,
     });
+    AppCache.instance.invalidate('conversations');
   }
 
   Future<String> uploadChatImage(File imageFile) => _uploadFile('chats', imageFile);
