@@ -3047,7 +3047,24 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
     required bool isProposer,
   }) async {
     final l10n = AppLocalizations.of(context)!;
-    final bookingId = swap['booking_id']?.toString();
+    var bookingId = swap['booking_id']?.toString();
+    var isClient = !isProposer; // proposer = provider on booking_id
+    // Two-way swap: once my part of the first booking is done, "Mark Done"
+    // opens the return booking (where my role is flipped).
+    final rev = swap['reverse_booking'];
+    final revId = swap['reverse_booking_id']?.toString();
+    if (!openChat && revId != null && rev is Map) {
+      final main = swap['booking'];
+      final mainDone = main is Map &&
+          (main['status'] == 'completed' ||
+              main[isClient ? 'client_confirmed' : 'provider_confirmed'] == true);
+      final revDone = rev['status'] == 'completed' ||
+          rev[isClient ? 'provider_confirmed' : 'client_confirmed'] == true;
+      if (mainDone && !revDone) {
+        bookingId = revId;
+        isClient = !isClient;
+      }
+    }
     if (bookingId == null) {
       _showSnack(l10n.swapBookingNotFound, isError: true);
       return;
@@ -3055,8 +3072,6 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
     try {
       final booking = await _apiService.getBookingById(bookingId);
       if (!mounted) return;
-      // proposer = provider_id on the booking, target = client_id
-      final isClient = !isProposer;
       if (openChat) {
         final otherId = isClient
             ? booking['provider_id']
@@ -3795,7 +3810,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
     final name = proposer['full_name'] ?? l10n.swapUnknown;
     final pic = proposer['profile_picture_url'];
     final status = _effectiveStatus(swap);
-    final iConfirmed = swap['booking']?['client_confirmed'] == true;
+    final iConfirmed = _iConfirmed(swap, isProposer: false);
     final isPending = status == 'pending';
 
     return Container(
@@ -4011,7 +4026,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
     final name = target['full_name'] ?? l10n.swapUnknown;
     final pic = target['profile_picture_url'];
     final status = _effectiveStatus(swap);
-    final iConfirmed = swap['booking']?['provider_confirmed'] == true;
+    final iConfirmed = _iConfirmed(swap, isProposer: true);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -4180,11 +4195,26 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
   }
 
   /// The swap row stays "accepted" forever; the booking says whether it's done.
+  /// A two-way swap is done when both bookings are.
   String _effectiveStatus(dynamic swap) {
     final bookingStatus = swap['booking']?['status'];
-    if (bookingStatus == 'completed') return 'completed';
+    final rev = swap['reverse_booking'];
+    final revDone = rev == null || rev['status'] == 'completed';
+    if (bookingStatus == 'completed' && revDone) return 'completed';
     if (bookingStatus == 'cancelled') return 'cancelled';
     return (swap['status'] ?? 'pending').toString();
+  }
+
+  /// I've confirmed my side of every booking in this swap.
+  bool _iConfirmed(dynamic swap, {required bool isProposer}) {
+    bool mine(dynamic b, bool asClient) =>
+        b is Map &&
+        (b['status'] == 'completed' ||
+            b[asClient ? 'client_confirmed' : 'provider_confirmed'] == true);
+    // booking_id: proposer is provider; reverse booking: proposer is client.
+    final main = mine(swap['booking'], !isProposer);
+    final rev = swap['reverse_booking'];
+    return main && (rev == null || mine(rev, isProposer));
   }
 
   int _statusRank(dynamic swap) => switch (_effectiveStatus(swap)) {
