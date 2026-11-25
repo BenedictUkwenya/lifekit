@@ -111,6 +111,7 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
     final picker = ImagePicker();
     final picked = await picker.pickImage(
       source: ImageSource.gallery,
+      maxWidth: 1600,
       imageQuality: 80,
     );
     if (picked == null) return;

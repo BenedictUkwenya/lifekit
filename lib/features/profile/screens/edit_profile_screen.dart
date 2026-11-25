@@ -42,7 +42,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   // --- 1. PICK IMAGE FUNCTION ---
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    final XFile? image = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1024,
+      imageQuality: 85,
+    );
 
     if (image != null) {
       setState(() {
@@ -53,6 +57,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   // --- 2. UPDATED SAVE FUNCTION ---
   Future<void> _save() async {
+    if (_nameController.text.trim().isEmpty) {
+      AppToast.info(context, AppLocalizations.of(context).editProfileNameRequired);
+      return;
+    }
     setState(() => isLoading = true);
     try {
       // A. If user picked a new image, upload it first
@@ -62,10 +70,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       // B. Update text details
       await _apiService.updateProfile(
-        fullName: _nameController.text,
-        username: _usernameController.text,
-        phone: _phoneController.text,
-        bio: _bioController.text,
+        fullName: _nameController.text.trim(),
+        username: _usernameController.text.trim(),
+        phone: _phoneController.text.trim(),
+        bio: _bioController.text.trim(),
       );
 
       if (mounted) {
@@ -167,10 +175,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ),
             const SizedBox(height: 30),
 
-            _buildInput("Name", _nameController),
-            _buildInput("Username", _usernameController),
-            _buildInput("Phone number", _phoneController),
-            _buildInput("Bio", _bioController, maxLines: 3),
+            _buildInput(AppLocalizations.of(context).fullNameLabel, _nameController),
+            _buildInput(AppLocalizations.of(context).editProfileUsername, _usernameController),
+            _buildInput(AppLocalizations.of(context).phoneLabel, _phoneController,
+                keyboardType: TextInputType.phone),
+            _buildInput(AppLocalizations.of(context).editProfileBio, _bioController, maxLines: 3),
 
             const SizedBox(height: 40),
             SizedBox(
@@ -205,6 +214,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     String label,
     TextEditingController controller, {
     int maxLines = 1,
+    TextInputType? keyboardType,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
@@ -219,6 +229,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           TextField(
             controller: controller,
             maxLines: maxLines,
+            keyboardType: keyboardType,
             decoration: InputDecoration(
               filled: true,
               fillColor: const Color(0xFFFAFAFA),

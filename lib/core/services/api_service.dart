@@ -573,17 +573,21 @@ class ApiService {
     return data['offers'] ?? [];
   }
 
-  Future<List<dynamic>> getCategories() async {
-    final key = 'categories_${_lang}';
+  /// [withServicesOnly]: client browse screens hide categories nobody offers
+  /// anything in yet; provider pickers must see them all.
+  Future<List<dynamic>> getCategories({bool withServicesOnly = false}) async {
+    final key = 'categories_${_lang}${withServicesOnly ? '_nonempty' : ''}';
     final cached = AppCache.instance.get<List<dynamic>>(key);
     if (cached != null) return cached;
     final response = await _net.get(
-      Uri.parse('$baseUrl/home/categories'),
+      Uri.parse('$baseUrl/home/categories${withServicesOnly ? '?with_services=1' : ''}'),
       headers: _langHeader(),
     );
     final data = await _processResponse(response);
     final result = data['categories'] ?? [];
-    AppCache.instance.set(key, result, ttl: AppCache.ttlStatic);
+    // A new service should show its category soon, so browse lists expire faster.
+    AppCache.instance.set(key, result,
+        ttl: withServicesOnly ? AppCache.ttlLong : AppCache.ttlStatic);
     return result;
   }
 
@@ -631,17 +635,20 @@ class ApiService {
     return await _processResponse(response);
   }
 
-  Future<List<dynamic>> getSubCategories(String parentId) async {
-    final key = 'subcategories_${_lang}_$parentId';
+  Future<List<dynamic>> getSubCategories(String parentId,
+      {bool withServicesOnly = false}) async {
+    final key =
+        'subcategories_${_lang}_$parentId${withServicesOnly ? '_nonempty' : ''}';
     final cached = AppCache.instance.get<List<dynamic>>(key);
     if (cached != null) return cached;
     final response = await _net.get(
-      Uri.parse('$baseUrl/home/categories/children/$parentId'),
+      Uri.parse('$baseUrl/home/categories/children/$parentId${withServicesOnly ? '?with_services=1' : ''}'),
       headers: _langHeader(),
     );
     final data = await _processResponse(response);
     final result = data['categories'] ?? [];
-    AppCache.instance.set(key, result, ttl: AppCache.ttlStatic);
+    AppCache.instance.set(key, result,
+        ttl: withServicesOnly ? AppCache.ttlLong : AppCache.ttlStatic);
     return result;
   }
 

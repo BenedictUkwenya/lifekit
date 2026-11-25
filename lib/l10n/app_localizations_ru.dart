@@ -3563,4 +3563,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get reviewTagEasy => 'Легко работать';
+
+  @override
+  String get editProfileUsername => 'Имя пользователя';
+
+  @override
+  String get editProfileBio => 'О себе';
+
+  @override
+  String get editProfileNameRequired => 'Пожалуйста, введите имя.';
 }

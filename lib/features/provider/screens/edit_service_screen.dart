@@ -167,6 +167,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
   Future<void> _pickImage() async {
     final XFile? image = await ImagePicker().pickImage(
       source: ImageSource.gallery,
+      maxWidth: 1600,
       imageQuality: 80,
     );
     if (image != null) setState(() => _newImages.add(File(image.path)));

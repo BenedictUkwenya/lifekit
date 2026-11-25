@@ -3,7 +3,6 @@ import 'package:lifekit_frontend/core/widgets/motion.dart';
 import 'package:flutter/material.dart';
 import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../core/widgets/lifekit_loader.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';

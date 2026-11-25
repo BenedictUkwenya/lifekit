@@ -3568,4 +3568,13 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get reviewTagEasy => 'ადვილი თანამშრომლობა';
+
+  @override
+  String get editProfileUsername => 'მომხმარებლის სახელი';
+
+  @override
+  String get editProfileBio => 'ბიო';
+
+  @override
+  String get editProfileNameRequired => 'გთხოვთ, შეიყვანოთ სახელი.';
 }

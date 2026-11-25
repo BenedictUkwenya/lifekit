@@ -8,7 +8,6 @@ import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import 'package:flutter/material.dart';
 import '../../../core/utils/time_ago.dart';
 import '../../../core/widgets/empty_state.dart';
-import '../../../core/widgets/lifekit_loader.dart';
 import '../../../core/widgets/app_toast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';

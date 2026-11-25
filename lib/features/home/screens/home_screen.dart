@@ -25,7 +25,6 @@ import '../../../core/providers/cart_provider.dart';
 
 import '../../services/screens/services_list_screen.dart';
 import '../../services/screens/all_categories_screen.dart';
-import '../../services/screens/skill_swap_dashboard_screen.dart';
 import '../../services/screens/category_items_screen.dart';
 import '../../provider/screens/provider_onboarding_intro_screen.dart';
 import '../../provider/screens/my_services_list_screen.dart';
@@ -65,7 +64,6 @@ class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> categories = [];
   List<String> recentSearches = [];
   List<dynamic> popularServices = [];
-  List<dynamic> swapOpportunities = [];
   List<dynamic> nearbyPlaces = [];
   List<dynamic> homeGroups = [];
   bool isLoading = true;
@@ -444,7 +442,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final prefs = await SharedPreferences.getInstance();
       final cachedProfile = prefs.getString('home_cache_profile');
       final cachedOffers = prefs.getString('home_cache_offers');
-      final cachedCats = prefs.getString('home_cache_categories');
+      final cachedCats = prefs.getString('home_cache_categories_v2');
       final cachedPop = prefs.getString('home_cache_popular');
       if (cachedProfile == null) return; // no cache yet
       if (!mounted) return;
@@ -471,7 +469,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('home_cache_profile', jsonEncode(profile));
       await prefs.setString('home_cache_offers', jsonEncode(offers));
-      await prefs.setString('home_cache_categories', jsonEncode(categories));
+      await prefs.setString('home_cache_categories_v2', jsonEncode(categories));
       await prefs.setString('home_cache_popular', jsonEncode(popular));
     } catch (_) {}
   }
@@ -493,7 +491,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final results = await Future.wait([
         _apiService.getUserProfile(),
         _apiService.getOffers(),
-        _apiService.getCategories(),
+        _apiService.getCategories(withServicesOnly: true),
         _apiService.getPopularServices(),
       ]);
 
@@ -510,10 +508,6 @@ class _HomeScreenState extends State<HomeScreen> {
           offers = offersData;
           categories = catsData;
           popularServices = popData;
-          swapOpportunities = popData
-              .where((s) => s['is_skill_swap_available'] == true)
-              .take(10)
-              .toList();
           isLoading = false;
         });
       }
@@ -1099,11 +1093,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         _buildServicesRow().fadeSlideIn(index: 7),
                         const SizedBox(height: 28),
 
-                        // Top Swap Opportunities
-                        if (swapOpportunities.isNotEmpty) ...[
-                          _buildTopSwapOpportunities().fadeSlideIn(index: 8),
-                          const SizedBox(height: 28),
-                        ],
 
                         // Communities
                         if (homeGroups.isNotEmpty) ...[
@@ -1893,191 +1882,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  // ── TOP SWAP OPPORTUNITIES ────────────────
-  Widget _buildTopSwapOpportunities() {
-    if (swapOpportunities.isEmpty) return const SizedBox();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader(
-          AppLocalizations.of(context)!.homeTopSwapOpportunities,
-          () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const SkillSwapDashboardScreen()),
-          ),
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 210,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            itemCount: swapOpportunities.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 14),
-            itemBuilder: (_, i) {
-              final service = swapOpportunities[i];
-              final sId = service['id']?.toString();
-              final pId = service['provider_id']?.toString();
-              final provider = service['profiles'] ?? {};
-              final providerName = (provider['full_name'] ?? 'Provider')
-                  .toString();
-              final title = (service['title'] ?? 'Service').toString();
-              final coverImage = _getSafeImage(service);
-              final price = service['price'] ?? 0;
-              final isOwn =
-                  pId != null && pId == userProfile?['id']?.toString();
-
-              return Pressable(
-                onTap: () {
-                  if (isOwn) {
-                    AppToast.info(context, AppLocalizations.of(context)!.homeMyServiceBadge);
-                    return;
-                  }
-                  if (sId == null || pId == null) return;
-                  showServiceActionSheet(
-                    context: context,
-                    serviceTitle: title,
-                    providerName: providerName,
-                    coverImageUrl: coverImage,
-                    isSwappable: true,
-                    onBook: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ServiceBookingDetailScreen(
-                          serviceId: sId,
-                          providerId: pId,
-                          providerName: providerName,
-                          providerPic: provider['profile_picture_url'],
-                          heroTag: 'home-swap-$sId',
-                          heroImageUrl: coverImage,
-                          serviceTitle: title,
-                        ),
-                      ),
-                    ),
-                    onSwap: () => showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (_) => SkillSwapBottomSheet(
-                        initialTargetCategoryId: service['category_id']
-                            ?.toString(),
-                        initialTargetCategoryName:
-                            (service['service_categories']?['name'] ?? title)
-                                .toString(),
-                        initialTargetCoverImageUrl: coverImage,
-                        initialTargetServiceId: sId,
-                        initialTargetProviderId: pId,
-                        initialTargetProviderName: providerName,
-                        initialTargetServiceTitle: title,
-                        initialTargetProviderPic:
-                            provider['profile_picture_url']?.toString(),
-                      ),
-                    ),
-                  );
-                },
-                child: Opacity(
-                  opacity: isOwn ? 0.75 : 1.0,
-                  child: Container(
-                    width: 165,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.06),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Stack(
-                          children: [
-                            ClipRRect(
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(20),
-                              ),
-                              child: Hero(tag: 'home-swap-$sId', child: CachedNetworkImage(
-                                imageUrl: coverImage,
-                                height: 110,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                errorWidget: (_, __, ___) => Container(
-                                  height: 110,
-                                  color: Colors.grey[200],
-                                  child: const Icon(
-                                    Icons.image_not_supported,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              )),
-                            ),
-                            Positioned(
-                              top: 8,
-                              left: 8,
-                              child: isOwn
-                                  ? _buildYourServiceBadge()
-                                  : _buildSwappableBadge(),
-                            ),
-                          ],
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(10, 10, 10, 6),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                title,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      providerName,
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 10,
-                                        color: Colors.grey[600],
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  Text(
-                                    '\$$price',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
     );
   }
 

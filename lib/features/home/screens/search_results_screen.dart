@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:lifekit_frontend/core/widgets/app_lottie.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../core/widgets/lifekit_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';

@@ -6753,6 +6753,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Easy to work with'**
   String get reviewTagEasy;
+
+  /// No description provided for @editProfileUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get editProfileUsername;
+
+  /// No description provided for @editProfileBio.
+  ///
+  /// In en, this message translates to:
+  /// **'Bio'**
+  String get editProfileBio;
+
+  /// No description provided for @editProfileNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your name.'**
+  String get editProfileNameRequired;
 }
 
 class _AppLocalizationsDelegate

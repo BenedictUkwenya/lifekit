@@ -6,7 +6,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import 'service_booking_detail_screen.dart';
-import '../../../core/widgets/lifekit_loader.dart';
 import '../../../l10n/app_localizations.dart';
 
 class CategoryItemsScreen extends StatefulWidget {
@@ -50,7 +49,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
       final myId = profileData['profile']['id'];
 
       // 2. Fetch Category Data
-      final subsData = await _apiService.getSubCategories(widget.categoryId);
+      final subsData = await _apiService.getSubCategories(widget.categoryId, withServicesOnly: true);
       final servicesData = await _apiService.getServicesByCategory(
         widget.categoryId,
       );

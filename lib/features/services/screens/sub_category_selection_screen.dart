@@ -3,7 +3,6 @@ import 'package:lifekit_frontend/core/widgets/motion.dart';
 import 'package:flutter/material.dart';
 import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../core/widgets/lifekit_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/services/api_service.dart';
@@ -42,7 +41,7 @@ class _SubCategorySelectionScreenState
   Future<void> _fetchSubCategories() async {
     try {
       // Calls: GET /home/categories/:parentId
-      final data = await _apiService.getSubCategories(widget.parentId);
+      final data = await _apiService.getSubCategories(widget.parentId, withServicesOnly: true);
       if (mounted) {
         setState(() {
           subCategories = data;

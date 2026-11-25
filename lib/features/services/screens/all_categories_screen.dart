@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import '../../../core/services/app_cache.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../core/widgets/lifekit_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/services/api_service.dart';
@@ -31,7 +30,7 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
 
   Future<void> _fetchCategories() async {
     try {
-      final data = await _apiService.getCategories();
+      final data = await _apiService.getCategories(withServicesOnly: true);
       if (mounted) {
         setState(() {
           categories = data;

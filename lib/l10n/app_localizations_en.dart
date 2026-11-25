@@ -3546,4 +3546,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reviewTagEasy => 'Easy to work with';
+
+  @override
+  String get editProfileUsername => 'Username';
+
+  @override
+  String get editProfileBio => 'Bio';
+
+  @override
+  String get editProfileNameRequired => 'Please enter your name.';
 }

@@ -4,7 +4,6 @@ import '../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/services/api_service.dart';
-import '../../../core/widgets/lifekit_loader.dart'; // Ensure you have this widget
 
 class ReviewsScreen extends StatefulWidget {
   final String serviceId;

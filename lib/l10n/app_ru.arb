@@ -2108,5 +2108,8 @@
   "reviewTagProfessional": "Профессионально",
   "reviewTagCommunication": "Понятное общение",
   "reviewTagRespectful": "Уважительно",
-  "reviewTagEasy": "Легко работать"
+  "reviewTagEasy": "Легко работать",
+  "editProfileUsername": "Имя пользователя",
+  "editProfileBio": "О себе",
+  "editProfileNameRequired": "Пожалуйста, введите имя."
 }

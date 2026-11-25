@@ -1993,7 +1993,7 @@ class _ComposePostSheetState extends State<_ComposePostSheet> {
   Future<void> _pickImages() async {
     final remaining = 3 - _pickedImages.length;
     if (remaining <= 0) return;
-    final picked = await _picker.pickMultiImage(imageQuality: 80);
+    final picked = await _picker.pickMultiImage(maxWidth: 1600, imageQuality: 80);
     if (!mounted) return;
     setState(() {
       final toAdd = picked.take(remaining).toList();

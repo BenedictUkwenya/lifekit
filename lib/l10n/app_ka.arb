@@ -2108,5 +2108,8 @@
   "reviewTagProfessional": "პროფესიონალური",
   "reviewTagCommunication": "მკაფიო კომუნიკაცია",
   "reviewTagRespectful": "პატივისცემით",
-  "reviewTagEasy": "ადვილი თანამშრომლობა"
+  "reviewTagEasy": "ადვილი თანამშრომლობა",
+  "editProfileUsername": "მომხმარებლის სახელი",
+  "editProfileBio": "ბიო",
+  "editProfileNameRequired": "გთხოვთ, შეიყვანოთ სახელი."
 }

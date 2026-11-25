@@ -46,7 +46,11 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final image = await picker.pickImage(source: ImageSource.gallery);
+    final image = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1600,
+      imageQuality: 80,
+    );
     if (image != null) setState(() => _imageFile = File(image.path));
   }
 

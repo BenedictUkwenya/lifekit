@@ -308,6 +308,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     final picker = ImagePicker();
     final image = await picker.pickImage(
       source: ImageSource.gallery,
+      maxWidth: 1600,
       imageQuality: 70,
     );
     if (image != null) setState(() => _selectedImage = File(image.path));

@@ -1911,5 +1911,8 @@
   "reviewTagProfessional": "Professional",
   "reviewTagCommunication": "Clear communication",
   "reviewTagRespectful": "Respectful",
-  "reviewTagEasy": "Easy to work with"
+  "reviewTagEasy": "Easy to work with",
+  "editProfileUsername": "Username",
+  "editProfileBio": "Bio",
+  "editProfileNameRequired": "Please enter your name."
 }
