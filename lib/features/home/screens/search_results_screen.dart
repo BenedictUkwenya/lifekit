@@ -1,4 +1,6 @@
+import 'package:lifekit_frontend/core/widgets/skeleton.dart';
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/app_lottie.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/lifekit_loader.dart';
@@ -70,7 +72,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         ),
       ),
       body: isLoading
-          ? const Center(child: LifeKitLoader())
+          ? const SkeletonList()
           : services.isEmpty && providers.isEmpty
           ? _buildEmptyState()
           : ListView(
@@ -113,6 +115,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   Widget _buildEmptyState() {
     return EmptyState(
       icon: Icons.search_off_rounded,
+      anim: AppAnim.search,
       title: AppLocalizations.of(context).noResults,
     );
   }

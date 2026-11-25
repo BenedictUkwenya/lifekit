@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/app_lottie.dart';
+import 'package:lifekit_frontend/core/widgets/celebrate.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -85,8 +88,8 @@ class _LeaveReviewScreenState extends State<LeaveReviewScreen> {
         comment: comment,
       );
       if (mounted) {
-        AppToast.success(context, AppLocalizations.of(context).msgReviewSubmitted);
-        Navigator.pop(context, true); // true = rated successfully
+        await Celebrate.show(context, title: AppLocalizations.of(context).msgReviewSubmitted, anim: AppAnim.stars);
+        if (mounted) Navigator.pop(context, true); // true = rated successfully
       }
     } catch (e) {
       if (mounted) {
@@ -268,12 +271,12 @@ class _LeaveReviewScreenState extends State<LeaveReviewScreen> {
                 height: 54,
                 child: ElevatedButton(
                   onPressed: _rating == 0 || _isLoading ? null : _submit,
-                  style: ElevatedButton.styleFrom(
+                  style: chunky(ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     disabledBackgroundColor: Colors.grey.shade300,
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
+                  )),
                   child: _isLoading
                       ? const SizedBox(
                           width: 22,

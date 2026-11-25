@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../core/widgets/motion.dart';
 import '../../../core/utils/error_handler.dart';
 import '../../../l10n/app_localizations.dart';
@@ -307,7 +308,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              style: ElevatedButton.styleFrom(
+              style: chunky(ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 elevation: 0,
@@ -315,7 +316,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
-              ),
+              )),
             ),
           ),
 
@@ -513,7 +514,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _goHome,
-              style: ElevatedButton.styleFrom(
+              style: chunky(ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 elevation: 0,
@@ -521,7 +522,7 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
-              ),
+              )),
               child: Text(
                 AppLocalizations.of(context).aiObFinish,
                 style: GoogleFonts.poppins(

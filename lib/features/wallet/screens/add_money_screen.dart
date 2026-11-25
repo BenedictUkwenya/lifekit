@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/app_lottie.dart';
+import 'package:lifekit_frontend/core/widgets/celebrate.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -61,8 +64,8 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
       await _apiService.confirmDeposit(paymentIntentId);
 
       if (mounted) {
-        AppToast.success(context, AppLocalizations.of(context).msgWalletFunded);
-        Navigator.pop(context, true); // Return 'true' to refresh wallet screen
+        await Celebrate.show(context, title: AppLocalizations.of(context).msgWalletFunded, anim: AppAnim.wallet);
+        if (mounted) Navigator.pop(context, true); // Return 'true' to refresh wallet screen
       }
     } on StripeException catch (e) {
       setState(() => isLoading = false);
@@ -169,13 +172,13 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
               height: 56,
               child: ElevatedButton(
                 onPressed: isLoading ? null : _processStripePayment,
-                style: ElevatedButton.styleFrom(
+                style: chunky(ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                   elevation: 2,
-                ),
+                )),
                 child: isLoading
                     ? const SizedBox(
                         height: 20,

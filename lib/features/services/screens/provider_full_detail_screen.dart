@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:lifekit_frontend/core/widgets/motion.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/lifekit_loader.dart';
@@ -497,10 +499,10 @@ class _ProviderFullDetailScreenState extends State<ProviderFullDetailScreen>
                     ListView.builder(
                       padding: const EdgeInsets.all(20),
                       itemCount: services.length,
-                      itemBuilder: (context, index) {
+                      itemBuilder: (context, index) => Builder(builder: (context) {
                         // Pass 'true' to indicate we are inside the detail view
                         return _buildBookableServiceCard(services[index]);
-                      },
+                      }).cascadeIn(index),
                     ),
                   ],
                 ),
@@ -589,7 +591,7 @@ class _ProviderFullDetailScreenState extends State<ProviderFullDetailScreen>
                       ),
                     );
                   },
-                  style: ElevatedButton.styleFrom(
+                  style: chunky(ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF89273B),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -598,7 +600,7 @@ class _ProviderFullDetailScreenState extends State<ProviderFullDetailScreen>
                       horizontal: 24,
                       vertical: 10,
                     ),
-                  ),
+                  )),
                   child: Text(
                     AppLocalizations.of(context).serviceBookNow,
                     style: GoogleFonts.poppins(

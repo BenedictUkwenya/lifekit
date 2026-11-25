@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../constants/app_colors.dart';
@@ -56,36 +57,49 @@ class AppTheme {
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
+        style: chunky(ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           shape: shape,
           textStyle: buttonText,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        ),
+        )),
       ),
       filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
+        style: chunky(FilledButton.styleFrom(
           shape: shape,
           textStyle: buttonText,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        ),
+        )),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
+        style: chunky(OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
           shape: shape,
           textStyle: buttonText,
           side: BorderSide(color: AppColors.primary.withValues(alpha: 0.35)),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        ),
+        )),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primary,
           textStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600),
         ),
+      ),
+      tabBarTheme: TabBarThemeData(
+        indicator: UnderlineTabIndicator(
+          borderSide: const BorderSide(width: 4, color: AppColors.primary),
+          borderRadius: BorderRadius.circular(4),
+          insets: const EdgeInsets.symmetric(horizontal: 10),
+        ),
+        indicatorSize: TabBarIndicatorSize.label,
+        dividerColor: Colors.transparent,
+        labelColor: AppColors.primary,
+        unselectedLabelColor: Colors.grey,
+        splashBorderRadius: BorderRadius.circular(14),
+        labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w700),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,

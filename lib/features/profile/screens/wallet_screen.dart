@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../core/widgets/motion.dart';
 import '../../../core/services/app_cache.dart';
 import '../../../core/widgets/app_toast.dart';
@@ -141,9 +142,9 @@ class _WalletScreenState extends State<WalletScreen> {
                         );
                       }
                     },
-              style: ElevatedButton.styleFrom(
+              style: chunky(ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-              ),
+              )),
               child: Text(
                 l10n.walletWithdraw,
                 style: GoogleFonts.poppins(color: Colors.white),
@@ -298,7 +299,7 @@ class _WalletScreenState extends State<WalletScreen> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: transactions.length,
-                      itemBuilder: (context, index) {
+                      itemBuilder: (context, index) => Builder(builder: (context) {
                         final tx = transactions[index];
                         final bool isCredit =
                             tx['type'] == 'deposit' ||
@@ -358,7 +359,7 @@ class _WalletScreenState extends State<WalletScreen> {
                             ],
                           ),
                         );
-                      },
+                      }).cascadeIn(index),
                     ),
                   ],
                 ),

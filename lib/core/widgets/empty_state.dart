@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../constants/app_colors.dart';
+import 'app_lottie.dart';
 import 'motion.dart';
 
 /// Friendly, animated "nothing here yet" state: an icon in a soft badge,
@@ -13,6 +14,9 @@ class EmptyState extends StatelessWidget {
   final String? actionLabel;
   final VoidCallback? onAction;
 
+  /// Optional looping illustration shown instead of [icon].
+  final AppAnim? anim;
+
   const EmptyState({
     super.key,
     required this.icon,
@@ -20,6 +24,7 @@ class EmptyState extends StatelessWidget {
     this.message,
     this.actionLabel,
     this.onAction,
+    this.anim,
   });
 
   @override
@@ -30,6 +35,9 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (anim != null)
+              AppLottie(anim!, size: 170).popIn()
+            else
             Container(
               width: 96,
               height: 96,

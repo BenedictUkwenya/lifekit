@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
+import 'package:lifekit_frontend/core/widgets/app_lottie.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../l10n/app_localizations.dart';
@@ -399,7 +401,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
                         ),
                       );
                     },
-                    style: ElevatedButton.styleFrom(
+                    style: chunky(ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 14),
@@ -407,7 +409,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
                         borderRadius: BorderRadius.circular(14),
                       ),
                       shadowColor: AppColors.primary.withOpacity(0.35),
-                    ),
+                    )),
                     child: Text(
                       AppLocalizations.of(context).txUpgradeNow,
                       style: GoogleFonts.poppins(
@@ -1154,9 +1156,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(
+            style: chunky(ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF22C55E),
-            ),
+            )),
             child: Text(
               AppLocalizations.of(context).markDone,
               style: GoogleFonts.poppins(color: Colors.white),
@@ -1341,20 +1343,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                ),
-              ],
-            ),
-            child: const Icon(Icons.waving_hand, size: 40, color: Colors.amber),
-          ),
+          const AppLottie(AppAnim.chat, size: 130),
           const SizedBox(height: 16),
           Text(
             AppLocalizations.of(context).txSayHello,

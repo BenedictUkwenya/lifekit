@@ -1,5 +1,10 @@
 ﻿import 'dart:async';
+import 'package:lifekit_frontend/core/widgets/skeleton.dart';
+import 'package:lifekit_frontend/core/widgets/motion.dart';
 import 'dart:math' as math;
+import 'package:lifekit_frontend/core/widgets/app_lottie.dart';
+import 'package:lifekit_frontend/core/widgets/celebrate.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import 'package:flutter/material.dart';
 import '../../../core/utils/time_ago.dart';
 import '../../../core/widgets/empty_state.dart';
@@ -576,14 +581,14 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
                     height: 54,
                     child: ElevatedButton(
                       onPressed: _startDirectProposal,
-                      style: ElevatedButton.styleFrom(
+                      style: chunky(ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
-                      ),
+                      )),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -613,7 +618,7 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
                     height: 46,
                     child: OutlinedButton(
                       onPressed: _startSearch,
-                      style: OutlinedButton.styleFrom(
+                      style: chunky(OutlinedButton.styleFrom(
                         foregroundColor: AppColors.primary,
                         side: BorderSide(
                           color: AppColors.primary.withOpacity(0.4),
@@ -622,7 +627,7 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
-                      ),
+                      )),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -649,14 +654,14 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
                     height: 54,
                     child: ElevatedButton(
                       onPressed: _startSearch,
-                      style: ElevatedButton.styleFrom(
+                      style: chunky(ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
-                      ),
+                      )),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -692,7 +697,7 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
                           ),
                         );
                       },
-                      style: OutlinedButton.styleFrom(
+                      style: chunky(OutlinedButton.styleFrom(
                         foregroundColor: AppColors.primary,
                         side: BorderSide(
                           color: AppColors.primary.withOpacity(0.4),
@@ -701,7 +706,7 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
-                      ),
+                      )),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -2302,14 +2307,14 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
                 height: 54,
                 child: ElevatedButton(
                   onPressed: _sendProposal,
-                  style: ElevatedButton.styleFrom(
+                  style: chunky(ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
-                  ),
+                  )),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -2866,7 +2871,7 @@ class _SwapProposalSheetState extends State<_SwapProposalSheet> {
                 height: 54,
                 child: ElevatedButton(
                   onPressed: isSending ? null : _send,
-                  style: ElevatedButton.styleFrom(
+                  style: chunky(ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     elevation: 0,
@@ -2874,7 +2879,7 @@ class _SwapProposalSheetState extends State<_SwapProposalSheet> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
-                  ),
+                  )),
                   child: isSending
                       ? const SizedBox(
                           width: 22,
@@ -3011,8 +3016,10 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
     final l10n = AppLocalizations.of(context)!;
     try {
       await _apiService.acceptSwap(swapId);
-      _showSnack(l10n.swapAcceptedToast, isSuccess: true);
       _loadMine();
+      if (mounted) {
+        Celebrate.show(context, title: l10n.swapAcceptedToast, anim: AppAnim.handshake);
+      }
     } catch (e) {
       _showSnack('Error: $e', isError: true);
     }
@@ -3203,7 +3210,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
             color: AppColors.primary,
             onRefresh: _loadBoard,
             child: isLoadingBoard
-                ? const Center(child: LifeKitLoader(showSlowHint: false))
+                ? const SkeletonList()
                 : _boardError
                 ? _buildEmpty(
                     l10n.swapLoadFailed,
@@ -3245,7 +3252,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
             color: AppColors.primary,
             onRefresh: _loadMine,
             child: isLoadingMine
-                ? const Center(child: LifeKitLoader(showSlowHint: false))
+                ? const SkeletonList()
                 : _mineLoadError
                 ? _buildRetry(_loadMine)
                 : incomingSwaps.isEmpty
@@ -3257,14 +3264,14 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                 : ListView.builder(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                     itemCount: incomingSwaps.length,
-                    itemBuilder: (_, i) => _buildIncomingCard(incomingSwaps[i]),
+                    itemBuilder: (_, i) => _buildIncomingCard(incomingSwaps[i]).cascadeIn(i),
                   ),
           ),
           RefreshIndicator(
             color: AppColors.primary,
             onRefresh: _loadMine,
             child: isLoadingMine
-                ? const Center(child: LifeKitLoader(showSlowHint: false))
+                ? const SkeletonList()
                 : _mineLoadError
                 ? _buildRetry(_loadMine)
                 : outgoingSwaps.isEmpty
@@ -3276,7 +3283,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                 : ListView.builder(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                     itemCount: outgoingSwaps.length,
-                    itemBuilder: (_, i) => _buildOutgoingCard(outgoingSwaps[i]),
+                    itemBuilder: (_, i) => _buildOutgoingCard(outgoingSwaps[i]).cascadeIn(i),
                   ),
           ),
         ],
@@ -3915,13 +3922,13 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => _declineSwap(swap['id']),
-                    style: OutlinedButton.styleFrom(
+                    style: chunky(OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
                       side: const BorderSide(color: Colors.red),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
+                    )),
                     child: Text(
                       l10n.swapDecline,
                       style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
@@ -3932,13 +3939,13 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () => _acceptSwap(swap['id']),
-                    style: ElevatedButton.styleFrom(
+                    style: chunky(ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
+                    )),
                     child: Text(
                       l10n.bookingsAccept,
                       style: GoogleFonts.poppins(
@@ -3972,7 +3979,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                       AppLocalizations.of(context).helpMessage,
                       style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                     ),
-                    style: OutlinedButton.styleFrom(
+                    style: chunky(OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
                       side: BorderSide(
                         color: AppColors.primary.withOpacity(0.5),
@@ -3980,7 +3987,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
+                    )),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -4001,14 +4008,14 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                           : AppLocalizations.of(context).markDone,
                       style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                     ),
-                    style: ElevatedButton.styleFrom(
+                    style: chunky(ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFE8A020),
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
+                    )),
                   ),
                 ),
               ],
@@ -4112,13 +4119,13 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
               width: double.infinity,
               child: OutlinedButton(
                 onPressed: () => _cancelSwap(swap['id']),
-                style: OutlinedButton.styleFrom(
+                style: chunky(OutlinedButton.styleFrom(
                   foregroundColor: Colors.red,
                   side: const BorderSide(color: Colors.red),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                ),
+                )),
                 child: Text(
                   AppLocalizations.of(context).txCancelProposal,
                   style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
@@ -4147,7 +4154,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                       AppLocalizations.of(context).helpMessage,
                       style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                     ),
-                    style: OutlinedButton.styleFrom(
+                    style: chunky(OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
                       side: BorderSide(
                         color: AppColors.primary.withOpacity(0.5),
@@ -4155,7 +4162,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
+                    )),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -4176,14 +4183,14 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                           : AppLocalizations.of(context).markDone,
                       style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                     ),
-                    style: ElevatedButton.styleFrom(
+                    style: chunky(ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFE8A020),
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
+                    )),
                   ),
                 ),
               ],
@@ -4301,13 +4308,13 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
             onPressed: onRetry,
             icon: const Icon(Icons.refresh_rounded, size: 16),
             label: Text(AppLocalizations.of(context).retry),
-            style: ElevatedButton.styleFrom(
+            style: chunky(ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
-            ),
+            )),
           ),
         ],
       ),
@@ -4315,7 +4322,12 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
   }
 
   Widget _buildEmpty(String title, String sub, IconData icon) {
-    return EmptyState(icon: icon, title: title, message: sub);
+    return EmptyState(
+      icon: icon,
+      title: title,
+      message: sub.isEmpty ? null : sub,
+      anim: icon == Icons.wifi_off_rounded ? null : AppAnim.handshake,
+    );
   }
 
   String _timeAgo(dynamic ts) => formatTimeAgoRaw(context, ts);

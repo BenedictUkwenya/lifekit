@@ -1,3 +1,4 @@
+import 'package:lifekit_frontend/core/widgets/skeleton.dart';
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -84,7 +85,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
         ),
       ),
       body: isLoading
-          ? const Center(child: LifeKitLoader())
+          ? const SkeletonList()
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -161,7 +162,7 @@ class BookingReceiptScreen extends StatelessWidget {
                 AppLocalizations.of(context).txDownloadPdf,
                 style: GoogleFonts.poppins(color: Colors.black),
               ),
-              style: OutlinedButton.styleFrom(
+              style: chunky(OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
                   vertical: 16,
                   horizontal: 32,
@@ -169,7 +170,7 @@ class BookingReceiptScreen extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-              ),
+              )),
             ),
           ],
         ),

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/celebrate.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
+import 'package:lifekit_frontend/core/widgets/app_lottie.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/motion.dart';
@@ -218,9 +221,11 @@ class _BookingsScreenState extends State<BookingsScreen>
 
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
-        AppToast.error(context, status == 'confirmed'
-                  ? l10n.bookingsRequestAccepted
-                  : l10n.bookingsRequestRejected);
+        if (status == 'confirmed') {
+          Celebrate.show(context, title: l10n.bookingsRequestAccepted, anim: AppAnim.handshake);
+        } else {
+          AppToast.info(context, l10n.bookingsRequestRejected);
+        }
       }
     } catch (e) {
       setState(() => isLoading = false);
@@ -398,12 +403,12 @@ class _BookingsScreenState extends State<BookingsScreen>
               padding: const EdgeInsets.all(20),
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: providerRequests.length,
-              itemBuilder: (context, index) {
+              itemBuilder: (context, index) => Builder(builder: (context) {
                 return _buildStandardBookingCard(
                   providerRequests[index],
                   isClient: false,
                 ).fadeSlideIn(index: index);
-              },
+              }).cascadeIn(index),
             ),
     );
   }
@@ -573,7 +578,7 @@ class _BookingsScreenState extends State<BookingsScreen>
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
         SizedBox(height: MediaQuery.of(context).size.height * 0.12),
-        EmptyState(icon: Icons.event_available_rounded, title: message),
+        EmptyState(icon: Icons.event_available_rounded, title: message, anim: AppAnim.emptyBox),
       ],
     );
   }
@@ -806,13 +811,13 @@ class _BookingsScreenState extends State<BookingsScreen>
               height: 50,
               child: ElevatedButton(
                 onPressed: () => _goToTracking(booking, isClient),
-                style: ElevatedButton.styleFrom(
+                style: chunky(ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                   elevation: 0,
-                ),
+                )),
                 child: Text(
                   l10n.bookingsTrackStatus,
                   style: GoogleFonts.poppins(
@@ -1118,13 +1123,13 @@ class _BookingsScreenState extends State<BookingsScreen>
                     child: OutlinedButton(
                       onPressed: () =>
                           _handleProviderAction(booking['id'], 'cancelled'),
-                      style: OutlinedButton.styleFrom(
+                      style: chunky(OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.red),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
+                      )),
                       child: Text(
                         l10n.bookingsReject,
                         style: GoogleFonts.poppins(
@@ -1139,13 +1144,13 @@ class _BookingsScreenState extends State<BookingsScreen>
                     child: ElevatedButton(
                       onPressed: () =>
                           _handleProviderAction(booking['id'], 'confirmed'),
-                      style: ElevatedButton.styleFrom(
+                      style: chunky(ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
+                      )),
                       child: Text(
                         l10n.bookingsAccept,
                         style: GoogleFonts.poppins(
@@ -1519,7 +1524,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                             size: 15,
                           ),
                           label: Text(l10n.bookingsMessage),
-                          style: OutlinedButton.styleFrom(
+                          style: chunky(OutlinedButton.styleFrom(
                             foregroundColor: AppColors.primary,
                             side: BorderSide(
                               color: AppColors.primary.withOpacity(0.5),
@@ -1532,7 +1537,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                          ),
+                          )),
                         ),
                       ),
                       if (status == 'confirmed') ...[
@@ -1545,7 +1550,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                               size: 15,
                             ),
                             label: Text(l10n.bookingsMarkDone),
-                            style: ElevatedButton.styleFrom(
+                            style: chunky(ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFE8A020),
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -1557,7 +1562,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               elevation: 0,
-                            ),
+                            )),
                           ),
                         ),
                       ],
@@ -1580,27 +1585,8 @@ class _BookingsScreenState extends State<BookingsScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 90,
-              height: 90,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    const Color(0xFFE8A020).withOpacity(0.15),
-                    const Color(0xFFE8A020).withOpacity(0.05),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.swap_horiz_rounded,
-                size: 40,
-                color: Color(0xFFE8A020),
-              ),
-            ),
-            const SizedBox(height: 24),
+            const AppLottie(AppAnim.handshake, size: 160),
+            const SizedBox(height: 16),
             Text(
               l10n.bookingsNoSwapsYet,
               style: GoogleFonts.poppins(
@@ -1630,7 +1616,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                 l10n.bookingsBrowseSwapBoard,
                 style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
               ),
-              style: ElevatedButton.styleFrom(
+              style: chunky(ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFE8A020),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
@@ -1641,7 +1627,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                   borderRadius: BorderRadius.circular(30),
                 ),
                 elevation: 0,
-              ),
+              )),
             ),
           ],
         ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/motion.dart';
+import 'package:lifekit_frontend/core/widgets/app_lottie.dart';
 import '../../../core/widgets/skeleton.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -214,9 +216,9 @@ class _ChatsListScreenState extends State<ChatsListScreen>
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: allConversations.length,
-                  itemBuilder: (context, index) {
+                  itemBuilder: (context, index) => Builder(builder: (context) {
                     return _buildActiveAvatar(allConversations[index]);
-                  },
+                  }).cascadeIn(index),
                 ),
               ),
               const SizedBox(height: 18),
@@ -259,13 +261,7 @@ class _ChatsListScreenState extends State<ChatsListScreen>
         padding: const EdgeInsets.only(top: 40),
         child: Column(
           children: [
-            Icon(
-              isActiveTab
-                  ? Icons.mark_chat_unread_outlined
-                  : Icons.history_rounded,
-              size: 40,
-              color: Colors.grey[300],
-            ),
+            const AppLottie(AppAnim.chat, size: 120),
             const SizedBox(height: 10),
             Text(
               isActiveTab

@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/motion.dart';
+import 'package:lifekit_frontend/core/widgets/app_lottie.dart';
+import 'package:lifekit_frontend/core/widgets/celebrate.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/error_handler.dart';
@@ -113,7 +117,12 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
       }
       _load();
       if (mounted) {
-        AppToast.error(context, action == 'accept' ? '✅ Swap accepted!' : 'Proposal declined');
+        final l10n = AppLocalizations.of(context);
+        if (action == 'accept') {
+          Celebrate.show(context, title: l10n.swapAcceptedToast, anim: AppAnim.handshake);
+        } else {
+          AppToast.info(context, l10n.swapDeclinedToast);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -623,14 +632,14 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => _handleSwapAction(swapId, 'decline'),
-                  style: OutlinedButton.styleFrom(
+                  style: chunky(OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.redAccent),
                     foregroundColor: Colors.redAccent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                  ),
+                  )),
                   child: Text(
                     AppLocalizations.of(context).skillSwapDecline,
                     style: GoogleFonts.poppins(
@@ -644,7 +653,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
               Expanded(
                 child: ElevatedButton(
                   onPressed: () => _handleSwapAction(swapId, 'accept'),
-                  style: ElevatedButton.styleFrom(
+                  style: chunky(ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF22C55E),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
@@ -652,7 +661,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     elevation: 0,
-                  ),
+                  )),
                   child: Text(
                     AppLocalizations.of(context).txAccept,
                     style: GoogleFonts.poppins(
@@ -800,7 +809,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
             physics: const BouncingScrollPhysics(),
             itemCount: _swappable.length,
             separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (_, i) {
+            itemBuilder: (_, i) => Builder(builder: (_) {
               final s = _swappable[i];
               final title = (s['title'] ?? 'Service').toString();
               final rawImages = s['image_urls'];
@@ -995,7 +1004,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                   ),
                 ),
               );
-            },
+            }).cascadeIn(i),
           ),
         ),
       ],
@@ -1191,7 +1200,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                 ),
               ElevatedButton(
                 onPressed: isGenerating ? null : generate,
-                style: ElevatedButton.styleFrom(
+                style: chunky(ElevatedButton.styleFrom(
                   backgroundColor: _kDark,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
@@ -1201,7 +1210,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
                     horizontal: 16,
                     vertical: 10,
                   ),
-                ),
+                )),
                 child: isGenerating
                     ? const SizedBox(
                         width: 16,

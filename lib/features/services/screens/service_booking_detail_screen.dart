@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import 'package:flutter/material.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import '../../../core/widgets/app_toast.dart';
@@ -692,13 +693,13 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
               ),
               child: ElevatedButton(
                 onPressed: () => _attemptBooking(currentService),
-                style: ElevatedButton.styleFrom(
+                style: chunky(ElevatedButton.styleFrom(
                   backgroundColor: brandColor,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
-                ),
+                )),
                 child: Text(
                   l10n.providerBookThisService,
                   style: GoogleFonts.poppins(
@@ -854,7 +855,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
 
                 ElevatedButton(
                   onPressed: () => _attemptBooking(service),
-                  style: ElevatedButton.styleFrom(
+                  style: chunky(ElevatedButton.styleFrom(
                     backgroundColor: brandColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -863,7 +864,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
                       horizontal: 24,
                       vertical: 10,
                     ),
-                  ),
+                  )),
                   child: Text(
                     l10n.providerBookNow,
                     style: GoogleFonts.poppins(

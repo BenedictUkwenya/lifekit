@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:lifekit_frontend/core/widgets/app_lottie.dart';
 import 'package:flutter/material.dart';
 import '../../../core/widgets/app_toast.dart';
 import 'package:intl/intl.dart';
@@ -674,7 +675,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
                             itemBuilder: (context, index) =>
                                 _buildFeaturedProviderCard(
                                   featuredProviders[index],
-                                ).fadeSlideIn(index: index, dy: 0.15),
+                                ).fadeSlideIn(index: index, dy: 0.15).cascadeIn(index),
                           ),
                         ),
                       ],
@@ -728,7 +729,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
                                 const SizedBox(width: 10),
                             itemBuilder: (context, index) =>
                                 _buildCategoryChip(categories[index])
-                                    .fadeSlideIn(index: index),
+                                    .fadeSlideIn(index: index).cascadeIn(index),
                           ),
                         ),
                       ],
@@ -1297,7 +1298,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 42, color: Colors.grey.shade400),
+            AppLottie(icon == Icons.search_off_rounded ? AppAnim.search : AppAnim.emptyBox, size: 140),
             const SizedBox(height: 14),
             Text(
               title,

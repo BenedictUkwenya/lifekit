@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/error_handler.dart';
@@ -213,12 +214,12 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(
+            style: chunky(ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFEF4444),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-            ),
+            )),
             child: Text(
               AppLocalizations.of(context).delete,
               style: GoogleFonts.poppins(color: Colors.white),
@@ -300,7 +301,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                 ),
               );
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            style: chunky(ElevatedButton.styleFrom(backgroundColor: AppColors.primary)),
             child: Text(
               AppLocalizations.of(context).txViewPlans,
               style: GoogleFonts.poppins(color: Colors.white),
@@ -340,7 +341,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                 MaterialPageRoute(builder: (_) => const AddMoneyScreen()),
               );
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            style: chunky(ElevatedButton.styleFrom(backgroundColor: AppColors.primary)),
             child: Text(
               AppLocalizations.of(context).addMoney,
               style: GoogleFonts.poppins(color: Colors.white),
@@ -456,12 +457,12 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                             }
                           }
                         },
-                  style: ElevatedButton.styleFrom(
+                  style: chunky(ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                  ),
+                  )),
                   child: isSubmitting
                       ? const SizedBox(
                           width: 20,
@@ -657,7 +658,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
             height: 52,
             child: ElevatedButton(
               onPressed: _isOpeningCreateFlow ? null : _openCreateServiceFlow,
-              style: ElevatedButton.styleFrom(
+              style: chunky(ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 elevation: 0,
@@ -665,7 +666,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
-              ),
+              )),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -994,7 +995,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                         onPressed: _isOpeningCreateFlow
                             ? null
                             : () => _openCreateFromSuggestion(opp),
-                        style: ElevatedButton.styleFrom(
+                        style: chunky(ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           elevation: 0,
@@ -1002,7 +1003,7 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
-                        ),
+                        )),
                         child: Text(
                           AppLocalizations.of(context).txCreateService,
                           style: GoogleFonts.poppins(
@@ -1245,14 +1246,14 @@ class _MyServicesListScreenState extends State<MyServicesListScreen> {
                     height: 28,
                     child: ElevatedButton(
                       onPressed: () => _showBoostSheet(service),
-                      style: ElevatedButton.styleFrom(
+                      style: chunky(ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         elevation: 0,
                         backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                      ),
+                      )),
                       child: Text(
                         "🚀 Boost",
                         style: GoogleFonts.poppins(

@@ -1,3 +1,4 @@
+import 'package:lifekit_frontend/core/widgets/skeleton.dart';
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -197,7 +198,7 @@ class _CommunitiesScreenState extends State<CommunitiesScreen>
           ),
         ],
         body: isLoading
-            ? const Center(child: LifeKitLoader())
+            ? const SkeletonList()
             : RefreshIndicator(
                 onRefresh: _fetchGroups,
                 color: AppColors.primary,

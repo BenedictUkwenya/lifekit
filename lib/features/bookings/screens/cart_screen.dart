@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../core/widgets/motion.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -121,10 +122,10 @@ class CartScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(20),
                   itemCount: cart.items.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 16),
-                  itemBuilder: (context, index) {
+                  itemBuilder: (context, index) => Builder(builder: (context) {
                     final item = cart.items[index];
                     return _buildCartItem(context, cart, item);
-                  },
+                  }).cascadeIn(index),
                 ),
               ),
 
@@ -145,12 +146,12 @@ class CartScreen extends StatelessWidget {
                         ),
                       );
                     },
-                    style: ElevatedButton.styleFrom(
+                    style: chunky(ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                    ),
+                    )),
                     child: Text(
                       l10n.cartCheckout,
                       style: GoogleFonts.poppins(

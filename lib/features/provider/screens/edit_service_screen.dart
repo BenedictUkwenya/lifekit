@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -521,7 +522,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: isGenerating ? null : generate,
-                      style: ElevatedButton.styleFrom(
+                      style: chunky(ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         disabledBackgroundColor: AppColors.primary.withOpacity(
@@ -532,7 +533,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                      ),
+                      )),
                       child: isGenerating
                           ? const SizedBox(
                               height: 20,
@@ -641,7 +642,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
             padding: const EdgeInsets.only(right: 16, top: 10, bottom: 10),
             child: ElevatedButton(
               onPressed: _isLoading ? null : _saveService,
-              style: ElevatedButton.styleFrom(
+              style: chunky(ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 elevation: 0,
@@ -649,7 +650,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-              ),
+              )),
               child: Text(
                 AppLocalizations.of(context).save,
                 style: GoogleFonts.poppins(
@@ -2133,13 +2134,13 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () => Navigator.pop(ctx, true),
-                          style: OutlinedButton.styleFrom(
+                          style: chunky(OutlinedButton.styleFrom(
                             side: BorderSide(color: Colors.grey.shade300),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
+                          )),
                           child: Text(
                             AppLocalizations.of(context).txKeepOff,
                             style: GoogleFonts.poppins(
@@ -2154,7 +2155,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () => Navigator.pop(ctx, false),
-                          style: ElevatedButton.styleFrom(
+                          style: chunky(ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFE8A020),
                             foregroundColor: Colors.white,
                             elevation: 0,
@@ -2162,7 +2163,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
+                          )),
                           child: Text(
                             AppLocalizations.of(context).txTurnOn,
                             style: GoogleFonts.poppins(

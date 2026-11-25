@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/motion.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../l10n/app_localizations.dart';
@@ -256,12 +258,12 @@ class _SelectMainCategoryScreenState extends State<SelectMainCategoryScreen> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
+                    style: chunky(ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
+                    )),
                     onPressed: isSubmitting
                         ? null
                         : () async {
@@ -366,12 +368,12 @@ class _SelectMainCategoryScreenState extends State<SelectMainCategoryScreen> {
                         ? searchResults.length
                         : mainCategories.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 16),
-                    itemBuilder: (context, index) {
+                    itemBuilder: (context, index) => Builder(builder: (context) {
                       final cat = isSearching
                           ? searchResults[index]
                           : mainCategories[index];
                       return _buildCategoryTile(cat);
-                    },
+                    }).cascadeIn(index),
                   ),
           ),
 

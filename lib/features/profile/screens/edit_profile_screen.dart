@@ -1,4 +1,5 @@
 import 'dart:io'; // Needed for File
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:flutter/material.dart';
 import '../../../core/widgets/app_toast.dart';
@@ -177,12 +178,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               height: 50,
               child: ElevatedButton(
                 onPressed: isLoading ? null : _save,
-                style: ElevatedButton.styleFrom(
+                style: chunky(ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
-                ),
+                )),
                 child: isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../core/widgets/motion.dart';
@@ -814,13 +815,13 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
               height: 52,
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
+                style: chunky(ElevatedButton.styleFrom(
                   backgroundColor: isError ? Colors.black87 : AppColors.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
                   elevation: 0,
-                ),
+                )),
                 child: Text(
                   AppLocalizations.of(context)!.bookGotIt,
                   style: GoogleFonts.poppins(
@@ -1840,7 +1841,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                   height: 56,
                   child: ElevatedButton(
                     onPressed: _addToCart,
-                    style: ElevatedButton.styleFrom(
+                    style: chunky(ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -1849,7 +1850,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                       shadowColor: AppColors.primary.withOpacity(0.3),
                       // Fix 3: remove internal padding so Row has room
                       padding: const EdgeInsets.symmetric(horizontal: 8),
-                    ),
+                    )),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,

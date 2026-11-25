@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -129,13 +130,13 @@ Future<bool> adminConfirm(
           child: Text(t('cancel'), style: adminText(14, color: AdminPalette.textMuted)),
         ),
         FilledButton(
-          style: FilledButton.styleFrom(
+          style: chunky(FilledButton.styleFrom(
             backgroundColor:
                 destructive ? AdminPalette.danger : AdminPalette.primary,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
-          ),
+          )),
           onPressed: () => Navigator.pop(ctx, true),
           child: Text(
             confirmLabel,
@@ -744,22 +745,22 @@ class AdminButton extends StatelessWidget {
     return outlined
         ? OutlinedButton(
             onPressed: busy ? null : onPressed,
-            style: OutlinedButton.styleFrom(
+            style: chunky(OutlinedButton.styleFrom(
               foregroundColor: color,
               side: BorderSide(color: color.withValues(alpha: 0.35)),
               shape: shape,
               padding: padding,
-            ),
+            )),
             child: child,
           )
         : FilledButton(
             onPressed: busy ? null : onPressed,
-            style: FilledButton.styleFrom(
+            style: chunky(FilledButton.styleFrom(
               backgroundColor: color,
               foregroundColor: Colors.white,
               shape: shape,
               padding: padding,
-            ),
+            )),
             child: child,
           );
   }

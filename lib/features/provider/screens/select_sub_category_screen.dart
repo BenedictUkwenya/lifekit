@@ -1,4 +1,7 @@
+import 'package:lifekit_frontend/core/widgets/skeleton.dart';
+import 'package:lifekit_frontend/core/widgets/motion.dart';
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import '../../../core/widgets/app_toast.dart';
@@ -230,7 +233,7 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
         ),
       ),
       body: isLoading
-          ? const Center(child: LifeKitLoader())
+          ? const SkeletonList()
           : Column(
               children: [
                 // 1. Search Bar
@@ -285,7 +288,7 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
                   child: ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     itemCount: sortedKeys.length,
-                    itemBuilder: (context, index) {
+                    itemBuilder: (context, index) => Builder(builder: (context) {
                       String letter = sortedKeys[index];
                       List<dynamic> items = groupedData[letter]!;
 
@@ -330,7 +333,7 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
                           ),
                         ],
                       );
-                    },
+                    }).cascadeIn(index),
                   ),
                 ),
 
@@ -355,13 +358,13 @@ class _SelectSubCategoryScreenState extends State<SelectSubCategoryScreen> {
                     height: 56,
                     child: ElevatedButton(
                       onPressed: _selectedIds.isEmpty ? null : _createServices,
-                      style: ElevatedButton.styleFrom(
+                      style: chunky(ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF89273B),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                         elevation: 0,
-                      ),
+                      )),
                       child: Text(
                         "Next (${_selectedIds.length})",
                         style: GoogleFonts.poppins(

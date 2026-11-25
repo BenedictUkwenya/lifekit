@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/app_toast.dart';
@@ -237,13 +238,13 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
+                      style: chunky(ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                         elevation: 0,
-                      ),
+                      )),
                       onPressed: _handleCreate,
                       child: Text(
                         AppLocalizations.of(context).txCreateGroup,

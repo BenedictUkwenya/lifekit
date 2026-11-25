@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/motion.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import '../../../core/widgets/app_toast.dart';
@@ -393,13 +395,13 @@ class _ServiceProfileScreenState extends State<ServiceProfileScreen>
                           ),
                         );
                       },
-                      style: ElevatedButton.styleFrom(
+                      style: chunky(ElevatedButton.styleFrom(
                         backgroundColor: brandColor,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                         elevation: 5,
-                      ),
+                      )),
                       child: Text(
                         AppLocalizations.of(context).serviceBookNow,
                         style: GoogleFonts.poppins(
@@ -460,7 +462,7 @@ class _ServiceProfileScreenState extends State<ServiceProfileScreen>
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
       itemCount: reviews.length,
-      itemBuilder: (context, index) {
+      itemBuilder: (context, index) => Builder(builder: (context) {
         final r = reviews[index];
         final user = r['profiles'];
         return Container(
@@ -519,7 +521,7 @@ class _ServiceProfileScreenState extends State<ServiceProfileScreen>
             ],
           ),
         );
-      },
+      }).cascadeIn(index),
     );
   }
 
@@ -604,7 +606,7 @@ class _ServiceProfileScreenState extends State<ServiceProfileScreen>
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
       itemCount: otherServices.length,
-      itemBuilder: (context, index) {
+      itemBuilder: (context, index) => Builder(builder: (context) {
         final s = otherServices[index];
         return GestureDetector(
           onTap: () {
@@ -658,7 +660,7 @@ class _ServiceProfileScreenState extends State<ServiceProfileScreen>
             ),
           ),
         );
-      },
+      }).cascadeIn(index),
     );
   }
 

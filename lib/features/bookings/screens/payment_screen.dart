@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -180,13 +181,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       _fetchWallet();
                     }
                   },
-                  style: ElevatedButton.styleFrom(
+                  style: chunky(ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                     elevation: 0,
-                  ),
+                  )),
                     child: Text(
                     l10n.walletTopUp,
                     style: GoogleFonts.poppins(
@@ -413,14 +414,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     height: 56,
                     child: ElevatedButton(
                       onPressed: _processPayment,
-                      style: ElevatedButton.styleFrom(
+                      style: chunky(ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                         elevation: 5,
                         shadowColor: AppColors.primary.withOpacity(0.4),
-                      ),
+                      )),
                     child: Text(
                       l10n.paymentConfirm,
                       style: GoogleFonts.poppins(

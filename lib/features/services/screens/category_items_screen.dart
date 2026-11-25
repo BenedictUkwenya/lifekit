@@ -1,3 +1,5 @@
+import 'package:lifekit_frontend/core/widgets/skeleton.dart';
+import 'package:lifekit_frontend/core/widgets/motion.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -199,7 +201,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
         ],
       ),
       body: isLoading
-          ? const Center(child: LifeKitLoader())
+          ? const SkeletonList()
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -240,7 +242,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       itemCount: subCategories.length,
-                      itemBuilder: (context, index) {
+                      itemBuilder: (context, index) => Builder(builder: (context) {
                         final sub = subCategories[index];
                         final isSelected = selectedFilterId == sub['id'];
                         return GestureDetector(
@@ -270,7 +272,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
                             ),
                           ),
                         );
-                      },
+                      }).cascadeIn(index),
                     ),
                   ),
 

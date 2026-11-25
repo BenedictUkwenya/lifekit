@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -151,12 +152,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             height: 54,
             child: ElevatedButton(
               onPressed: _isLoading ? null : _updatePassword,
-              style: ElevatedButton.styleFrom(
+              style: chunky(ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 disabledBackgroundColor: AppColors.primary.withOpacity(0.5),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 elevation: 0,
-              ),
+              )),
               child: _isLoading
                   ? const SizedBox(
                       width: 22,
@@ -220,11 +221,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 (route) => false,
               );
             },
-            style: ElevatedButton.styleFrom(
+            style: chunky(ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               elevation: 0,
-            ),
+            )),
             child: Text(
               l10n.backToLogin,
               style: GoogleFonts.poppins(

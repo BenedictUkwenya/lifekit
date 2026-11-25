@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/motion.dart';
+import 'package:lifekit_frontend/core/widgets/app_lottie.dart';
 import '../../../core/utils/time_ago.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../l10n/app_localizations.dart';
@@ -242,10 +244,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(20),
                 itemCount: notifications.length,
-                itemBuilder: (context, index) {
+                itemBuilder: (context, index) => Builder(builder: (context) {
                   final notif = notifications[index];
                   return _buildDismissibleItem(notif, index);
-                },
+                }).cascadeIn(index),
               ),
             ),
     );
@@ -276,6 +278,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Widget _buildEmptyState() {
     return EmptyState(
       icon: Icons.notifications_none_rounded,
+      anim: AppAnim.cat,
       title: AppLocalizations.of(context).txNoNotificationsYet,
     );
   }

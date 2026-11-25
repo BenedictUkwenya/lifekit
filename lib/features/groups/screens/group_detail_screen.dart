@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:lifekit_frontend/core/widgets/motion.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
@@ -838,7 +840,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
         reverse: true,
         padding: const EdgeInsets.only(top: 16, bottom: 8, left: 16, right: 16),
         itemCount: filtered.length,
-        itemBuilder: (context, index) {
+        itemBuilder: (context, index) => Builder(builder: (context) {
           final post = filtered[index];
           final current = parseApiDate(post['created_at']);
           bool showDate = false;
@@ -857,7 +859,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
               _buildBubble(post),
             ],
           );
-        },
+        }).cascadeIn(index),
       ),
     );
   }
@@ -1883,14 +1885,14 @@ class _PlanLimitDetailSheet extends StatelessWidget {
                     ),
                   );
                 },
-                style: ElevatedButton.styleFrom(
+                style: chunky(ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
-                ),
+                )),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

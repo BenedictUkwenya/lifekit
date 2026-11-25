@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../../core/widgets/motion.dart';
@@ -373,14 +375,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     );
                   },
-                  style: ElevatedButton.styleFrom(
+                  style: chunky(ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
-                  ),
+                  )),
                   child: Text(
                     AppLocalizations.of(context).txViewAiOpportunityRadar,
                     style: GoogleFonts.poppins(
@@ -932,6 +934,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   return Expanded(
                     child: GestureDetector(
                       onTap: () {
+                        if (_currentNavIndex != i) HapticFeedback.selectionClick();
                         setState(() {
                           _currentNavIndex = i;
                           if (i == 2) {
@@ -950,9 +953,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       behavior: HitTestBehavior.opaque,
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeOutBack,
+                        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: active
+                              ? AppColors.primary.withValues(alpha: 0.09)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(22),
+                        ),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 4,
-                          vertical: 8,
+                          vertical: 1,
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -960,13 +971,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             Stack(
                               clipBehavior: Clip.none,
                               children: [
-                                Icon(
-                                  active ? item.activeIcon : item.icon,
-                                  color: active
-                                      ? AppColors.primary
-                                      : Colors.grey[400],
-                                  size: active ? 26 : 24,
-                                ),
+                                active
+                                    ? Icon(item.activeIcon, color: AppColors.primary, size: 26)
+                                        .animate(key: ValueKey('nav-on-$i'))
+                                        .moveY(begin: 7, end: 0, duration: 650.ms, curve: Curves.elasticOut)
+                                        .scale(begin: const Offset(0.7, 0.7), end: const Offset(1, 1), duration: 650.ms, curve: Curves.elasticOut)
+                                    : Icon(item.icon, color: Colors.grey[400], size: 24),
                                 if (item.badge != null && item.badge! > 0)
                                   Positioned(
                                     right: -6,
@@ -985,7 +995,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                    ),
+                                    )
+                                        .animate(key: ValueKey('badge-$i-${item.badge}'))
+                                        .scale(begin: const Offset(0.2, 0.2), end: const Offset(1, 1), duration: 600.ms, curve: Curves.elasticOut),
                                   ),
                                 if (item.showDot && !active)
                                   Positioned(
@@ -1964,6 +1976,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           providerId: pId,
                           providerName: providerName,
                           providerPic: provider['profile_picture_url'],
+                          heroTag: 'home-swap-$sId',
+                          heroImageUrl: coverImage,
                           serviceTitle: title,
                         ),
                       ),
@@ -2013,7 +2027,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               borderRadius: const BorderRadius.vertical(
                                 top: Radius.circular(20),
                               ),
-                              child: CachedNetworkImage(
+                              child: Hero(tag: 'home-swap-$sId', child: CachedNetworkImage(
                                 imageUrl: coverImage,
                                 height: 110,
                                 width: double.infinity,
@@ -2026,7 +2040,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     color: Colors.grey,
                                   ),
                                 ),
-                              ),
+                              )),
                             ),
                             Positioned(
                               top: 8,
@@ -2422,6 +2436,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           providerId: pId,
                           providerName: providerName,
                           providerPic: provider['profile_picture_url'],
+                          heroTag: 'home-pop-$sId',
+                          heroImageUrl: coverImage,
                           serviceTitle: service['title'] ?? 'Service',
                         ),
                       ),
@@ -2474,7 +2490,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               borderRadius: const BorderRadius.vertical(
                                 top: Radius.circular(20),
                               ),
-                              child: CachedNetworkImage(
+                              child: Hero(tag: 'home-pop-$sId', child: CachedNetworkImage(
                                 imageUrl: coverImage,
                                 height: 110,
                                 width: double.infinity,
@@ -2487,7 +2503,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     color: Colors.grey,
                                   ),
                                 ),
-                              ),
+                              )),
                             ),
                             Positioned(
                               top: 8,

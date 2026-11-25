@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -143,7 +144,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
                 MaterialPageRoute(builder: (_) => const AddMoneyScreen()),
               );
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            style: chunky(ElevatedButton.styleFrom(backgroundColor: AppColors.primary)),
             child: Text(
               l10n.subscriptionAddMoney,
               style: GoogleFonts.poppins(color: Colors.white),
@@ -325,13 +326,13 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
               onPressed: isFree || isLoading || isCurrent || !StoreRules.showUpgrades
                   ? null
                   : () => _buyPlan(tier),
-              style: ElevatedButton.styleFrom(
+              style: chunky(ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 disabledBackgroundColor: Colors.grey.shade300,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-              ),
+              )),
               child: isLoading
                   ? const SizedBox(
                       width: 20,

@@ -23,6 +23,16 @@ extension MotionX on Widget {
           .fadeIn(duration: Motion.medium, curve: Motion.curve)
           .slideY(begin: dy, end: 0, duration: Motion.medium, curve: Motion.curve);
 
+  /// List item entrance: the first screenful cascades in one after another
+  /// with a little bounce; items further down (scrolled into view) appear
+  /// without delay so scrolling never lags.
+  Widget cascadeIn(int index) => animate(
+        delay: index < 8 ? Duration(milliseconds: 45 * index) : Duration.zero,
+      )
+          .fadeIn(duration: 260.ms, curve: Curves.easeOut)
+          .slideY(begin: 0.18, end: 0, duration: 420.ms, curve: Curves.easeOutBack)
+          .scaleXY(begin: 0.96, end: 1, duration: 420.ms, curve: Curves.easeOutBack);
+
   /// Pop in with a gentle overshoot — for icons, badges, success marks.
   Widget popIn({Duration delay = Duration.zero}) => animate(delay: delay)
       .fadeIn(duration: Motion.fast)

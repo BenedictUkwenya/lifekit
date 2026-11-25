@@ -1,4 +1,5 @@
 import 'package:fl_chart/fl_chart.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/services/api_service.dart';
@@ -124,14 +125,14 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                     const SizedBox(height: 14),
                     FilledButton.icon(
                       onPressed: available > 0 ? () => _withdraw(available, reload) : null,
-                      style: FilledButton.styleFrom(
+                      style: chunky(FilledButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: AdminPalette.primary,
                         disabledBackgroundColor: Colors.white24,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                      ),
+                      )),
                       icon: const Icon(Icons.north_east_rounded, size: 18),
                       label: Text(
                         t('withdraw'),

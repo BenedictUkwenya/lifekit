@@ -1,3 +1,4 @@
+import 'package:lifekit_frontend/core/widgets/motion.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -464,16 +465,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                               ],
                             )
-                          : Text(
-                              _isBalanceVisible
-                                  ? "\$${(_walletBalance ?? 0).toStringAsFixed(2)}"
-                                  : "****",
-                              style: GoogleFonts.poppins(
-                                fontSize: 28,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.black87,
-                              ),
-                            ),
+                          : _isBalanceVisible
+                              ? AnimatedCount(
+                                  value: _walletBalance ?? 0,
+                                  format: (v) => "\$${v.toStringAsFixed(2)}",
+                                  duration: const Duration(milliseconds: 900),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.black87,
+                                  ),
+                                )
+                              : Text(
+                                  "****",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.black87,
+                                  ),
+                                ),
                       const SizedBox(height: 14),
                       Container(
                         width: double.infinity,

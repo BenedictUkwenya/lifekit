@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/error_handler.dart';
@@ -142,12 +143,12 @@ class _ReportUserScreenState extends State<ReportUserScreen> {
               height: 50,
               child: ElevatedButton(
                 onPressed: _isSubmitting ? null : _submitReport,
-                style: ElevatedButton.styleFrom(
+                style: chunky(ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                ),
+                )),
                 child: _isSubmitting
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/motion.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/store_rules.dart';
@@ -269,7 +271,7 @@ class _AllGroupsTabState extends State<AllGroupsTab> {
                       _MyHubChip(
                     group: myGroups[i],
                     onTap: () => _openGroup(myGroups[i]['id'] as String),
-                  ),
+                  ).cascadeIn(i),
                 ),
               ),
             ),
@@ -1257,14 +1259,14 @@ class _PlanLimitSheet extends StatelessWidget {
                     ),
                   );
                 },
-                style: ElevatedButton.styleFrom(
+                style: chunky(ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
-                ),
+                )),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

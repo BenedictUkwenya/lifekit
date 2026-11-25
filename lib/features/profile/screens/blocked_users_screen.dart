@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -190,10 +191,10 @@ class _UserRow extends StatelessWidget {
                   : OutlinedButton(
                       key: const ValueKey('btn'),
                       onPressed: onUnblock,
-                      style: OutlinedButton.styleFrom(
+                      style: chunky(OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                         minimumSize: Size.zero,
-                      ),
+                      )),
                       child: Text(l10n.unblock, style: GoogleFonts.poppins(fontSize: 13)),
                     ),
             ),

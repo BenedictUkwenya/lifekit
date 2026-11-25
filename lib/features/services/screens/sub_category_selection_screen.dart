@@ -1,4 +1,7 @@
+import 'package:lifekit_frontend/core/widgets/skeleton.dart';
+import 'package:lifekit_frontend/core/widgets/motion.dart';
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -100,7 +103,7 @@ class _SubCategorySelectionScreenState
         ),
       ),
       body: isLoading
-          ? const Center(child: LifeKitLoader())
+          ? const SkeletonList()
           : Column(
               children: [
                 // 1. Search Bar
@@ -162,7 +165,7 @@ class _SubCategorySelectionScreenState
                       vertical: 10,
                     ),
                     itemCount: sortedKeys.length,
-                    itemBuilder: (context, index) {
+                    itemBuilder: (context, index) => Builder(builder: (context) {
                       String letter = sortedKeys[index];
                       List<dynamic> items = groupedData[letter]!;
 
@@ -206,7 +209,7 @@ class _SubCategorySelectionScreenState
                           ),
                         ],
                       );
-                    },
+                    }).cascadeIn(index),
                   ),
                 ),
 
@@ -236,12 +239,12 @@ class _SubCategorySelectionScreenState
                           ),
                         );
                       },
-                      style: ElevatedButton.styleFrom(
+                      style: chunky(ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF89273B), // Your Maroon
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
-                      ),
+                      )),
                       child: Text(
                         AppLocalizations.of(context).next,
                         style: GoogleFonts.poppins(

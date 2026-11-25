@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/app_toast.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -208,12 +209,12 @@ class _EventBookingScreenState extends State<EventBookingScreen> {
               height: 56,
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _processPayment,
-                style: ElevatedButton.styleFrom(
+                style: chunky(ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
-                ),
+                )),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(

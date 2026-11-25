@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
@@ -203,12 +204,12 @@ class _SecurityScreenState extends State<SecurityScreen> {
                     height: 50,
                     child: ElevatedButton(
                       onPressed: isLoading ? null : _updatePassword,
-                      style: ElevatedButton.styleFrom(
+                      style: chunky(ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                      ),
+                      )),
                       child: isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
                           : Text(
@@ -288,12 +289,12 @@ class _SecurityScreenState extends State<SecurityScreen> {
               height: 50,
               child: ElevatedButton(
                 onPressed: _confirmDeleteAccount,
-                style: ElevatedButton.styleFrom(
+                style: chunky(ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                ),
+                )),
                 child: Text(
                   l10n.securityDeleteAccount,
                   style: GoogleFonts.poppins(
@@ -707,12 +708,12 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: _submitTicket,
-                  style: ElevatedButton.styleFrom(
+                  style: chunky(ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                  ),
+                  )),
                   child: Text(
                     l10n.helpSubmitTicket,
                     style: GoogleFonts.poppins(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -1205,7 +1206,7 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      style: ElevatedButton.styleFrom(
+                      style: chunky(ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         elevation: 0,
@@ -1216,7 +1217,7 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
-                      ),
+                      )),
                     ),
                   ],
                 ),

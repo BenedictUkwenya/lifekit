@@ -1,3 +1,5 @@
+import 'package:lifekit_frontend/core/widgets/skeleton.dart';
+import 'package:lifekit_frontend/core/widgets/motion.dart';
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/lifekit_loader.dart';
@@ -59,7 +61,7 @@ class _SavedPostsScreenState extends State<SavedPostsScreen> {
       ),
       backgroundColor: const Color(0xFFF2F2F7),
       body: isLoading
-          ? const Center(child: LifeKitLoader())
+          ? const SkeletonList()
           : posts.isEmpty
               ? Center(
                   child: Column(
@@ -90,7 +92,7 @@ class _SavedPostsScreenState extends State<SavedPostsScreen> {
                       vertical: 12,
                     ),
                     itemCount: posts.length,
-                    itemBuilder: (context, index) {
+                    itemBuilder: (context, index) => Builder(builder: (context) {
                       final post = posts[index];
                       final profile = post['profiles'] ?? {};
                       final name = profile['full_name'] ?? 'User';
@@ -215,7 +217,7 @@ class _SavedPostsScreenState extends State<SavedPostsScreen> {
                           ),
                         ),
                       );
-                    },
+                    }).cascadeIn(index),
                   ),
                 ),
     );

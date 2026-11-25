@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../constants/app_colors.dart';
+import 'app_lottie.dart';
 import 'motion.dart';
 
 /// Full-screen celebration: a self-drawing check mark inside a growing
@@ -68,7 +69,9 @@ class _SuccessScreenState extends State<SuccessScreen> with TickerProviderStateM
       },
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: SafeArea(
+        body: Stack(
+          children: [
+            SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 28),
             child: Column(
@@ -124,6 +127,11 @@ class _SuccessScreenState extends State<SuccessScreen> with TickerProviderStateM
               ],
             ),
           ),
+        ),
+            const Positioned.fill(
+              child: IgnorePointer(child: AppLottie(AppAnim.confetti, repeat: false, fit: BoxFit.cover)),
+            ),
+          ],
         ),
       ),
     );

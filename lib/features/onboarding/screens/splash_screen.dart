@@ -46,7 +46,7 @@ class _SplashScreenState extends State<SplashScreen>
         curve: const Interval(
           0.0,
           0.6,
-          curve: Curves.easeOutBack,
+          curve: Curves.elasticOut,
         ), // The "Bounce"
       ),
     );

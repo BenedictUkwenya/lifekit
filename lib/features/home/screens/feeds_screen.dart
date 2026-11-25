@@ -1,4 +1,6 @@
+import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:io';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:flutter/material.dart';
 import '../../../core/widgets/motion.dart';
@@ -334,7 +336,7 @@ class _FeedsScreenState extends State<FeedsScreen>
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
         itemCount: posts.length + 2 + (_hasMorePosts && posts.isNotEmpty ? 1 : 0),
-        itemBuilder: (context, index) {
+        itemBuilder: (context, index) => Builder(builder: (context) {
           // index 0 = compose box
           if (index == 0) return _buildComposeBox();
           // index 1 = trending tags strip
@@ -357,7 +359,7 @@ class _FeedsScreenState extends State<FeedsScreen>
               setState(() => posts.removeWhere((p) => p['id'] == deletedId));
             },
           );
-        },
+        }).cascadeIn(index),
       ),
     );
   }
@@ -1455,11 +1457,32 @@ class _ActionBtn extends StatelessWidget {
         child: Row(
           children: [
             // Icon pops with a bounce when it changes (e.g. like toggled).
-            AnimatedSwitcher(
-              duration: Motion.slow,
-              switchInCurve: Curves.elasticOut,
-              transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
-              child: Icon(icon, key: ValueKey(icon), size: 19, color: color),
+            Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                // Like: a ring bursts out of the heart.
+                if (active && icon == Icons.favorite_rounded)
+                  IgnorePointer(
+                    child: Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: color, width: 2.5),
+                      ),
+                    )
+                        .animate()
+                        .scaleXY(begin: 0.3, end: 1.5, duration: 500.ms, curve: Curves.easeOut)
+                        .fadeOut(delay: 150.ms, duration: 350.ms),
+                  ),
+                AnimatedSwitcher(
+                  duration: Motion.slow,
+                  switchInCurve: Curves.elasticOut,
+                  transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
+                  child: Icon(icon, key: ValueKey(icon), size: 19, color: color),
+                ),
+              ],
             ),
             const SizedBox(width: 4),
             AnimatedSwitcher(
@@ -2092,7 +2115,7 @@ class _ComposePostSheetState extends State<_ComposePostSheet> {
               ),
               ElevatedButton(
                 onPressed: _isPosting ? null : _submit,
-                style: ElevatedButton.styleFrom(
+                style: chunky(ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
@@ -2103,7 +2126,7 @@ class _ComposePostSheetState extends State<_ComposePostSheet> {
                     borderRadius: BorderRadius.circular(22),
                   ),
                   elevation: 0,
-                ),
+                )),
                 child: _isPosting
                     ? const SizedBox(
                         width: 16,

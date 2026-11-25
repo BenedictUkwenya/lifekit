@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'package:lifekit_frontend/core/widgets/app_lottie.dart';
+import 'package:lifekit_frontend/core/widgets/celebrate.dart';
+import 'package:lifekit_frontend/core/widgets/chunky.dart';
 
 import 'package:flutter/material.dart';
 import '../../../core/widgets/app_toast.dart';
@@ -269,12 +272,12 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
                                 AppToast.error(context, appErrorMessage(context, e));
                               }
                             },
-                      style: ElevatedButton.styleFrom(
+                      style: chunky(ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                      ),
+                      )),
                       child: _isDisputeSubmitting
                           ? const CircularProgressIndicator(color: Colors.white)
                           : Text(
@@ -319,7 +322,12 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
       });
 
       if (!mounted) return;
-      AppToast.success(context, AppLocalizations.of(context).confirmationSent);
+      final l10n = AppLocalizations.of(context);
+      if (_currentBooking['status'] == 'completed') {
+        Celebrate.show(context, title: l10n.trackHdrCompletedTitle, message: l10n.trackHdrCompletedSub, anim: AppAnim.stars);
+      } else {
+        AppToast.success(context, l10n.confirmationSent);
+      }
     } catch (e) {
       setState(() => _isLoading = false);
       if (!mounted) return;
@@ -405,7 +413,7 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: _isLoading ? null : _cancelAsClient,
-                      style: OutlinedButton.styleFrom(foregroundColor: Colors.red[700]),
+                      style: chunky(OutlinedButton.styleFrom(foregroundColor: Colors.red[700])),
                       icon: const Icon(Icons.close_rounded, size: 18),
                       label: Text(l10n.trackCancelBooking),
                     ),

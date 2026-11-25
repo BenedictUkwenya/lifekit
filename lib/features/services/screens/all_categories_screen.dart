@@ -1,3 +1,5 @@
+import 'package:lifekit_frontend/core/widgets/skeleton.dart';
+import 'package:lifekit_frontend/core/widgets/motion.dart';
 import 'package:flutter/material.dart';
 import '../../../core/services/app_cache.dart';
 import '../../../core/constants/app_colors.dart';
@@ -183,7 +185,7 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
         ),
       ),
       body: isLoading
-          ? const Center(child: LifeKitLoader())
+          ? const SkeletonList()
           : RefreshIndicator(
               color: AppColors.primary,
               onRefresh: () {
@@ -196,7 +198,7 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
                 itemCount: categories.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 16),
                 itemBuilder: (context, index) =>
-                    _buildCategoryTile(categories[index]),
+                    _buildCategoryTile(categories[index]).cascadeIn(index),
               ),
             ),
     );

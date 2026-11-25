@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../constants/app_colors.dart';
@@ -17,8 +18,7 @@ class LifeKitLoader extends StatefulWidget {
 class _LifeKitLoaderState extends State<LifeKitLoader>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _opacityAnimation;
+  late Animation<double> _bounce;
 
   bool _showHint = false;
   Timer? _hintTimer;
@@ -29,15 +29,9 @@ class _LifeKitLoaderState extends State<LifeKitLoader>
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    )..repeat(reverse: true);
-
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.2).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-    _opacityAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+      duration: const Duration(milliseconds: 720),
+    )..repeat();
+    _bounce = CurvedAnimation(parent: _controller, curve: Curves.linear);
 
     // After 3 s of spinning, hint the user the server is waking up
     if (widget.showSlowHint) {
@@ -60,34 +54,41 @@ class _LifeKitLoaderState extends State<LifeKitLoader>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              return Opacity(
-                opacity: _opacityAnimation.value,
-                child: Transform.scale(
-                  scale: _scaleAnimation.value,
-                  child: Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withOpacity(0.3),
-                          blurRadius: 20,
-                          spreadRadius: 5,
-                        ),
-                      ],
+          // Bouncing logo: hops up, squashes on landing, shadow breathes below.
+          SizedBox(
+            width: 80,
+            height: 96,
+            child: AnimatedBuilder(
+              animation: _bounce,
+              builder: (context, child) {
+                final t = _bounce.value; // 0..1, one hop
+                final height = math.sin(t * math.pi); // 0 at ground, 1 at top
+                final squash = t < 0.12 || t > 0.88 ? 1 - (1 - height) * 0.18 : 1.0;
+                return Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: [
+                    // Shadow shrinks as the logo rises.
+                    Container(
+                      width: 44 - 18 * height,
+                      height: 8 - 3 * height,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.18 - 0.1 * height),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Image.asset('assets/images/forloading.png'),
+                    Positioned(
+                      bottom: 6 + 30 * height,
+                      child: Transform(
+                        alignment: Alignment.bottomCenter,
+                        transform: Matrix4.diagonal3Values(2 - squash, squash, 1),
+                        child: child,
+                      ),
                     ),
-                  ),
-                ),
-              );
-            },
+                  ],
+                );
+              },
+              child: Image.asset('assets/images/forloading.png', width: 52, height: 52),
+            ),
           ),
 
           // Slow-connection hint fades in after 3 s

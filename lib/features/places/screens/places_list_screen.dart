@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:lifekit_frontend/core/widgets/motion.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
@@ -318,7 +319,7 @@ class _PlacesListScreenState extends State<PlacesListScreen>
               padding: const EdgeInsets.symmetric(horizontal: 20),
               scrollDirection: Axis.horizontal,
               itemCount: _categories.length,
-              itemBuilder: (context, index) {
+              itemBuilder: (context, index) => Builder(builder: (context) {
                 final cat = _categories[index];
                 final isSelected = _selectedCategory == cat;
                 return GestureDetector(
@@ -358,7 +359,7 @@ class _PlacesListScreenState extends State<PlacesListScreen>
                     ),
                   ),
                 );
-              },
+              }).cascadeIn(index),
             ),
           ),
 
@@ -434,7 +435,7 @@ class _PlacesListScreenState extends State<PlacesListScreen>
                       padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                       itemCount: filteredPlaces.length,
                       itemBuilder: (context, index) =>
-                          _buildPlaceCard(filteredPlaces[index]),
+                          _buildPlaceCard(filteredPlaces[index]).cascadeIn(index),
                     ),
                   ),
           ),
