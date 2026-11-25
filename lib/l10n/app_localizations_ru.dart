@@ -1072,7 +1072,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Это ваша услуга. Управляйте ею из «Мои услуги».';
 
   @override
-  String get homeDailyTaskTitle => 'Ежедневное задание от Gracia';
+  String get homeDailyTaskTitle => 'Ежедневное задание от Gracy';
 
   @override
   String homeDailyTaskDay(int dayNum) {
@@ -1770,7 +1770,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get swapTitle => 'Обмен навыками';
 
   @override
-  String get swapPoweredBy => 'Работает на Gracia';
+  String get swapPoweredBy => 'Работает на Gracy';
 
   @override
   String get swapSelectServiceType => 'Выберите тип услуги';
@@ -2074,14 +2074,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get bookingsBrowseSwapBoard => 'Открыть доску обменов';
 
   @override
-  String get aiGraciaGreeting =>
-      'Привет! Я Gracia, твой ассистент в LifeKit — помогу найти услуги, твоё сообщество и максимально использовать день. Чем могу помочь?';
+  String get aiGracyGreeting =>
+      'Привет! Я Gracy, твой ассистент в LifeKit — помогу найти услуги, твоё сообщество и максимально использовать день. Чем могу помочь?';
 
   @override
   String get aiAlwaysHereForYou => 'Всегда на связи';
 
   @override
-  String get aiMessageHint => 'Сообщение для Gracia…';
+  String get aiMessageHint => 'Сообщение для Gracy…';
 
   @override
   String get aiGenericError => 'Что-то пошло не так. Попробуй ещё раз.';
@@ -2094,7 +2094,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get aiProFeatureBody =>
-      'Gracia доступна на тарифах Pro и Business. Обнови подписку, чтобы открыть AI-чат, умные рекомендации и многое другое.';
+      'Gracy доступна на тарифах Pro и Business. Обнови подписку, чтобы открыть AI-чат, умные рекомендации и многое другое.';
 
   @override
   String get aiMaybeLater => 'Может быть, позже';
@@ -2669,7 +2669,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get aiFreeBanner =>
-      'Чат с Gracia — функция Pro. Начните бесплатный пробный период или обновите план.';
+      'Чат с Gracy — функция Pro. Начните бесплатный пробный период или обновите план.';
 
   @override
   String get aiSeePlans => 'Тарифы';
@@ -2691,7 +2691,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get aiObTitle => 'AI-помощник настройки';
 
   @override
-  String get aiObAnalyzing => 'Gracia составляет ваш план…';
+  String get aiObAnalyzing => 'Gracy составляет ваш план…';
 
   @override
   String get aiObHeroTitle => 'Пусть AI проведёт вас\nпо LifeKit';

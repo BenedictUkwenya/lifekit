@@ -1540,7 +1540,7 @@ class ApiService {
     return data;
   }
 
-  /// Marks a day of Gracia's 7-day plan done (or not). Returns the updated
+  /// Marks a day of Gracy's 7-day plan done (or not). Returns the updated
   /// plan in the user's language.
   Future<List<dynamic>> setPlanDayDone(int day, bool done) async {
     final data = await _authenticatedPost('/users/onboarding-plan/progress', {

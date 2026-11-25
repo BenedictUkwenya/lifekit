@@ -2149,7 +2149,7 @@ abstract class AppLocalizations {
   /// AI daily task card title
   ///
   /// In en, this message translates to:
-  /// **'Gracia\'s Daily Task'**
+  /// **'Gracy\'s Daily Task'**
   String get homeDailyTaskTitle;
 
   /// Day number badge on daily task card
@@ -3451,7 +3451,7 @@ abstract class AppLocalizations {
   /// No description provided for @swapPoweredBy.
   ///
   /// In en, this message translates to:
-  /// **'Powered by Gracia'**
+  /// **'Powered by Gracy'**
   String get swapPoweredBy;
 
   /// No description provided for @swapSelectServiceType.
@@ -4024,11 +4024,11 @@ abstract class AppLocalizations {
   /// **'Browse Swap Board'**
   String get bookingsBrowseSwapBoard;
 
-  /// No description provided for @aiGraciaGreeting.
+  /// No description provided for @aiGracyGreeting.
   ///
   /// In en, this message translates to:
-  /// **'Hello! I\'m Gracia, your LifeKit assistant — here to help you discover services, find your community, and make the most of your day. What can I do for you?'**
-  String get aiGraciaGreeting;
+  /// **'Hello! I\'m Gracy, your LifeKit assistant — here to help you discover services, find your community, and make the most of your day. What can I do for you?'**
+  String get aiGracyGreeting;
 
   /// No description provided for @aiAlwaysHereForYou.
   ///
@@ -4039,7 +4039,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiMessageHint.
   ///
   /// In en, this message translates to:
-  /// **'Message Gracia…'**
+  /// **'Message Gracy…'**
   String get aiMessageHint;
 
   /// No description provided for @aiGenericError.
@@ -4063,7 +4063,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiProFeatureBody.
   ///
   /// In en, this message translates to:
-  /// **'Gracia is available on Pro and Business plans. Upgrade to unlock AI chat, smart recommendations, and more.'**
+  /// **'Gracy is available on Pro and Business plans. Upgrade to unlock AI chat, smart recommendations, and more.'**
   String get aiProFeatureBody;
 
   /// No description provided for @aiMaybeLater.
@@ -5089,7 +5089,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiFreeBanner.
   ///
   /// In en, this message translates to:
-  /// **'Chatting with Gracia is a Pro feature. Start your free trial or upgrade to unlock it.'**
+  /// **'Chatting with Gracy is a Pro feature. Start your free trial or upgrade to unlock it.'**
   String get aiFreeBanner;
 
   /// No description provided for @aiSeePlans.
@@ -5131,7 +5131,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiObAnalyzing.
   ///
   /// In en, this message translates to:
-  /// **'Gracia is building your plan…'**
+  /// **'Gracy is building your plan…'**
   String get aiObAnalyzing;
 
   /// No description provided for @aiObHeroTitle.

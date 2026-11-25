@@ -1,4 +1,4 @@
-/// Gracia's 7-day plan: which day is unlocked, which task is current, and
+/// Gracy's 7-day plan: which day is unlocked, which task is current, and
 /// overall progress. Pure logic so it can be unit-tested.
 library;
 

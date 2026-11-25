@@ -1073,7 +1073,7 @@ class AppLocalizationsKa extends AppLocalizations {
       'ეს არის შენი სერვისი. მართე იგი \'ჩემი სერვისებიდან\'.';
 
   @override
-  String get homeDailyTaskTitle => 'Gracia-ს დღიური დავალება';
+  String get homeDailyTaskTitle => 'Gracy-ს დღიური დავალება';
 
   @override
   String homeDailyTaskDay(int dayNum) {
@@ -1772,7 +1772,7 @@ class AppLocalizationsKa extends AppLocalizations {
   String get swapTitle => 'უნარების გაცვლა';
 
   @override
-  String get swapPoweredBy => 'Gracia-ს მიერ';
+  String get swapPoweredBy => 'Gracy-ს მიერ';
 
   @override
   String get swapSelectServiceType => 'აირჩიე სერვისის ტიპი';
@@ -2075,14 +2075,14 @@ class AppLocalizationsKa extends AppLocalizations {
   String get bookingsBrowseSwapBoard => 'გაცვლის დაფის ნახვა';
 
   @override
-  String get aiGraciaGreeting =>
-      'გამარჯობა! მე ვარ Gracia, შენი LifeKit-ის ასისტენტი — დაგეხმარები სერვისების აღმოჩენაში, შენი თემის პოვნაში და დღის სრულად გამოყენებაში. რით შემიძლია დაგეხმარო?';
+  String get aiGracyGreeting =>
+      'გამარჯობა! მე ვარ Gracy, შენი LifeKit-ის ასისტენტი — დაგეხმარები სერვისების აღმოჩენაში, შენი თემის პოვნაში და დღის სრულად გამოყენებაში. რით შემიძლია დაგეხმარო?';
 
   @override
   String get aiAlwaysHereForYou => 'ყოველთვის შენთვის';
 
   @override
-  String get aiMessageHint => 'მიწერე Gracia-ს…';
+  String get aiMessageHint => 'მიწერე Gracy-ს…';
 
   @override
   String get aiGenericError => 'რაღაც შეცდომა მოხდა. გთხოვ, კიდევ სცადე.';
@@ -2095,7 +2095,7 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get aiProFeatureBody =>
-      'Gracia ხელმისაწვდომია Pro და Business გეგმებზე. გაიუმჯობესე ხელმოწერა, რათა გახსნა AI ჩატი, ჭკვიანი რეკომენდაციები და სხვა.';
+      'Gracy ხელმისაწვდომია Pro და Business გეგმებზე. გაიუმჯობესე ხელმოწერა, რათა გახსნა AI ჩატი, ჭკვიანი რეკომენდაციები და სხვა.';
 
   @override
   String get aiMaybeLater => 'შესაძლოა მოგვიანებით';
@@ -2674,7 +2674,7 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get aiFreeBanner =>
-      'Gracia-სთან ჩატი Pro ფუნქციაა. დაიწყეთ უფასო საცდელი პერიოდი ან განაახლეთ გეგმა.';
+      'Gracy-სთან ჩატი Pro ფუნქციაა. დაიწყეთ უფასო საცდელი პერიოდი ან განაახლეთ გეგმა.';
 
   @override
   String get aiSeePlans => 'გეგმების ნახვა';
@@ -2696,7 +2696,7 @@ class AppLocalizationsKa extends AppLocalizations {
   String get aiObTitle => 'AI დაყენების გზამკვლევი';
 
   @override
-  String get aiObAnalyzing => 'Gracia ამზადებს თქვენს გეგმას…';
+  String get aiObAnalyzing => 'Gracy ამზადებს თქვენს გეგმას…';
 
   @override
   String get aiObHeroTitle => 'AI დაგეხმარებათ\nLifeKit-ში';

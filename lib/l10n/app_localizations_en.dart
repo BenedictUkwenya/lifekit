@@ -1064,7 +1064,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'This is your service. Manage it from My Services.';
 
   @override
-  String get homeDailyTaskTitle => 'Gracia\'s Daily Task';
+  String get homeDailyTaskTitle => 'Gracy\'s Daily Task';
 
   @override
   String homeDailyTaskDay(int dayNum) {
@@ -1758,7 +1758,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get swapTitle => 'Skill Swap';
 
   @override
-  String get swapPoweredBy => 'Powered by Gracia';
+  String get swapPoweredBy => 'Powered by Gracy';
 
   @override
   String get swapSelectServiceType => 'Select service type';
@@ -2061,14 +2061,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookingsBrowseSwapBoard => 'Browse Swap Board';
 
   @override
-  String get aiGraciaGreeting =>
-      'Hello! I\'m Gracia, your LifeKit assistant — here to help you discover services, find your community, and make the most of your day. What can I do for you?';
+  String get aiGracyGreeting =>
+      'Hello! I\'m Gracy, your LifeKit assistant — here to help you discover services, find your community, and make the most of your day. What can I do for you?';
 
   @override
   String get aiAlwaysHereForYou => 'Always here for you';
 
   @override
-  String get aiMessageHint => 'Message Gracia…';
+  String get aiMessageHint => 'Message Gracy…';
 
   @override
   String get aiGenericError => 'Something went wrong. Please try again.';
@@ -2081,7 +2081,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiProFeatureBody =>
-      'Gracia is available on Pro and Business plans. Upgrade to unlock AI chat, smart recommendations, and more.';
+      'Gracy is available on Pro and Business plans. Upgrade to unlock AI chat, smart recommendations, and more.';
 
   @override
   String get aiMaybeLater => 'Maybe Later';
@@ -2658,7 +2658,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiFreeBanner =>
-      'Chatting with Gracia is a Pro feature. Start your free trial or upgrade to unlock it.';
+      'Chatting with Gracy is a Pro feature. Start your free trial or upgrade to unlock it.';
 
   @override
   String get aiSeePlans => 'See plans';
@@ -2680,7 +2680,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aiObTitle => 'AI setup guide';
 
   @override
-  String get aiObAnalyzing => 'Gracia is building your plan…';
+  String get aiObAnalyzing => 'Gracy is building your plan…';
 
   @override
   String get aiObHeroTitle => 'Let AI guide your\nLifeKit journey';

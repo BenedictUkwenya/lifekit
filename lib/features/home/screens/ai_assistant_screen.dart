@@ -18,7 +18,7 @@ import '../../groups/screens/group_detail_screen.dart';
 import '../../provider/screens/subscription_plans_screen.dart';
 import '../../services/screens/service_booking_detail_screen.dart';
 
-/// Gracia — LifeKit's AI assistant.
+/// Gracy — LifeKit's AI assistant.
 ///
 /// Each message: { role: 'user'|'ai', text, actions?, failed?, animate? }.
 /// The conversation is kept on the device (last [_maxStored] messages).
@@ -269,12 +269,12 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
         titleSpacing: 0,
         title: Row(
           children: [
-            const _GraciaAvatar(size: 40),
+            const _GracyAvatar(size: 40),
             const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Gracia', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700)),
+                Text('Gracy', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700)),
                 Row(
                   children: [
                     Pulse(
@@ -332,12 +332,12 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
               shape: BoxShape.circle,
               gradient: LinearGradient(colors: [AppColors.primary, Color(0xFF7C3AED)]),
             ),
-            child: const _GraciaAvatar(size: 84),
+            child: const _GracyAvatar(size: 84),
           ).popIn(),
         ),
         const SizedBox(height: 18),
         Text(
-          l10n.aiGraciaGreeting,
+          l10n.aiGracyGreeting,
           textAlign: TextAlign.center,
           style: GoogleFonts.poppins(fontSize: 15, height: 1.5, color: AppColors.textDark),
         ).fadeSlideIn(index: 1),
@@ -555,9 +555,9 @@ final _aiTextStyle = GoogleFonts.poppins(color: Colors.black87, fontSize: 14, he
 
 // ── Pieces ─────────────────────────────────────────────────────────────────
 
-class _GraciaAvatar extends StatelessWidget {
+class _GracyAvatar extends StatelessWidget {
   final double size;
-  const _GraciaAvatar({required this.size});
+  const _GracyAvatar({required this.size});
 
   @override
   Widget build(BuildContext context) {
@@ -607,7 +607,7 @@ class _Bubble extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: isUser
             ? [const SizedBox(width: 56), Flexible(child: bubble), const SizedBox(width: 8), ?trailing]
-            : [const _GraciaAvatar(size: 34), const SizedBox(width: 10), Flexible(child: bubble), const SizedBox(width: 40)],
+            : [const _GracyAvatar(size: 34), const SizedBox(width: 10), Flexible(child: bubble), const SizedBox(width: 40)],
       ),
     );
   }

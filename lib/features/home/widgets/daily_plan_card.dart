@@ -12,7 +12,7 @@ import '../../../l10n/app_localizations.dart';
 import '../daily_plan.dart';
 import '../plan_actions.dart';
 
-/// Home-screen card for Gracia's 7-day plan: today's task, progress dots,
+/// Home-screen card for Gracy's 7-day plan: today's task, progress dots,
 /// "Do it" / "Mark done", and a sheet with every day. Progress is saved to
 /// the account via the API, so it follows the user across devices.
 class DailyPlanCard extends StatefulWidget {
