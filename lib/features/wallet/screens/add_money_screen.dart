@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lifekit_frontend/core/widgets/app_lottie.dart';
 import 'package:lifekit_frontend/core/widgets/celebrate.dart';
 import 'package:lifekit_frontend/core/widgets/chunky.dart';
@@ -95,6 +96,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: const BackButton(color: Colors.black),

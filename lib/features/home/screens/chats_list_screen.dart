@@ -429,8 +429,10 @@ class _ChatsListScreenState extends State<ChatsListScreen>
                                 ),
                               ),
                             if (lastActive.isNotEmpty) const SizedBox(width: 6),
-                            // Hard cap so a long title can't overflow.
-                            ConstrainedBox(
+                            // Hard cap so a long title can't overflow, and
+                            // shrinks further when the row is tight.
+                            Flexible(
+                              child: ConstrainedBox(
                               constraints: const BoxConstraints(maxWidth: 90),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
@@ -451,6 +453,7 @@ class _ChatsListScreenState extends State<ChatsListScreen>
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 1,
                                 ),
+                              ),
                               ),
                             ),
                           ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/utils/error_handler.dart';
@@ -254,6 +255,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: const BackButton(color: Colors.black),

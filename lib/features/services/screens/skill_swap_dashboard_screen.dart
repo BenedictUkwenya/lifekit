@@ -50,8 +50,9 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
   int get _pendingOutgoing =>
       _outgoing.where((s) => s['status'] == 'pending').length;
   int get _activeSwaps =>
-      _incoming.where((s) => s['status'] == 'confirmed').length +
-      _outgoing.where((s) => s['status'] == 'confirmed').length;
+      // Accepted swaps are stored as 'accepted' ('confirmed' is a booking status).
+      _incoming.where((s) => s['status'] == 'accepted').length +
+      _outgoing.where((s) => s['status'] == 'accepted').length;
 
   @override
   void initState() {
@@ -188,6 +189,7 @@ class _SkillSwapDashboardScreenState extends State<SkillSwapDashboardScreen>
     return SliverAppBar(
       expandedHeight: 220,
       pinned: true,
+      systemOverlayStyle: SystemUiOverlayStyle.light,
       backgroundColor: _kDark,
       leading: IconButton(
         icon: const Icon(

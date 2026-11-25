@@ -1379,6 +1379,7 @@ class _PhotoViewer extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle.light,
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         elevation: 0,

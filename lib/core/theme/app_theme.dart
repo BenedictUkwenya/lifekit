@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -44,6 +45,7 @@ class AppTheme {
         },
       ),
       appBarTheme: AppBarTheme(
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
         foregroundColor: AppColors.textDark,

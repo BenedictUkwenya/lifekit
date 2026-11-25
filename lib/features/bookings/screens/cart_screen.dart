@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../core/widgets/motion.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,6 +20,7 @@ class CartScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: const BackButton(color: Colors.black),

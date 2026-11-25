@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lifekit_frontend/core/widgets/celebrate.dart';
 import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import 'package:lifekit_frontend/core/widgets/app_lottie.dart';
@@ -240,6 +241,7 @@ class _BookingsScreenState extends State<BookingsScreen>
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,

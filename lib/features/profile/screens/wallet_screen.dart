@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../core/widgets/motion.dart';
 import '../../../core/services/app_cache.dart';
@@ -169,6 +170,7 @@ class _WalletScreenState extends State<WalletScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
@@ -231,7 +233,6 @@ class _WalletScreenState extends State<WalletScreen> {
 
                     // ACTION BUTTONS
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _buildActionBtn(
                           Icons.money,
@@ -246,6 +247,7 @@ class _WalletScreenState extends State<WalletScreen> {
                             if (result == true) _fetchWallet();
                           },
                         ),
+                        const SizedBox(width: 12),
                         _buildActionBtn(
                           Icons.arrow_outward,
                           isProvider && balance > 0 && !isStripeConnected
@@ -333,7 +335,13 @@ class _WalletScreenState extends State<WalletScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      tx['description'] ?? 'Transaction',
+                                      // Shorten raw booking UUIDs ("#e5c24389-…") to their first 8 chars.
+                                      (tx['description'] ?? 'Transaction')
+                                          .toString()
+                                          .replaceAllMapped(
+                                            RegExp(r'#([0-9a-f]{8})-[0-9a-f-]{27}'),
+                                            (m) => '#${m[1]}',
+                                          ),
                                       style: GoogleFonts.poppins(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 14,
@@ -406,11 +414,11 @@ class _WalletScreenState extends State<WalletScreen> {
   }
 
   Widget _buildActionBtn(IconData icon, String label, VoidCallback onTap) {
-    return GestureDetector(
+    return Expanded(
+      child: GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 100,
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -421,15 +429,20 @@ class _WalletScreenState extends State<WalletScreen> {
           children: [
             Icon(icon, size: 18, color: Colors.black87),
             const SizedBox(width: 8),
-            Text(
-              label,
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
         ),
+      ),
       ),
     );
   }

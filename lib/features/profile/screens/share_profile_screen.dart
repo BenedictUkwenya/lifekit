@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart'; // Make sure to add this package
@@ -16,6 +17,7 @@ class ShareProfileScreen extends StatelessWidget {
           AppLocalizations.of(context).txShareYourProfile,
           style: GoogleFonts.poppins(color: Colors.white),
         ),
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: const BackButton(color: Colors.white),

@@ -660,7 +660,12 @@ class _ServicesListScreenState extends State<ServicesListScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (_cityPulseInsight != null) ...[
-                          _buildCityPulseBanner(),
+                          // This column has no right padding (the carousel
+                          // below bleeds to the edge); the banner needs one.
+                          Padding(
+                            padding: const EdgeInsets.only(right: 20),
+                            child: _buildCityPulseBanner(),
+                          ),
                           const SizedBox(height: 16),
                         ],
                         _buildSectionHeader(AppLocalizations.of(context).exploreFeaturedProfessionals),
