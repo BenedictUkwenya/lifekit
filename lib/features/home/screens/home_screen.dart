@@ -11,7 +11,7 @@ import 'event_detail_screen.dart';
 import '../daily_plan.dart';
 import '../widgets/daily_plan_card.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
+import '../../../core/services/country_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -573,41 +573,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ── Local Flag Helpers ────────────────────
 
-  // Fetches the user's country from their IP address; falls back to 'GE' (Georgia)
+  // Flag of the country the user is in right now (IP lookup with fallbacks).
   Future<void> _fetchCountryFromIp() async {
-    try {
-      final res = await http
-          .get(Uri.parse('https://ipapi.co/json/?fields=country_code'))
-          .timeout(const Duration(seconds: 5));
-      if (res.statusCode == 200) {
-        final data = jsonDecode(res.body) as Map<String, dynamic>;
-        final code =
-            data['country_code']?.toString().toUpperCase().trim() ?? '';
-        if (code.length == 2 && mounted) {
-          setState(() => _countryCode = code);
-          return;
-        }
-      }
-    } catch (_) {}
-    // Keep default 'GE'
+    final cached = await CountryService.cached();
+    if (mounted) setState(() => _countryCode = cached);
+    final code = await CountryService.current();
+    if (mounted && code != _countryCode) setState(() => _countryCode = code);
   }
 
   // Returns the resolved country code
   String _getLocalCountryCode() => _countryCode;
-
-  // Converts the 2-letter country code into a Flag Emoji
-  String _getFlagEmoji(String countryCode) {
-    final normalized = countryCode.toUpperCase().trim();
-    final isValid =
-        normalized.length == 2 &&
-        normalized.codeUnits.every((c) => c >= 0x41 && c <= 0x5A);
-    final safeCode = isValid ? normalized : 'GE';
-    const int flagOffset = 0x1F1E6;
-    const int asciiOffset = 0x41;
-    final int firstChar = safeCode.codeUnitAt(0) - asciiOffset + flagOffset;
-    final int secondChar = safeCode.codeUnitAt(1) - asciiOffset + flagOffset;
-    return String.fromCharCode(firstChar) + String.fromCharCode(secondChar);
-  }
 
   // ── Safe Image Helper ──────────────────────
   // Handles cases where Supabase saves the image as a nested list [["url"]]
@@ -1410,7 +1385,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Center(
               widthFactor: 1.0,
               child: Text(
-                _getFlagEmoji(_getLocalCountryCode()),
+                CountryService.flagEmoji(_getLocalCountryCode()),
                 style: const TextStyle(fontSize: 22),
               ),
             ),

@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 // --- CORE IMPORTS ---
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/services/country_service.dart';
 import '../../../core/providers/cart_provider.dart';
 
 import 'category_items_screen.dart';
@@ -60,6 +61,7 @@ class _ServicesListScreenState extends State<ServicesListScreen>
   @override
   void initState() {
     super.initState();
+    _loadFlag();
     _fabGlowController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
@@ -89,11 +91,8 @@ class _ServicesListScreenState extends State<ServicesListScreen>
       ]);
       final Map<String, dynamic> profileData = results[0];
       final Map<String, dynamic> countsData = results[1];
-      final profileCountry =
-          profileData['profile']?['country']?.toString() ?? '';
       if (mounted) {
         setState(() {
-          _flagEmoji = _getFlagEmoji(_countryCodeFor(profileCountry));
           _unreadNotifications = countsData['notifications'] ?? 0;
           _currentUserId = profileData['profile']?['id']?.toString();
         });
@@ -132,37 +131,12 @@ class _ServicesListScreenState extends State<ServicesListScreen>
 
   /// Profiles store either a two-letter code or a country name ("Georgia").
   /// Unknown values fall back to Georgia, where LifeKit launches.
-  static const Map<String, String> _countryNames = {
-    'georgia': 'GE',
-    'nigeria': 'NG',
-    'russia': 'RU',
-    'ukraine': 'UA',
-    'armenia': 'AM',
-    'azerbaijan': 'AZ',
-    'turkey': 'TR',
-    'türkiye': 'TR',
-    'united kingdom': 'GB',
-    'united states': 'US',
-    'germany': 'DE',
-  };
-
-  String _countryCodeFor(String country) {
-    final trimmed = country.trim();
-    if (trimmed.length == 2) return trimmed.toUpperCase();
-    return _countryNames[trimmed.toLowerCase()] ?? 'GE';
-  }
-
-  String _getFlagEmoji(String countryCode) {
-    final normalized = countryCode.toUpperCase().trim();
-    final isValid =
-        normalized.length == 2 &&
-        normalized.codeUnits.every((c) => c >= 0x41 && c <= 0x5A);
-    final safeCode = isValid ? normalized : 'GE';
-    const int flagOffset = 0x1F1E6;
-    const int asciiOffset = 0x41;
-    final int firstChar = safeCode.codeUnitAt(0) - asciiOffset + flagOffset;
-    final int secondChar = safeCode.codeUnitAt(1) - asciiOffset + flagOffset;
-    return String.fromCharCode(firstChar) + String.fromCharCode(secondChar);
+  // Flag of the country the user is in right now, not their profile country.
+  Future<void> _loadFlag() async {
+    final cached = await CountryService.cached();
+    if (mounted) setState(() => _flagEmoji = CountryService.flagEmoji(cached));
+    final code = await CountryService.current();
+    if (mounted) setState(() => _flagEmoji = CountryService.flagEmoji(code));
   }
 
   // ── SWR cache helpers ─────────────────────────────────────────────────────
