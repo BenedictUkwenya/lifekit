@@ -61,6 +61,8 @@
 	<string>LifeKit uses your photo library so you can choose images for your profile, services, posts and chats.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>LifeKit uses your location while you use the app to show places and services near you.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>LifeKit uses your location while you use the app to show places and services near you. LifeKit does not track your location in the background.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
