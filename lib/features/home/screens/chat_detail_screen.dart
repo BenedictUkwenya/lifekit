@@ -78,10 +78,26 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
     WidgetsBinding.instance.addObserver(this);
     _messageController.addListener(_onMessageInputChanged);
     _loadSubscriptionTier();
-    // Default to the first booking passed
+    // Open the booking that has unread messages (or the newest message):
+    // several bookings with one person share a chat row, and opening a
+    // different, empty booking looked like the messages had vanished.
     if (widget.bookings.isNotEmpty) {
-      _selectBooking(widget.bookings[0]);
+      _selectBooking(_bookingToOpen(widget.bookings));
     }
+  }
+
+  static int _unreadOf(dynamic b) => int.tryParse('${b['unread_count'] ?? 0}') ?? 0;
+
+  static dynamic _bookingToOpen(List<dynamic> bookings) {
+    DateTime at(dynamic b) =>
+        DateTime.tryParse('${b['last_message_at'] ?? ''}') ?? DateTime(1970);
+    final sorted = List<dynamic>.from(bookings)
+      ..sort((a, b) {
+        final unread = (_unreadOf(b) > 0 ? 1 : 0) - (_unreadOf(a) > 0 ? 1 : 0);
+        if (unread != 0) return unread;
+        return at(b).compareTo(at(a));
+      });
+    return sorted.first;
   }
 
   void _selectBooking(dynamic booking) {
@@ -871,8 +887,16 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
     final price = currentBooking['total_price'] ?? 0;
     bool isSwap = price == 0;
     String status = currentBooking['status'] ?? 'pending';
+    // Unread messages in the *other* bookings with this person.
+    final otherUnread = widget.bookings
+        .where((b) => b['id'] != currentBooking['id'])
+        .fold<int>(0, (sum, b) => sum + _unreadOf(b));
 
-    return Container(
+    return GestureDetector(
+      key: const Key('chat_booking_switcher'),
+      behavior: HitTestBehavior.opaque,
+      onTap: widget.bookings.length > 1 ? _showBookingSwitcher : null,
+      child: Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
@@ -923,12 +947,88 @@ class _ChatDetailScreenState extends State<ChatDetailScreen>
               ],
             ),
           ),
-          if (widget.bookings.length > 1)
+          if (widget.bookings.length > 1) ...[
+            if (otherUnread > 0) _unreadBadge(otherUnread),
             const Icon(
               Icons.keyboard_arrow_down,
               color: Colors.grey,
-            ), // Hint they can switch
+            ), // Tap to switch booking
+          ],
         ],
+      ),
+      ),
+    );
+  }
+
+  Widget _unreadBadge(int n) => Container(
+        margin: const EdgeInsets.only(right: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+        decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(10)),
+        child: Text(n > 99 ? '99+' : '$n',
+            style: GoogleFonts.poppins(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
+      );
+
+  /// All bookings with this person; picking one switches the chat to it.
+  void _showBookingSwitcher() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 44, height: 5,
+                decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(99)),
+              ),
+              const SizedBox(height: 12),
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    for (final b in widget.bookings)
+                      ListTile(
+                        key: Key('chat_booking_${b['id']}'),
+                        selected: b['id'] == currentBooking?['id'],
+                        selectedTileColor: AppColors.primary.withOpacity(0.06),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        leading: Icon(
+                          (num.tryParse('${b['total_price']}') ?? 0) == 0
+                              ? Icons.swap_horiz
+                              : Icons.receipt_long,
+                          color: AppColors.primary,
+                        ),
+                        title: Text(
+                          '${b['services']?['title'] ?? 'Service'}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
+                        subtitle: Text(
+                          '${b['status'] ?? ''}'.toUpperCase(),
+                          style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey[600]),
+                        ),
+                        trailing: _unreadOf(b) > 0 ? _unreadBadge(_unreadOf(b)) : null,
+                        onTap: () {
+                          Navigator.pop(ctx);
+                          b['unread_count'] = 0; // reading it now
+                          _selectBooking(b);
+                        },
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
