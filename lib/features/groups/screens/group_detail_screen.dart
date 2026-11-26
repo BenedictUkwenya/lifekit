@@ -16,38 +16,41 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../profile/screens/service_profile_screen.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
-import '../../../core/widgets/lifekit_loader.dart';
 import 'group_settings_screen.dart';
 import '../../home/widgets/comments_sheet.dart';
 import '../../../core/utils/dates.dart';
+import '../../../core/widgets/skeleton.dart';
+import '../../../core/widgets/celebrate.dart';
+import '../../../core/widgets/app_lottie.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
-// ─── Soft Pastel Design Tokens ──────────────────────────────────
+// ─── LifeKit design tokens (burgundy / blush, matches the rest of the app) ──
 class _T {
-  static const bg = Color(0xFFFDF8F4);
+  static const bg = Color(0xFFFAF6F7);
   static const surface = Color(0xFFFFFFFF);
-  static const surfaceAlt = Color(0xFFFFF5EE);
-  static const elevated = Color(0xFFFFF0E8);
+  static const surfaceAlt = Color(0xFFF8F1F3);
+  static const elevated = Color(0xFFF6E4E8);
 
-  static const rose = Color(0xFFFF8FAB);
-  static const peach = Color(0xFFFFB49A);
-  static const lavender = Color(0xFFB5A8F5);
-  static const mint = Color(0xFF8ED8C0);
-  static const butter = Color(0xFFFFD97D);
+  static const rose = Color(0xFF89273B); // brand
+  static const peach = Color(0xFFC0485F); // brand mid
+  static const lavender = Color(0xFFE86A8A); // brand pink
+  static const mint = Color(0xFF1F9D6B);
+  static const butter = Color(0xFFD99A1E);
 
-  static const textPri = Color(0xFF3A2E2A);
-  static const textSec = Color(0xFF8E7E77);
-  static const textMuted = Color(0xFFBBA9A1);
+  static const textPri = Color(0xFF1F1F24);
+  static const textSec = Color(0xFF6B6B76);
+  static const textMuted = Color(0xFFA8A3A8);
 
-  static const border = Color(0xFFF0E4DC);
-  static const divider = Color(0xFFF5EAE2);
+  static const border = Color(0xFFEFE3E6);
+  static const divider = Color(0xFFF3E9EB);
 
-  static const myBubble = Color(0xFFFFE4EE);
-  static const likeColor = Color(0xFFFF6B8A);
+  static const myBubble = Color(0xFFF6E4E8);
+  static const likeColor = Color(0xFFE11D48);
 
-  static const gradStart = Color(0xFFFFB49A);
-  static const gradEnd = Color(0xFFFF8FAB);
+  static const gradStart = Color(0xFF89273B);
+  static const gradEnd = Color(0xFFC0485F);
 
-  static const headerBg = Color(0xFFFFF5EE);
+  static const headerBg = Color(0xFFFFFFFF);
 }
 // ────────────────────────────────────────────────────────────────
 
@@ -61,6 +64,9 @@ class GroupDetailScreen extends StatefulWidget {
 
 class _GroupDetailScreenState extends State<GroupDetailScreen>
     with TickerProviderStateMixin, WidgetsBindingObserver {
+  final Set<String> _seenPostIds = {}; // posts present when the screen opened
+  final Set<String> _poppedIn = {};
+  Map<String, dynamic>? _myProfile;
   final ApiService _apiService = ApiService();
   final TextEditingController _postController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -163,15 +169,32 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     }
   }
 
+  Future<void> _loadMyProfile() async {
+    try {
+      final p = await _apiService.getUserProfile();
+      if (p['profile'] is Map && mounted) {
+        final m = Map<String, dynamic>.from(p['profile']);
+        _myProfile = {'full_name': m['full_name'], 'profile_picture_url': m['profile_picture_url']};
+      }
+    } catch (_) {}
+  }
+
   Future<void> _loadMyId() async {
+    _loadMyProfile();
     final id = await _apiService.getCurrentUserId();
     if (mounted) setState(() => myId = id);
   }
 
   Future<void> _loadData() async {
     try {
-      final detail = await _apiService.getGroupDetail(widget.groupId);
-      final postList = await _apiService.getGroupPosts(widget.groupId);
+      // Group details and messages in parallel (was one after the other).
+      final results = await Future.wait([
+        _apiService.getGroupDetail(widget.groupId),
+        _apiService.getGroupPosts(widget.groupId),
+      ]);
+      final detail = results[0] as Map;
+      final postList = results[1] as List<dynamic>;
+      _seenPostIds.addAll(postList.map((p) => '${p['id']}'));
       if (mounted) {
         setState(() {
           groupData = detail['group'];
@@ -192,6 +215,12 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     try {
       final postList = await _apiService.getGroupPosts(widget.groupId);
       if (mounted) {
+        // My instant (pending) message already popped in: don't animate the
+        // confirmed copy from the server again.
+        final pending = posts.where((p) => p['_pending'] == true).map((p) => p['content']).toSet();
+        for (final p in postList) {
+          if (p['user_id'] == myId && pending.contains(p['content'])) _seenPostIds.add('${p['id']}');
+        }
         setState(() {
           posts = postList;
           _rebuildMemberActivity(postList);
@@ -270,8 +299,12 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
   Future<void> _handleJoinGroup() async {
     try {
       await _apiService.joinGroup(widget.groupId);
-      _showSnack("You're in! Welcome 🌸", isSuccess: true);
+      if (!mounted) return;
       _loadData();
+      Celebrate.show(context,
+          title: AppLocalizations.of(context).groupWelcomeTitle('${groupData?['name'] ?? ''}'),
+          message: AppLocalizations.of(context).groupWelcomeBody,
+          anim: AppAnim.handshake);
     } catch (e) {
       final msg = e.toString().toLowerCase();
       if (msg.contains('plan limit') || msg.contains('plan_limit_reached')) {
@@ -360,7 +393,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                   const SizedBox(width: 12),
                   Text(
                     AppLocalizations.of(context).txShareAService,
-                    style: GoogleFonts.nunito(
+                    style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
                       color: _T.textPri,
@@ -393,7 +426,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                     ),
                     title: Text(
                       s['title'] ?? 'Untitled',
-                      style: GoogleFonts.nunito(
+                      style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w700,
                         color: _T.textPri,
                         fontSize: 14,
@@ -429,10 +462,34 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
       return;
     if (content.isNotEmpty && !_isContentSafe(content)) {
       _showSnack(
-        "Safety alert: contact info isn't allowed here 🚫",
+        AppLocalizations.of(context).commentsSafetyWarning,
         isError: true,
       );
       return;
+    }
+    _vibrate();
+    // Text-only messages appear at once (faded) and are confirmed by refresh.
+    final bool optimistic = _selectedImage == null && _selectedService == null;
+    final tmpId = 'tmp_${DateTime.now().microsecondsSinceEpoch}';
+    if (optimistic) {
+      final replying = _replyingTo;
+      setState(() {
+        posts.insert(0, {
+          'id': tmpId,
+          'user_id': myId,
+          'content': content,
+          'created_at': DateTime.now().toUtc().toIso8601String(),
+          'profiles': _myProfile ?? {'full_name': AppLocalizations.of(context).commentsYou},
+          'parent': replying,
+          'likes_count': 0,
+          'comments_count': 0,
+          'is_liked_by_me': false,
+          '_pending': true,
+        });
+        _postController.clear();
+        _replyingTo = null;
+      });
+      _scrollToBottom();
     }
     setState(() => isSending = true);
     try {
@@ -460,8 +517,14 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
       }
     } catch (e) {
       if (mounted) {
-        setState(() => isSending = false);
-        _showSnack("Oops, couldn't send. Try again!", isError: true);
+        setState(() {
+          isSending = false;
+          if (optimistic) {
+            posts.removeWhere((p) => p['id'] == tmpId);
+            if (_postController.text.isEmpty) _postController.text = content;
+          }
+        });
+        _showSnack(AppLocalizations.of(context).groupSendFailed, isError: true);
       }
     }
   }
@@ -576,7 +639,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
       ),
       title: Text(
         label,
-        style: GoogleFonts.nunito(
+        style: GoogleFonts.poppins(
           color: _T.textPri,
           fontSize: 15,
           fontWeight: FontWeight.w700,
@@ -599,7 +662,31 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     if (isLoading) {
       return Scaffold(
         backgroundColor: _T.bg,
-        body: const Center(child: LifeKitLoader()),
+        body: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              const Row(children: [
+                SkeletonBox(width: 44, height: 44, radius: 22),
+                SizedBox(width: 12),
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  SkeletonBox(width: 160, height: 14),
+                  SizedBox(height: 6),
+                  SkeletonBox(width: 90, height: 11),
+                ]),
+              ]),
+              const SizedBox(height: 28),
+              for (var i = 0; i < 5; i++)
+                Align(
+                  alignment: i.isEven ? Alignment.centerLeft : Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: SkeletonBox(width: i.isEven ? 230 : 170, height: i == 2 ? 90 : 54, radius: 18),
+                  ),
+                ),
+            ],
+          ),
+        ),
       );
     }
     if (groupData == null) {
@@ -607,8 +694,8 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
         backgroundColor: _T.bg,
         body: Center(
           child: Text(
-            "Couldn't find this group 🌿",
-            style: GoogleFonts.nunito(color: _T.textSec),
+            AppLocalizations.of(context).groupNotFound,
+            style: GoogleFonts.poppins(color: _T.textSec),
           ),
         ),
       );
@@ -695,7 +782,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                     const SizedBox(width: 5),
                     Text(
                       f['label']!,
-                      style: GoogleFonts.nunito(
+                      style: GoogleFonts.poppins(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w700,
                         color: isActive ? Colors.white : _T.textSec,
@@ -712,7 +799,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
   }
 
   PreferredSizeWidget _buildAppBar() {
-    final memberCount = groupData!['member_count'] ?? 0;
+    final int memberCount = (groupData!['member_count'] ?? groupData!['members_count'] ?? 0) as int;
     final activeNowCount = _activeMembersNowCount();
     return PreferredSize(
       preferredSize: const Size.fromHeight(68),
@@ -747,11 +834,18 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                   ),
                   child: CircleAvatar(
                     radius: 20,
-                    backgroundColor: _T.surface,
-                    backgroundImage: CachedNetworkImageProvider(
-                      groupData!['image_url'] ??
-                          "https://via.placeholder.com/150",
-                    ),
+                    backgroundColor: _T.elevated,
+                    backgroundImage: (groupData!['image_url'] ?? '').toString().isNotEmpty
+                        ? CachedNetworkImageProvider(groupData!['image_url'])
+                        : null,
+                    child: (groupData!['image_url'] ?? '').toString().isNotEmpty
+                        ? null
+                        : Text(
+                            '${groupData!['name'] ?? '?'}'.trim().isEmpty
+                                ? '?'
+                                : '${groupData!['name']}'.trim()[0].toUpperCase(),
+                            style: GoogleFonts.poppins(fontWeight: FontWeight.w700, color: _T.rose),
+                          ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -776,7 +870,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                       children: [
                         Text(
                           groupData!['name'],
-                          style: GoogleFonts.nunito(
+                          style: GoogleFonts.poppins(
                             color: _T.textPri,
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
@@ -785,17 +879,17 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                         ),
                         Text(
                           isMember
-                              ? "🌸 $memberCount members"
-                              : "Join to participate",
-                          style: GoogleFonts.nunito(
+                              ? AppLocalizations.of(context).groupMembersCount(memberCount)
+                              : AppLocalizations.of(context).groupJoinToParticipate,
+                          style: GoogleFonts.poppins(
                             color: _T.textSec,
                             fontSize: 11.5,
                           ),
                         ),
-                        if (isMember)
+                        if (isMember && activeNowCount > 0)
                           Text(
-                            "$activeNowCount members active now",
-                            style: GoogleFonts.nunito(
+                            AppLocalizations.of(context).groupActiveNow(activeNowCount),
+                            style: GoogleFonts.poppins(
                               color: _T.peach,
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
@@ -825,7 +919,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
             const SizedBox(height: 12),
             Text(
               'No ${_activeFilter} posts yet',
-              style: GoogleFonts.nunito(
+              style: GoogleFonts.poppins(
                 color: _T.textSec,
                 fontWeight: FontWeight.w700,
               ),
@@ -896,7 +990,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
               ),
               child: Text(
                 text,
-                style: GoogleFonts.nunito(
+                style: GoogleFonts.poppins(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   color: _T.textSec,
@@ -955,7 +1049,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
           const SizedBox(width: 2),
           Text(
             rating.toStringAsFixed(1),
-            style: GoogleFonts.nunito(
+            style: GoogleFonts.poppins(
               fontSize: 9,
               fontWeight: FontWeight.w800,
               color: const Color(0xFFD97706),
@@ -967,6 +1061,24 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
   }
 
   Widget _buildBubble(dynamic post) {
+    final id = '${post['id']}';
+    Widget bubble = Opacity(
+      opacity: post['_pending'] == true ? 0.6 : 1,
+      child: _buildBubbleBody(post),
+    );
+    // Messages that arrive after the screen opened pop in.
+    if (_seenPostIds.add(id) || _poppedIn.contains(id)) {
+      _poppedIn.add(id);
+      bubble = bubble
+          .animate()
+          .fadeIn(duration: 220.ms)
+          .scaleXY(begin: 0.9, end: 1, curve: Curves.easeOutBack, duration: 320.ms)
+          .slideY(begin: 0.2, end: 0, duration: 260.ms);
+    }
+    return bubble;
+  }
+
+  Widget _buildBubbleBody(dynamic post) {
     final bool isMine = myId != null && post['user_id'] == myId;
     final profile = post['profiles'] ?? {};
     final String name = profile['full_name'] ?? 'Someone';
@@ -1063,7 +1175,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                                     name,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.nunito(
+                                    style: GoogleFonts.poppins(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w800,
                                       color: nameColor,
@@ -1101,7 +1213,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                             padding: const EdgeInsets.fromLTRB(14, 10, 14, 4),
                             child: Text(
                               content,
-                              style: GoogleFonts.nunito(
+                              style: GoogleFonts.poppins(
                                 fontSize: 14,
                                 height: 1.45,
                                 color: _T.textPri,
@@ -1145,7 +1257,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
         child: pic == null
             ? Text(
                 name.isNotEmpty ? name[0].toUpperCase() : '?',
-                style: GoogleFonts.nunito(
+                style: GoogleFonts.poppins(
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
                   color: ringColor,
@@ -1183,7 +1295,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                 : (parent['image_url'] != null ? "📷 Image" : "💼 Service"),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.nunito(fontSize: 11.5, color: _T.textSec),
+            style: GoogleFonts.poppins(fontSize: 11.5, color: _T.textSec),
           ),
         ],
       ),
@@ -1261,7 +1373,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                     children: [
                       Text(
                         service['title']?.toString() ?? 'Service',
-                        style: GoogleFonts.nunito(
+                        style: GoogleFonts.poppins(
                           color: _T.textPri,
                           fontWeight: FontWeight.w800,
                           fontSize: 13,
@@ -1271,7 +1383,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                       ),
                       Text(
                         "\$${service['price'] ?? '0'}",
-                        style: GoogleFonts.nunito(
+                        style: GoogleFonts.poppins(
                           color: _T.mint,
                           fontWeight: FontWeight.w700,
                           fontSize: 12.5,
@@ -1316,7 +1428,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                   ),
                   child: Text(
                     AppLocalizations.of(context).aiActionViewFallback,
-                    style: GoogleFonts.nunito(
+                    style: GoogleFonts.poppins(
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
                     ),
@@ -1347,7 +1459,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
             const SizedBox(width: 3),
             Text(
               "$likes",
-              style: GoogleFonts.nunito(
+              style: GoogleFonts.poppins(
                 fontSize: 11,
                 color: _T.textMuted,
                 fontWeight: FontWeight.w600,
@@ -1360,7 +1472,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
             const SizedBox(width: 3),
             Text(
               "$comments",
-              style: GoogleFonts.nunito(
+              style: GoogleFonts.poppins(
                 fontSize: 11,
                 color: _T.textMuted,
                 fontWeight: FontWeight.w600,
@@ -1370,7 +1482,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
           ],
           Text(
             timeStr,
-            style: GoogleFonts.nunito(
+            style: GoogleFonts.poppins(
               fontSize: 10.5,
               color: _T.textMuted,
               fontWeight: FontWeight.w600,
@@ -1418,7 +1530,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                   Expanded(
                     child: Text(
                       AppLocalizations.of(context).txImageAttached,
-                      style: GoogleFonts.nunito(
+                      style: GoogleFonts.poppins(
                         color: _T.textPri,
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -1451,7 +1563,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                       children: [
                         Text(
                           _selectedService!['title'] ?? 'Service',
-                          style: GoogleFonts.nunito(
+                          style: GoogleFonts.poppins(
                             color: _T.textPri,
                             fontWeight: FontWeight.w700,
                             fontSize: 13,
@@ -1497,7 +1609,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                                     : "💼 Service"),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.nunito(
+                          style: GoogleFonts.poppins(
                             fontSize: 12,
                             color: _T.textSec,
                           ),
@@ -1537,13 +1649,13 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                           controller: _postController,
                           maxLines: 4,
                           minLines: 1,
-                          style: GoogleFonts.nunito(
+                          style: GoogleFonts.poppins(
                             color: _T.textPri,
                             fontSize: 14,
                           ),
                           decoration: InputDecoration(
                             hintText: "Share something ✨",
-                            hintStyle: GoogleFonts.nunito(
+                            hintStyle: GoogleFonts.poppins(
                               color: _T.textMuted,
                               fontSize: 13.5,
                             ),
@@ -1685,7 +1797,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                   const Text("🌸 ", style: TextStyle(fontSize: 16)),
                   Text(
                     AppLocalizations.of(context).txJoinThisCommunity,
-                    style: GoogleFonts.nunito(
+                    style: GoogleFonts.poppins(
                       color: Colors.white,
                       fontWeight: FontWeight.w800,
                       fontSize: 15,
@@ -1705,18 +1817,11 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.all(28),
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: _T.elevated,
-            ),
-            child: const Text("🌿", style: TextStyle(fontSize: 44)),
-          ),
+          const AppLottie(AppAnim.handshake, size: 150),
           const SizedBox(height: 16),
           Text(
             AppLocalizations.of(context).txNothingHereYet,
-            style: GoogleFonts.nunito(
+            style: GoogleFonts.poppins(
               color: _T.textPri,
               fontSize: 18,
               fontWeight: FontWeight.w800,
@@ -1725,7 +1830,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
           const SizedBox(height: 6),
           Text(
             AppLocalizations.of(context).txStartTheConversation,
-            style: GoogleFonts.nunito(color: _T.textSec, fontSize: 13.5),
+            style: GoogleFonts.poppins(color: _T.textSec, fontSize: 13.5),
           ),
         ],
       ),

@@ -3787,4 +3787,44 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get feedsEmptyBody =>
       'Be the first to share something with your community.';
+
+  @override
+  String groupWelcomeTitle(String name) {
+    return 'Welcome to $name!';
+  }
+
+  @override
+  String get groupWelcomeBody =>
+      'Say hi and tell everyone a skill you can share.';
+
+  @override
+  String get groupSendFailed => 'Couldn’t send. Try again.';
+
+  @override
+  String groupMembersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count members',
+      one: '1 member',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupActiveNow(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count active now',
+      one: '1 active now',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupJoinToParticipate => 'Join to take part';
+
+  @override
+  String get groupNotFound => 'Couldn’t find this community.';
 }

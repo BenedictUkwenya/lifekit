@@ -2185,5 +2185,15 @@
   "commentsReply": "პასუხი",
   "feedsPosted": "გამოქვეყნდა! 🎉",
   "feedsEmptyTitle": "აქ ჯერ არაფერია",
-  "feedsEmptyBody": "იყავით პირველი, ვინც საზოგადოებას რამეს გაუზიარებს."
+  "feedsEmptyBody": "იყავით პირველი, ვინც საზოგადოებას რამეს გაუზიარებს.",
+  "groupWelcomeTitle": "მოგესალმებით: {name}!",
+  "@groupWelcomeTitle": {"placeholders":{"name":{"type":"String"}}},
+  "groupWelcomeBody": "მიესალმეთ და გვითხარით, რა უნარის გაზიარება შეგიძლიათ.",
+  "groupSendFailed": "ვერ გაიგზავნა. სცადეთ ხელახლა.",
+  "groupMembersCount": "{count} წევრი",
+  "@groupMembersCount": {"placeholders":{"count":{"type":"int"}}},
+  "groupActiveNow": "{count} აქტიურია ახლა",
+  "@groupActiveNow": {"placeholders":{"count":{"type":"int"}}},
+  "groupJoinToParticipate": "შემოუერთდით მონაწილეობისთვის",
+  "groupNotFound": "ეს საზოგადოება ვერ მოიძებნა."
 }

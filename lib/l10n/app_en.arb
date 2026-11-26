@@ -1988,5 +1988,15 @@
   "commentsReply": "Reply",
   "feedsPosted": "Posted! 🎉",
   "feedsEmptyTitle": "Nothing here yet",
-  "feedsEmptyBody": "Be the first to share something with your community."
+  "feedsEmptyBody": "Be the first to share something with your community.",
+  "groupWelcomeTitle": "Welcome to {name}!",
+  "@groupWelcomeTitle": {"placeholders":{"name":{"type":"String"}}},
+  "groupWelcomeBody": "Say hi and tell everyone a skill you can share.",
+  "groupSendFailed": "Couldn’t send. Try again.",
+  "groupMembersCount": "{count, plural, =1{1 member} other{{count} members}}",
+  "@groupMembersCount": {"placeholders":{"count":{"type":"int"}}},
+  "groupActiveNow": "{count, plural, =1{1 active now} other{{count} active now}}",
+  "@groupActiveNow": {"placeholders":{"count":{"type":"int"}}},
+  "groupJoinToParticipate": "Join to take part",
+  "groupNotFound": "Couldn’t find this community."
 }

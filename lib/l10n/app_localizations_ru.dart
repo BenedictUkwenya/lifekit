@@ -3803,4 +3803,46 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get feedsEmptyBody =>
       'Станьте первым, кто поделится чем-то с сообществом.';
+
+  @override
+  String groupWelcomeTitle(String name) {
+    return 'Добро пожаловать в $name!';
+  }
+
+  @override
+  String get groupWelcomeBody =>
+      'Поздоровайтесь и расскажите, каким навыком можете поделиться.';
+
+  @override
+  String get groupSendFailed => 'Не удалось отправить. Попробуйте ещё раз.';
+
+  @override
+  String groupMembersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count участника',
+      many: '$count участников',
+      few: '$count участника',
+      one: '$count участник',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupActiveNow(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count сейчас онлайн',
+      one: '$count сейчас онлайн',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupJoinToParticipate => 'Вступите, чтобы участвовать';
+
+  @override
+  String get groupNotFound => 'Сообщество не найдено.';
 }

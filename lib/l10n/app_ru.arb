@@ -2185,5 +2185,15 @@
   "commentsReply": "Ответить",
   "feedsPosted": "Опубликовано! 🎉",
   "feedsEmptyTitle": "Здесь пока пусто",
-  "feedsEmptyBody": "Станьте первым, кто поделится чем-то с сообществом."
+  "feedsEmptyBody": "Станьте первым, кто поделится чем-то с сообществом.",
+  "groupWelcomeTitle": "Добро пожаловать в {name}!",
+  "@groupWelcomeTitle": {"placeholders":{"name":{"type":"String"}}},
+  "groupWelcomeBody": "Поздоровайтесь и расскажите, каким навыком можете поделиться.",
+  "groupSendFailed": "Не удалось отправить. Попробуйте ещё раз.",
+  "groupMembersCount": "{count, plural, one{{count} участник} few{{count} участника} many{{count} участников} other{{count} участника}}",
+  "@groupMembersCount": {"placeholders":{"count":{"type":"int"}}},
+  "groupActiveNow": "{count, plural, one{{count} сейчас онлайн} other{{count} сейчас онлайн}}",
+  "@groupActiveNow": {"placeholders":{"count":{"type":"int"}}},
+  "groupJoinToParticipate": "Вступите, чтобы участвовать",
+  "groupNotFound": "Сообщество не найдено."
 }

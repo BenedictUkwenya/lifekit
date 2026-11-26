@@ -10,6 +10,10 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import 'event_booking_screen.dart';
 import '../../../core/utils/store_rules.dart';
+import 'package:flutter/services.dart';
+import '../../../core/utils/error_handler.dart';
+import '../../../core/widgets/skeleton.dart';
+import '../../../core/services/app_cache.dart';
 import '../../../core/utils/dates.dart';
 
 class EventDetailScreen extends StatefulWidget {
@@ -74,10 +78,31 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       setState(() => _isLoadingSocial = false);
       return;
     }
+    // Show what we had last time straight away, then refresh.
+    final cacheKey = 'event_social_$eventId';
+    final cached = AppCache.instance.get<Map<String, dynamic>>(cacheKey);
+    if (cached != null) {
+      setState(() {
+        _isLiked = cached['is_liked_by_me'] ?? false;
+        _likeCount = cached['likes_count'] ?? 0;
+        _comments = List<dynamic>.from(cached['comments'] ?? const []);
+        _isLoadingSocial = false;
+      });
+    }
     try {
-      final meta = await _apiService.getEventMeta(eventId);
-      final comments = await _apiService.getEventComments(eventId);
+      // One request: the server now returns the comments with the meta.
+      // (Older servers don't, so fetch them in parallel as a fallback.)
+      final metaFuture = _apiService.getEventMeta(eventId);
+      final meta = await metaFuture;
+      final comments = meta['comments'] is List
+          ? meta['comments'] as List
+          : await _apiService.getEventComments(eventId);
       if (!mounted) return;
+      AppCache.instance.set(cacheKey, {
+        'is_liked_by_me': meta['is_liked_by_me'] ?? false,
+        'likes_count': meta['likes_count'] ?? 0,
+        'comments': comments,
+      }, ttl: AppCache.ttlLong);
       setState(() {
         _isLiked = meta['is_liked_by_me'] ?? false;
         _likeCount = meta['likes_count'] ?? 0;
@@ -128,19 +153,31 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     final eventId = widget.event['id']?.toString();
     if (text.isEmpty || eventId == null) return;
 
-    setState(() => _isPostingComment = true);
+    // Show it at once (faded while sending); undo if the server refuses.
+    HapticFeedback.lightImpact();
+    final tmp = {
+      'id': 'tmp_${DateTime.now().microsecondsSinceEpoch}',
+      'content': text,
+      'profiles': {'full_name': AppLocalizations.of(context).commentsYou},
+      '_pending': true,
+    };
+    setState(() {
+      _isPostingComment = true;
+      _comments = [..._comments, tmp];
+      _commentController.clear();
+    });
     try {
       await _apiService.postEventComment(eventId, text);
-      _commentController.clear();
+      AppCache.instance.invalidate('event_social_$eventId');
       final comments = await _apiService.getEventComments(eventId);
+      if (mounted) setState(() => _comments = comments);
+    } catch (e) {
       if (mounted) {
         setState(() {
-          _comments = comments;
+          _comments = _comments.where((c) => c['id'] != tmp['id']).toList();
+          if (_commentController.text.isEmpty) _commentController.text = text;
         });
-      }
-    } catch (_) {
-      if (mounted) {
-        AppToast.info(context, "Failed to post comment. Please try again.");
+        AppToast.error(context, appErrorMessage(context, e));
       }
     } finally {
       if (mounted) setState(() => _isPostingComment = false);
@@ -491,15 +528,23 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       ),
                       const SizedBox(height: 8),
                       if (_isLoadingSocial)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12),
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.primary,
+                        Column(children: [
+                          for (var i = 0; i < 2; i++)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8),
+                              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                SkeletonBox(width: 32, height: 32, radius: 16),
+                                SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                    SkeletonBox(width: 100, height: 11),
+                                    SizedBox(height: 6),
+                                    SkeletonBox(height: 11),
+                                  ]),
+                                ),
+                              ]),
                             ),
-                          ),
-                        )
+                        ])
                       else if (_comments.isEmpty)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -515,7 +560,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         Column(
                           children: _comments
                               .map(
-                                (c) => Padding(
+                                (c) => Opacity(
+                                  opacity: c['_pending'] == true ? 0.55 : 1,
+                                  child: Padding(
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8),
                                   child: Row(
@@ -570,6 +617,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                       ),
                                     ],
                                   ),
+                                ),
                                 ),
                               )
                               .toList(),

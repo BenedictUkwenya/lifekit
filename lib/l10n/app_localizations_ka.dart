@@ -3807,4 +3807,32 @@ class AppLocalizationsKa extends AppLocalizations {
   @override
   String get feedsEmptyBody =>
       'იყავით პირველი, ვინც საზოგადოებას რამეს გაუზიარებს.';
+
+  @override
+  String groupWelcomeTitle(String name) {
+    return 'მოგესალმებით: $name!';
+  }
+
+  @override
+  String get groupWelcomeBody =>
+      'მიესალმეთ და გვითხარით, რა უნარის გაზიარება შეგიძლიათ.';
+
+  @override
+  String get groupSendFailed => 'ვერ გაიგზავნა. სცადეთ ხელახლა.';
+
+  @override
+  String groupMembersCount(int count) {
+    return '$count წევრი';
+  }
+
+  @override
+  String groupActiveNow(int count) {
+    return '$count აქტიურია ახლა';
+  }
+
+  @override
+  String get groupJoinToParticipate => 'შემოუერთდით მონაწილეობისთვის';
+
+  @override
+  String get groupNotFound => 'ეს საზოგადოება ვერ მოიძებნა.';
 }

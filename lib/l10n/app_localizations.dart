@@ -7179,6 +7179,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Be the first to share something with your community.'**
   String get feedsEmptyBody;
+
+  /// No description provided for @groupWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to {name}!'**
+  String groupWelcomeTitle(String name);
+
+  /// No description provided for @groupWelcomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Say hi and tell everyone a skill you can share.'**
+  String get groupWelcomeBody;
+
+  /// No description provided for @groupSendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t send. Try again.'**
+  String get groupSendFailed;
+
+  /// No description provided for @groupMembersCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 member} other{{count} members}}'**
+  String groupMembersCount(int count);
+
+  /// No description provided for @groupActiveNow.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 active now} other{{count} active now}}'**
+  String groupActiveNow(int count);
+
+  /// No description provided for @groupJoinToParticipate.
+  ///
+  /// In en, this message translates to:
+  /// **'Join to take part'**
+  String get groupJoinToParticipate;
+
+  /// No description provided for @groupNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t find this community.'**
+  String get groupNotFound;
 }
 
 class _AppLocalizationsDelegate
