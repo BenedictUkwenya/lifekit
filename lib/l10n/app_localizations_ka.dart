@@ -3645,4 +3645,123 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get trackCancelledDirect => 'ჯავშანი გაუქმდა.';
+
+  @override
+  String get payDetailsTitle => 'გადახდის დეტალები';
+
+  @override
+  String get payDetailsIntro =>
+      'მიუთითეთ, როგორ შეუძლიათ კლიენტებს გადაგიხადონ. LifeKit გადახდებს არ იღებს — კლიენტები პირდაპირ გიხდიან.';
+
+  @override
+  String get payMethodsHeading => 'გადახდის მიღების გზები';
+
+  @override
+  String get payMethodCash => 'ნაღდი ფული';
+
+  @override
+  String get payMethodCard => 'ბარათი';
+
+  @override
+  String get payMethodTransfer => 'საბანკო გადარიცხვა';
+
+  @override
+  String get payBankHeading => 'საბანკო რეკვიზიტები';
+
+  @override
+  String get payBankName => 'ბანკის სახელი (არასავალდებულო)';
+
+  @override
+  String get payAccountHolder => 'ანგარიშის მფლობელის სახელი';
+
+  @override
+  String get payIban => 'IBAN';
+
+  @override
+  String get payIbanHint => 'მაგ. GE29 NB00 0000 0101 9049 17';
+
+  @override
+  String get payIbanInvalid => 'IBAN არასწორი ჩანს. გთხოვთ, გადაამოწმოთ.';
+
+  @override
+  String get payHolderRequired => 'მიუთითეთ ანგარიშის მფლობელის სახელი.';
+
+  @override
+  String get payPickOne => 'აირჩიეთ გადახდის მიღების ერთი გზა მაინც.';
+
+  @override
+  String get paySaved => 'გადახდის დეტალები შენახულია.';
+
+  @override
+  String get payPrivacyNote =>
+      'თქვენს საბანკო რეკვიზიტებს ხედავს მხოლოდ ის კლიენტი, რომლის ჯავშანიც დაადასტურეთ, და მხოლოდ გადახდამდე.';
+
+  @override
+  String get payAccepts => 'იღებს';
+
+  @override
+  String get payHowToPay => 'როგორ გადაიხადოთ';
+
+  @override
+  String payHowToPayNoDetails(String name) {
+    return '$name-ს ჯერ არ მიუთითებია გადახდის დეტალები. ჰკითხეთ ჩატში, როგორ გადაიხადოთ.';
+  }
+
+  @override
+  String payBankAfterAccept(String name) {
+    return 'საბანკო რეკვიზიტები აქ გამოჩნდება, როცა $name თქვენს ჯავშანს დაადასტურებს.';
+  }
+
+  @override
+  String get payCopy => 'კოპირება';
+
+  @override
+  String get payCopied => 'IBAN დაკოპირდა';
+
+  @override
+  String get paySafetyTip =>
+      'გადაიხადეთ მხოლოდ აქ მითითებულ ანგარიშზე, ჯავშნის დადასტურების შემდეგ. ფრთხილად იყავით, თუ ვინმე სხვა ანგარიშზე გადახდას გთხოვთ.';
+
+  @override
+  String get payIvePaid => 'გადავიხადე';
+
+  @override
+  String get payMarkPaidTitle => 'მოვნიშნო გადახდილად?';
+
+  @override
+  String payMarkPaidBody(String name) {
+    return 'ეს გააკეთეთ მხოლოდ მაშინ, როცა $name-ს რეალურად გადაუხდით.';
+  }
+
+  @override
+  String payMarkedPaid(String name) {
+    return 'გადახდილად მონიშნეთ — ველოდებით $name-ის დადასტურებას.';
+  }
+
+  @override
+  String get payReceivedButton => 'გადახდა მივიღე';
+
+  @override
+  String get payReceivedTitle => 'ადასტურებთ გადახდის მიღებას?';
+
+  @override
+  String get payReceivedBody => 'დაადასტურეთ მხოლოდ მაშინ, როცა თანხა მოგივათ.';
+
+  @override
+  String payClientSaysPaid(String name) {
+    return '$name ამბობს, რომ გადაიხადა. დაადასტურეთ, როცა მიიღებთ.';
+  }
+
+  @override
+  String get payWaitingClient => 'ველოდებით კლიენტის გადახდას.';
+
+  @override
+  String get payConfirmedDone => 'გადახდა დადასტურებულია ✓';
+
+  @override
+  String get payAddYourDetails =>
+      'დაამატეთ გადახდის დეტალები, რომ კლიენტებმა იცოდნენ, როგორ გადაგიხადონ.';
+
+  @override
+  String get payAddDetailsButton => 'დეტალების დამატება';
 }

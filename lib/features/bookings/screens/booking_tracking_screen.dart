@@ -14,6 +14,7 @@ import '../../../core/services/api_service.dart';
 import '../../reviews/screens/leave_review_screen.dart';
 import '../../../core/widgets/motion.dart';
 import '../booking_progress.dart';
+import '../widgets/booking_payment_card.dart';
 import '../../../core/utils/dates.dart';
 
 class BookingTrackingScreen extends StatefulWidget {
@@ -405,6 +406,17 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
             ).fadeSlideIn(index: 2),
             const SizedBox(height: 14),
             _DetailsCard(booking: _currentBooking).fadeSlideIn(index: 2),
+            // Direct bookings: how to pay the provider + "paid / received".
+            if (!progress.isSwap &&
+                !progress.paidInApp &&
+                progress.phase != BookingPhase.cancelled) ...[
+              const SizedBox(height: 14),
+              BookingPaymentCard(
+                booking: _currentBooking as Map,
+                isClient: widget.isClient,
+                otherName: otherName,
+              ).fadeSlideIn(index: 2),
+            ],
             if (widget.isClient && status == 'pending') ...[
               const SizedBox(height: 14),
               Row(

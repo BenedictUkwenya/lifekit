@@ -810,6 +810,60 @@ class ApiService {
     AppCache.instance.invalidate('wallet');
   }
 
+  // ===========================================================================
+  // DIRECT PAYMENTS — how providers accept payment (LifeKit moves no money)
+  // ===========================================================================
+
+  /// The signed-in user's own payment details: {methods, bank, updated_at}.
+  Future<Map<String, dynamic>> getMyPaymentDetails() async =>
+      Map<String, dynamic>.from(await _authenticatedGet('/payment-details/me'));
+
+  Future<Map<String, dynamic>> savePaymentDetails({
+    required bool cash,
+    required bool card,
+    required bool transfer,
+    String? bankName,
+    String? accountHolder,
+    String? iban,
+  }) async {
+    final data = await _authenticatedPut('/payment-details/me', {
+      'cash': cash,
+      'card': card,
+      'transfer': transfer,
+      'bank_name': bankName,
+      'account_holder': accountHolder,
+      'iban': iban,
+    });
+    AppCache.instance.invalidatePrefix('pay_methods_');
+    return Map<String, dynamic>.from(data);
+  }
+
+  /// Public: which methods a provider accepts (never bank details).
+  Future<Map<String, dynamic>> getProviderPaymentMethods(String userId) async {
+    final key = 'pay_methods_$userId';
+    final cached = AppCache.instance.get<Map<String, dynamic>>(key);
+    if (cached != null) return cached;
+    final response = await _net.get(Uri.parse('$baseUrl/payment-details/methods/$userId'));
+    final data = await _processResponse(response);
+    final methods = Map<String, dynamic>.from((data['methods'] as Map?) ?? const {});
+    AppCache.instance.set(key, methods, ttl: AppCache.ttlMedium);
+    return methods;
+  }
+
+  /// How to pay for a booking: {methods, bank?, bank_hidden_reason,
+  /// client_marked_paid_at, provider_confirmed_paid_at}.
+  Future<Map<String, dynamic>> getBookingPaymentDetails(String bookingId) async =>
+      Map<String, dynamic>.from(
+          await _authenticatedGet('/payment-details/booking/$bookingId'));
+
+  /// Client: "I've paid". Provider: "Payment received". Only a record.
+  Future<Map<String, dynamic>> markBookingPaid(String bookingId) async {
+    final data = await _authenticatedPut('/bookings/$bookingId/paid', {});
+    AppCache.instance.invalidate('client_bookings');
+    AppCache.instance.invalidate('provider_requests');
+    return Map<String, dynamic>.from(data);
+  }
+
   Future<void> updateBookingStatus(String bookingId, String status) async {
     await _authenticatedPut('/bookings/$bookingId/status', {"status": status});
     AppCache.instance.invalidate('client_bookings');

@@ -3624,4 +3624,124 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trackCancelledDirect => 'Booking cancelled.';
+
+  @override
+  String get payDetailsTitle => 'Payment details';
+
+  @override
+  String get payDetailsIntro =>
+      'Tell clients how they can pay you. LifeKit doesn\'t take payments — clients pay you directly.';
+
+  @override
+  String get payMethodsHeading => 'Ways you accept payment';
+
+  @override
+  String get payMethodCash => 'Cash';
+
+  @override
+  String get payMethodCard => 'Card';
+
+  @override
+  String get payMethodTransfer => 'Bank transfer';
+
+  @override
+  String get payBankHeading => 'Bank details';
+
+  @override
+  String get payBankName => 'Bank name (optional)';
+
+  @override
+  String get payAccountHolder => 'Account holder name';
+
+  @override
+  String get payIban => 'IBAN';
+
+  @override
+  String get payIbanHint => 'e.g. GE29 NB00 0000 0101 9049 17';
+
+  @override
+  String get payIbanInvalid =>
+      'That IBAN doesn\'t look right. Please check it.';
+
+  @override
+  String get payHolderRequired => 'Add the account holder\'s name.';
+
+  @override
+  String get payPickOne => 'Choose at least one way to get paid.';
+
+  @override
+  String get paySaved => 'Payment details saved.';
+
+  @override
+  String get payPrivacyNote =>
+      'Only a client whose booking you\'ve accepted can see your bank details, and only until they\'ve paid.';
+
+  @override
+  String get payAccepts => 'Accepts';
+
+  @override
+  String get payHowToPay => 'How to pay';
+
+  @override
+  String payHowToPayNoDetails(String name) {
+    return '$name hasn\'t added payment details yet. Ask them in chat how to pay.';
+  }
+
+  @override
+  String payBankAfterAccept(String name) {
+    return 'Bank details appear here once $name accepts your booking.';
+  }
+
+  @override
+  String get payCopy => 'Copy';
+
+  @override
+  String get payCopied => 'IBAN copied';
+
+  @override
+  String get paySafetyTip =>
+      'Only pay the account shown here, after the booking is accepted. Be careful if anyone asks you to pay a different account.';
+
+  @override
+  String get payIvePaid => 'I\'ve paid';
+
+  @override
+  String get payMarkPaidTitle => 'Mark as paid?';
+
+  @override
+  String payMarkPaidBody(String name) {
+    return 'Only do this once you\'ve actually paid $name.';
+  }
+
+  @override
+  String payMarkedPaid(String name) {
+    return 'You marked this as paid — waiting for $name to confirm.';
+  }
+
+  @override
+  String get payReceivedButton => 'Payment received';
+
+  @override
+  String get payReceivedTitle => 'Confirm payment received?';
+
+  @override
+  String get payReceivedBody => 'Only confirm once the money has reached you.';
+
+  @override
+  String payClientSaysPaid(String name) {
+    return '$name says they\'ve paid. Confirm once you\'ve received it.';
+  }
+
+  @override
+  String get payWaitingClient => 'Waiting for the client to pay.';
+
+  @override
+  String get payConfirmedDone => 'Payment confirmed ✓';
+
+  @override
+  String get payAddYourDetails =>
+      'Add your payment details so clients know how to pay you.';
+
+  @override
+  String get payAddDetailsButton => 'Add payment details';
 }

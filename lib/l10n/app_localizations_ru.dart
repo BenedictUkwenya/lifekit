@@ -3641,4 +3641,123 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get trackCancelledDirect => 'Бронирование отменено.';
+
+  @override
+  String get payDetailsTitle => 'Платёжные данные';
+
+  @override
+  String get payDetailsIntro =>
+      'Укажите, как клиенты могут вам заплатить. LifeKit не принимает платежи — клиенты платят вам напрямую.';
+
+  @override
+  String get payMethodsHeading => 'Как вы принимаете оплату';
+
+  @override
+  String get payMethodCash => 'Наличные';
+
+  @override
+  String get payMethodCard => 'Карта';
+
+  @override
+  String get payMethodTransfer => 'Банковский перевод';
+
+  @override
+  String get payBankHeading => 'Банковские реквизиты';
+
+  @override
+  String get payBankName => 'Название банка (необязательно)';
+
+  @override
+  String get payAccountHolder => 'Имя владельца счёта';
+
+  @override
+  String get payIban => 'IBAN';
+
+  @override
+  String get payIbanHint => 'напр. GE29 NB00 0000 0101 9049 17';
+
+  @override
+  String get payIbanInvalid => 'IBAN выглядит неверно. Проверьте, пожалуйста.';
+
+  @override
+  String get payHolderRequired => 'Укажите имя владельца счёта.';
+
+  @override
+  String get payPickOne => 'Выберите хотя бы один способ оплаты.';
+
+  @override
+  String get paySaved => 'Платёжные данные сохранены.';
+
+  @override
+  String get payPrivacyNote =>
+      'Ваши банковские реквизиты видит только клиент, чьё бронирование вы приняли, и только до оплаты.';
+
+  @override
+  String get payAccepts => 'Принимает';
+
+  @override
+  String get payHowToPay => 'Как оплатить';
+
+  @override
+  String payHowToPayNoDetails(String name) {
+    return '$name ещё не указал(а) платёжные данные. Спросите в чате, как оплатить.';
+  }
+
+  @override
+  String payBankAfterAccept(String name) {
+    return 'Реквизиты появятся здесь, когда $name примет ваше бронирование.';
+  }
+
+  @override
+  String get payCopy => 'Копировать';
+
+  @override
+  String get payCopied => 'IBAN скопирован';
+
+  @override
+  String get paySafetyTip =>
+      'Платите только на указанный здесь счёт и только после подтверждения бронирования. Будьте осторожны, если вас просят оплатить на другой счёт.';
+
+  @override
+  String get payIvePaid => 'Я оплатил(а)';
+
+  @override
+  String get payMarkPaidTitle => 'Отметить как оплаченное?';
+
+  @override
+  String payMarkPaidBody(String name) {
+    return 'Делайте это, только когда действительно заплатили $name.';
+  }
+
+  @override
+  String payMarkedPaid(String name) {
+    return 'Вы отметили оплату — ждём подтверждения от $name.';
+  }
+
+  @override
+  String get payReceivedButton => 'Оплата получена';
+
+  @override
+  String get payReceivedTitle => 'Подтвердить получение оплаты?';
+
+  @override
+  String get payReceivedBody => 'Подтверждайте, только когда деньги поступили.';
+
+  @override
+  String payClientSaysPaid(String name) {
+    return '$name сообщает, что оплатил(а). Подтвердите, когда получите.';
+  }
+
+  @override
+  String get payWaitingClient => 'Ожидаем оплату от клиента.';
+
+  @override
+  String get payConfirmedDone => 'Оплата подтверждена ✓';
+
+  @override
+  String get payAddYourDetails =>
+      'Добавьте платёжные данные, чтобы клиенты знали, как вам заплатить.';
+
+  @override
+  String get payAddDetailsButton => 'Добавить данные';
 }

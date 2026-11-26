@@ -52,6 +52,7 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
     with SingleTickerProviderStateMixin {
   final ApiService _apiService = ApiService();
   late TabController _tabController;
+  Future<Map<String, dynamic>>? _paymentMethods; // loaded once for the About tab
 
   bool isLoading = true;
   bool _isSharingToFeed = false;
@@ -576,6 +577,42 @@ class _ServiceBookingDetailScreenState extends State<ServiceBookingDetailScreen>
                               height: 1.6,
                               color: Colors.grey[600],
                             ),
+                          ),
+                          // How this provider accepts payment (clients pay
+                          // providers directly). Hidden if they haven't said.
+                          FutureBuilder<Map<String, dynamic>>(
+                            future: _paymentMethods ??=
+                                _apiService.getProviderPaymentMethods(widget.providerId),
+                            builder: (context, snap) {
+                              final m = snap.data ?? const {};
+                              final labels = [
+                                if (m['cash'] == true) l10n.payMethodCash,
+                                if (m['card'] == true) l10n.payMethodCard,
+                                if (m['transfer'] == true) l10n.payMethodTransfer,
+                              ];
+                              if (labels.isEmpty) return const SizedBox.shrink();
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 16),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Icon(Icons.handshake_outlined,
+                                        size: 18, color: AppColors.primary),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        '${l10n.payAccepts}: ${labels.join(' · ')}',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.grey[800],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),

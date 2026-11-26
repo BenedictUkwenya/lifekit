@@ -20,6 +20,7 @@ import '../../auth/screens/login_screen.dart';
 import '../../bookings/screens/bookings_screen.dart';
 import 'edit_profile_screen.dart';
 import 'wallet_screen.dart';
+import 'payment_details_screen.dart';
 import 'share_profile_screen.dart';
 import 'settings_sub_screens.dart';
 import '../../onboarding/screens/ai_onboarding_screen.dart';
@@ -881,6 +882,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (_) => const WalletScreen(),
+                                ),
+                              ),
+                            )
+                          else
+                            // Clients pay providers directly: say how.
+                            _buildToolItem(
+                              Icons.account_balance_outlined,
+                              l10n.payDetailsTitle,
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const PaymentDetailsScreen(),
                                 ),
                               ),
                             ),

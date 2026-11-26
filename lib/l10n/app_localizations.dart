@@ -6891,6 +6891,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Booking cancelled.'**
   String get trackCancelledDirect;
+
+  /// No description provided for @payDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment details'**
+  String get payDetailsTitle;
+
+  /// No description provided for @payDetailsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell clients how they can pay you. LifeKit doesn\'t take payments — clients pay you directly.'**
+  String get payDetailsIntro;
+
+  /// No description provided for @payMethodsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Ways you accept payment'**
+  String get payMethodsHeading;
+
+  /// No description provided for @payMethodCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get payMethodCash;
+
+  /// No description provided for @payMethodCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Card'**
+  String get payMethodCard;
+
+  /// No description provided for @payMethodTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank transfer'**
+  String get payMethodTransfer;
+
+  /// No description provided for @payBankHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank details'**
+  String get payBankHeading;
+
+  /// No description provided for @payBankName.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank name (optional)'**
+  String get payBankName;
+
+  /// No description provided for @payAccountHolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Account holder name'**
+  String get payAccountHolder;
+
+  /// No description provided for @payIban.
+  ///
+  /// In en, this message translates to:
+  /// **'IBAN'**
+  String get payIban;
+
+  /// No description provided for @payIbanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. GE29 NB00 0000 0101 9049 17'**
+  String get payIbanHint;
+
+  /// No description provided for @payIbanInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'That IBAN doesn\'t look right. Please check it.'**
+  String get payIbanInvalid;
+
+  /// No description provided for @payHolderRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the account holder\'s name.'**
+  String get payHolderRequired;
+
+  /// No description provided for @payPickOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose at least one way to get paid.'**
+  String get payPickOne;
+
+  /// No description provided for @paySaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment details saved.'**
+  String get paySaved;
+
+  /// No description provided for @payPrivacyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Only a client whose booking you\'ve accepted can see your bank details, and only until they\'ve paid.'**
+  String get payPrivacyNote;
+
+  /// No description provided for @payAccepts.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepts'**
+  String get payAccepts;
+
+  /// No description provided for @payHowToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'How to pay'**
+  String get payHowToPay;
+
+  /// No description provided for @payHowToPayNoDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} hasn\'t added payment details yet. Ask them in chat how to pay.'**
+  String payHowToPayNoDetails(String name);
+
+  /// No description provided for @payBankAfterAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank details appear here once {name} accepts your booking.'**
+  String payBankAfterAccept(String name);
+
+  /// No description provided for @payCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get payCopy;
+
+  /// No description provided for @payCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'IBAN copied'**
+  String get payCopied;
+
+  /// No description provided for @paySafetyTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Only pay the account shown here, after the booking is accepted. Be careful if anyone asks you to pay a different account.'**
+  String get paySafetyTip;
+
+  /// No description provided for @payIvePaid.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ve paid'**
+  String get payIvePaid;
+
+  /// No description provided for @payMarkPaidTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as paid?'**
+  String get payMarkPaidTitle;
+
+  /// No description provided for @payMarkPaidBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Only do this once you\'ve actually paid {name}.'**
+  String payMarkPaidBody(String name);
+
+  /// No description provided for @payMarkedPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'You marked this as paid — waiting for {name} to confirm.'**
+  String payMarkedPaid(String name);
+
+  /// No description provided for @payReceivedButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment received'**
+  String get payReceivedButton;
+
+  /// No description provided for @payReceivedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm payment received?'**
+  String get payReceivedTitle;
+
+  /// No description provided for @payReceivedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Only confirm once the money has reached you.'**
+  String get payReceivedBody;
+
+  /// No description provided for @payClientSaysPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} says they\'ve paid. Confirm once you\'ve received it.'**
+  String payClientSaysPaid(String name);
+
+  /// No description provided for @payWaitingClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the client to pay.'**
+  String get payWaitingClient;
+
+  /// No description provided for @payConfirmedDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment confirmed ✓'**
+  String get payConfirmedDone;
+
+  /// No description provided for @payAddYourDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your payment details so clients know how to pay you.'**
+  String get payAddYourDetails;
+
+  /// No description provided for @payAddDetailsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add payment details'**
+  String get payAddDetailsButton;
 }
 
 class _AppLocalizationsDelegate
