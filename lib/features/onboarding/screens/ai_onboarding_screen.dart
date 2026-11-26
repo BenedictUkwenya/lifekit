@@ -624,17 +624,17 @@ class _AIOnboardingScreenState extends State<AIOnboardingScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      task,
+                      planTaskText(context, actionRoute, task),
                       style: GoogleFonts.poppins(
                         fontSize: 13,
                         color: Colors.black87,
                         height: 1.5,
                       ),
                     ),
-                    if (actionRoute != 'none') ...[
+                    if (planActionAvailable(actionRoute, task)) ...[
                       const SizedBox(height: 8),
                       GestureDetector(
-                        onTap: () => openPlanAction(context, actionRoute),
+                        onTap: () => openPlanAction(context, actionRoute, task),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

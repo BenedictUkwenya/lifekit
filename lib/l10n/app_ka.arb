@@ -2195,5 +2195,6 @@
   "groupActiveNow": "{count} აქტიურია ახლა",
   "@groupActiveNow": {"placeholders":{"count":{"type":"int"}}},
   "groupJoinToParticipate": "შემოუერთდით მონაწილეობისთვის",
-  "groupNotFound": "ეს საზოგადოება ვერ მოიძებნა."
+  "groupNotFound": "ეს საზოგადოება ვერ მოიძებნა.",
+  "planTaskPaymentDetails": "დაამატეთ გადახდის დეტალები, რომ კლიენტებმა იცოდნენ, როგორ გადაგიხადონ (ნაღდი, ბარათი ან გადარიცხვა)."
 }

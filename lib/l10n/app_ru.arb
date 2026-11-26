@@ -2195,5 +2195,6 @@
   "groupActiveNow": "{count, plural, one{{count} сейчас онлайн} other{{count} сейчас онлайн}}",
   "@groupActiveNow": {"placeholders":{"count":{"type":"int"}}},
   "groupJoinToParticipate": "Вступите, чтобы участвовать",
-  "groupNotFound": "Сообщество не найдено."
+  "groupNotFound": "Сообщество не найдено.",
+  "planTaskPaymentDetails": "Добавьте платёжные данные, чтобы клиенты знали, как вам заплатить (наличные, карта или перевод)."
 }

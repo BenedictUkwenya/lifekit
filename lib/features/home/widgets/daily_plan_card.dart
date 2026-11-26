@@ -136,7 +136,7 @@ class _DailyPlanCardState extends State<DailyPlanCard> {
             const SizedBox(height: 12),
             _Dots(plan: plan),
             const SizedBox(height: 12),
-            Text(day.task,
+            Text(planTaskText(context, day.actionRoute, day.task),
                 style: GoogleFonts.poppins(color: Colors.white, fontSize: 14.5, fontWeight: FontWeight.w600, height: 1.45)),
             const SizedBox(height: 14),
             Row(
@@ -144,12 +144,12 @@ class _DailyPlanCardState extends State<DailyPlanCard> {
                 Text(l10n.planProgress(plan.doneCount, plan.days.length),
                     style: GoogleFonts.poppins(color: Colors.white70, fontSize: 12)),
                 const Spacer(),
-                if (planActionAvailable(day.actionRoute)) ...[
+                if (planActionAvailable(day.actionRoute, day.task)) ...[
                   _button(
                     label: l10n.planDoIt,
                     icon: Icons.arrow_forward_rounded,
                     filled: false,
-                    onTap: () => openPlanAction(context, day.actionRoute),
+                    onTap: () => openPlanAction(context, day.actionRoute, day.task),
                   ),
                   const SizedBox(width: 8),
                 ],
@@ -453,7 +453,7 @@ class _PlanSheetState extends State<_PlanSheet> {
                       ],
                     ),
                     const SizedBox(height: 3),
-                    Text(d.task,
+                    Text(planTaskText(context, d.actionRoute, d.task),
                         style: GoogleFonts.poppins(
                           fontSize: 13.5,
                           fontWeight: FontWeight.w500,
@@ -465,13 +465,13 @@ class _PlanSheetState extends State<_PlanSheet> {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          if (planActionAvailable(d.actionRoute) && status != DayStatus.done)
+                          if (planActionAvailable(d.actionRoute, d.task) && status != DayStatus.done)
                             TextButton.icon(
                               style: TextButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(horizontal: 8), visualDensity: VisualDensity.compact),
                               onPressed: () {
                                 Navigator.pop(context);
-                                openPlanAction(context, d.actionRoute);
+                                openPlanAction(context, d.actionRoute, d.task);
                               },
                               icon: const Icon(Icons.arrow_forward_rounded, size: 16),
                               label: Text(l10n.planDoIt),

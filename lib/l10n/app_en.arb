@@ -1998,5 +1998,6 @@
   "groupActiveNow": "{count, plural, =1{1 active now} other{{count} active now}}",
   "@groupActiveNow": {"placeholders":{"count":{"type":"int"}}},
   "groupJoinToParticipate": "Join to take part",
-  "groupNotFound": "Couldn’t find this community."
+  "groupNotFound": "Couldn’t find this community.",
+  "planTaskPaymentDetails": "Add your payment details so clients know how to pay you (cash, card or bank transfer)."
 }

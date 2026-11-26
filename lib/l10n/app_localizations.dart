@@ -7221,6 +7221,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn’t find this community.'**
   String get groupNotFound;
+
+  /// No description provided for @planTaskPaymentDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your payment details so clients know how to pay you (cash, card or bank transfer).'**
+  String get planTaskPaymentDetails;
 }
 
 class _AppLocalizationsDelegate

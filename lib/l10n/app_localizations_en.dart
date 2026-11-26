@@ -3827,4 +3827,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get groupNotFound => 'Couldn’t find this community.';
+
+  @override
+  String get planTaskPaymentDetails =>
+      'Add your payment details so clients know how to pay you (cash, card or bank transfer).';
 }

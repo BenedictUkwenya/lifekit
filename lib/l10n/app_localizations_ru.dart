@@ -3845,4 +3845,8 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get groupNotFound => 'Сообщество не найдено.';
+
+  @override
+  String get planTaskPaymentDetails =>
+      'Добавьте платёжные данные, чтобы клиенты знали, как вам заплатить (наличные, карта или перевод).';
 }

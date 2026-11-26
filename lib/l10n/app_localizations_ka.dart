@@ -3835,4 +3835,8 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get groupNotFound => 'ეს საზოგადოება ვერ მოიძებნა.';
+
+  @override
+  String get planTaskPaymentDetails =>
+      'დაამატეთ გადახდის დეტალები, რომ კლიენტებმა იცოდნენ, როგორ გადაგიხადონ (ნაღდი, ბარათი ან გადარიცხვა).';
 }
