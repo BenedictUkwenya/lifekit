@@ -3,7 +3,7 @@ import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:share_plus/share_plus.dart';
+import '../../../core/utils/share_text.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/dates.dart';
 import '../../../core/utils/store_rules.dart';
@@ -154,7 +154,8 @@ class BookingReceiptScreen extends StatelessWidget {
             const SizedBox(height: 40),
 
             OutlinedButton.icon(
-              onPressed: () => Share.share(
+              onPressed: () => shareText(
+                context,
                 'LifeKit receipt\n'
                 'Service: $serviceName\n'
                 'Date: $dateStr, $timeStr\n'

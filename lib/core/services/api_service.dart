@@ -1191,8 +1191,11 @@ class ApiService {
     return result;
   }
 
-  Future<Map<String, dynamic>> toggleLike(String postId) async {
-    final result = await _authenticatedPost('/feeds/posts/$postId/like', {});
+  /// [liked]: the state the user wants (the UI updates instantly). The server
+  /// sets exactly that, so quick repeated taps can't double-toggle.
+  Future<Map<String, dynamic>> toggleLike(String postId, {bool? liked}) async {
+    final result = await _authenticatedPost(
+        '/feeds/posts/$postId/like', {if (liked != null) 'liked': liked});
     return result is Map<String, dynamic> ? result : {};
   }
 
@@ -1211,9 +1214,11 @@ class ApiService {
     return await _processResponse(response);
   }
 
-  Future<dynamic> postComment(String postId, String content) async {
+  /// [parentId]: reply to that comment (one level of replies).
+  Future<dynamic> postComment(String postId, String content, {String? parentId}) async {
     return await _authenticatedPost('/feeds/posts/$postId/comments', {
       "content": content,
+      if (parentId != null) "parent_id": parentId,
     });
   }
 
@@ -1472,9 +1477,10 @@ class ApiService {
   }
 
   // Saved posts (bookmarks)
-  Future<Map<String, dynamic>> toggleBookmark(String postId) async {
+  Future<Map<String, dynamic>> toggleBookmark(String postId, {bool? saved}) async {
     final result = await _authenticatedPost('/feeds/toggle-bookmark', {
       "postId": postId,
+      if (saved != null) "saved": saved,
     });
     return result is Map<String, dynamic> ? result : {};
   }

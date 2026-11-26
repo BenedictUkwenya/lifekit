@@ -9,7 +9,10 @@ import '../../../core/widgets/app_toast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:flutter/services.dart';
+import '../../../core/utils/share_text.dart';
+import '../../../core/widgets/app_lottie.dart';
+import '../widgets/photo_viewer.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
@@ -278,7 +281,7 @@ class _FeedsScreenState extends State<FeedsScreen>
             ),
           ],
           body: isLoading
-              ? const SkeletonList(count: 4, thumbSize: 44)
+              ? const _FeedSkeleton()
               : Column(
                   children: [
                     Expanded(
@@ -302,7 +305,9 @@ class _FeedsScreenState extends State<FeedsScreen>
       backgroundColor: Colors.transparent,
       builder: (_) => _ComposePostSheet(
         onPosted: (newPost) {
+          HapticFeedback.mediumImpact();
           setState(() => posts.insert(0, newPost));
+          AppToast.success(context, AppLocalizations.of(context).feedsPosted);
         },
       ),
     );
@@ -328,6 +333,21 @@ class _FeedsScreenState extends State<FeedsScreen>
     }
   }
 
+  // Start downloading the next few posts' first photo before they scroll into
+  // view, so slow connections show photos sooner. Each URL only once.
+  final Set<String> _prefetched = {};
+  void _prefetchAfter(BuildContext context, int i) {
+    for (var j = i + 1; j <= i + 3 && j < posts.length; j++) {
+      final urls = posts[j]['image_urls'];
+      if (urls is List && urls.isNotEmpty && urls.first is String) {
+        final url = urls.first as String;
+        if (_prefetched.add(url)) {
+          precacheImage(CachedNetworkImageProvider(url), context).catchError((_) {});
+        }
+      }
+    }
+  }
+
   Widget _buildFeedsList() {
     return RefreshIndicator(
       onRefresh: () => _fetchData(force: true),
@@ -339,14 +359,31 @@ class _FeedsScreenState extends State<FeedsScreen>
         itemBuilder: (context, index) => Builder(builder: (context) {
           // index 0 = compose box
           if (index == 0) return _buildComposeBox();
-          // index 1 = trending tags strip
-          if (index == 1) return _buildTrendingStrip();
+          // index 1 = trending tags strip (+ empty state when there are no posts)
+          if (index == 1) {
+            if (posts.isEmpty) {
+              return Column(children: [
+                _buildTrendingStrip(),
+                const SizedBox(height: 24),
+                const AppLottie(AppAnim.chat, size: 140),
+                const SizedBox(height: 8),
+                Text(AppLocalizations.of(context).feedsEmptyTitle,
+                    style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 4),
+                Text(AppLocalizations.of(context).feedsEmptyBody,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey[600])),
+              ]);
+            }
+            return _buildTrendingStrip();
+          }
           // Last row: reaching it loads the next page.
           if (index == posts.length + 2) {
             WidgetsBinding.instance.addPostFrameCallback((_) => _loadMorePosts());
             return const SizedBox(height: 120, child: SkeletonList(count: 1, thumbSize: 44, padding: EdgeInsets.zero));
           }
           final post = posts[index - 2];
+          _prefetchAfter(context, index - 2);
           return _FeedCard(
             key: ValueKey(post['id']),
             post: post,
@@ -732,6 +769,7 @@ class _FeedCardState extends State<_FeedCard> with TickerProviderStateMixin {
     likeCount = widget.post['likes_count'] ?? 0;
     isLiked = widget.post['is_liked_by_me'] ?? false;
     commentsCount = widget.post['comments_count'] ?? 0;
+    isBookmarked = widget.post['is_saved_by_me'] == true;
     _heartController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 320),
@@ -776,18 +814,34 @@ class _FeedCardState extends State<_FeedCard> with TickerProviderStateMixin {
     }
   }
 
-  Future<void> _handleLike() async {
-    try {
-      final result = await _apiService.toggleLike(widget.post['id']);
-      if (!mounted) return;
-      setState(() {
-        isLiked = result['is_liked_by_me'] ?? isLiked;
-        likeCount = result['likes_count'] ?? likeCount;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      AppToast.info(context, AppLocalizations.of(context).feedsLikeFailed(appErrorMessage(context, e)));
-    }
+  // Taps update the UI instantly; the server is told the wanted state. Only
+  // the newest tap's reply is applied, so a late reply can't flip it back.
+  int _likeSeq = 0;
+  int _saveSeq = 0;
+
+  void _setLiked(bool liked, int count) {
+    isLiked = liked;
+    likeCount = count < 0 ? 0 : count;
+    // Keep the shared post map in sync so a list rebuild shows the same state.
+    widget.post['is_liked_by_me'] = isLiked;
+    widget.post['likes_count'] = likeCount;
+  }
+
+  void _handleLike() {
+    HapticFeedback.lightImpact();
+    final want = !isLiked;
+    final prevLiked = isLiked;
+    final prevCount = likeCount;
+    setState(() => _setLiked(want, likeCount + (want ? 1 : -1)));
+    final seq = ++_likeSeq;
+    _apiService.toggleLike(widget.post['id'], liked: want).then((r) {
+      if (!mounted || seq != _likeSeq) return;
+      setState(() => _setLiked(r['is_liked_by_me'] ?? want, r['likes_count'] ?? likeCount));
+    }).catchError((Object e) {
+      if (!mounted || seq != _likeSeq) return;
+      setState(() => _setLiked(prevLiked, prevCount));
+      AppToast.error(context, AppLocalizations.of(context).feedsLikeFailed(appErrorMessage(context, e)));
+    });
   }
 
   Future<void> _handleImageDoubleTapLike() async {
@@ -799,22 +853,38 @@ class _FeedCardState extends State<_FeedCard> with TickerProviderStateMixin {
       }
     });
 
-    if (!isLiked) {
-      await _handleLike();
-    }
+    if (!isLiked) _handleLike();
   }
 
-  Future<void> _handleBookmark() async {
-    try {
-      final result = await _apiService.toggleBookmark(widget.post['id']);
-      if (!mounted) return;
-      setState(() {
-        isBookmarked = result['is_saved'] ?? isBookmarked;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      AppToast.info(context, AppLocalizations.of(context).feedsBookmarkFailed(appErrorMessage(context, e)));
-    }
+  void _handleBookmark() {
+    HapticFeedback.selectionClick();
+    final l10n = AppLocalizations.of(context);
+    final want = !isBookmarked;
+    setState(() {
+      isBookmarked = want;
+      widget.post['is_saved_by_me'] = want;
+    });
+    AppToast.success(context, want ? l10n.feedsSavedToBookmarks : l10n.feedsRemovedFromBookmarks);
+    final seq = ++_saveSeq;
+    _apiService.toggleBookmark(widget.post['id'], saved: want).catchError((Object e) {
+      if (mounted && seq == _saveSeq) {
+        setState(() {
+          isBookmarked = !want;
+          widget.post['is_saved_by_me'] = !want;
+        });
+        AppToast.error(context, l10n.feedsBookmarkFailed(appErrorMessage(context, e)));
+      }
+      return <String, dynamic>{};
+    });
+  }
+
+  /// Share the post (text + link) through the system share sheet.
+  void _sharePost(BuildContext anchor) {
+    final l10n = AppLocalizations.of(context);
+    final content = (widget.post['content'] ?? '').toString();
+    final title = (widget.post['title'] ?? '').toString();
+    final head = title.isNotEmpty ? '$title\n\n' : '';
+    shareText(anchor, '$head$content\n\n${l10n.feedsSharedFromLifeKit} · https://www.lifekithub.com');
   }
 
   void _showPostOptions() {
@@ -932,13 +1002,8 @@ class _FeedCardState extends State<_FeedCard> with TickerProviderStateMixin {
                 style: GoogleFonts.poppins(),
               ),
               onTap: () {
-                final l10n = AppLocalizations.of(context);
                 Navigator.pop(context);
-                final content = widget.post['content'] ?? '';
-                final title = widget.post['title'] ?? '';
-                final text =
-                    '${title.isNotEmpty ? '$title\n\n' : ''}$content\n\n${l10n.feedsSharedFromLifeKit}';
-                Share.share(text.trim());
+                _sharePost(this.context);
               },
             ),
             if (isOwner)
@@ -1194,33 +1259,40 @@ class _FeedCardState extends State<_FeedCard> with TickerProviderStateMixin {
                             postId: widget.post['id'],
                             onCommentPosted: () =>
                                 setState(() => commentsCount++),
+                            onCommentsDeleted: (n) => setState(
+                                () => commentsCount = (commentsCount - n).clamp(0, 1 << 30)),
                           ),
                         ),
                       ),
                       const SizedBox(width: 6),
-                      _ActionBtn(
-                        icon: Icons.repeat_rounded,
-                        label: 'Share',
-                        color: Colors.grey[500]!,
-                        active: false,
-                        onTap: () {
-                          final text =
-                              '${title.isNotEmpty ? '$title\n\n' : ''}$content\n\nShared from LifeKit'
-                                  .trim();
-                          Share.share(text);
-                        },
+                      Builder(
+                        builder: (btnContext) => _ActionBtn(
+                          icon: Icons.ios_share_rounded,
+                          label: AppLocalizations.of(context).feedsShare,
+                          color: Colors.grey[500]!,
+                          active: false,
+                          onTap: () => _sharePost(btnContext),
+                        ),
                       ),
                       const Spacer(),
-                      GestureDetector(
+                      Pressable(
+                        pressedScale: 0.85,
                         onTap: _handleBookmark,
-                        child: Icon(
-                          isBookmarked
-                              ? Icons.bookmark_rounded
-                              : Icons.bookmark_border_rounded,
-                          color: isBookmarked
-                              ? AppColors.primary
-                              : Colors.grey[400],
-                          size: 22,
+                        child: Padding(
+                          padding: const EdgeInsets.all(6),
+                          child: AnimatedSwitcher(
+                            duration: Motion.slow,
+                            switchInCurve: Curves.elasticOut,
+                            transitionBuilder: (c, a) => ScaleTransition(scale: a, child: c),
+                            child: Icon(
+                              isBookmarked
+                                  ? Icons.bookmark_rounded
+                                  : Icons.bookmark_border_rounded,
+                              key: ValueKey(isBookmarked),
+                              color: isBookmarked ? AppColors.primary : Colors.grey[400],
+                              size: 23,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -1524,12 +1596,22 @@ class _PostImageGrid extends StatelessWidget {
     required this.heartScale,
   });
 
-  Widget _img(String url, {double? height, double? width}) {
+  Widget _img(BuildContext context, String url, {double? height, double? width}) {
+    // Decode at on-screen size: far less memory and smoother scrolling than
+    // decoding a full-resolution photo for a 200px tile.
+    final dpr = MediaQuery.maybeDevicePixelRatioOf(context) ?? 2.0;
+    final screenW = MediaQuery.maybeSizeOf(context)?.width ?? 400;
     return CachedNetworkImage(
       imageUrl: url,
       height: height,
       width: width ?? double.infinity,
       fit: BoxFit.cover,
+      memCacheWidth: (screenW * dpr).round(),
+      fadeInDuration: const Duration(milliseconds: 250),
+      fadeOutDuration: Duration.zero,
+      // A visible placeholder while loading — without it a slow photo left an
+      // empty gap (2-photo posts looked like one photo pushed to the right).
+      placeholder: (_, __) => SkeletonBox(height: height ?? 200, radius: 0),
       errorWidget: (_, __, ___) => Container(
         height: height,
         color: Colors.grey[200],
@@ -1541,29 +1623,33 @@ class _PostImageGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget grid;
+    Widget tap(int i, Widget child) => GestureDetector(
+          onTap: () => PhotoViewer.open(context, images, index: i),
+          child: child,
+        );
     if (images.length == 1) {
-      grid = _img(images[0], height: 200);
+      grid = tap(0, _img(context, images[0], height: 220));
     } else if (images.length == 2) {
       grid = Row(
         children: [
-          Expanded(child: _img(images[0], height: 180)),
+          Expanded(child: tap(0, _img(context, images[0], height: 180))),
           const SizedBox(width: 3),
-          Expanded(child: _img(images[1], height: 180)),
+          Expanded(child: tap(1, _img(context, images[1], height: 180))),
         ],
       );
     } else {
       // 3 images: one large left, two stacked right
       grid = Row(
         children: [
-          Expanded(flex: 3, child: _img(images[0], height: 200)),
+          Expanded(flex: 3, child: tap(0, _img(context, images[0], height: 200))),
           const SizedBox(width: 3),
           Expanded(
             flex: 2,
             child: Column(
               children: [
-                _img(images[1], height: 98.5),
+                tap(1, _img(context, images[1], height: 98.5)),
                 const SizedBox(height: 3),
-                _img(images[2], height: 98.5),
+                tap(2, _img(context, images[2], height: 98.5)),
               ],
             ),
           ),
@@ -2009,12 +2095,10 @@ class _ComposePostSheetState extends State<_ComposePostSheet> {
       _errorMessage = null;
     });
     try {
-      // Upload images first
-      final List<String> uploadedUrls = [];
-      for (final xfile in _pickedImages) {
-        final url = await _apiService.uploadPostImage(File(xfile.path));
-        uploadedUrls.add(url);
-      }
+      // Upload all photos at the same time (was one after another).
+      final List<String> uploadedUrls = await Future.wait(
+        _pickedImages.map((x) => _apiService.uploadPostImage(File(x.path))),
+      );
 
       final newPost = await _apiService.createPost(
         content: content,
@@ -2031,7 +2115,7 @@ class _ComposePostSheetState extends State<_ComposePostSheet> {
       if (mounted) {
         setState(() {
           _isPosting = false;
-          _errorMessage = e.toString().replaceFirst('Exception: ', '');
+          _errorMessage = appErrorMessage(context, e);
         });
       }
     }
@@ -2323,6 +2407,46 @@ class _ComposePostSheetState extends State<_ComposePostSheet> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Loading placeholder shaped like feed posts (avatar, lines, photo).
+class _FeedSkeleton extends StatelessWidget {
+  const _FeedSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      children: [
+        for (var i = 0; i < 3; i++)
+          Container(
+            margin: const EdgeInsets.only(bottom: 14),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(22)),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: const [
+                SkeletonBox(width: 40, height: 40, radius: 20),
+                SizedBox(width: 10),
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  SkeletonBox(width: 120, height: 12),
+                  SizedBox(height: 6),
+                  SkeletonBox(width: 70, height: 10),
+                ]),
+              ]),
+              const SizedBox(height: 14),
+              const SkeletonBox(height: 12),
+              const SizedBox(height: 6),
+              const SkeletonBox(width: 200, height: 12),
+              if (i != 1) ...[
+                const SizedBox(height: 12),
+                const SkeletonBox(height: 170, radius: 14),
+              ],
+            ]),
+          ),
+      ],
     );
   }
 }

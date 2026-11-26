@@ -3744,4 +3744,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payAddDetailsButton => 'Add payment details';
+
+  @override
+  String get feedsSavedToBookmarks => 'Saved to your bookmarks';
+
+  @override
+  String get feedsRemovedFromBookmarks => 'Removed from bookmarks';
+
+  @override
+  String get commentsSafetyWarning =>
+      'Contact details aren’t allowed in group comments.';
+
+  @override
+  String get commentsYou => 'You';
+
+  @override
+  String get commentsLoadFailed => 'Couldn’t load comments.';
+
+  @override
+  String commentsReplyingTo(String name) {
+    return 'Replying to $name';
+  }
+
+  @override
+  String get commentsAddHint => 'Add a comment…';
+
+  @override
+  String get commentsReplyHint => 'Write a reply…';
+
+  @override
+  String get commentsSending => 'Sending…';
+
+  @override
+  String get commentsReply => 'Reply';
+
+  @override
+  String get feedsPosted => 'Posted! 🎉';
+
+  @override
+  String get feedsEmptyTitle => 'Nothing here yet';
+
+  @override
+  String get feedsEmptyBody =>
+      'Be the first to share something with your community.';
 }

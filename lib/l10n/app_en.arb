@@ -1974,5 +1974,19 @@
   "payWaitingClient": "Waiting for the client to pay.",
   "payConfirmedDone": "Payment confirmed ✓",
   "payAddYourDetails": "Add your payment details so clients know how to pay you.",
-  "payAddDetailsButton": "Add payment details"
+  "payAddDetailsButton": "Add payment details",
+  "feedsSavedToBookmarks": "Saved to your bookmarks",
+  "feedsRemovedFromBookmarks": "Removed from bookmarks",
+  "commentsSafetyWarning": "Contact details aren’t allowed in group comments.",
+  "commentsYou": "You",
+  "commentsLoadFailed": "Couldn’t load comments.",
+  "commentsReplyingTo": "Replying to {name}",
+  "@commentsReplyingTo": {"placeholders":{"name":{"type":"String"}}},
+  "commentsAddHint": "Add a comment…",
+  "commentsReplyHint": "Write a reply…",
+  "commentsSending": "Sending…",
+  "commentsReply": "Reply",
+  "feedsPosted": "Posted! 🎉",
+  "feedsEmptyTitle": "Nothing here yet",
+  "feedsEmptyBody": "Be the first to share something with your community."
 }

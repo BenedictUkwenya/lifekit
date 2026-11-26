@@ -5,7 +5,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:share_plus/share_plus.dart';
+import '../../../core/utils/share_text.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/utils/dates.dart';
@@ -57,7 +57,8 @@ class _GroupPostCardState extends State<GroupPostCard> {
 
   void _handleShare() {
     final String content = widget.post['content'] ?? '';
-    Share.share(
+    // shareText anchors the sheet (required on iPad and iOS 26 iPhones).
+    shareText(context,
       'Check out this post on LifeKit:\n\n"$content"\n\nJoin the community on LifeKit!',
     );
   }

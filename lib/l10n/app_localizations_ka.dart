@@ -3764,4 +3764,47 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get payAddDetailsButton => 'დეტალების დამატება';
+
+  @override
+  String get feedsSavedToBookmarks => 'შენახულია სანიშნეებში';
+
+  @override
+  String get feedsRemovedFromBookmarks => 'წაიშალა სანიშნეებიდან';
+
+  @override
+  String get commentsSafetyWarning =>
+      'ჯგუფის კომენტარებში საკონტაქტო მონაცემები დაუშვებელია.';
+
+  @override
+  String get commentsYou => 'თქვენ';
+
+  @override
+  String get commentsLoadFailed => 'კომენტარები ვერ ჩაიტვირთა.';
+
+  @override
+  String commentsReplyingTo(String name) {
+    return 'პასუხი: $name';
+  }
+
+  @override
+  String get commentsAddHint => 'დაწერეთ კომენტარი…';
+
+  @override
+  String get commentsReplyHint => 'დაწერეთ პასუხი…';
+
+  @override
+  String get commentsSending => 'იგზავნება…';
+
+  @override
+  String get commentsReply => 'პასუხი';
+
+  @override
+  String get feedsPosted => 'გამოქვეყნდა! 🎉';
+
+  @override
+  String get feedsEmptyTitle => 'აქ ჯერ არაფერია';
+
+  @override
+  String get feedsEmptyBody =>
+      'იყავით პირველი, ვინც საზოგადოებას რამეს გაუზიარებს.';
 }

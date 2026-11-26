@@ -2171,5 +2171,19 @@
   "payWaitingClient": "ველოდებით კლიენტის გადახდას.",
   "payConfirmedDone": "გადახდა დადასტურებულია ✓",
   "payAddYourDetails": "დაამატეთ გადახდის დეტალები, რომ კლიენტებმა იცოდნენ, როგორ გადაგიხადონ.",
-  "payAddDetailsButton": "დეტალების დამატება"
+  "payAddDetailsButton": "დეტალების დამატება",
+  "feedsSavedToBookmarks": "შენახულია სანიშნეებში",
+  "feedsRemovedFromBookmarks": "წაიშალა სანიშნეებიდან",
+  "commentsSafetyWarning": "ჯგუფის კომენტარებში საკონტაქტო მონაცემები დაუშვებელია.",
+  "commentsYou": "თქვენ",
+  "commentsLoadFailed": "კომენტარები ვერ ჩაიტვირთა.",
+  "commentsReplyingTo": "პასუხი: {name}",
+  "@commentsReplyingTo": {"placeholders":{"name":{"type":"String"}}},
+  "commentsAddHint": "დაწერეთ კომენტარი…",
+  "commentsReplyHint": "დაწერეთ პასუხი…",
+  "commentsSending": "იგზავნება…",
+  "commentsReply": "პასუხი",
+  "feedsPosted": "გამოქვეყნდა! 🎉",
+  "feedsEmptyTitle": "აქ ჯერ არაფერია",
+  "feedsEmptyBody": "იყავით პირველი, ვინც საზოგადოებას რამეს გაუზიარებს."
 }

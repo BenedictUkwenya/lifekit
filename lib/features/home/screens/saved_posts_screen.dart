@@ -6,6 +6,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import 'package:flutter/services.dart';
+import '../../../core/utils/error_handler.dart';
+import '../../../core/widgets/app_lottie.dart';
+import '../../../core/widgets/app_toast.dart';
+import 'feed_detail_screen.dart';
 
 class SavedPostsScreen extends StatefulWidget {
   const SavedPostsScreen({super.key});
@@ -43,6 +48,22 @@ class _SavedPostsScreenState extends State<SavedPostsScreen> {
     }
   }
 
+  /// Unsave instantly; put it back if the server refuses.
+  Future<void> _unsave(dynamic post) async {
+    HapticFeedback.selectionClick();
+    final l10n = AppLocalizations.of(context);
+    final index = posts.indexOf(post);
+    setState(() => posts.removeAt(index));
+    AppToast.success(context, l10n.feedsRemovedFromBookmarks);
+    try {
+      await _apiService.toggleBookmark('${post['id']}', saved: false);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => posts.insert(index.clamp(0, posts.length), post));
+      AppToast.error(context, l10n.feedsBookmarkFailed(appErrorMessage(context, e)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,11 +87,7 @@ class _SavedPostsScreenState extends State<SavedPostsScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.bookmark_border,
-                        size: 56,
-                        color: Colors.grey[300],
-                      ),
+                      const AppLottie(AppAnim.emptyBox, size: 150),
                       const SizedBox(height: 12),
                       Text(
                         AppLocalizations.of(context).txNoSavedPostsYet,
@@ -99,9 +116,14 @@ class _SavedPostsScreenState extends State<SavedPostsScreen> {
                       final pic = profile['profile_picture_url'];
                       final title = post['title'] ?? '';
                       final content = post['content'] ?? '';
-                      final image = post['image_url'];
+                      // Posts store photos in image_urls; image_url is the old single field.
+                      final urls = (post['image_urls'] as List?)?.whereType<String>().toList() ?? const <String>[];
+                      final String? image = urls.isNotEmpty ? urls.first : post['image_url'];
 
-                      return Container(
+                      return GestureDetector(
+                        onTap: () => Navigator.push(context,
+                            MaterialPageRoute(builder: (_) => FeedDetailScreen(post: post))),
+                        child: Container(
                         margin: const EdgeInsets.only(bottom: 12),
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -150,6 +172,11 @@ class _SavedPostsScreenState extends State<SavedPostsScreen> {
                                         ),
                                       ],
                                     ),
+                                  ),
+                                  IconButton(
+                                    tooltip: AppLocalizations.of(context).feedsRemovedFromBookmarks,
+                                    onPressed: () => _unsave(post),
+                                    icon: const Icon(Icons.bookmark_rounded, color: AppColors.primary),
                                   ),
                                 ],
                               ),
@@ -215,6 +242,7 @@ class _SavedPostsScreenState extends State<SavedPostsScreen> {
                             ],
                           ),
                         ),
+                      ),
                       );
                     }).cascadeIn(index),
                   ),

@@ -3760,4 +3760,47 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get payAddDetailsButton => 'Добавить данные';
+
+  @override
+  String get feedsSavedToBookmarks => 'Сохранено в закладки';
+
+  @override
+  String get feedsRemovedFromBookmarks => 'Удалено из закладок';
+
+  @override
+  String get commentsSafetyWarning =>
+      'Контактные данные в комментариях группы запрещены.';
+
+  @override
+  String get commentsYou => 'Вы';
+
+  @override
+  String get commentsLoadFailed => 'Не удалось загрузить комментарии.';
+
+  @override
+  String commentsReplyingTo(String name) {
+    return 'Ответ для $name';
+  }
+
+  @override
+  String get commentsAddHint => 'Напишите комментарий…';
+
+  @override
+  String get commentsReplyHint => 'Напишите ответ…';
+
+  @override
+  String get commentsSending => 'Отправка…';
+
+  @override
+  String get commentsReply => 'Ответить';
+
+  @override
+  String get feedsPosted => 'Опубликовано! 🎉';
+
+  @override
+  String get feedsEmptyTitle => 'Здесь пока пусто';
+
+  @override
+  String get feedsEmptyBody =>
+      'Станьте первым, кто поделится чем-то с сообществом.';
 }

@@ -2171,5 +2171,19 @@
   "payWaitingClient": "Ожидаем оплату от клиента.",
   "payConfirmedDone": "Оплата подтверждена ✓",
   "payAddYourDetails": "Добавьте платёжные данные, чтобы клиенты знали, как вам заплатить.",
-  "payAddDetailsButton": "Добавить данные"
+  "payAddDetailsButton": "Добавить данные",
+  "feedsSavedToBookmarks": "Сохранено в закладки",
+  "feedsRemovedFromBookmarks": "Удалено из закладок",
+  "commentsSafetyWarning": "Контактные данные в комментариях группы запрещены.",
+  "commentsYou": "Вы",
+  "commentsLoadFailed": "Не удалось загрузить комментарии.",
+  "commentsReplyingTo": "Ответ для {name}",
+  "@commentsReplyingTo": {"placeholders":{"name":{"type":"String"}}},
+  "commentsAddHint": "Напишите комментарий…",
+  "commentsReplyHint": "Напишите ответ…",
+  "commentsSending": "Отправка…",
+  "commentsReply": "Ответить",
+  "feedsPosted": "Опубликовано! 🎉",
+  "feedsEmptyTitle": "Здесь пока пусто",
+  "feedsEmptyBody": "Станьте первым, кто поделится чем-то с сообществом."
 }

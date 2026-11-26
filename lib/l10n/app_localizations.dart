@@ -7101,6 +7101,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add payment details'**
   String get payAddDetailsButton;
+
+  /// No description provided for @feedsSavedToBookmarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to your bookmarks'**
+  String get feedsSavedToBookmarks;
+
+  /// No description provided for @feedsRemovedFromBookmarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from bookmarks'**
+  String get feedsRemovedFromBookmarks;
+
+  /// No description provided for @commentsSafetyWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact details aren’t allowed in group comments.'**
+  String get commentsSafetyWarning;
+
+  /// No description provided for @commentsYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get commentsYou;
+
+  /// No description provided for @commentsLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t load comments.'**
+  String get commentsLoadFailed;
+
+  /// No description provided for @commentsReplyingTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Replying to {name}'**
+  String commentsReplyingTo(String name);
+
+  /// No description provided for @commentsAddHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a comment…'**
+  String get commentsAddHint;
+
+  /// No description provided for @commentsReplyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a reply…'**
+  String get commentsReplyHint;
+
+  /// No description provided for @commentsSending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending…'**
+  String get commentsSending;
+
+  /// No description provided for @commentsReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply'**
+  String get commentsReply;
+
+  /// No description provided for @feedsPosted.
+  ///
+  /// In en, this message translates to:
+  /// **'Posted! 🎉'**
+  String get feedsPosted;
+
+  /// No description provided for @feedsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here yet'**
+  String get feedsEmptyTitle;
+
+  /// No description provided for @feedsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Be the first to share something with your community.'**
+  String get feedsEmptyBody;
 }
 
 class _AppLocalizationsDelegate

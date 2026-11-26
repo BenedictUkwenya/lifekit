@@ -7,6 +7,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
+import '../widgets/comments_sheet.dart';
+import '../../../core/widgets/skeleton.dart';
+import '../widgets/photo_viewer.dart';
+import 'package:flutter/services.dart';
 import '../../../core/utils/dates.dart';
 
 class FeedDetailScreen extends StatefulWidget {
@@ -60,33 +64,78 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
     }
   }
 
+  int _likeSeq = 0;
+
+  // Instant: flip now, tell the server the wanted state, undo on failure.
   void _handleLike() {
-    _apiService
-        .toggleLike(widget.post['id'])
-        .then((result) {
-          if (!mounted) return;
-          setState(() {
-            isLiked = result['is_liked_by_me'] ?? isLiked;
-            likeCount = result['likes_count'] ?? likeCount;
-          });
-        })
-        .catchError((e) {
-          if (!mounted) return;
-          AppToast.info(context, appErrorMessage(context, e));
-        });
+    HapticFeedback.lightImpact();
+    final want = !isLiked;
+    final prevLiked = isLiked, prevCount = likeCount;
+    setState(() {
+      isLiked = want;
+      likeCount = (likeCount + (want ? 1 : -1)).clamp(0, 1 << 30);
+    });
+    widget.post['is_liked_by_me'] = isLiked;
+    widget.post['likes_count'] = likeCount;
+    final seq = ++_likeSeq;
+    _apiService.toggleLike(widget.post['id'], liked: want).then((result) {
+      if (!mounted || seq != _likeSeq) return;
+      setState(() {
+        isLiked = result['is_liked_by_me'] ?? want;
+        likeCount = result['likes_count'] ?? likeCount;
+      });
+    }).catchError((Object e) {
+      if (!mounted || seq != _likeSeq) return;
+      setState(() {
+        isLiked = prevLiked;
+        likeCount = prevCount;
+      });
+      widget.post['is_liked_by_me'] = prevLiked;
+      widget.post['likes_count'] = prevCount;
+      AppToast.error(context, appErrorMessage(context, e));
+    });
+  }
+
+  /// Replies are written in the comments sheet (it handles threading).
+  Future<void> _openThread() async {
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => CommentsSheet(
+        postId: widget.post['id'],
+        onCommentPosted: () => setState(() => commentCount++),
+        onCommentsDeleted: (n) => setState(() => commentCount = (commentCount - n).clamp(0, 1 << 30)),
+      ),
+    );
+    _fetchComments();
   }
 
   Future<void> _postComment() async {
     final text = _commentController.text.trim();
     if (text.isEmpty) return;
-    setState(() => isPosting = true);
-    try {
-      await _apiService.postComment(widget.post['id'], text);
+    HapticFeedback.lightImpact();
+    // Show it straight away; replace with the saved comment when the server answers.
+    final tmp = <String, dynamic>{
+      'id': 'tmp_${DateTime.now().microsecondsSinceEpoch}',
+      'content': text,
+      'parent_id': null,
+      'created_at': DateTime.now().toUtc().toIso8601String(),
+      'profiles': {'full_name': AppLocalizations.of(context).commentsYou},
+      '_pending': true,
+    };
+    setState(() {
+      comments = [...comments, tmp];
+      commentCount++;
       _commentController.clear();
-      await _fetchComments();
+    });
+    try {
+      final saved = await _apiService.postComment(widget.post['id'], text);
       if (mounted) {
         setState(() {
-          commentCount++;
+          comments = [
+            for (final c in comments)
+              if (c['id'] == tmp['id'] && saved is Map) Map<String, dynamic>.from(saved) else c,
+          ];
         });
       }
       // Scroll to bottom after posting
@@ -99,7 +148,14 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
           );
         }
       });
-    } catch (_) {
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        comments = comments.where((c) => c['id'] != tmp['id']).toList();
+        commentCount = (commentCount - 1).clamp(0, 1 << 30);
+        if (_commentController.text.isEmpty) _commentController.text = text;
+      });
+      AppToast.error(context, appErrorMessage(context, e));
     } finally {
       if (mounted) setState(() => isPosting = false);
     }
@@ -122,7 +178,11 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
     final pic = profile['profile_picture_url'];
     final title = widget.post['title'] ?? '';
     final content = widget.post['content'] ?? '';
-    final image = widget.post['image_url'];
+    // Photos live in image_urls; image_url is the old single-photo field.
+    final List<String> images = [
+      ...((widget.post['image_urls'] as List?)?.whereType<String>() ?? const <String>[]),
+    ];
+    if (images.isEmpty && widget.post['image_url'] is String) images.add(widget.post['image_url']);
     final createdAt = widget.post['created_at'];
 
     return Scaffold(
@@ -172,18 +232,10 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
                 controller: _scrollController,
                 children: [
                   // Post image
-                  if (image != null)
+                  if (images.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: CachedNetworkImage(
-                          imageUrl: image,
-                          width: double.infinity,
-                          height: 220,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
+                      child: _DetailPhotos(images: images),
                     ),
 
                   // ── Post itself (first "comment" row) ─
@@ -215,24 +267,42 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
                       ),
                     )
                   else
-                    ...comments.asMap().entries.map((entry) {
-                      final i = entry.key;
-                      final c = entry.value;
-                      final u = c['profiles'] ?? {};
-                      return _PostRow(
-                        avatar: u['profile_picture_url'],
-                        name: u['full_name'] ?? 'User',
-                        handle: u['username'] ?? 'user',
-                        timeAgo: _timeAgo(c['created_at']),
-                        title: null,
-                        content: c['content'] ?? '',
-                        likeCount: null,
-                        commentCount: null,
-                        isLiked: false,
-                        onLike: null,
-                        showDivider: i < comments.length - 1,
-                      );
-                    }),
+                    ...() {
+                      final top = comments.where((c) => c['parent_id'] == null).toList();
+                      Widget row(dynamic c, {required bool divider, bool reply = false}) {
+                        final u = c['profiles'] ?? {};
+                        return Padding(
+                          padding: EdgeInsets.only(left: reply ? 40 : 0),
+                          child: Opacity(
+                            opacity: c['_pending'] == true ? 0.55 : 1,
+                            child: _PostRow(
+                              avatar: u['profile_picture_url'],
+                              name: u['full_name'] ?? 'User',
+                              handle: u['username'] ?? 'user',
+                              timeAgo: c['_pending'] == true
+                                  ? AppLocalizations.of(context).commentsSending
+                                  : _timeAgo(c['created_at']),
+                              title: null,
+                              content: c['content'] ?? '',
+                              likeCount: null,
+                              commentCount: null,
+                              isLiked: false,
+                              onLike: null,
+                              showDivider: divider,
+                              onReply: c['_pending'] == true ? null : _openThread,
+                            ),
+                          ),
+                        );
+                      }
+                      return [
+                        for (var i = 0; i < top.length; i++) ...[
+                          row(top[i], divider: false),
+                          for (final r in comments.where((x) => x['parent_id'] == top[i]['id']))
+                            row(r, divider: false, reply: true),
+                          if (i < top.length - 1) const Divider(height: 1, indent: 16, endIndent: 16),
+                        ],
+                      ];
+                    }(),
 
                   const SizedBox(height: 20),
                 ],
@@ -263,7 +333,7 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
                       child: TextField(
                         controller: _commentController,
                         decoration: InputDecoration(
-                          hintText: 'Add a comment...',
+                          hintText: AppLocalizations.of(context).commentsAddHint,
                           hintStyle: GoogleFonts.poppins(
                             fontSize: 13,
                             color: Colors.grey,
@@ -332,6 +402,7 @@ class _PostRow extends StatelessWidget {
   final bool isLiked;
   final VoidCallback? onLike;
   final bool showDivider;
+  final VoidCallback? onReply;
 
   const _PostRow({
     required this.avatar,
@@ -345,6 +416,7 @@ class _PostRow extends StatelessWidget {
     required this.isLiked,
     required this.onLike,
     required this.showDivider,
+    this.onReply,
   });
 
   @override
@@ -490,6 +562,17 @@ class _PostRow extends StatelessWidget {
               ],
             ),
           ),
+          if (onReply != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(66, 0, 16, 8),
+              child: GestureDetector(
+                onTap: onReply,
+                child: Text(
+                  AppLocalizations.of(context).commentsReply,
+                  style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey[700]),
+                ),
+              ),
+            ),
           if (showDivider) Divider(height: 1, color: Colors.grey.shade200),
         ],
       ),
@@ -552,5 +635,68 @@ class _SkeletonCommentRow extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// Swipeable photos with page dots; tap opens the full-screen viewer.
+class _DetailPhotos extends StatefulWidget {
+  final List<String> images;
+  const _DetailPhotos({required this.images});
+
+  @override
+  State<_DetailPhotos> createState() => _DetailPhotosState();
+}
+
+class _DetailPhotosState extends State<_DetailPhotos> {
+  int _page = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: [
+      ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: SizedBox(
+          height: 280,
+          child: PageView.builder(
+            itemCount: widget.images.length,
+            onPageChanged: (i) => setState(() => _page = i),
+            itemBuilder: (_, i) => GestureDetector(
+              onTap: () => PhotoViewer.open(context, widget.images, index: i),
+              child: CachedNetworkImage(
+                imageUrl: widget.images[i],
+                fit: BoxFit.cover,
+                width: double.infinity,
+                fadeInDuration: const Duration(milliseconds: 250),
+                placeholder: (_, __) => const SkeletonBox(height: 280, radius: 0),
+                errorWidget: (_, __, ___) => Container(
+                  color: Colors.grey[200],
+                  child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      if (widget.images.length > 1)
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (var i = 0; i < widget.images.length; i++)
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  width: i == _page ? 18 : 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: i == _page ? AppColors.primary : Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+            ],
+          ),
+        ),
+    ]);
   }
 }
