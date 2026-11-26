@@ -33,6 +33,10 @@ class BookingProgress {
   final bool isSwap;
   final DateTime? scheduledAt;
 
+  /// The client's money is held in LifeKit (bookings from before direct
+  /// payments). New bookings are paid to the provider directly.
+  final bool paidInApp;
+
   const BookingProgress({
     required this.phase,
     required this.currentStep,
@@ -40,6 +44,7 @@ class BookingProgress {
     required this.otherConfirmed,
     required this.isSwap,
     required this.scheduledAt,
+    this.paidInApp = false,
   });
 
   /// True when the viewer must do something (confirm) right now.
@@ -64,6 +69,7 @@ BookingProgress computeBookingProgress(
   final iConfirmed = isClient ? clientOk : providerOk;
   final otherConfirmed = isClient ? providerOk : clientOk;
   final isSwap = (num.tryParse('${booking['total_price']}') ?? 0) == 0;
+  final paidInApp = !isSwap && booking['payment_method'] == 'wallet';
 
   BookingProgress make(BookingPhase phase, BookingStep step, {bool allDone = false}) =>
       BookingProgress(
@@ -73,6 +79,7 @@ BookingProgress computeBookingProgress(
         otherConfirmed: otherConfirmed,
         isSwap: isSwap,
         scheduledAt: scheduledAt,
+        paidInApp: paidInApp,
       );
 
   switch (status) {

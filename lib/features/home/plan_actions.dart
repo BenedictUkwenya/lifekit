@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 
 import '../../core/services/api_service.dart';
 import '../../core/utils/error_handler.dart';
+import '../../core/utils/store_rules.dart';
 import '../../core/widgets/app_toast.dart';
 import '../profile/screens/edit_profile_screen.dart';
 import '../profile/screens/wallet_screen.dart';
 import '../provider/screens/select_main_category_screen.dart';
 import '../services/screens/services_list_screen.dart';
 
-/// Whether a plan task has a screen to jump to.
+/// Whether a plan task has a screen to jump to. Older plans may still point
+/// at the wallet, which is hidden while LifeKit doesn't take payments.
 bool planActionAvailable(String route) =>
-    const {'profile', 'create_service', 'explore', 'wallet'}.contains(route);
+    const {'profile', 'create_service', 'explore'}.contains(route) ||
+    (route == 'wallet' && StoreRules.inAppPayments);
 
 /// Opens the screen for a 7-day-plan task's `action_route`.
 ///
@@ -35,7 +38,7 @@ Future<void> openPlanAction(BuildContext context, String route) async {
     case 'explore':
       screen = const ServicesListScreen();
     case 'wallet':
-      screen = const WalletScreen();
+      if (StoreRules.inAppPayments) screen = const WalletScreen();
   }
   if (screen != null) nav.push(MaterialPageRoute(builder: (_) => screen!));
 }

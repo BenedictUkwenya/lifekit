@@ -13,6 +13,7 @@ import '../../../core/widgets/success_screen.dart';
 import 'bookings_screen.dart';
 import '../../wallet/screens/add_money_screen.dart';
 import '../../../core/widgets/lifekit_loader.dart';
+import '../../../core/utils/store_rules.dart';
 import '../../../l10n/app_localizations.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -32,7 +33,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchWallet();
+    // While LifeKit doesn't take payments, clients pay the provider directly:
+    // no wallet to read and nothing to charge here.
+    if (StoreRules.inAppPayments) {
+      _fetchWallet();
+    } else {
+      isLoading = false;
+    }
   }
 
   Future<void> _fetchWallet() async {
@@ -60,7 +67,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Future<void> _processPayment() async {
     double total = _calculateTotal();
 
-    if (walletBalance < total) {
+    if (StoreRules.inAppPayments && walletBalance < total) {
       _showInsufficientFundsDialog(total);
       return;
     }
@@ -231,7 +238,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       context,
       MaterialPageRoute(
         builder: (ctx) => SuccessScreen(
-          title: l10n.paymentSuccess,
+          title: StoreRules.inAppPayments ? l10n.paymentSuccess : l10n.bookingRequestSent,
           subtitle: l10n.bookingSuccessSub,
           primaryLabel: l10n.viewMyBookings,
           onPrimary: () {
@@ -261,7 +268,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         leading: const BackButton(color: Colors.black),
         centerTitle: true,
         title: Text(
-          l10n.paymentTitle,
+          StoreRules.inAppPayments ? l10n.paymentTitle : l10n.checkoutTitle,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -292,7 +299,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          l10n.cartTotal,
+                          StoreRules.inAppPayments ? l10n.cartTotal : l10n.checkoutPriceLabel,
                           style: GoogleFonts.poppins(
                             color: Colors.white70,
                             fontSize: 12,
@@ -356,7 +363,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  Container(
+                  if (StoreRules.inAppPayments)
+                    Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -409,6 +417,56 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         ),
                       ],
                     ),
+                  )
+                  else
+                    Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.primary.withOpacity(0.15)),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.handshake_outlined,
+                            color: AppColors.primary,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.directPayTitle,
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                l10n.directPayBody,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: Colors.grey[700],
+                                  height: 1.45,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const Spacer(),
                   SizedBox(
@@ -425,7 +483,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         shadowColor: AppColors.primary.withOpacity(0.4),
                       )),
                     child: Text(
-                      l10n.paymentConfirm,
+                      StoreRules.inAppPayments ? l10n.paymentConfirm : l10n.checkoutSendRequest,
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,

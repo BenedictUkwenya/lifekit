@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/services/api_service.dart';
 import '../admin_strings.dart';
+import '../../../core/utils/store_rules.dart';
 import '../widgets/admin_ui.dart';
 
 /// Booking monitor with overdue nudges (web: Transactions page).
@@ -229,13 +230,19 @@ class _AdminDisputesScreenState extends State<AdminDisputesScreen> {
     final booking = (d['bookings'] as Map?) ?? const {};
     final refund = verdict == 'refund_client';
     final party = (booking[refund ? 'client' : 'provider'] as Map?)?['full_name'];
+    // Only old wallet bookings hold money; direct bookings just get closed.
+    final held = StoreRules.heldInApp(Map<String, dynamic>.from(booking));
     final ok = await adminConfirm(
       context,
-      title: refund ? t('refundClient') : t('payProvider'),
-      message: t('resolveConfirm', {
-        'amount': adminMoney(booking['total_price']),
-        'name': '${party ?? t('unknown')}',
-      }),
+      title: held
+          ? (refund ? t('refundClient') : t('payProvider'))
+          : (refund ? t('cancelForClient') : t('completeForProvider')),
+      message: held
+          ? t('resolveConfirm', {
+              'amount': adminMoney(booking['total_price']),
+              'name': '${party ?? t('unknown')}',
+            })
+          : t('resolveConfirmDirect', {'name': '${party ?? t('unknown')}'}),
       confirmLabel: t('resolve'),
       destructive: refund,
     );
@@ -277,6 +284,8 @@ class _AdminDisputesScreenState extends State<AdminDisputesScreen> {
     final t = AdminStrings.of(context);
     final b = (d['bookings'] as Map?) ?? const {};
     final busy = _busy.contains('${d['booking_id']}');
+    final held = StoreRules.heldInApp(
+        Map<String, dynamic>.from((d['bookings'] as Map?) ?? const {}));
     Widget party(String role, Map? p) => Expanded(
       child: Row(
         children: [
@@ -354,7 +363,7 @@ class _AdminDisputesScreenState extends State<AdminDisputesScreen> {
               children: [
                 Expanded(
                   child: AdminButton(
-                    label: t('refundClient'),
+                    label: held ? t('refundClient') : t('cancelForClient'),
                     outlined: true,
                     destructive: true,
                     busy: busy,
@@ -364,7 +373,7 @@ class _AdminDisputesScreenState extends State<AdminDisputesScreen> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: AdminButton(
-                    label: t('payProvider'),
+                    label: held ? t('payProvider') : t('completeForProvider'),
                     busy: busy,
                     onPressed: () => _resolve(d, 'pay_provider', reload),
                   ),

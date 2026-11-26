@@ -6,6 +6,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/app_cache.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/utils/store_rules.dart';
 import 'select_main_category_screen.dart';
 import 'my_services_list_screen.dart';
 import '../../bookings/screens/bookings_screen.dart';
@@ -296,14 +297,20 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
-                            Icons.account_balance_wallet_outlined,
+                          Icon(
+                            StoreRules.inAppPayments
+                                ? Icons.account_balance_wallet_outlined
+                                : Icons.handshake_outlined,
                             color: Colors.white,
                             size: 13,
                           ),
                           const SizedBox(width: 5),
                           Text(
-                            AppLocalizations.of(context).walletTitle,
+                            // Earnings = completed bookings; clients pay the
+                            // provider directly while LifeKit takes no payments.
+                            StoreRules.inAppPayments
+                                ? AppLocalizations.of(context).walletTitle
+                                : AppLocalizations.of(context).dashboardPaidDirectly,
                             style: GoogleFonts.poppins(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
@@ -359,6 +366,8 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
                     ],
                   ),
                 ),
+                // Withdraw / History only make sense with in-app payments.
+                if (StoreRules.inAppPayments) ...[
                 const SizedBox(height: 16),
                 // Action buttons
                 Row(
@@ -384,6 +393,7 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
                     ),
                   ],
                 ),
+                ],
               ],
             ),
           ),

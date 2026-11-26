@@ -1327,7 +1327,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get helpFaqRefundAnswer =>
-      'Возврат поступает на ваш кошелёк сразу после подтверждения отмены.';
+      'LifeKit пока не принимает оплату в приложении — вы платите исполнителю напрямую, поэтому возврат обсуждайте с ним. Если что-то пошло не так, сообщите о проблеме из бронирования, и наша команда поможет.';
 
   @override
   String get walletWeeklyIncome => 'Доход за неделю';
@@ -1574,7 +1574,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get actionBookService => 'Забронировать услугу';
 
   @override
-  String get actionBookServiceSubtitle => 'Оплата и планирование';
+  String get actionBookServiceSubtitle => 'Запрос и время';
 
   @override
   String get actionSkillSwap => 'Обмен навыками';
@@ -2141,7 +2141,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get trialPerkServices => '✔ 5 услуг';
+  String get trialPerkServices => '✔ 3 услуги';
 
   @override
   String get trialPerkCommission => '✔ 3% комиссии';
@@ -3182,7 +3182,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get txOnline => 'В сети';
 
   @override
-  String get txOnly3CommissionUpTo5 => 'Всего 3% комиссии и до 3 услуг!';
+  String get txOnly3CommissionUpTo5 => 'Бесплатный Pro — до 3 услуг!';
 
   @override
   String get txOpenPosting => 'Открытые публикации';
@@ -3572,4 +3572,73 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get editProfileNameRequired => 'Пожалуйста, введите имя.';
+
+  @override
+  String get checkoutTitle => 'Подтверждение бронирования';
+
+  @override
+  String get checkoutPriceLabel => 'Цена — оплачивается исполнителю';
+
+  @override
+  String get directPayTitle => 'Оплата напрямую исполнителю';
+
+  @override
+  String get directPayBody =>
+      'LifeKit пока не принимает оплату в приложении. Когда исполнитель примет заказ, договоритесь об оплате в чате — наличными, картой или банковским переводом.';
+
+  @override
+  String get checkoutSendRequest => 'Отправить запрос';
+
+  @override
+  String get bookingRequestSent => 'Запрос на бронирование отправлен!';
+
+  @override
+  String get eventPayAtEvent => 'Оплата на месте';
+
+  @override
+  String get dashboardPaidDirectly => 'Оплата вам напрямую';
+
+  @override
+  String get trackHdrRequestedSubDirect =>
+      'Исполнитель скоро примет или отклонит ваш запрос.';
+
+  @override
+  String get trackHdrActionClientSubDirect =>
+      'Подтвердите, когда получите услугу.';
+
+  @override
+  String get trackHdrCompletedSubDirect =>
+      'Бронирование завершено. Спасибо, что пользуетесь LifeKit.';
+
+  @override
+  String get trackHdrOverdueSubDirect =>
+      'Подтвердите, что услуга оказана, или сообщите о проблеме.';
+
+  @override
+  String get trackHdrDisputedSubDirect =>
+      'Наша команда рассматривает этот спор и свяжется с вами.';
+
+  @override
+  String get trackHdrCancelledSubDirect => 'Это бронирование отменено.';
+
+  @override
+  String get trackEscrowBodyDirect =>
+      'Исполнитель отметил работу как выполненную. Если вы не подтвердите и не сообщите о проблеме, бронирование автоматически завершится через 48 часов.';
+
+  @override
+  String get trackDirectPayInfo =>
+      'Вы платите исполнителю напрямую — обсудите детали в чате.';
+
+  @override
+  String get trackStepDone => 'Завершено';
+
+  @override
+  String get trackStepDoneSub => 'Бронирование завершено';
+
+  @override
+  String get trackCancelConfirmBodyDirect =>
+      'Исполнитель ещё не принял заказ, поэтому вы можете отменить его сейчас.';
+
+  @override
+  String get trackCancelledDirect => 'Бронирование отменено.';
 }

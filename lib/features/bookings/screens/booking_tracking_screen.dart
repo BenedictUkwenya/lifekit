@@ -51,13 +51,17 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
     super.dispose();
   }
 
+  /// Money held in LifeKit (old wallet bookings) vs paid to the provider directly.
+  bool get _paidInApp =>
+      computeBookingProgress(_currentBooking as Map, isClient: widget.isClient).paidInApp;
+
   Future<void> _cancelAsClient() async {
     final l10n = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.trackCancelConfirmTitle),
-        content: Text(l10n.trackCancelConfirmBody),
+        content: Text(_paidInApp ? l10n.trackCancelConfirmBody : l10n.trackCancelConfirmBodyDirect),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.trackKeepBooking)),
           TextButton(
@@ -74,7 +78,7 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
       await _apiService.cancelBookingAsClient(_currentBooking['id'].toString());
       if (!mounted) return;
       setState(() => _currentBooking = {..._currentBooking, 'status': 'cancelled'});
-      AppToast.success(context, l10n.trackCancelledRefunded);
+      AppToast.success(context, _paidInApp ? l10n.trackCancelledRefunded : l10n.trackCancelledDirect);
     } catch (e) {
       if (mounted) AppToast.error(context, appErrorMessage(context, e));
     } finally {
@@ -324,7 +328,10 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
       if (!mounted) return;
       final l10n = AppLocalizations.of(context);
       if (_currentBooking['status'] == 'completed') {
-        Celebrate.show(context, title: l10n.trackHdrCompletedTitle, message: l10n.trackHdrCompletedSub, anim: AppAnim.stars);
+        Celebrate.show(context,
+            title: l10n.trackHdrCompletedTitle,
+            message: _paidInApp ? l10n.trackHdrCompletedSub : l10n.trackHdrCompletedSubDirect,
+            anim: AppAnim.stars);
       } else {
         AppToast.success(context, l10n.confirmationSent);
       }
@@ -386,7 +393,7 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
                 color: Colors.orange,
                 icon: Icons.access_time_filled_rounded,
                 title: l10n.trackEscrowTitle,
-                body: l10n.trackEscrowBody,
+                body: progress.paidInApp ? l10n.trackEscrowBody : l10n.trackEscrowBodyDirect,
               ).fadeSlideIn(index: 1),
             ],
             const SizedBox(height: 14),
@@ -477,11 +484,18 @@ class _BookingTrackingScreenState extends State<BookingTrackingScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.lock_outline_rounded, size: 14, color: Colors.grey[500]),
+                  Icon(
+                      progress.paidInApp ? Icons.lock_outline_rounded : Icons.handshake_outlined,
+                      size: 14,
+                      color: Colors.grey[500]),
                   const SizedBox(width: 6),
                   Flexible(
                     child: Text(
-                      progress.isSwap ? l10n.trackSwapInfo : l10n.trackEscrowInfo,
+                      progress.isSwap
+                          ? l10n.trackSwapInfo
+                          : progress.paidInApp
+                              ? l10n.trackEscrowInfo
+                              : l10n.trackDirectPayInfo,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(fontSize: 11.5, color: Colors.grey[600]),
                     ),
@@ -568,7 +582,7 @@ class _StatusHero extends StatelessWidget {
       case BookingPhase.requested:
         return isClient
             ? _HeroStyle(const [Color(0xFFF59E0B), Color(0xFFEA580C)], Icons.hourglass_top_rounded,
-                l10n.trackHdrRequestedTitle, l10n.trackHdrRequestedSub)
+                l10n.trackHdrRequestedTitle, (progress.paidInApp ? l10n.trackHdrRequestedSub : l10n.trackHdrRequestedSubDirect))
             : _HeroStyle(const [Color(0xFF89273B), Color(0xFFB4405A)], Icons.mark_email_unread_rounded,
                 l10n.trackHdrNewRequestTitle, l10n.trackHdrNewRequestSub);
       case BookingPhase.upcoming:
@@ -580,20 +594,20 @@ class _StatusHero extends StatelessWidget {
                 l10n.trackHdrWaitingTitle(otherName), l10n.trackHdrWaitingSub)
             : _HeroStyle(const [Color(0xFF89273B), Color(0xFFB4405A)], Icons.touch_app_rounded,
                 l10n.trackHdrActionTitle,
-                isClient ? l10n.trackHdrActionClientSub : l10n.trackHdrActionProviderSub);
+                isClient ? (progress.paidInApp ? l10n.trackHdrActionClientSub : l10n.trackHdrActionClientSubDirect) : l10n.trackHdrActionProviderSub);
       case BookingPhase.overdue:
         return _HeroStyle(const [Color(0xFFDC2626), Color(0xFFF97316)], Icons.warning_amber_rounded,
-            l10n.trackHdrOverdueTitle, l10n.trackHdrOverdueSub);
+            l10n.trackHdrOverdueTitle, (progress.paidInApp ? l10n.trackHdrOverdueSub : l10n.trackHdrOverdueSubDirect));
       case BookingPhase.completed:
         return _HeroStyle(const [Color(0xFF059669), Color(0xFF10B981)], Icons.check_circle_rounded,
             l10n.trackHdrCompletedTitle,
-            progress.isSwap ? l10n.trackHdrSwapCompletedSub : l10n.trackHdrCompletedSub);
+            progress.isSwap ? l10n.trackHdrSwapCompletedSub : (progress.paidInApp ? l10n.trackHdrCompletedSub : l10n.trackHdrCompletedSubDirect));
       case BookingPhase.disputed:
         return _HeroStyle(const [Color(0xFFB91C1C), Color(0xFF7F1D1D)], Icons.gavel_rounded,
-            l10n.trackHdrDisputedTitle, l10n.trackHdrDisputedSub);
+            l10n.trackHdrDisputedTitle, (progress.paidInApp ? l10n.trackHdrDisputedSub : l10n.trackHdrDisputedSubDirect));
       case BookingPhase.cancelled:
         return _HeroStyle(const [Color(0xFF6B7280), Color(0xFF374151)], Icons.cancel_rounded,
-            l10n.trackHdrCancelledTitle, l10n.trackHdrCancelledSub);
+            l10n.trackHdrCancelledTitle, (progress.paidInApp ? l10n.trackHdrCancelledSub : l10n.trackHdrCancelledSubDirect));
     }
   }
 
@@ -882,7 +896,9 @@ class _Timeline extends StatelessWidget {
         case BookingStep.paidOut:
           return p.isSwap
               ? (l10n.trackStepSwapDone, l10n.trackStepSwapDoneSub)
-              : (l10n.trackStepPaidOut, l10n.trackStepPaidOutSub);
+              : p.paidInApp
+                  ? (l10n.trackStepPaidOut, l10n.trackStepPaidOutSub)
+                  : (l10n.trackStepDone, l10n.trackStepDoneSub);
       }
     }
 

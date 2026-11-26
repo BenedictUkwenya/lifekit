@@ -1328,7 +1328,7 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get helpFaqRefundAnswer =>
-      'თანხის დაბრუნება ხდება თქვენს საფულეში ჯავშნის გაუქმების დადასტურებისთანავე.';
+      'LifeKit ჯერ არ იღებს გადახდებს აპში — პროვაიდერს უხდით პირდაპირ, ამიტომ თანხის დაბრუნებაზე მასთან შეთანხმდით. თუ რამე არასწორად წავა, შეატყობინეთ ჯავშნიდან და ჩვენი გუნდი დაგეხმარებათ.';
 
   @override
   String get walletWeeklyIncome => 'კვირის შემოსავალი';
@@ -1575,7 +1575,7 @@ class AppLocalizationsKa extends AppLocalizations {
   String get actionBookService => 'სერვისის ჯავშანი';
 
   @override
-  String get actionBookServiceSubtitle => 'გადახდა და დაგეგმვა';
+  String get actionBookServiceSubtitle => 'მოთხოვნა და დაგეგმვა';
 
   @override
   String get actionSkillSwap => 'უნარების გაცვლა';
@@ -2143,7 +2143,7 @@ class AppLocalizationsKa extends AppLocalizations {
   }
 
   @override
-  String get trialPerkServices => '✔ 5 სერვისი';
+  String get trialPerkServices => '✔ 3 სერვისი';
 
   @override
   String get trialPerkCommission => '✔ 3% საკომისიო';
@@ -3188,8 +3188,7 @@ class AppLocalizationsKa extends AppLocalizations {
   String get txOnline => 'ონლაინ';
 
   @override
-  String get txOnly3CommissionUpTo5 =>
-      'მხოლოდ 3% საკომისიო და 3-მდე მომსახურება!';
+  String get txOnly3CommissionUpTo5 => 'უფასო Pro საცდელი — 3-მდე სერვისი!';
 
   @override
   String get txOpenPosting => 'ღია გამოქვეყნება';
@@ -3577,4 +3576,73 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get editProfileNameRequired => 'გთხოვთ, შეიყვანოთ სახელი.';
+
+  @override
+  String get checkoutTitle => 'ჯავშნის დადასტურება';
+
+  @override
+  String get checkoutPriceLabel => 'ფასი — უხდით პროვაიდერს';
+
+  @override
+  String get directPayTitle => 'გადაუხადეთ პროვაიდერს პირდაპირ';
+
+  @override
+  String get directPayBody =>
+      'LifeKit ჯერ არ იღებს გადახდებს აპში. როცა პროვაიდერი დაგეთანხმებათ, ჩატში შეთანხმდით გადახდის გზაზე — ნაღდი ფული, ბარათი ან საბანკო გადარიცხვა.';
+
+  @override
+  String get checkoutSendRequest => 'ჯავშნის მოთხოვნის გაგზავნა';
+
+  @override
+  String get bookingRequestSent => 'ჯავშნის მოთხოვნა გაიგზავნა!';
+
+  @override
+  String get eventPayAtEvent => 'გადახდა ღონისძიებაზე';
+
+  @override
+  String get dashboardPaidDirectly => 'გეხდიან პირდაპირ';
+
+  @override
+  String get trackHdrRequestedSubDirect =>
+      'ისინი მალე მიიღებენ ან უარყოფენ თქვენს მოთხოვნას.';
+
+  @override
+  String get trackHdrActionClientSubDirect =>
+      'დაადასტურეთ, როცა მომსახურებას მიიღებთ.';
+
+  @override
+  String get trackHdrCompletedSubDirect =>
+      'ჯავშანი დასრულდა. მადლობა, რომ იყენებთ LifeKit-ს.';
+
+  @override
+  String get trackHdrOverdueSubDirect =>
+      'გთხოვთ, დაადასტუროთ, რომ მომსახურება შესრულდა, ან შეატყობინოთ პრობლემა.';
+
+  @override
+  String get trackHdrDisputedSubDirect =>
+      'ჩვენი გუნდი განიხილავს ამ დავას და დაგიკავშირდებათ.';
+
+  @override
+  String get trackHdrCancelledSubDirect => 'ეს ჯავშანი გაუქმდა.';
+
+  @override
+  String get trackEscrowBodyDirect =>
+      'პროვაიდერმა სამუშაო დასრულებულად მონიშნა. თუ არ დაადასტურებთ ან არ შეატყობინებთ პრობლემას, 48 საათში ის ავტომატურად დასრულებულად ჩაითვლება.';
+
+  @override
+  String get trackDirectPayInfo =>
+      'პროვაიდერს უხდით პირდაპირ — დეტალებზე ჩატში შეთანხმდით.';
+
+  @override
+  String get trackStepDone => 'დასრულდა';
+
+  @override
+  String get trackStepDoneSub => 'ჯავშანი დასრულდა';
+
+  @override
+  String get trackCancelConfirmBodyDirect =>
+      'პროვაიდერს ჯერ არ დაუდასტურებია, ამიტომ ახლა შეგიძლიათ გაუქმება.';
+
+  @override
+  String get trackCancelledDirect => 'ჯავშანი გაუქმდა.';
 }

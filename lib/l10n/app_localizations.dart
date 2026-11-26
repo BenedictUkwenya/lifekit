@@ -2623,7 +2623,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpFaqRefundAnswer.
   ///
   /// In en, this message translates to:
-  /// **'Refunds are processed to your wallet immediately after cancellation confirmation.'**
+  /// **'LifeKit doesn\'t take payments in the app yet — you pay the provider directly, so agree any refund with them. If something goes wrong, report it from the booking and our team will help.'**
   String get helpFaqRefundAnswer;
 
   /// No description provided for @walletWeeklyIncome.
@@ -3073,7 +3073,7 @@ abstract class AppLocalizations {
   /// No description provided for @actionBookServiceSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Pay & schedule'**
+  /// **'Request & schedule'**
   String get actionBookServiceSubtitle;
 
   /// No description provided for @actionSkillSwap.
@@ -4141,7 +4141,7 @@ abstract class AppLocalizations {
   /// No description provided for @trialPerkServices.
   ///
   /// In en, this message translates to:
-  /// **'✔ 5 Services'**
+  /// **'✔ 3 Services'**
   String get trialPerkServices;
 
   /// No description provided for @trialPerkCommission.
@@ -6049,7 +6049,7 @@ abstract class AppLocalizations {
   /// No description provided for @txOnly3CommissionUpTo5.
   ///
   /// In en, this message translates to:
-  /// **'Only 3% commission & up to 3 services!'**
+  /// **'Free Pro trial — up to 3 services!'**
   String get txOnly3CommissionUpTo5;
 
   /// No description provided for @txOpenPosting.
@@ -6771,6 +6771,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please enter your name.'**
   String get editProfileNameRequired;
+
+  /// No description provided for @checkoutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm booking'**
+  String get checkoutTitle;
+
+  /// No description provided for @checkoutPriceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Price — you pay the provider'**
+  String get checkoutPriceLabel;
+
+  /// No description provided for @directPayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay the provider directly'**
+  String get directPayTitle;
+
+  /// No description provided for @directPayBody.
+  ///
+  /// In en, this message translates to:
+  /// **'LifeKit doesn\'t take payments in the app yet. Once the provider accepts, agree how to pay in chat — cash, card or bank transfer.'**
+  String get directPayBody;
+
+  /// No description provided for @checkoutSendRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Send booking request'**
+  String get checkoutSendRequest;
+
+  /// No description provided for @bookingRequestSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking request sent!'**
+  String get bookingRequestSent;
+
+  /// No description provided for @eventPayAtEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay at the event'**
+  String get eventPayAtEvent;
+
+  /// No description provided for @dashboardPaidDirectly.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid to you directly'**
+  String get dashboardPaidDirectly;
+
+  /// No description provided for @trackHdrRequestedSubDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'They\'ll accept or decline your request soon.'**
+  String get trackHdrRequestedSubDirect;
+
+  /// No description provided for @trackHdrActionClientSubDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm once you\'ve received the service.'**
+  String get trackHdrActionClientSubDirect;
+
+  /// No description provided for @trackHdrCompletedSubDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'This booking is complete. Thanks for using LifeKit.'**
+  String get trackHdrCompletedSubDirect;
+
+  /// No description provided for @trackHdrOverdueSubDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm the service was completed, or report an issue.'**
+  String get trackHdrOverdueSubDirect;
+
+  /// No description provided for @trackHdrDisputedSubDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Our team is reviewing this dispute and will be in touch.'**
+  String get trackHdrDisputedSubDirect;
+
+  /// No description provided for @trackHdrCancelledSubDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'This booking was cancelled.'**
+  String get trackHdrCancelledSubDirect;
+
+  /// No description provided for @trackEscrowBodyDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'The provider marked this job as done. If you don\'t confirm or report an issue, it\'s marked completed automatically in 48 hours.'**
+  String get trackEscrowBodyDirect;
+
+  /// No description provided for @trackDirectPayInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'You pay the provider directly — agree the details in chat.'**
+  String get trackDirectPayInfo;
+
+  /// No description provided for @trackStepDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get trackStepDone;
+
+  /// No description provided for @trackStepDoneSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking completed'**
+  String get trackStepDoneSub;
+
+  /// No description provided for @trackCancelConfirmBodyDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'The provider hasn\'t accepted yet, so you can cancel now.'**
+  String get trackCancelConfirmBodyDirect;
+
+  /// No description provided for @trackCancelledDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking cancelled.'**
+  String get trackCancelledDirect;
 }
 
 class _AppLocalizationsDelegate

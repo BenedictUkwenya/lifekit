@@ -434,14 +434,7 @@ class _ServiceProfileScreenState extends State<ServiceProfileScreen>
               color: Colors.grey[700],
             ),
           ),
-          const SizedBox(height: 20),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _buildTag("Secure Payment"),
-            ],
-          ),
+          // (A "Secure Payment" badge was here; LifeKit doesn't take payments.)
         ],
       ),
     );
@@ -688,20 +681,6 @@ class _ServiceProfileScreenState extends State<ServiceProfileScreen>
     );
   }
 
-  Widget _buildTag(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: Text(
-        text,
-        style: GoogleFonts.poppins(fontSize: 11, color: Colors.black54),
-      ),
-    );
-  }
 }
 
 // --- STICKY HEADER DELEGATE ---

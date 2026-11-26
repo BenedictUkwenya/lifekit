@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import 'event_booking_screen.dart';
+import '../../../core/utils/store_rules.dart';
 import '../../../core/utils/dates.dart';
 
 class EventDetailScreen extends StatefulWidget {
@@ -674,6 +675,21 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         ],
                       ),
                       const Spacer(),
+                      // Tickets aren't sold in the app while LifeKit doesn't
+                      // take payments; people pay at the event.
+                      if (!StoreRules.inAppPayments)
+                        Flexible(
+                          child: Text(
+                            AppLocalizations.of(context).eventPayAtEvent,
+                            textAlign: TextAlign.end,
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        )
+                      else
                       SizedBox(
                         height: 48,
                         child: ElevatedButton.icon(

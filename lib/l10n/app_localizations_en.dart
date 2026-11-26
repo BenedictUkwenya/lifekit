@@ -1317,7 +1317,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpFaqRefundAnswer =>
-      'Refunds are processed to your wallet immediately after cancellation confirmation.';
+      'LifeKit doesn\'t take payments in the app yet — you pay the provider directly, so agree any refund with them. If something goes wrong, report it from the booking and our team will help.';
 
   @override
   String get walletWeeklyIncome => 'Weekly Income';
@@ -1564,7 +1564,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionBookService => 'Book Service';
 
   @override
-  String get actionBookServiceSubtitle => 'Pay & schedule';
+  String get actionBookServiceSubtitle => 'Request & schedule';
 
   @override
   String get actionSkillSwap => 'Skill Swap';
@@ -2128,7 +2128,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get trialPerkServices => '✔ 5 Services';
+  String get trialPerkServices => '✔ 3 Services';
 
   @override
   String get trialPerkCommission => '✔ 3% Commission';
@@ -3168,7 +3168,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get txOnline => 'Online';
 
   @override
-  String get txOnly3CommissionUpTo5 => 'Only 3% commission & up to 3 services!';
+  String get txOnly3CommissionUpTo5 => 'Free Pro trial — up to 3 services!';
 
   @override
   String get txOpenPosting => 'Open Posting';
@@ -3555,4 +3555,73 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editProfileNameRequired => 'Please enter your name.';
+
+  @override
+  String get checkoutTitle => 'Confirm booking';
+
+  @override
+  String get checkoutPriceLabel => 'Price — you pay the provider';
+
+  @override
+  String get directPayTitle => 'Pay the provider directly';
+
+  @override
+  String get directPayBody =>
+      'LifeKit doesn\'t take payments in the app yet. Once the provider accepts, agree how to pay in chat — cash, card or bank transfer.';
+
+  @override
+  String get checkoutSendRequest => 'Send booking request';
+
+  @override
+  String get bookingRequestSent => 'Booking request sent!';
+
+  @override
+  String get eventPayAtEvent => 'Pay at the event';
+
+  @override
+  String get dashboardPaidDirectly => 'Paid to you directly';
+
+  @override
+  String get trackHdrRequestedSubDirect =>
+      'They\'ll accept or decline your request soon.';
+
+  @override
+  String get trackHdrActionClientSubDirect =>
+      'Confirm once you\'ve received the service.';
+
+  @override
+  String get trackHdrCompletedSubDirect =>
+      'This booking is complete. Thanks for using LifeKit.';
+
+  @override
+  String get trackHdrOverdueSubDirect =>
+      'Please confirm the service was completed, or report an issue.';
+
+  @override
+  String get trackHdrDisputedSubDirect =>
+      'Our team is reviewing this dispute and will be in touch.';
+
+  @override
+  String get trackHdrCancelledSubDirect => 'This booking was cancelled.';
+
+  @override
+  String get trackEscrowBodyDirect =>
+      'The provider marked this job as done. If you don\'t confirm or report an issue, it\'s marked completed automatically in 48 hours.';
+
+  @override
+  String get trackDirectPayInfo =>
+      'You pay the provider directly — agree the details in chat.';
+
+  @override
+  String get trackStepDone => 'Completed';
+
+  @override
+  String get trackStepDoneSub => 'Booking completed';
+
+  @override
+  String get trackCancelConfirmBodyDirect =>
+      'The provider hasn\'t accepted yet, so you can cancel now.';
+
+  @override
+  String get trackCancelledDirect => 'Booking cancelled.';
 }

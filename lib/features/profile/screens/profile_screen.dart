@@ -233,7 +233,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   runSpacing: 4,
                   children: [
                     _buildTrialPerk(l10n.trialPerkServices),
-                    _buildTrialPerk(l10n.trialPerkCommission),
+                    // No commission while clients pay providers directly.
+                    if (StoreRules.inAppPayments)
+                      _buildTrialPerk(l10n.trialPerkCommission),
                     _buildTrialPerk(l10n.trialPerkAI),
                   ],
                 ),
@@ -410,6 +412,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Wallet balance only exists while LifeKit takes payments.
+                      if (StoreRules.inAppPayments) ...[
                       Row(
                         children: [
                           Text(
@@ -485,6 +489,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 ),
                       const SizedBox(height: 14),
+                      ],
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(14),
@@ -868,16 +873,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ),
                           ),
-                          _buildToolItem(
-                            Icons.account_balance_wallet_outlined,
-                            l10n.walletTitle,
-                            () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const WalletScreen(),
+                          if (StoreRules.inAppPayments)
+                            _buildToolItem(
+                              Icons.account_balance_wallet_outlined,
+                              l10n.walletTitle,
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const WalletScreen(),
+                                ),
                               ),
                             ),
-                          ),
                           _buildToolItem(
                             Icons.edit_outlined,
                             l10n.profileEdit,

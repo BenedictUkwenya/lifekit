@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/dates.dart';
+import '../../../core/utils/store_rules.dart';
 
 class BookingReceiptScreen extends StatelessWidget {
   final dynamic booking;
@@ -26,17 +27,20 @@ class BookingReceiptScreen extends StatelessWidget {
     final timeStr = DateFormat('hh:mm a').format(dateObj);
     final serviceName = booking['services']['title'];
 
-    // Escrow Status Logic
-    String escrowStatus = "Funds held by Escrow";
+    // Payment status. Only old wallet bookings had money held by LifeKit;
+    // everything else is paid to the provider directly.
+    final l10n = AppLocalizations.of(context);
+    final paidInApp = StoreRules.heldInApp(Map<String, dynamic>.from(booking as Map));
+    String escrowStatus = paidInApp ? "Funds held by Escrow" : l10n.directPayTitle;
     Color escrowColor = Colors.orange;
-    IconData escrowIcon = Icons.lock_clock;
+    IconData escrowIcon = paidInApp ? Icons.lock_clock : Icons.handshake_outlined;
 
     if (status == 'completed') {
-      escrowStatus = "Funds Released to Provider";
+      escrowStatus = paidInApp ? "Funds Released to Provider" : l10n.trackStepDone;
       escrowColor = Colors.green;
       escrowIcon = Icons.check_circle;
     } else if (status == 'cancelled') {
-      escrowStatus = "Funds Refunded to Client";
+      escrowStatus = paidInApp ? "Funds Refunded to Client" : l10n.trackHdrCancelledTitle;
       escrowColor = Colors.red;
       escrowIcon = Icons.error;
     }
