@@ -3883,4 +3883,66 @@ class AppLocalizationsKa extends AppLocalizations {
   @override
   String get placesDataCredit =>
       'რუკის მონაცემები © OpenStreetMap-ის მონაწილეები';
+
+  @override
+  String get notifWhatYouGet => 'რას მიიღებთ';
+
+  @override
+  String get notifInAppAlways =>
+      'ყველაფერი ასევე ჩანს აპის შეტყობინებების სიაში.';
+
+  @override
+  String get notifPushComingSoon =>
+      'Push-შეტყობინებები მალე ჩაირთვება. მანამდე ყველაფერს ნახავთ აპის შეტყობინებების სიაში, მნიშვნელოვანს კი — ელფოსტით. თქვენი არჩევანი შენახული იქნება.';
+
+  @override
+  String get notifPushShort => 'Push';
+
+  @override
+  String get notifEmailShort => 'ფოსტა';
+
+  @override
+  String get notifCatMessages => 'შეტყობინებები';
+
+  @override
+  String get notifCatMessagesSub => 'ახალი ჩატის შეტყობინებები';
+
+  @override
+  String get notifCatBookings => 'ჯავშნები და გადახდები';
+
+  @override
+  String get notifCatBookingsSub =>
+      'მოთხოვნები, დადასტურებები, გადახდები, დავები';
+
+  @override
+  String get notifCatSwaps => 'უნარების გაცვლა';
+
+  @override
+  String get notifCatSwapsSub => 'შეთავაზებები და პასუხები';
+
+  @override
+  String get notifCatReminders => 'შეხსენებები';
+
+  @override
+  String get notifCatRemindersSub => 'მომავალი ჯავშნები';
+
+  @override
+  String get notifCatCommunity => 'საზოგადოება';
+
+  @override
+  String get notifCatCommunitySub =>
+      'კომენტარები, პასუხები, კითხვები ღონისძიებებზე';
+
+  @override
+  String get notifCatAccount => 'ანგარიში';
+
+  @override
+  String get notifCatAccountSub =>
+      'თქვენი გეგმა და ანგარიშის მნიშვნელოვანი სიახლეები';
+
+  @override
+  String get notifCatTips => 'რჩევები და სიახლეები';
+
+  @override
+  String get notifCatTipsSub => 'Gracy-ს რჩევები და LifeKit-ის სიახლეები';
 }

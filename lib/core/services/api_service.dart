@@ -838,6 +838,35 @@ class ApiService {
     return Map<String, dynamic>.from(data);
   }
 
+  // ---- Notification preferences (which categories go by push / email) ----
+  Future<Map<String, dynamic>> getNotificationPrefs() async =>
+      Map<String, dynamic>.from(await _authenticatedGet('/users/notification-prefs'));
+
+  /// [push]/[email]: {category: bool}; masters switch a whole channel.
+  Future<Map<String, dynamic>> saveNotificationPrefs({
+    Map<String, bool>? push,
+    Map<String, bool>? email,
+    bool? pushMaster,
+    bool? emailMaster,
+  }) async =>
+      Map<String, dynamic>.from(await _authenticatedPut('/users/notification-prefs', {
+        if (push != null) 'push': push,
+        if (email != null) 'email': email,
+        if (pushMaster != null) 'push_master': pushMaster,
+        if (emailMaster != null) 'email_master': emailMaster,
+      }));
+
+  /// Whether push notifications are switched on for LifeKit (Firebase set up).
+  Future<bool> isPushAvailable() async {
+    try {
+      final r = await _net.get(Uri.parse('$baseUrl/push/status'));
+      final d = await _processResponse(r);
+      return d is Map && d['available'] == true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// Public: which methods a provider accepts (never bank details).
   Future<Map<String, dynamic>> getProviderPaymentMethods(String userId) async {
     final key = 'pay_methods_$userId';

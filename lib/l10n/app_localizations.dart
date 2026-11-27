@@ -7305,6 +7305,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Map data © OpenStreetMap contributors'**
   String get placesDataCredit;
+
+  /// No description provided for @notifWhatYouGet.
+  ///
+  /// In en, this message translates to:
+  /// **'What you get'**
+  String get notifWhatYouGet;
+
+  /// No description provided for @notifInAppAlways.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything also appears in your notification list in the app.'**
+  String get notifInAppAlways;
+
+  /// No description provided for @notifPushComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Push notifications are coming soon. Until then you’ll see everything in the app’s notification list, and important updates by email. Your choices below are saved for when push is switched on.'**
+  String get notifPushComingSoon;
+
+  /// No description provided for @notifPushShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Push'**
+  String get notifPushShort;
+
+  /// No description provided for @notifEmailShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get notifEmailShort;
+
+  /// No description provided for @notifCatMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages'**
+  String get notifCatMessages;
+
+  /// No description provided for @notifCatMessagesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'New chat messages'**
+  String get notifCatMessagesSub;
+
+  /// No description provided for @notifCatBookings.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookings & payments'**
+  String get notifCatBookings;
+
+  /// No description provided for @notifCatBookingsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests, confirmations, payments, disputes'**
+  String get notifCatBookingsSub;
+
+  /// No description provided for @notifCatSwaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Skill swaps'**
+  String get notifCatSwaps;
+
+  /// No description provided for @notifCatSwapsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposals and answers'**
+  String get notifCatSwapsSub;
+
+  /// No description provided for @notifCatReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get notifCatReminders;
+
+  /// No description provided for @notifCatRemindersSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming bookings'**
+  String get notifCatRemindersSub;
+
+  /// No description provided for @notifCatCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Community'**
+  String get notifCatCommunity;
+
+  /// No description provided for @notifCatCommunitySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments, replies and event questions'**
+  String get notifCatCommunitySub;
+
+  /// No description provided for @notifCatAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get notifCatAccount;
+
+  /// No description provided for @notifCatAccountSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Your plan and important account news'**
+  String get notifCatAccountSub;
+
+  /// No description provided for @notifCatTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips & updates'**
+  String get notifCatTips;
+
+  /// No description provided for @notifCatTipsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Gracy’s tips and LifeKit news'**
+  String get notifCatTipsSub;
 }
 
 class _AppLocalizationsDelegate

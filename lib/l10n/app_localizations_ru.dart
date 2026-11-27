@@ -3891,4 +3891,63 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get placesDataCredit => 'Данные карты © участники OpenStreetMap';
+
+  @override
+  String get notifWhatYouGet => 'Что вы получаете';
+
+  @override
+  String get notifInAppAlways =>
+      'Всё также появляется в списке уведомлений в приложении.';
+
+  @override
+  String get notifPushComingSoon =>
+      'Push-уведомления скоро появятся. А пока всё будет в списке уведомлений в приложении, а важное — на почте. Ваш выбор ниже сохранится.';
+
+  @override
+  String get notifPushShort => 'Push';
+
+  @override
+  String get notifEmailShort => 'Почта';
+
+  @override
+  String get notifCatMessages => 'Сообщения';
+
+  @override
+  String get notifCatMessagesSub => 'Новые сообщения в чате';
+
+  @override
+  String get notifCatBookings => 'Бронирования и оплата';
+
+  @override
+  String get notifCatBookingsSub => 'Запросы, подтверждения, оплата, споры';
+
+  @override
+  String get notifCatSwaps => 'Обмен навыками';
+
+  @override
+  String get notifCatSwapsSub => 'Предложения и ответы';
+
+  @override
+  String get notifCatReminders => 'Напоминания';
+
+  @override
+  String get notifCatRemindersSub => 'Предстоящие бронирования';
+
+  @override
+  String get notifCatCommunity => 'Сообщество';
+
+  @override
+  String get notifCatCommunitySub => 'Комментарии, ответы, вопросы к событиям';
+
+  @override
+  String get notifCatAccount => 'Аккаунт';
+
+  @override
+  String get notifCatAccountSub => 'Ваш тариф и важное об аккаунте';
+
+  @override
+  String get notifCatTips => 'Советы и новости';
+
+  @override
+  String get notifCatTipsSub => 'Советы Gracy и новости LifeKit';
 }

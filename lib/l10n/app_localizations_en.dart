@@ -3874,4 +3874,64 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get placesDataCredit => 'Map data © OpenStreetMap contributors';
+
+  @override
+  String get notifWhatYouGet => 'What you get';
+
+  @override
+  String get notifInAppAlways =>
+      'Everything also appears in your notification list in the app.';
+
+  @override
+  String get notifPushComingSoon =>
+      'Push notifications are coming soon. Until then you’ll see everything in the app’s notification list, and important updates by email. Your choices below are saved for when push is switched on.';
+
+  @override
+  String get notifPushShort => 'Push';
+
+  @override
+  String get notifEmailShort => 'Email';
+
+  @override
+  String get notifCatMessages => 'Messages';
+
+  @override
+  String get notifCatMessagesSub => 'New chat messages';
+
+  @override
+  String get notifCatBookings => 'Bookings & payments';
+
+  @override
+  String get notifCatBookingsSub =>
+      'Requests, confirmations, payments, disputes';
+
+  @override
+  String get notifCatSwaps => 'Skill swaps';
+
+  @override
+  String get notifCatSwapsSub => 'Proposals and answers';
+
+  @override
+  String get notifCatReminders => 'Reminders';
+
+  @override
+  String get notifCatRemindersSub => 'Upcoming bookings';
+
+  @override
+  String get notifCatCommunity => 'Community';
+
+  @override
+  String get notifCatCommunitySub => 'Comments, replies and event questions';
+
+  @override
+  String get notifCatAccount => 'Account';
+
+  @override
+  String get notifCatAccountSub => 'Your plan and important account news';
+
+  @override
+  String get notifCatTips => 'Tips & updates';
+
+  @override
+  String get notifCatTipsSub => 'Gracy’s tips and LifeKit news';
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lifekit_frontend/core/widgets/chunky.dart';
 import '../../../core/widgets/lifekit_loader.dart';
 import '../../../core/widgets/app_toast.dart';
@@ -366,6 +367,19 @@ class _NotificationSettingsScreenState
   final ApiService _apiService = ApiService();
   bool push = true;
   bool email = true;
+  bool _pushAvailable = true;
+  bool _loading = true;
+  List<Map<String, dynamic>> _categories = [];
+
+  static const _icons = {
+    'messages': Icons.chat_bubble_outline_rounded,
+    'bookings': Icons.event_available_outlined,
+    'swaps': Icons.swap_horiz_rounded,
+    'reminders': Icons.alarm_rounded,
+    'community': Icons.forum_outlined,
+    'account': Icons.person_outline_rounded,
+    'tips': Icons.lightbulb_outline_rounded,
+  };
 
   @override
   void initState() {
@@ -373,31 +387,87 @@ class _NotificationSettingsScreenState
     _load();
   }
 
+  void _apply(Map<String, dynamic> d) {
+    email = d['email_master'] != false;
+    _categories = ((d['categories'] as List?) ?? const [])
+        .map((c) => Map<String, dynamic>.from(c as Map))
+        .toList();
+  }
+
   Future<void> _load() async {
-    final pushOn = await PushService.instance.isUserEnabled();
-    if (mounted) setState(() => push = pushOn);
-    try {
-      final data = await _apiService.getUserProfile();
-      final emailOn = data['profile']?['email_notifications_enabled'];
-      if (mounted && emailOn is bool) setState(() => email = emailOn);
-    } catch (_) {}
+    final results = await Future.wait([
+      PushService.instance.isUserEnabled(),
+      _apiService.isPushAvailable(),
+      _apiService.getNotificationPrefs().then<Map<String, dynamic>?>((v) => v).catchError((_) => null),
+    ]);
+    if (!mounted) return;
+    setState(() {
+      push = results[0] as bool;
+      _pushAvailable = results[1] as bool;
+      final prefs = results[2] as Map<String, dynamic>?;
+      if (prefs != null) {
+        _apply(prefs);
+        push = push && prefs['push_master'] != false;
+      }
+      _loading = false;
+    });
   }
 
   Future<void> _setPush(bool value) async {
     setState(() => push = value);
     await PushService.instance.setEnabled(value);
+    try {
+      await _apiService.saveNotificationPrefs(pushMaster: value);
+    } catch (_) {}
   }
 
   Future<void> _setEmail(bool value) async {
     setState(() => email = value);
     try {
-      await _apiService.updateProfile(emailNotifications: value);
+      final d = await _apiService.saveNotificationPrefs(emailMaster: value);
+      if (mounted) setState(() => _apply(d));
     } catch (e) {
       if (!mounted) return;
       setState(() => email = !value);
       AppToast.error(context, appErrorMessage(context, e));
     }
   }
+
+  Future<void> _setCategory(String key, String channel, bool value) async {
+    final cat = _categories.firstWhere((c) => c['key'] == key);
+    final prev = Map<String, dynamic>.from(cat[channel] as Map);
+    setState(() => cat[channel] = {...prev, 'enabled': value});
+    try {
+      await _apiService.saveNotificationPrefs(
+        push: channel == 'push' ? {key: value} : null,
+        email: channel == 'email' ? {key: value} : null,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => cat[channel] = prev);
+      AppToast.error(context, appErrorMessage(context, e));
+    }
+  }
+
+  String _title(AppLocalizations l10n, String key) => switch (key) {
+        'messages' => l10n.notifCatMessages,
+        'bookings' => l10n.notifCatBookings,
+        'swaps' => l10n.notifCatSwaps,
+        'reminders' => l10n.notifCatReminders,
+        'community' => l10n.notifCatCommunity,
+        'account' => l10n.notifCatAccount,
+        _ => l10n.notifCatTips,
+      };
+
+  String _subtitle(AppLocalizations l10n, String key) => switch (key) {
+        'messages' => l10n.notifCatMessagesSub,
+        'bookings' => l10n.notifCatBookingsSub,
+        'swaps' => l10n.notifCatSwapsSub,
+        'reminders' => l10n.notifCatRemindersSub,
+        'community' => l10n.notifCatCommunitySub,
+        'account' => l10n.notifCatAccountSub,
+        _ => l10n.notifCatTipsSub,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -407,41 +477,124 @@ class _NotificationSettingsScreenState
       appBar: AppBar(
         title: Text(
           l10n.settingsNotifications,
-          style: GoogleFonts.poppins(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
+          style: GoogleFonts.poppins(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16),
         ),
         backgroundColor: const Color(0xFFFAFAFA),
         elevation: 0,
         leading: const BackButton(color: Colors.black),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Container(
+      body: _loading
+          ? const Center(child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2))
+          : ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+              children: [
+                if (!_pushAvailable)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 14),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      const Icon(Icons.notifications_paused_outlined, color: AppColors.primary, size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(l10n.notifPushComingSoon,
+                            style: GoogleFonts.poppins(fontSize: 12.5, color: Colors.grey[800], height: 1.45)),
+                      ),
+                    ]),
+                  ),
+                Container(
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    _buildSwitch(l10n.notifPush, l10n.notifPushSubtitle, push, _setPush),
+                    const Divider(height: 1),
+                    _buildSwitch(l10n.notifEmail, l10n.notifEmailSubtitle, email, _setEmail),
+                  ]),
+                ),
+                if (_categories.isNotEmpty) ...[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(4, 22, 4, 4),
+                    child: Text(l10n.notifWhatYouGet,
+                        style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700)),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
+                    child: Text(l10n.notifInAppAlways,
+                        style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                    child: Column(children: [
+                      for (var i = 0; i < _categories.length; i++) ...[
+                        if (i > 0) const Divider(height: 1, indent: 16, endIndent: 16),
+                        _categoryRow(l10n, _categories[i]),
+                      ],
+                    ]),
+                  ),
+                ],
+              ],
+            ),
+    );
+  }
+
+  Widget _categoryRow(AppLocalizations l10n, Map<String, dynamic> c) {
+    final key = '${c['key']}';
+    final p = Map<String, dynamic>.from(c['push'] as Map);
+    final e = Map<String, dynamic>.from(c['email'] as Map);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+      child: Row(children: [
+        Container(
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            color: AppColors.primary.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(10),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildSwitch(
-                l10n.notifPush,
-                l10n.notifPushSubtitle,
-                push,
-                _setPush,
-              ),
-              const Divider(height: 1),
-              _buildSwitch(
-                l10n.notifEmail,
-                l10n.notifEmailSubtitle,
-                email,
-                _setEmail,
-              ),
-            ],
+          child: Icon(_icons[key] ?? Icons.notifications_none_rounded, size: 18, color: AppColors.primary),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(_title(l10n, key), style: GoogleFonts.poppins(fontSize: 13.5, fontWeight: FontWeight.w600)),
+            Text(_subtitle(l10n, key), style: GoogleFonts.poppins(fontSize: 11.5, color: Colors.grey[600])),
+          ]),
+        ),
+        const SizedBox(width: 6),
+        _pill(Icons.notifications_rounded, l10n.notifPushShort, p, master: push,
+            onTap: () => _setCategory(key, 'push', !(p['enabled'] == true))),
+        const SizedBox(width: 6),
+        _pill(Icons.mail_outline_rounded, l10n.notifEmailShort, e, master: email,
+            onTap: () => _setCategory(key, 'email', !(e['enabled'] == true))),
+      ]),
+    );
+  }
+
+  /// A small on/off pill for one channel of one category.
+  Widget _pill(IconData icon, String label, Map<String, dynamic> ch,
+      {required bool master, required VoidCallback onTap}) {
+    final allowed = ch['allowed'] == true;
+    final on = allowed && ch['enabled'] == true && master;
+    return Opacity(
+      opacity: allowed ? (master ? 1 : 0.45) : 0.25,
+      child: GestureDetector(
+        onTap: allowed && master ? () { HapticFeedback.selectionClick(); onTap(); } : null,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+          decoration: BoxDecoration(
+            color: on ? AppColors.primary : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: on ? AppColors.primary : Colors.grey.shade300),
           ),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            Icon(icon, size: 13, color: on ? Colors.white : Colors.grey[600]),
+            const SizedBox(width: 3),
+            Text(label,
+                style: GoogleFonts.poppins(
+                    fontSize: 10.5, fontWeight: FontWeight.w600, color: on ? Colors.white : Colors.grey[700])),
+          ]),
         ),
       ),
     );
@@ -454,14 +607,8 @@ class _NotificationSettingsScreenState
     Function(bool) onChanged,
   ) {
     return SwitchListTile(
-      title: Text(
-        title,
-        style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
-      ),
+      title: Text(title, style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+      subtitle: Text(subtitle, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey)),
       value: val,
       onChanged: onChanged,
       activeThumbColor: AppColors.primary,
