@@ -3934,4 +3934,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notifCatTipsSub => 'Gracy’s tips and LifeKit news';
+
+  @override
+  String get swapOfferHint => 'Pick one of your services to trade.';
+
+  @override
+  String get swapNoServicesTitle => 'No services yet';
+
+  @override
+  String get swapCreateFirstService => 'Create your first service';
+
+  @override
+  String get swapCreateNewService => 'Create a new service';
+
+  @override
+  String get swapProposalSentTitle => 'Proposal sent!';
+
+  @override
+  String get swapSectionNeedsAnswer => 'Waiting for your answer';
+
+  @override
+  String get swapSectionAwaitingThem => 'Waiting for their answer';
+
+  @override
+  String get swapSectionActive => 'Active swaps';
+
+  @override
+  String get swapSectionPast => 'Completed & closed';
+
+  @override
+  String swapProposalSentBody(String name) {
+    return 'We\'ve told $name. You\'ll get a notification when they answer. You can follow it under My swaps → Outgoing.';
+  }
 }

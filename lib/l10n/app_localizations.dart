@@ -7419,6 +7419,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Gracy’s tips and LifeKit news'**
   String get notifCatTipsSub;
+
+  /// No description provided for @swapOfferHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick one of your services to trade.'**
+  String get swapOfferHint;
+
+  /// No description provided for @swapNoServicesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No services yet'**
+  String get swapNoServicesTitle;
+
+  /// No description provided for @swapCreateFirstService.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first service'**
+  String get swapCreateFirstService;
+
+  /// No description provided for @swapCreateNewService.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new service'**
+  String get swapCreateNewService;
+
+  /// No description provided for @swapProposalSentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposal sent!'**
+  String get swapProposalSentTitle;
+
+  /// No description provided for @swapSectionNeedsAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for your answer'**
+  String get swapSectionNeedsAnswer;
+
+  /// No description provided for @swapSectionAwaitingThem.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for their answer'**
+  String get swapSectionAwaitingThem;
+
+  /// No description provided for @swapSectionActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active swaps'**
+  String get swapSectionActive;
+
+  /// No description provided for @swapSectionPast.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed & closed'**
+  String get swapSectionPast;
+
+  /// No description provided for @swapProposalSentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ve told {name}. You\'ll get a notification when they answer. You can follow it under My swaps → Outgoing.'**
+  String swapProposalSentBody(String name);
 }
 
 class _AppLocalizationsDelegate

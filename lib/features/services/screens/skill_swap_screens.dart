@@ -21,6 +21,7 @@ import '../../bookings/screens/booking_tracking_screen.dart';
 import '../../home/screens/chat_detail_screen.dart';
 import '../../profile/screens/provider_profile_screen.dart';
 import 'service_booking_detail_screen.dart';
+import '../../provider/screens/select_main_category_screen.dart';
 
 // ═══════════════════════════════════════════════════════════
 // COLOURS & CONSTANTS
@@ -110,7 +111,10 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
       final services = await _apiService.getMyServices();
       if (mounted) {
         setState(() {
-          myServices = services;
+          // Only live services can be offered in a swap.
+          myServices = services
+              .where((s) => '${s['status'] ?? 'active'}' == 'active' && s['is_draft'] != true)
+              .toList();
           if (myServices.isNotEmpty) selectedMyService = myServices[0];
           isLoadingData = false;
         });
@@ -170,27 +174,27 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
       'match_reason': l10n.swapDirectSelection,
       'average_rating': 0.0,
     };
-    // Play the same AI animation, then land on proposal sheet
+    // The user chose this person's service, so there's nothing to "match":
+    // go straight to the proposal (no AI-search animation).
     final nav = Navigator.of(context);
+    final hostContext = nav.context;
+    final myService = selectedMyService!;
+    final providerName = widget.initialTargetProviderName ?? l10n.swapProviderFallback;
     nav.pop(); // close this bottom sheet
-    nav.push(
-      PageRouteBuilder(
-        pageBuilder: (_, animation, __) => FindingMatchAnimationScreen(
-          myService: selectedMyService!,
-          targetCategoryId: widget.initialTargetCategoryId ?? '',
-          targetCategoryName:
-              widget.initialTargetCategoryName ??
-              widget.initialTargetServiceTitle ??
-              l10n.swapServiceFallback,
-          serviceType: selectedServiceType,
-          directTarget: targetMatch,
-          directTargetCategoryName:
-              widget.initialTargetCategoryName ??
-              widget.initialTargetServiceTitle ??
-              l10n.swapServiceFallback,
-        ),
-        transitionsBuilder: (_, animation, __, child) =>
-            FadeTransition(opacity: animation, child: child),
+    showModalBottomSheet(
+      context: hostContext,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) => _SwapProposalSheet(
+        myService: myService,
+        targetMatch: targetMatch,
+        targetCategoryName: widget.initialTargetCategoryName ??
+            widget.initialTargetServiceTitle ??
+            l10n.swapServiceFallback,
+        onSent: () {
+          Navigator.pop(sheetCtx);
+          showProposalSent(hostContext, providerName);
+        },
       ),
     );
   }
@@ -852,97 +856,157 @@ class _SkillSwapBottomSheetState extends State<SkillSwapBottomSheet>
 
   void _showMyServicesPicker() {
     final l10n = AppLocalizations.of(context)!;
+    Future<void> createService(BuildContext sheetCtx) async {
+      Navigator.pop(sheetCtx);
+      await Navigator.push(context, MaterialPageRoute(builder: (_) => const SelectMainCategoryScreen()));
+      if (mounted) {
+        setState(() => isLoadingData = true);
+        await _fetchMyServices();
+      }
+    }
+
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => Container(
-        height: 420,
+      builder: (sheetCtx) => Container(
+        constraints: BoxConstraints(maxHeight: MediaQuery.of(sheetCtx).size.height * 0.7),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.swapSelectSkillToOffer,
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: myServices.isEmpty
-                  ? Center(
-                      child: Text(
-                        l10n.swapNoServicesCreateFirst,
-                        style: GoogleFonts.poppins(
-                          color: Colors.grey,
-                          fontSize: 13,
-                        ),
+              const SizedBox(height: 16),
+              Text(l10n.swapSelectSkillToOffer,
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 17)),
+              const SizedBox(height: 2),
+              Text(l10n.swapOfferHint, style: GoogleFonts.poppins(fontSize: 12.5, color: Colors.grey[600])),
+              const SizedBox(height: 14),
+              if (myServices.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Column(children: [
+                    const AppLottie(AppAnim.emptyBox, size: 120),
+                    const SizedBox(height: 6),
+                    Text(l10n.swapNoServicesTitle,
+                        style: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: 15)),
+                    const SizedBox(height: 4),
+                    Text(l10n.swapNoServicesCreateFirst,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(color: Colors.grey[600], fontSize: 12.5)),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton.icon(
+                        onPressed: () => createService(sheetCtx),
+                        style: chunky(ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        )),
+                        icon: const Icon(Icons.add_rounded),
+                        label: Text(l10n.swapCreateFirstService,
+                            style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
                       ),
-                    )
-                  : ListView.separated(
-                      itemCount: myServices.length,
-                      separatorBuilder: (_, __) =>
-                          Divider(height: 1, color: Colors.grey.shade100),
-                      itemBuilder: (_, i) {
-                        final s = myServices[i];
-                        final isImg = (s['image_urls'] as List).isNotEmpty;
-                        return ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: CircleAvatar(
-                            radius: 22,
-                            backgroundColor: AppColors.primary.withOpacity(0.1),
-                            backgroundImage: isImg
-                                ? CachedNetworkImageProvider(s['image_urls'][0])
-                                : null,
-                            child: !isImg
-                                ? Text(
-                                    s['title'][0],
-                                    style: GoogleFonts.poppins(
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.primary,
-                                    ),
-                                  )
-                                : null,
-                          ),
-                          title: Text(
-                            s['title'],
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          trailing: selectedMyService?['id'] == s['id']
-                              ? const Icon(
-                                  Icons.check_circle,
-                                  color: AppColors.primary,
-                                  size: 20,
-                                )
-                              : null,
-                          onTap: () {
-                            setState(() => selectedMyService = s);
-                            Navigator.pop(context);
-                          },
-                        );
-                      },
                     ),
-            ),
-          ],
+                  ]),
+                )
+              else ...[
+                Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: myServices.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder: (_, i) {
+                      final s = myServices[i];
+                      final imgs = (s['image_urls'] as List?) ?? const [];
+                      final selected = selectedMyService?['id'] == s['id'];
+                      final price = num.tryParse('${s['price'] ?? ''}');
+                      return Pressable(
+                        onTap: () {
+                          setState(() => selectedMyService = s);
+                          Navigator.pop(sheetCtx);
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: selected ? AppColors.primary.withValues(alpha: 0.06) : const Color(0xFFF8F7F8),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                                color: selected ? AppColors.primary : Colors.transparent, width: 1.5),
+                          ),
+                          child: Row(children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: imgs.isNotEmpty
+                                  ? CachedNetworkImage(imageUrl: '${imgs.first}', width: 52, height: 52, fit: BoxFit.cover)
+                                  : Container(
+                                      width: 52,
+                                      height: 52,
+                                      color: AppColors.primary.withValues(alpha: 0.1),
+                                      alignment: Alignment.center,
+                                      child: Text('${s['title'] ?? '?'}'.isEmpty ? '?' : '${s['title']}'[0],
+                                          style: GoogleFonts.poppins(
+                                              fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 18)),
+                                    ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                Text('${s['title'] ?? ''}',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: GoogleFonts.poppins(fontSize: 13.5, fontWeight: FontWeight.w600)),
+                                if (price != null && price > 0)
+                                  Text('\$${price % 1 == 0 ? price.toInt() : price}',
+                                      style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
+                              ]),
+                            ),
+                            AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 200),
+                              child: selected
+                                  ? const Icon(Icons.check_circle_rounded, key: ValueKey(1), color: AppColors.primary)
+                                  : Icon(Icons.radio_button_unchecked_rounded, key: const ValueKey(0), color: Colors.grey[400]),
+                            ),
+                          ]),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => createService(sheetCtx),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    icon: const Icon(Icons.add_rounded),
+                    label: Text(l10n.swapCreateNewService, style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
@@ -1835,9 +1899,9 @@ class _SkillSwapResultsScreenState extends State<SkillSwapResultsScreen> {
         targetCategoryName: widget.targetCategoryName,
         onSent: () {
           Navigator.pop(context);
-          _showSnack(
-            AppLocalizations.of(context)!.swapProposalSent,
-            isSuccess: true,
+          showProposalSent(
+            context,
+            '${primaryMatch?['profiles']?['full_name'] ?? AppLocalizations.of(context)!.swapProviderFallback}',
           );
         },
       ),
@@ -2947,6 +3011,11 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
       vsync: this,
       initialIndex: widget.initialTab,
     );
+    // Refresh "mine" when opening Incoming/Outgoing: a proposal sent from a
+    // screen opened on top of the board didn't show up until a restart.
+    _tabCtrl.addListener(() {
+      if (!_tabCtrl.indexIsChanging && _tabCtrl.index > 0) _loadMine();
+    });
     _loadAll();
   }
 
@@ -3260,11 +3329,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                     l10n.swapIncomingHint,
                     Icons.inbox_outlined,
                   )
-                : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-                    itemCount: incomingSwaps.length,
-                    itemBuilder: (_, i) => _buildIncomingCard(incomingSwaps[i]).cascadeIn(i),
-                  ),
+                : _sectionedList(incomingSwaps, _buildIncomingCard, incoming: true),
           ),
           RefreshIndicator(
             color: AppColors.primary,
@@ -3279,11 +3344,7 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
                     l10n.swapOutgoingHint,
                     Icons.send_outlined,
                   )
-                : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-                    itemCount: outgoingSwaps.length,
-                    itemBuilder: (_, i) => _buildOutgoingCard(outgoingSwaps[i]).cascadeIn(i),
-                  ),
+                : _sectionedList(outgoingSwaps, _buildOutgoingCard, incoming: false),
           ),
         ],
       ),
@@ -4223,6 +4284,54 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
     return main && (rev == null || mine(rev, isProposer));
   }
 
+  /// Groups swaps into "waiting", "active" and a muted "past" section so it's
+  /// obvious at a glance what needs an answer.
+  Widget _sectionedList(List<dynamic> swaps, Widget Function(dynamic) card, {required bool incoming}) {
+    final l10n = AppLocalizations.of(context);
+    final groups = <int, List<dynamic>>{0: [], 1: [], 2: []};
+    for (final sw in swaps) {
+      groups[_statusRank(sw)]!.add(sw);
+    }
+    final titles = {
+      0: incoming ? l10n.swapSectionNeedsAnswer : l10n.swapSectionAwaitingThem,
+      1: l10n.swapSectionActive,
+      2: l10n.swapSectionPast,
+    };
+    final icons = {0: Icons.mark_email_unread_outlined, 1: Icons.handshake_outlined, 2: Icons.history_rounded};
+    final colors = {0: const Color(0xFFE08A00), 1: AppColors.primary, 2: Colors.grey};
+    final children = <Widget>[];
+    var n = 0;
+    for (final rank in [0, 1, 2]) {
+      final items = groups[rank]!;
+      if (items.isEmpty) continue;
+      children.add(Padding(
+        padding: EdgeInsets.fromLTRB(4, children.isEmpty ? 0 : 18, 4, 10),
+        child: Row(children: [
+          Icon(icons[rank], size: 17, color: colors[rank]),
+          const SizedBox(width: 8),
+          Text(titles[rank]!,
+              style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: rank == 2 ? Colors.grey[600] : Colors.black87)),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+            decoration: BoxDecoration(color: colors[rank]!.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
+            child: Text('${items.length}',
+                style: GoogleFonts.poppins(fontSize: 11.5, fontWeight: FontWeight.w700, color: colors[rank])),
+          ),
+        ]),
+      ));
+      for (final sw in items) {
+        final c = card(sw);
+        children.add((rank == 2 ? Opacity(opacity: 0.6, child: c) : c).cascadeIn(n++));
+      }
+    }
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+      children: children,
+    );
+  }
+
   int _statusRank(dynamic swap) => switch (_effectiveStatus(swap)) {
         'pending' => 0,
         'accepted' => 1,
@@ -4330,4 +4439,15 @@ class _SwapBoardScreenState extends State<SwapBoardScreen>
   }
 
   String _timeAgo(dynamic ts) => formatTimeAgoRaw(context, ts);
+}
+
+/// Shown after a swap proposal is sent.
+void showProposalSent(BuildContext context, String toName) {
+  final l10n = AppLocalizations.of(context)!;
+  Celebrate.show(
+    context,
+    title: l10n.swapProposalSentTitle,
+    message: l10n.swapProposalSentBody(toName),
+    anim: AppAnim.handshake,
+  );
 }

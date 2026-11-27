@@ -2229,5 +2229,15 @@
   "notifCatAccount": "ანგარიში",
   "notifCatAccountSub": "თქვენი გეგმა და ანგარიშის მნიშვნელოვანი სიახლეები",
   "notifCatTips": "რჩევები და სიახლეები",
-  "notifCatTipsSub": "Gracy-ს რჩევები და LifeKit-ის სიახლეები"
+  "notifCatTipsSub": "Gracy-ს რჩევები და LifeKit-ის სიახლეები",
+  "swapOfferHint": "აირჩიეთ თქვენი სერვისი გასაცვლელად.",
+  "swapNoServicesTitle": "ჯერ სერვისი არ გაქვთ",
+  "swapCreateFirstService": "შექმენით პირველი სერვისი",
+  "swapCreateNewService": "ახალი სერვისის შექმნა",
+  "swapProposalSentTitle": "შეთავაზება გაიგზავნა!",
+  "swapSectionNeedsAnswer": "ელოდება თქვენს პასუხს",
+  "swapSectionAwaitingThem": "ელოდება მათ პასუხს",
+  "swapSectionActive": "აქტიური გაცვლები",
+  "swapSectionPast": "დასრულებული და დახურული",
+  "swapProposalSentBody": "{name}-ს ვაცნობეთ. პასუხისას შეტყობინებას მიიღებთ. თვალი ადევნეთ: ჩემი გაცვლები → გაგზავნილი."
 }

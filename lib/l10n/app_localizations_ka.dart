@@ -3945,4 +3945,36 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get notifCatTipsSub => 'Gracy-ს რჩევები და LifeKit-ის სიახლეები';
+
+  @override
+  String get swapOfferHint => 'აირჩიეთ თქვენი სერვისი გასაცვლელად.';
+
+  @override
+  String get swapNoServicesTitle => 'ჯერ სერვისი არ გაქვთ';
+
+  @override
+  String get swapCreateFirstService => 'შექმენით პირველი სერვისი';
+
+  @override
+  String get swapCreateNewService => 'ახალი სერვისის შექმნა';
+
+  @override
+  String get swapProposalSentTitle => 'შეთავაზება გაიგზავნა!';
+
+  @override
+  String get swapSectionNeedsAnswer => 'ელოდება თქვენს პასუხს';
+
+  @override
+  String get swapSectionAwaitingThem => 'ელოდება მათ პასუხს';
+
+  @override
+  String get swapSectionActive => 'აქტიური გაცვლები';
+
+  @override
+  String get swapSectionPast => 'დასრულებული და დახურული';
+
+  @override
+  String swapProposalSentBody(String name) {
+    return '$name-ს ვაცნობეთ. პასუხისას შეტყობინებას მიიღებთ. თვალი ადევნეთ: ჩემი გაცვლები → გაგზავნილი.';
+  }
 }

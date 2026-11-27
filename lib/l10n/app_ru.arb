@@ -2229,5 +2229,15 @@
   "notifCatAccount": "Аккаунт",
   "notifCatAccountSub": "Ваш тариф и важное об аккаунте",
   "notifCatTips": "Советы и новости",
-  "notifCatTipsSub": "Советы Gracy и новости LifeKit"
+  "notifCatTipsSub": "Советы Gracy и новости LifeKit",
+  "swapOfferHint": "Выберите свою услугу для обмена.",
+  "swapNoServicesTitle": "Пока нет услуг",
+  "swapCreateFirstService": "Создать первую услугу",
+  "swapCreateNewService": "Создать новую услугу",
+  "swapProposalSentTitle": "Предложение отправлено!",
+  "swapSectionNeedsAnswer": "Ждут вашего ответа",
+  "swapSectionAwaitingThem": "Ждут их ответа",
+  "swapSectionActive": "Активные обмены",
+  "swapSectionPast": "Завершённые и закрытые",
+  "swapProposalSentBody": "Мы сообщили {name}. Вы получите уведомление, когда придёт ответ. Следите в разделе Мои обмены → Исходящие."
 }

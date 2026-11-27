@@ -3950,4 +3950,36 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get notifCatTipsSub => 'Советы Gracy и новости LifeKit';
+
+  @override
+  String get swapOfferHint => 'Выберите свою услугу для обмена.';
+
+  @override
+  String get swapNoServicesTitle => 'Пока нет услуг';
+
+  @override
+  String get swapCreateFirstService => 'Создать первую услугу';
+
+  @override
+  String get swapCreateNewService => 'Создать новую услугу';
+
+  @override
+  String get swapProposalSentTitle => 'Предложение отправлено!';
+
+  @override
+  String get swapSectionNeedsAnswer => 'Ждут вашего ответа';
+
+  @override
+  String get swapSectionAwaitingThem => 'Ждут их ответа';
+
+  @override
+  String get swapSectionActive => 'Активные обмены';
+
+  @override
+  String get swapSectionPast => 'Завершённые и закрытые';
+
+  @override
+  String swapProposalSentBody(String name) {
+    return 'Мы сообщили $name. Вы получите уведомление, когда придёт ответ. Следите в разделе Мои обмены → Исходящие.';
+  }
 }

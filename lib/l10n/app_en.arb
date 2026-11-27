@@ -2032,5 +2032,16 @@
   "notifCatAccount": "Account",
   "notifCatAccountSub": "Your plan and important account news",
   "notifCatTips": "Tips & updates",
-  "notifCatTipsSub": "Gracy’s tips and LifeKit news"
+  "notifCatTipsSub": "Gracy’s tips and LifeKit news",
+  "swapOfferHint": "Pick one of your services to trade.",
+  "swapNoServicesTitle": "No services yet",
+  "swapCreateFirstService": "Create your first service",
+  "swapCreateNewService": "Create a new service",
+  "swapProposalSentTitle": "Proposal sent!",
+  "swapSectionNeedsAnswer": "Waiting for your answer",
+  "swapSectionAwaitingThem": "Waiting for their answer",
+  "swapSectionActive": "Active swaps",
+  "swapSectionPast": "Completed & closed",
+  "swapProposalSentBody": "We've told {name}. You'll get a notification when they answer. You can follow it under My swaps → Outgoing.",
+  "@swapProposalSentBody": {"placeholders": {"name": {"type": "String"}}}
 }
