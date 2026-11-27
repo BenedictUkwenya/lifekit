@@ -2810,7 +2810,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get placesNearby => 'Nearby';
 
   @override
-  String get placesPopular => 'Popular';
+  String get placesPopular => 'Highlights';
 
   @override
   String get msgProfileUpdated => 'Profile updated!';
@@ -3831,4 +3831,47 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get planTaskPaymentDetails =>
       'Add your payment details so clients know how to pay you (cash, card or bank transfer).';
+
+  @override
+  String placesKmAway(String km) {
+    return '$km km away';
+  }
+
+  @override
+  String get placesHoursListed => 'Hours';
+
+  @override
+  String get placesWebsite => 'Website';
+
+  @override
+  String get placesPhone => 'Phone';
+
+  @override
+  String get placesTryAgainHint =>
+      'The map service can be busy. Try again in a moment.';
+
+  @override
+  String get placesDirections => 'Directions';
+
+  @override
+  String get placesCall => 'Call';
+
+  @override
+  String get placesShare => 'Share';
+
+  @override
+  String get placesAddress => 'Address';
+
+  @override
+  String get placesOpeningHours => 'Opening hours';
+
+  @override
+  String get placesAbout => 'About';
+
+  @override
+  String get placesNoDetails =>
+      'The map doesn’t have more details about this place yet.';
+
+  @override
+  String get placesDataCredit => 'Map data © OpenStreetMap contributors';
 }

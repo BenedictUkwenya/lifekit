@@ -2828,7 +2828,7 @@ class AppLocalizationsKa extends AppLocalizations {
   String get placesNearby => 'ახლოს';
 
   @override
-  String get placesPopular => 'პოპულარული';
+  String get placesPopular => 'გამორჩეული';
 
   @override
   String get msgProfileUpdated => 'პროფილი განახლდა!';
@@ -3839,4 +3839,48 @@ class AppLocalizationsKa extends AppLocalizations {
   @override
   String get planTaskPaymentDetails =>
       'დაამატეთ გადახდის დეტალები, რომ კლიენტებმა იცოდნენ, როგორ გადაგიხადონ (ნაღდი, ბარათი ან გადარიცხვა).';
+
+  @override
+  String placesKmAway(String km) {
+    return '$km კმ';
+  }
+
+  @override
+  String get placesHoursListed => 'საათები';
+
+  @override
+  String get placesWebsite => 'ვებგვერდი';
+
+  @override
+  String get placesPhone => 'ტელეფონი';
+
+  @override
+  String get placesTryAgainHint =>
+      'რუკის სერვისი შეიძლება დატვირთული იყოს. სცადეთ ცოტა ხანში.';
+
+  @override
+  String get placesDirections => 'მარშრუტი';
+
+  @override
+  String get placesCall => 'დარეკვა';
+
+  @override
+  String get placesShare => 'გაზიარება';
+
+  @override
+  String get placesAddress => 'მისამართი';
+
+  @override
+  String get placesOpeningHours => 'სამუშაო საათები';
+
+  @override
+  String get placesAbout => 'შესახებ';
+
+  @override
+  String get placesNoDetails =>
+      'რუკაზე ამ ადგილის შესახებ მეტი ინფორმაცია ჯერ არ არის.';
+
+  @override
+  String get placesDataCredit =>
+      'რუკის მონაცემები © OpenStreetMap-ის მონაწილეები';
 }

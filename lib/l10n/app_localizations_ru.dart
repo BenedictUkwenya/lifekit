@@ -2822,7 +2822,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get placesNearby => 'Рядом';
 
   @override
-  String get placesPopular => 'Популярное';
+  String get placesPopular => 'Интересное';
 
   @override
   String get msgProfileUpdated => 'Профиль обновлён!';
@@ -3849,4 +3849,46 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get planTaskPaymentDetails =>
       'Добавьте платёжные данные, чтобы клиенты знали, как вам заплатить (наличные, карта или перевод).';
+
+  @override
+  String placesKmAway(String km) {
+    return '$km км';
+  }
+
+  @override
+  String get placesHoursListed => 'Часы работы';
+
+  @override
+  String get placesWebsite => 'Сайт';
+
+  @override
+  String get placesPhone => 'Телефон';
+
+  @override
+  String get placesTryAgainHint =>
+      'Картографический сервис может быть перегружен. Попробуйте чуть позже.';
+
+  @override
+  String get placesDirections => 'Маршрут';
+
+  @override
+  String get placesCall => 'Позвонить';
+
+  @override
+  String get placesShare => 'Поделиться';
+
+  @override
+  String get placesAddress => 'Адрес';
+
+  @override
+  String get placesOpeningHours => 'Часы работы';
+
+  @override
+  String get placesAbout => 'Описание';
+
+  @override
+  String get placesNoDetails => 'На карте пока нет подробностей об этом месте.';
+
+  @override
+  String get placesDataCredit => 'Данные карты © участники OpenStreetMap';
 }

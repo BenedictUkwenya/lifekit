@@ -10,6 +10,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/api_service.dart';
 import 'place_detail_screen.dart';
+import '../../../core/widgets/skeleton.dart';
+import '../widgets/place_category_art.dart';
+import '../../../core/widgets/app_lottie.dart';
 
 class PlacesListScreen extends StatefulWidget {
   const PlacesListScreen({super.key});
@@ -411,15 +414,25 @@ class _PlacesListScreenState extends State<PlacesListScreen>
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.location_off,
-                          size: 48,
-                          color: Colors.grey[300],
-                        ),
-                        const SizedBox(height: 12),
+                        const AppLottie(AppAnim.search, size: 130),
+                        const SizedBox(height: 8),
                         Text(
                           AppLocalizations.of(context).txNoPlacesFound,
-                          style: GoogleFonts.poppins(color: Colors.grey),
+                          style: GoogleFonts.poppins(color: Colors.grey[700], fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 4),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: Text(
+                            AppLocalizations.of(context).placesTryAgainHint,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(color: Colors.grey, fontSize: 12),
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: _initLocationAndFetch,
+                          icon: const Icon(Icons.refresh_rounded),
+                          label: Text(AppLocalizations.of(context).retry),
                         ),
                       ],
                     ),
@@ -445,275 +458,111 @@ class _PlacesListScreenState extends State<PlacesListScreen>
   }
 
   Widget _buildPlaceCard(dynamic place) {
-    final imgUrl = (place['image_urls'] as List?)?.isNotEmpty == true
-        ? place['image_urls'][0]
-        : "https://images.unsplash.com/photo-1444084316824-dc26d6657664?w=800";
+    final l10n = AppLocalizations.of(context);
+    final images = (place['image_urls'] as List?)?.whereType<String>().toList() ?? const <String>[];
+    final style = placeCategoryStyle(place['category']?.toString());
+    final distance = place['distance_km'] != null ? l10n.placesKmAway('${place['distance_km']}') : null;
+    final addressLine = [place['address'], place['city']]
+        .where((s) => s != null && '$s'.trim().isNotEmpty && s != 'Nearby' && s != 'Detected')
+        .join(', ');
 
-    final distance = place['distance_km'] != null
-        ? "${place['distance_km']} km away"
-        : null;
+    Widget chip(IconData icon, String label) => Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(color: const Color(0xFFF5F2F3), borderRadius: BorderRadius.circular(10)),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            Icon(icon, size: 12, color: Colors.grey[700]),
+            const SizedBox(width: 4),
+            Text(label, style: GoogleFonts.poppins(fontSize: 10.5, color: Colors.grey[800])),
+          ]),
+        );
 
-    final isPopular =
-        (place['popularity_score'] ?? 0) > 6.0 ||
-        (place['review_count'] ?? 0) > 100;
-
-    return GestureDetector(
+    return Pressable(
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => PlaceDetailScreen(place: place)),
       ),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 20),
+        margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.08), blurRadius: 12, offset: const Offset(0, 4))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Image with overlays ──
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(20),
-                  ),
-                  child: CachedNetworkImage(
-                    imageUrl: imgUrl,
-                    height: 190,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    placeholder: (c, u) => Container(
-                      height: 190,
-                      color: Colors.grey[100],
-                      child: const Center(
-                        child: CircularProgressIndicator(strokeWidth: 1),
-                      ),
-                    ),
-                    errorWidget: (c, u, e) => Container(
-                      height: 190,
-                      color: Colors.grey[200],
-                      child: const Icon(
-                        Icons.image_not_supported,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ),
-                ),
-                // Category badge
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              child: Stack(children: [
+                images.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: images.first,
+                        height: 160,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) => const SkeletonBox(height: 160, radius: 0),
+                        errorWidget: (_, __, ___) => PlaceCategoryArt(style: style, height: 160),
+                      )
+                    : PlaceCategoryArt(style: style, height: 110),
                 Positioned(
                   top: 12,
                   left: 12,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.92),
+                      color: Colors.white.withValues(alpha: 0.94),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Text(
-                      place['category'] ?? 'Place',
-                      style: GoogleFonts.poppins(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
-                      ),
-                    ),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      Icon(style.icon, size: 12, color: style.color),
+                      const SizedBox(width: 4),
+                      Text('${place['category'] ?? 'Place'}',
+                          style: GoogleFonts.poppins(fontSize: 10.5, fontWeight: FontWeight.w600, color: style.color)),
+                    ]),
                   ),
                 ),
-                // Popular badge
-                if (isPopular)
-                  Positioned(
-                    top: 12,
-                    right: 46,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.orange,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.local_fire_department,
-                            size: 10,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            AppLocalizations.of(context).popular,
-                            style: GoogleFonts.poppins(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                // Favourite icon
-                const Positioned(
-                  top: 12,
-                  right: 12,
-                  child: CircleAvatar(
-                    radius: 14,
-                    backgroundColor: Colors.white,
-                    child: Icon(
-                      Icons.favorite_border,
-                      color: Colors.grey,
-                      size: 16,
-                    ),
-                  ),
-                ),
-              ],
+              ]),
             ),
-
-            // ── Info ──
             Padding(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Name + rating
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          place['name'] ?? 'Unknown Place',
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
-                          maxLines: 1,
+                  Row(children: [
+                    Expanded(
+                      child: Text('${place['name'] ?? ''}',
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
+                          style: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: 15, height: 1.3)),
+                    ),
+                    if (distance != null) ...[
                       const SizedBox(width: 8),
-                      Row(
-                        children: [
-                          const Icon(Icons.star, color: Colors.amber, size: 14),
-                          const SizedBox(width: 3),
-                          Text(
-                            "${place['rating']}",
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
+                      Text(distance,
+                          style: GoogleFonts.poppins(fontSize: 11.5, color: AppColors.primary, fontWeight: FontWeight.w600)),
                     ],
-                  ),
-
-                  const SizedBox(height: 6),
-
-                  // Location + distance
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.location_on,
-                        size: 13,
-                        color: Colors.grey,
-                      ),
+                  ]),
+                  if (addressLine.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Row(children: [
+                      const Icon(Icons.location_on_outlined, size: 13, color: Colors.grey),
                       const SizedBox(width: 4),
                       Expanded(
-                        child: Text(
-                          [place['address'], place['city']]
-                                  .where(
-                                    (s) =>
-                                        s != null &&
-                                        s != '' &&
-                                        s != 'Nearby' &&
-                                        s != 'Detected',
-                                  )
-                                  .join(', ')
-                                  .isNotEmpty
-                              ? [place['address'], place['city']]
-                                    .where(
-                                      (s) =>
-                                          s != null &&
-                                          s != '' &&
-                                          s != 'Nearby' &&
-                                          s != 'Detected',
-                                    )
-                                    .join(', ')
-                              : place['city'] ?? 'Nearby',
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        child: Text(addressLine,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
                       ),
-                      if (distance != null) ...[
-                        const SizedBox(width: 8),
-                        Text(
-                          distance,
-                          style: GoogleFonts.poppins(
-                            fontSize: 11,
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  // Reviews count + cuisine tag
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.rate_review_outlined,
-                        size: 13,
-                        color: Colors.grey,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        "${place['review_count']} reviews",
-                        style: GoogleFonts.poppins(
-                          fontSize: 11,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      if (place['cuisine'] != null) ...[
-                        const SizedBox(width: 12),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            place['cuisine'],
-                            style: GoogleFonts.poppins(
-                              fontSize: 10,
-                              color: Colors.black54,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
+                    ]),
+                  ],
+                  if (place['cuisine'] != null || place['opening_hours'] != null || place['website'] != null || place['phone'] != null) ...[
+                    const SizedBox(height: 10),
+                    Wrap(spacing: 6, runSpacing: 6, children: [
+                      if (place['cuisine'] != null) chip(Icons.restaurant_menu_rounded, '${place['cuisine']}'),
+                      if (place['opening_hours'] != null) chip(Icons.schedule_rounded, l10n.placesHoursListed),
+                      if (place['website'] != null) chip(Icons.language_rounded, l10n.placesWebsite),
+                      if (place['phone'] != null) chip(Icons.call_outlined, l10n.placesPhone),
+                    ]),
+                  ],
                 ],
               ),
             ),

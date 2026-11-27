@@ -5371,7 +5371,7 @@ abstract class AppLocalizations {
   /// No description provided for @placesPopular.
   ///
   /// In en, this message translates to:
-  /// **'Popular'**
+  /// **'Highlights'**
   String get placesPopular;
 
   /// No description provided for @msgProfileUpdated.
@@ -7227,6 +7227,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add your payment details so clients know how to pay you (cash, card or bank transfer).'**
   String get planTaskPaymentDetails;
+
+  /// No description provided for @placesKmAway.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km away'**
+  String placesKmAway(String km);
+
+  /// No description provided for @placesHoursListed.
+  ///
+  /// In en, this message translates to:
+  /// **'Hours'**
+  String get placesHoursListed;
+
+  /// No description provided for @placesWebsite.
+  ///
+  /// In en, this message translates to:
+  /// **'Website'**
+  String get placesWebsite;
+
+  /// No description provided for @placesPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get placesPhone;
+
+  /// No description provided for @placesTryAgainHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The map service can be busy. Try again in a moment.'**
+  String get placesTryAgainHint;
+
+  /// No description provided for @placesDirections.
+  ///
+  /// In en, this message translates to:
+  /// **'Directions'**
+  String get placesDirections;
+
+  /// No description provided for @placesCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Call'**
+  String get placesCall;
+
+  /// No description provided for @placesShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get placesShare;
+
+  /// No description provided for @placesAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get placesAddress;
+
+  /// No description provided for @placesOpeningHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening hours'**
+  String get placesOpeningHours;
+
+  /// No description provided for @placesAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get placesAbout;
+
+  /// No description provided for @placesNoDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'The map doesn’t have more details about this place yet.'**
+  String get placesNoDetails;
+
+  /// No description provided for @placesDataCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Map data © OpenStreetMap contributors'**
+  String get placesDataCredit;
 }
 
 class _AppLocalizationsDelegate

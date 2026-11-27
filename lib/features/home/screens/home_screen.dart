@@ -36,6 +36,7 @@ import '../../profile/screens/profile_screen.dart';
 import 'search_results_screen.dart';
 import '../../places/screens/places_list_screen.dart';
 import '../../places/screens/place_detail_screen.dart';
+import '../../places/widgets/place_category_art.dart';
 import '../../services/screens/service_booking_detail_screen.dart';
 import '../../bookings/screens/bookings_screen.dart';
 import '../../bookings/screens/cart_screen.dart';
@@ -2770,13 +2771,12 @@ class _HomeScreenState extends State<HomeScreen> {
         separatorBuilder: (_, __) => const SizedBox(width: 14),
         itemBuilder: (_, i) {
           final place = displayPlaces[i];
-          final imgUrl = (place['image_urls'] as List?)?.isNotEmpty == true
-              ? place['image_urls'][0]
-              : 'https://via.placeholder.com/400';
-          final rating = place['rating'] ?? 0.0;
-          final city = place['city'] ?? '';
-
-          final distance = '${(i + 1) * 34} km';
+          // Real data only: no invented rating or distance, no stock photo.
+          final images = (place['image_urls'] as List?)?.whereType<String>().toList() ?? const <String>[];
+          final style = placeCategoryStyle(place['category']?.toString());
+          final city = [place['address'], place['city']]
+              .where((s) => s != null && '$s'.trim().isNotEmpty && s != 'Nearby')
+              .join(', ');
 
           return Pressable(
             onTap: () => Navigator.push(
@@ -2805,14 +2805,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(20),
                     ),
-                    child: CachedNetworkImage(
-                      imageUrl: imgUrl,
-                      height: 130,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorWidget: (_, __, ___) =>
-                          Container(height: 130, color: Colors.grey[200]),
-                    ),
+                    child: images.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: images.first,
+                            height: 130,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorWidget: (_, __, ___) => PlaceCategoryArt(style: style, height: 130),
+                          )
+                        : PlaceCategoryArt(style: style, height: 130),
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
@@ -2832,14 +2833,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            Text(
-                              distance,
-                              style: GoogleFonts.poppins(
-                                fontSize: 11,
-                                color: Colors.grey[500],
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
+
                           ],
                         ),
                         const SizedBox(height: 4),
@@ -2847,7 +2841,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             Expanded(
                               child: Text(
-                                city,
+                                city.isNotEmpty ? city : '${place['category'] ?? ''}',
                                 style: GoogleFonts.poppins(
                                   fontSize: 11,
                                   color: Colors.grey[500],
@@ -2856,20 +2850,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            const Icon(
-                              Icons.star_rounded,
-                              size: 13,
-                              color: Colors.amber,
-                            ),
-                            const SizedBox(width: 2),
-                            Text(
-                              '$rating',
-                              style: GoogleFonts.poppins(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.black87,
-                              ),
-                            ),
+                            Icon(style.icon, size: 13, color: style.color),
                           ],
                         ),
                       ],
