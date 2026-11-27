@@ -3966,4 +3966,51 @@ class AppLocalizationsEn extends AppLocalizations {
   String swapProposalSentBody(String name) {
     return 'We\'ve told $name. You\'ll get a notification when they answer. You can follow it under My swaps → Outgoing.';
   }
+
+  @override
+  String get bookingsSecNew => 'New requests';
+
+  @override
+  String get bookingsSecUpcoming => 'Upcoming';
+
+  @override
+  String get bookingsSecPast => 'Past';
+
+  @override
+  String get bookingsSwapCtaSub => 'Trade your skills with people near you';
+
+  @override
+  String get bookingsSwapNeedsAnswer => 'Needs answer';
+
+  @override
+  String get bookingsSwapDeclined => 'Declined';
+
+  @override
+  String get bookingsSwapProposedToYou => 'Proposed to you';
+
+  @override
+  String get bookingsSwapProposedByYou => 'You proposed';
+
+  @override
+  String get bookingsSwapYouGive => 'You give';
+
+  @override
+  String get bookingsSwapYouGet => 'You get';
+
+  @override
+  String get bookingsSwapReview => 'Review & answer';
+
+  @override
+  String get bookingsSwapMyPart => 'My part';
+
+  @override
+  String get bookingsSwapDone => 'Done';
+
+  @override
+  String get bookingsSwapToDo => 'To do';
+
+  @override
+  String bookingsSwapWaitingFor(String name) {
+    return 'Waiting for $name to answer';
+  }
 }

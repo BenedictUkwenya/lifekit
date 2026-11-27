@@ -2239,5 +2239,20 @@
   "swapSectionAwaitingThem": "Ждут их ответа",
   "swapSectionActive": "Активные обмены",
   "swapSectionPast": "Завершённые и закрытые",
-  "swapProposalSentBody": "Мы сообщили {name}. Вы получите уведомление, когда придёт ответ. Следите в разделе Мои обмены → Исходящие."
+  "swapProposalSentBody": "Мы сообщили {name}. Вы получите уведомление, когда придёт ответ. Следите в разделе Мои обмены → Исходящие.",
+  "bookingsSecNew": "Новые запросы",
+  "bookingsSecUpcoming": "Предстоящие",
+  "bookingsSecPast": "Прошедшие",
+  "bookingsSwapCtaSub": "Обменивайтесь навыками с людьми рядом",
+  "bookingsSwapNeedsAnswer": "Нужен ответ",
+  "bookingsSwapDeclined": "Отклонено",
+  "bookingsSwapProposedToYou": "Предложили вам",
+  "bookingsSwapProposedByYou": "Вы предложили",
+  "bookingsSwapYouGive": "Вы даёте",
+  "bookingsSwapYouGet": "Вы получаете",
+  "bookingsSwapReview": "Посмотреть и ответить",
+  "bookingsSwapMyPart": "Моя часть",
+  "bookingsSwapDone": "Готово",
+  "bookingsSwapToDo": "Предстоит",
+  "bookingsSwapWaitingFor": "Ждём ответа от {name}"
 }

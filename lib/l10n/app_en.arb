@@ -2043,5 +2043,21 @@
   "swapSectionActive": "Active swaps",
   "swapSectionPast": "Completed & closed",
   "swapProposalSentBody": "We've told {name}. You'll get a notification when they answer. You can follow it under My swaps → Outgoing.",
-  "@swapProposalSentBody": {"placeholders": {"name": {"type": "String"}}}
+  "@swapProposalSentBody": {"placeholders": {"name": {"type": "String"}}},
+  "bookingsSecNew": "New requests",
+  "bookingsSecUpcoming": "Upcoming",
+  "bookingsSecPast": "Past",
+  "bookingsSwapCtaSub": "Trade your skills with people near you",
+  "bookingsSwapNeedsAnswer": "Needs answer",
+  "bookingsSwapDeclined": "Declined",
+  "bookingsSwapProposedToYou": "Proposed to you",
+  "bookingsSwapProposedByYou": "You proposed",
+  "bookingsSwapYouGive": "You give",
+  "bookingsSwapYouGet": "You get",
+  "bookingsSwapReview": "Review & answer",
+  "bookingsSwapMyPart": "My part",
+  "bookingsSwapDone": "Done",
+  "bookingsSwapToDo": "To do",
+  "bookingsSwapWaitingFor": "Waiting for {name} to answer",
+  "@bookingsSwapWaitingFor": {"placeholders": {"name": {"type": "String"}}}
 }

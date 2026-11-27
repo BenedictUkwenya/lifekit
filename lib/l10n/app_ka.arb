@@ -2239,5 +2239,20 @@
   "swapSectionAwaitingThem": "ელოდება მათ პასუხს",
   "swapSectionActive": "აქტიური გაცვლები",
   "swapSectionPast": "დასრულებული და დახურული",
-  "swapProposalSentBody": "{name}-ს ვაცნობეთ. პასუხისას შეტყობინებას მიიღებთ. თვალი ადევნეთ: ჩემი გაცვლები → გაგზავნილი."
+  "swapProposalSentBody": "{name}-ს ვაცნობეთ. პასუხისას შეტყობინებას მიიღებთ. თვალი ადევნეთ: ჩემი გაცვლები → გაგზავნილი.",
+  "bookingsSecNew": "ახალი მოთხოვნები",
+  "bookingsSecUpcoming": "მომავალი",
+  "bookingsSecPast": "წარსული",
+  "bookingsSwapCtaSub": "გაცვალეთ უნარები ახლომახლო ადამიანებთან",
+  "bookingsSwapNeedsAnswer": "ელოდება პასუხს",
+  "bookingsSwapDeclined": "უარყოფილი",
+  "bookingsSwapProposedToYou": "შემოგთავაზეს",
+  "bookingsSwapProposedByYou": "თქვენ შესთავაზეთ",
+  "bookingsSwapYouGive": "თქვენ აძლევთ",
+  "bookingsSwapYouGet": "თქვენ იღებთ",
+  "bookingsSwapReview": "ნახვა და პასუხი",
+  "bookingsSwapMyPart": "ჩემი ნაწილი",
+  "bookingsSwapDone": "შესრულდა",
+  "bookingsSwapToDo": "გასაკეთებელი",
+  "bookingsSwapWaitingFor": "ველოდებით {name}-ის პასუხს"
 }

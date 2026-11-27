@@ -3977,4 +3977,51 @@ class AppLocalizationsKa extends AppLocalizations {
   String swapProposalSentBody(String name) {
     return '$name-ს ვაცნობეთ. პასუხისას შეტყობინებას მიიღებთ. თვალი ადევნეთ: ჩემი გაცვლები → გაგზავნილი.';
   }
+
+  @override
+  String get bookingsSecNew => 'ახალი მოთხოვნები';
+
+  @override
+  String get bookingsSecUpcoming => 'მომავალი';
+
+  @override
+  String get bookingsSecPast => 'წარსული';
+
+  @override
+  String get bookingsSwapCtaSub => 'გაცვალეთ უნარები ახლომახლო ადამიანებთან';
+
+  @override
+  String get bookingsSwapNeedsAnswer => 'ელოდება პასუხს';
+
+  @override
+  String get bookingsSwapDeclined => 'უარყოფილი';
+
+  @override
+  String get bookingsSwapProposedToYou => 'შემოგთავაზეს';
+
+  @override
+  String get bookingsSwapProposedByYou => 'თქვენ შესთავაზეთ';
+
+  @override
+  String get bookingsSwapYouGive => 'თქვენ აძლევთ';
+
+  @override
+  String get bookingsSwapYouGet => 'თქვენ იღებთ';
+
+  @override
+  String get bookingsSwapReview => 'ნახვა და პასუხი';
+
+  @override
+  String get bookingsSwapMyPart => 'ჩემი ნაწილი';
+
+  @override
+  String get bookingsSwapDone => 'შესრულდა';
+
+  @override
+  String get bookingsSwapToDo => 'გასაკეთებელი';
+
+  @override
+  String bookingsSwapWaitingFor(String name) {
+    return 'ველოდებით $name-ის პასუხს';
+  }
 }

@@ -43,6 +43,10 @@ class _BookingsScreenState extends State<BookingsScreen>
   List<dynamic> providerRequests = [];
   List<dynamic> swapBookings = [];
   List<dynamic> pendingSwaps = [];
+  // Swap requests as the swap card needs them (role tagged), and every booking
+  // by id so a swap's two halves can open their own tracking screens.
+  List<Map<String, dynamic>> _swaps = [];
+  final Map<String, dynamic> _bookingById = {};
   int _incomingPendingCount = 0;
   int _pendingRequestCount = 0;
   bool _autoTabDone = false;
@@ -99,6 +103,10 @@ class _BookingsScreenState extends State<BookingsScreen>
       final pRequests = List<dynamic>.from(results[1]);
       final incomingSwaps = results[2];
       final outgoingSwaps = results[3];
+      _bookingById
+        ..clear()
+        ..addEntries(cBookings.map((b) => MapEntry('${b['id']}', {...b, '_swap_role': 'client'})))
+        ..addEntries(pRequests.map((b) => MapEntry('${b['id']}', {...b, '_swap_role': 'provider'})));
 
       if (mounted) {
         setState(() {
@@ -143,6 +151,10 @@ class _BookingsScreenState extends State<BookingsScreen>
             ...outgoingSwaps.where((s) => s['status'] == 'pending'),
           ];
           _incomingPendingCount = incomingPending.length;
+          _swaps = [
+            ...incomingSwaps.map((sw) => {...Map<String, dynamic>.from(sw as Map), '_incoming': true}),
+            ...outgoingSwaps.map((sw) => {...Map<String, dynamic>.from(sw as Map), '_incoming': false}),
+          ]..sort((a, b) => '${b['created_at'] ?? ''}'.compareTo('${a['created_at'] ?? ''}'));
           // Remove swaps from regular client/provider views
           cBookings.removeWhere(_isSwap);
           pRequests.removeWhere(_isSwap);
@@ -252,66 +264,44 @@ class _BookingsScreenState extends State<BookingsScreen>
             fontWeight: FontWeight.bold,
           ),
         ),
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: AppColors.primary,
-          indicatorWeight: 3,
-          isScrollable: true,
-          tabAlignment: TabAlignment.center,
-          labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-          tabs: [
-            Tab(text: l10n.bookingsMyBookings),
-            Tab(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(l10n.bookingsClientRequests),
-                  if (_pendingRequestCount > 0) ...[
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        '$_pendingRequestCount',
-                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(58),
+          child: Container(
+            height: 46,
+            margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF0ECEE),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: TabBar(
+              controller: _tabController,
+              dividerHeight: 0,
+              indicatorSize: TabBarIndicatorSize.tab,
+              indicator: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(26),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
                 ],
               ),
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.black54,
+              labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+              splashBorderRadius: BorderRadius.circular(26),
+              labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 12.5),
+              unselectedLabelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w500, fontSize: 12.5),
+              tabs: [
+                _pillTab(l10n.bookingsMyBookings, 0),
+                _pillTab(l10n.bookingsClientRequests, _pendingRequestCount),
+                _pillTab(l10n.bookingsMySwaps, _incomingPendingCount),
+              ],
             ),
-            Tab(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(l10n.bookingsMySwaps),
-                  if (pendingSwaps.isNotEmpty) ...[
-                    const SizedBox(width: 5),
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFE8A020),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        '${pendingSwaps.length}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
       body: isLoading
@@ -340,7 +330,7 @@ class _BookingsScreenState extends State<BookingsScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildHeroBookingCard(clientBookings.first, isClient: true)
+                  _buildHeroBookingCard(_heroBooking(), isClient: true)
                       .fadeSlideIn(),
                   // Filters only apply to the bookings below the hero card;
                   // with just one booking they'd show "Nothing here".
@@ -363,8 +353,9 @@ class _BookingsScreenState extends State<BookingsScreen>
                     child: Builder(
                       key: ValueKey(_clientFilter),
                       builder: (context) {
+                        final hero = _heroBooking();
                         final rest = clientBookings
-                            .skip(1)
+                            .where((b) => !identical(b, hero))
                             .where(_matchesClientFilter)
                             .toList();
                         if (rest.isEmpty) {
@@ -396,22 +387,99 @@ class _BookingsScreenState extends State<BookingsScreen>
   }
 
   Widget _buildProviderView() {
+    final l10n = AppLocalizations.of(context)!;
+    if (providerRequests.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: _fetchData,
+        color: AppColors.primary,
+        child: _buildEmptyState(l10n.bookingsNoRequestsYet),
+      );
+    }
+    final groups = <int, List<dynamic>>{0: [], 1: [], 2: []};
+    for (final b in providerRequests) {
+      final st = '${b['status']}';
+      groups[st == 'pending' ? 0 : (st == 'completed' || st == 'cancelled') ? 2 : 1]!.add(b);
+    }
+    final titles = {0: l10n.bookingsSecNew, 1: l10n.bookingsSecUpcoming, 2: l10n.bookingsSecPast};
+    final icons = {0: Icons.notifications_active_outlined, 1: Icons.event_available_outlined, 2: Icons.history_rounded};
+    final colors = {0: const Color(0xFFE08A00), 1: AppColors.primary, 2: Colors.grey};
+    final children = <Widget>[];
+    var n = 0;
+    for (final k in [0, 1, 2]) {
+      final items = groups[k]!;
+      if (items.isEmpty) continue;
+      children.add(_sectionHeader(titles[k]!, icons[k]!, colors[k]!, items.length, first: children.isEmpty));
+      for (final b in items) {
+        final card = _buildStandardBookingCard(b, isClient: false);
+        children.add((k == 2 ? Opacity(opacity: 0.62, child: card) : card).cascadeIn(n++));
+      }
+    }
     return RefreshIndicator(
       onRefresh: _fetchData,
       color: AppColors.primary,
-      child: providerRequests.isEmpty
-          ? _buildEmptyState(AppLocalizations.of(context)!.bookingsNoRequestsYet)
-          : ListView.builder(
-              padding: const EdgeInsets.all(20),
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: providerRequests.length,
-              itemBuilder: (context, index) => Builder(builder: (context) {
-                return _buildStandardBookingCard(
-                  providerRequests[index],
-                  isClient: false,
-                ).fadeSlideIn(index: index);
-              }).cascadeIn(index),
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 110),
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: children,
+      ),
+    );
+  }
+
+  /// The booking most worth showing big: the soonest one still in play,
+  /// else the most recent.
+  dynamic _heroBooking() {
+    final live = clientBookings.where((b) {
+      final st = '${b['status']}';
+      return st != 'completed' && st != 'cancelled';
+    }).toList()
+      ..sort((a, b) => parseApiDate(a['scheduled_time']).compareTo(parseApiDate(b['scheduled_time'])));
+    return live.isNotEmpty ? live.first : clientBookings.first;
+  }
+
+  Widget _pillTab(String label, int badge) {
+    return Tab(
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Text(label),
+          if (badge > 0) ...[
+            const SizedBox(width: 5),
+            Container(
+              constraints: const BoxConstraints(minWidth: 17),
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE53935),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text('$badge',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
             ),
+          ],
+        ]),
+      ),
+    );
+  }
+
+  Widget _sectionHeader(String title, IconData icon, Color color, int count, {bool first = false}) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(2, first ? 4 : 18, 2, 10),
+      child: Row(children: [
+        Icon(icon, size: 17, color: color),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(title,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.poppins(
+                  fontSize: 14, fontWeight: FontWeight.w700, color: color == Colors.grey ? Colors.grey[600] : Colors.black87)),
+        ),
+        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+          decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
+          child: Text('$count', style: GoogleFonts.poppins(fontSize: 11.5, fontWeight: FontWeight.w700, color: color)),
+        ),
+      ]),
     );
   }
 
@@ -749,8 +817,11 @@ class _BookingsScreenState extends State<BookingsScreen>
 
             const SizedBox(height: 8),
             Text(
-              "Service: $serviceName",
-              style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+              '$serviceName',
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.poppins(fontSize: 13, color: Colors.black54, fontWeight: FontWeight.w500),
             ),
             // ── Countdown badge (confirmed bookings only) ──
             if (status == 'confirmed') ...[
@@ -1209,44 +1280,348 @@ class _BookingsScreenState extends State<BookingsScreen>
 
   // ── My Swaps Tab ───────────────────────────────────────────────────────────
   Widget _buildSwapsView() {
-    final hasData = swapBookings.isNotEmpty || pendingSwaps.isNotEmpty;
+    final l10n = AppLocalizations.of(context)!;
+    // $0 bookings not linked to any swap request (older data) still show.
+    final linked = <String>{
+      for (final sw in _swaps) ...['${sw['booking_id']}', '${sw['reverse_booking_id']}'],
+    };
+    final orphans = swapBookings.where((b) => !linked.contains('${b['id']}')).toList();
+    if (_swaps.isEmpty && orphans.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: _fetchData,
+        color: AppColors.primary,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [SliverFillRemaining(child: _buildSwapsEmptyState())],
+        ),
+      );
+    }
+    final groups = <String, List<Map<String, dynamic>>>{'answer': [], 'waiting': [], 'active': [], 'past': []};
+    for (final sw in _swaps) {
+      groups[_swapGroup(sw)]!.add(sw);
+    }
+    final children = <Widget>[_swapBoardCta()];
+    var n = 0;
+    void section(String key, String title, IconData icon, Color color) {
+      final items = groups[key]!;
+      if (items.isEmpty) return;
+      children.add(_sectionHeader(title, icon, color, items.length));
+      for (final sw in items) {
+        children.add(_buildSwapCard(sw, group: key).cascadeIn(n++));
+      }
+    }
+    section('answer', l10n.swapSectionNeedsAnswer, Icons.mark_email_unread_outlined, const Color(0xFFE08A00));
+    section('active', l10n.swapSectionActive, Icons.handshake_outlined, AppColors.primary);
+    section('waiting', l10n.swapSectionAwaitingThem, Icons.hourglass_top_rounded, const Color(0xFF6B7280));
+    section('past', l10n.swapSectionPast, Icons.history_rounded, Colors.grey);
+    if (orphans.isNotEmpty) {
+      children.add(_sectionHeader(l10n.bookingsSkillSwap, Icons.swap_horiz_rounded, Colors.grey, orphans.length));
+      for (final b in orphans) {
+        children.add(_buildSwapBookingCard(b));
+      }
+    }
     return RefreshIndicator(
       onRefresh: _fetchData,
-      color: const Color(0xFFE8A020),
-      child: CustomScrollView(
+      color: AppColors.primary,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 110),
         physics: const AlwaysScrollableScrollPhysics(),
-        slivers: [
-          // Pending proposals banner
-          if (pendingSwaps.isNotEmpty)
-            SliverToBoxAdapter(child: _buildPendingBanner()),
-          // Confirmed/Active swap bookings
-          if (swapBookings.isNotEmpty) ...[
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-                child: Text(
-                  AppLocalizations.of(context)!.bookingsActiveAndPastSwaps,
-                  style: GoogleFonts.poppins(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black87,
-                  ),
-                ),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (ctx, i) => _buildSwapBookingCard(swapBookings[i]),
-                  childCount: swapBookings.length,
-                ),
-              ),
-            ),
-          ],
-          if (!hasData) SliverFillRemaining(child: _buildSwapsEmptyState()),
-        ],
+        children: children,
       ),
+    );
+  }
+
+  /// Where a swap belongs: needs my answer / waiting on them / active / past.
+  String _swapGroup(Map<String, dynamic> sw) {
+    final st = '${sw['status']}';
+    if (st == 'pending') return sw['_incoming'] == true ? 'answer' : 'waiting';
+    if (st != 'accepted') return 'past';
+    final a = '${sw['booking']?['status'] ?? ''}';
+    final b = '${sw['reverse_booking']?['status'] ?? ''}';
+    final done = (a == 'completed' || a == 'cancelled') && (b.isEmpty || b == 'completed' || b == 'cancelled');
+    return done ? 'past' : 'active';
+  }
+
+  void _openSwapBoard(int tab) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => SwapBoardScreen(initialTab: tab)),
+    ).then((_) => _fetchData());
+  }
+
+  Widget _swapBoardCta() {
+    final l10n = AppLocalizations.of(context)!;
+    return Pressable(
+      onTap: () => _openSwapBoard(0),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 6),
+        padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF7A1F3D), Color(0xFFB0306A)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(color: AppColors.primary.withValues(alpha: 0.25), blurRadius: 14, offset: const Offset(0, 6)),
+          ],
+        ),
+        child: Row(children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(12)),
+            child: const Icon(Icons.swap_horiz_rounded, color: Colors.white, size: 24),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(l10n.bookingsBrowseSwapBoard,
+                  style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14)),
+              Text(l10n.bookingsSwapCtaSub,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(color: Colors.white70, fontSize: 11.5)),
+            ]),
+          ),
+          const Icon(Icons.chevron_right_rounded, color: Colors.white),
+        ]),
+      ),
+    );
+  }
+
+  /// One card per swap: partner, status, and the two halves side by side.
+  Widget _buildSwapCard(Map<String, dynamic> sw, {required String group}) {
+    final l10n = AppLocalizations.of(context)!;
+    final incoming = sw['_incoming'] == true;
+    final partner = (incoming ? sw['proposer'] : sw['target_user']) as Map?;
+    final partnerName = '${partner?['full_name'] ?? l10n.bookingsPartnerFallback}';
+    final giveSvc = (incoming ? sw['target_service'] : sw['proposer_service']) as Map?;
+    final getSvc = (incoming ? sw['proposer_service'] : sw['target_service']) as Map?;
+    final giveTitle = '${giveSvc?['title'] ?? sw['target_category_name'] ?? l10n.bookingsServiceFallback}';
+    final getTitle = '${getSvc?['title'] ?? sw['target_category_name'] ?? l10n.bookingsServiceFallback}';
+    // proposer is provider on booking_id; acceptor is provider on reverse_booking_id
+    final giveId = '${incoming ? sw['reverse_booking_id'] : sw['booking_id']}';
+    final getId = '${incoming ? sw['booking_id'] : sw['reverse_booking_id']}';
+    final giveStatus = '${(incoming ? sw['reverse_booking'] : sw['booking'])?['status'] ?? ''}';
+    final getStatus = '${(incoming ? sw['booking'] : sw['reverse_booking'])?['status'] ?? ''}';
+    final when = sw['scheduled_time'] != null ? parseApiDate(sw['scheduled_time']) : null;
+    final past = group == 'past';
+
+    final (Color pillColor, String pillText) = switch (group) {
+      'answer' => (const Color(0xFFE08A00), l10n.bookingsSwapNeedsAnswer),
+      'waiting' => (const Color(0xFF6B7280), l10n.bookingsAwaiting),
+      'active' => (const Color(0xFF16A34A), l10n.bookingsSwapActive),
+      _ => '${sw['status']}' == 'accepted'
+          ? (const Color(0xFF3B82F6), l10n.bookingStatusCompleted)
+          : (Colors.grey, '${sw['status']}' == 'declined' ? l10n.bookingsSwapDeclined : l10n.bookingStatusCancelled),
+    };
+
+    final card = Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: group == 'answer' ? const Color(0xFFE08A00).withValues(alpha: 0.45) : Colors.black.withValues(alpha: 0.05),
+          width: group == 'answer' ? 1.4 : 1,
+        ),
+        boxShadow: past
+            ? null
+            : [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 12, offset: const Offset(0, 4))],
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          _buildAvatar(partner?['profile_picture_url'], partnerName, radius: past ? 16 : 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(partnerName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: 14)),
+              Text(
+                [
+                  incoming ? l10n.bookingsSwapProposedToYou : l10n.bookingsSwapProposedByYou,
+                  if (when != null) DateFormat('d MMM, HH:mm').format(when),
+                ].join(' · '),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(fontSize: 11.5, color: Colors.black45),
+              ),
+            ]),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(color: pillColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
+            child: Text(pillText,
+                style: GoogleFonts.poppins(fontSize: 10.5, fontWeight: FontWeight.w700, color: pillColor)),
+          ),
+        ]),
+        if (!past) ...[
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(color: const Color(0xFFF8F5F6), borderRadius: BorderRadius.circular(14)),
+            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Expanded(
+                child: _swapHalf(l10n.bookingsSwapYouGive, giveSvc, giveTitle,
+                    status: group == 'active' ? giveStatus : null,
+                    onTap: _bookingById.containsKey(giveId) ? () => _goToTracking(_bookingById[giveId], false) : null),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 22),
+                child: Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 6)],
+                  ),
+                  child: const Icon(Icons.swap_horiz_rounded, size: 18, color: AppColors.primary),
+                ),
+              ),
+              Expanded(
+                child: _swapHalf(l10n.bookingsSwapYouGet, getSvc, getTitle,
+                    status: group == 'active' ? getStatus : null,
+                    alignEnd: true,
+                    onTap: _bookingById.containsKey(getId) ? () => _goToTracking(_bookingById[getId], true) : null),
+              ),
+            ]),
+          ),
+        ] else
+          Padding(
+            padding: const EdgeInsets.only(top: 8, left: 2),
+            child: Text('$giveTitle  ⇄  $getTitle',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(fontSize: 12, color: Colors.black54)),
+          ),
+        if (group == 'answer') ...[
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            height: 46,
+            child: ElevatedButton.icon(
+              onPressed: () => _openSwapBoard(1),
+              icon: const Icon(Icons.reply_rounded, size: 18),
+              label: Text(l10n.bookingsSwapReview, style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+              style: chunky(ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE08A00),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              )),
+            ),
+          ),
+        ] else if (group == 'waiting') ...[
+          const SizedBox(height: 10),
+          Row(children: [
+            const Icon(Icons.schedule_rounded, size: 14, color: Colors.black38),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(l10n.bookingsSwapWaitingFor(partnerName),
+                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.black54)),
+            ),
+          ]),
+        ] else if (group == 'active') ...[
+          const SizedBox(height: 12),
+          Row(children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _bookingById.containsKey(getId)
+                    ? () => _goToChat(_bookingById[getId], true)
+                    : (_bookingById.containsKey(giveId) ? () => _goToChat(_bookingById[giveId], false) : null),
+                icon: const Icon(Icons.chat_bubble_outline_rounded, size: 16),
+                label: Text(l10n.bookingsMessage),
+                style: chunky(OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                  textStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 13),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                )),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: _bookingById.containsKey(giveId)
+                    ? () => _goToTracking(_bookingById[giveId], false)
+                    : null,
+                icon: const Icon(Icons.check_circle_outline_rounded, size: 16),
+                label: Text(l10n.bookingsSwapMyPart),
+                style: chunky(ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                  textStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 13),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                )),
+              ),
+            ),
+          ]),
+        ],
+      ]),
+    );
+    final tappable = Pressable(
+      pressedScale: 0.98,
+      onTap: () {
+        if (group == 'answer') return _openSwapBoard(1);
+        if (group == 'waiting') return _openSwapBoard(2);
+        if (_bookingById.containsKey(giveId)) _goToTracking(_bookingById[giveId], false);
+      },
+      child: card,
+    );
+    return past ? Opacity(opacity: 0.65, child: tappable) : tappable;
+  }
+
+  Widget _swapHalf(String label, Map? svc, String title,
+      {String? status, bool alignEnd = false, VoidCallback? onTap}) {
+    final l10n = AppLocalizations.of(context)!;
+    final imgs = (svc?['image_urls'] as List?) ?? const [];
+    final done = status == 'completed';
+    final cross = alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Column(crossAxisAlignment: cross, children: [
+        Text(label.toUpperCase(),
+            style: GoogleFonts.poppins(fontSize: 9.5, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: Colors.black38)),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: imgs.isNotEmpty
+              ? CachedNetworkImage(imageUrl: '${imgs.first}', width: 44, height: 44, fit: BoxFit.cover)
+              : Container(
+                  width: 44,
+                  height: 44,
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  child: const Icon(Icons.handyman_outlined, size: 20, color: AppColors.primary),
+                ),
+        ),
+        const SizedBox(height: 6),
+        Text(title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: alignEnd ? TextAlign.end : TextAlign.start,
+            style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, height: 1.3)),
+        if (status != null && status.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Row(mainAxisSize: MainAxisSize.min, children: [
+            Icon(done ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                size: 12, color: done ? const Color(0xFF16A34A) : Colors.black38),
+            const SizedBox(width: 3),
+            Text(done ? l10n.bookingsSwapDone : l10n.bookingsSwapToDo,
+                style: GoogleFonts.poppins(
+                    fontSize: 10.5, fontWeight: FontWeight.w600, color: done ? const Color(0xFF16A34A) : Colors.black45)),
+          ]),
+        ],
+      ]),
     );
   }
 

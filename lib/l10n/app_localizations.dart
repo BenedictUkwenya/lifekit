@@ -7479,6 +7479,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'We\'ve told {name}. You\'ll get a notification when they answer. You can follow it under My swaps → Outgoing.'**
   String swapProposalSentBody(String name);
+
+  /// No description provided for @bookingsSecNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New requests'**
+  String get bookingsSecNew;
+
+  /// No description provided for @bookingsSecUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get bookingsSecUpcoming;
+
+  /// No description provided for @bookingsSecPast.
+  ///
+  /// In en, this message translates to:
+  /// **'Past'**
+  String get bookingsSecPast;
+
+  /// No description provided for @bookingsSwapCtaSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Trade your skills with people near you'**
+  String get bookingsSwapCtaSub;
+
+  /// No description provided for @bookingsSwapNeedsAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs answer'**
+  String get bookingsSwapNeedsAnswer;
+
+  /// No description provided for @bookingsSwapDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Declined'**
+  String get bookingsSwapDeclined;
+
+  /// No description provided for @bookingsSwapProposedToYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposed to you'**
+  String get bookingsSwapProposedToYou;
+
+  /// No description provided for @bookingsSwapProposedByYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You proposed'**
+  String get bookingsSwapProposedByYou;
+
+  /// No description provided for @bookingsSwapYouGive.
+  ///
+  /// In en, this message translates to:
+  /// **'You give'**
+  String get bookingsSwapYouGive;
+
+  /// No description provided for @bookingsSwapYouGet.
+  ///
+  /// In en, this message translates to:
+  /// **'You get'**
+  String get bookingsSwapYouGet;
+
+  /// No description provided for @bookingsSwapReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review & answer'**
+  String get bookingsSwapReview;
+
+  /// No description provided for @bookingsSwapMyPart.
+  ///
+  /// In en, this message translates to:
+  /// **'My part'**
+  String get bookingsSwapMyPart;
+
+  /// No description provided for @bookingsSwapDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get bookingsSwapDone;
+
+  /// No description provided for @bookingsSwapToDo.
+  ///
+  /// In en, this message translates to:
+  /// **'To do'**
+  String get bookingsSwapToDo;
+
+  /// No description provided for @bookingsSwapWaitingFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for {name} to answer'**
+  String bookingsSwapWaitingFor(String name);
 }
 
 class _AppLocalizationsDelegate

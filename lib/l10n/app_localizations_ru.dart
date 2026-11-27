@@ -3982,4 +3982,51 @@ class AppLocalizationsRu extends AppLocalizations {
   String swapProposalSentBody(String name) {
     return 'Мы сообщили $name. Вы получите уведомление, когда придёт ответ. Следите в разделе Мои обмены → Исходящие.';
   }
+
+  @override
+  String get bookingsSecNew => 'Новые запросы';
+
+  @override
+  String get bookingsSecUpcoming => 'Предстоящие';
+
+  @override
+  String get bookingsSecPast => 'Прошедшие';
+
+  @override
+  String get bookingsSwapCtaSub => 'Обменивайтесь навыками с людьми рядом';
+
+  @override
+  String get bookingsSwapNeedsAnswer => 'Нужен ответ';
+
+  @override
+  String get bookingsSwapDeclined => 'Отклонено';
+
+  @override
+  String get bookingsSwapProposedToYou => 'Предложили вам';
+
+  @override
+  String get bookingsSwapProposedByYou => 'Вы предложили';
+
+  @override
+  String get bookingsSwapYouGive => 'Вы даёте';
+
+  @override
+  String get bookingsSwapYouGet => 'Вы получаете';
+
+  @override
+  String get bookingsSwapReview => 'Посмотреть и ответить';
+
+  @override
+  String get bookingsSwapMyPart => 'Моя часть';
+
+  @override
+  String get bookingsSwapDone => 'Готово';
+
+  @override
+  String get bookingsSwapToDo => 'Предстоит';
+
+  @override
+  String bookingsSwapWaitingFor(String name) {
+    return 'Ждём ответа от $name';
+  }
 }

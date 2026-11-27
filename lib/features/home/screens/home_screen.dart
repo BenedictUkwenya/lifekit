@@ -89,7 +89,8 @@ class _HomeScreenState extends State<HomeScreen> {
   int unreadNotifications = 0;
   int unreadChats = 0;
   int activeBookingsCount = 0;
-  bool hasNewFeeds = true; // <-- NEW: Toggle this based on your logic
+  // True only when someone else posted since the user last opened Feeds.
+  bool hasNewFeeds = false;
 
   // Nearest upcoming confirmed booking (for home banner)
   Map<String, dynamic>? _nearestBooking;
@@ -101,7 +102,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Draggable AI button position (right/bottom offsets from screen edge)
   double _aiButtonRight = 16;
-  double _aiButtonBottom = 96;
+  double? _aiButtonBottom; // null = default spot just above the nav bar
+  bool _aiDragging = false;
+  static const double _aiSize = 64;
 
   // AI speech bubble
   String? _aiBubbleMessage;
@@ -135,6 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // Signed in: ask for push permission (first time) and register this device.
     PushService.instance.registerForUser();
     _loadLocalRecents();
+    _loadAiPosition();
     _fetchCountryFromIp();
     // SWR: paint from cache immediately, then revalidate in background
     _loadHomeCache().then((_) => _fetchAllData());
@@ -227,6 +231,41 @@ class _HomeScreenState extends State<HomeScreen> {
           activeBookingsCount = data['active_bookings'] ?? 0;
         });
       }
+    } catch (_) {}
+    _checkNewFeeds();
+  }
+
+  static const _feedSeenKey = 'feed_last_seen';
+
+  /// Lights the Feeds dot only if another person posted after the user's
+  /// last visit to Feeds. First run just records "now" (no fake dot).
+  Future<void> _checkNewFeeds() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final seenStr = prefs.getString(_feedSeenKey);
+      if (seenStr == null) {
+        await prefs.setString(_feedSeenKey, DateTime.now().toUtc().toIso8601String());
+        return;
+      }
+      final seen = DateTime.tryParse(seenStr) ?? DateTime.now();
+      final results = await Future.wait([_apiService.getFeeds(), _apiService.getCurrentUserId()]);
+      final posts = results[0] as List<dynamic>;
+      final myId = results[1] as String?;
+      final fresh = posts.any((p) {
+        if (p is! Map || p['user_id'] == myId) return false;
+        final t = DateTime.tryParse('${p['created_at'] ?? ''}');
+        return t != null && t.isAfter(seen);
+      });
+      if (mounted && _currentNavIndex != 2 && fresh != hasNewFeeds) {
+        setState(() => hasNewFeeds = fresh);
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _markFeedsSeen() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_feedSeenKey, DateTime.now().toUtc().toIso8601String());
     } catch (_) {}
   }
 
@@ -681,67 +720,95 @@ class _HomeScreenState extends State<HomeScreen> {
               _showAiBubble &&
               _aiBubbleMessage != null)
             Positioned(
-              right: _aiButtonRight + 68,
-              bottom: _aiButtonBottom - 2,
+              right: _aiButtonRight + _aiSize + 8,
+              bottom: _aiBottom(context) + 8,
               child: _buildAiBubble(_aiBubbleMessage!),
             ),
-          // ── Draggable AI button — only visible on home tab ─────────────
+          // ── Draggable Alice button — only visible on home tab ──────────
           if (_currentNavIndex == 0)
-            Positioned(
+            AnimatedPositioned(
+              duration: _aiDragging ? Duration.zero : const Duration(milliseconds: 380),
+              curve: Curves.easeOutBack,
               right: _aiButtonRight,
-              bottom: _aiButtonBottom,
+              bottom: _aiBottom(context),
               child: GestureDetector(
                 onTap: () {
-                  if (_showAiBubble) {
-                    setState(() => _showAiBubble = false);
-                  } else {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const AIAssistantScreen(),
-                      ),
-                    );
-                  }
+                  HapticFeedback.lightImpact();
+                  if (_showAiBubble) setState(() => _showAiBubble = false);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AIAssistantScreen()),
+                  );
                 },
+                onPanStart: (_) => setState(() {
+                  _aiDragging = true;
+                  _showAiBubble = false;
+                }),
                 onPanUpdate: (details) {
                   final size = MediaQuery.of(context).size;
                   setState(() {
-                    _aiButtonRight = (_aiButtonRight - details.delta.dx).clamp(
-                      8.0,
-                      size.width - 76.0,
-                    );
-                    _aiButtonBottom = (_aiButtonBottom - details.delta.dy)
-                        .clamp(8.0, size.height - 76.0);
+                    _aiButtonRight = (_aiButtonRight - details.delta.dx)
+                        .clamp(8.0, size.width - _aiSize - 8);
+                    _aiButtonBottom = (_aiBottom(context) - details.delta.dy)
+                        .clamp(_aiMinBottom(context), _aiMaxBottom(context));
                   });
                 },
-                onPanEnd: (details) {
-                  // Snap to nearest horizontal edge
+                onPanEnd: (_) {
+                  // Snap to the nearest side edge.
                   final size = MediaQuery.of(context).size;
-                  final centerX = size.width - _aiButtonRight - 30;
+                  final centerX = size.width - _aiButtonRight - _aiSize / 2;
+                  HapticFeedback.selectionClick();
                   setState(() {
-                    _aiButtonRight = centerX < size.width / 2
-                        ? size.width -
-                              76.0 // snap to left edge
-                        : 16.0; // snap to right edge
+                    _aiDragging = false;
+                    _aiButtonRight = centerX < size.width / 2 ? size.width - _aiSize - 16 : 16.0;
                   });
+                  _saveAiPosition();
                 },
-                child: SizedBox(
-                  width: 60,
-                  height: 60,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.asset(
-                      'assets/ai/aihalfpic.jpg',
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
+                child: _AliceOrb(size: _aiSize, lifted: _aiDragging),
               ),
             ),
         ],
       ),
       bottomNavigationBar: _buildModernBottomNav(),
     );
+  }
+
+  /// Lowest Alice may sit: clear of the floating nav bar and home indicator.
+  double _aiMinBottom(BuildContext context) =>
+      MediaQuery.of(context).padding.bottom + 16 + 66 + 14;
+
+  /// Highest: below the header/search area.
+  double _aiMaxBottom(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    return mq.size.height - mq.padding.top - 140 - _aiSize;
+  }
+
+  double _aiBottom(BuildContext context) {
+    final min = _aiMinBottom(context);
+    final max = _aiMaxBottom(context);
+    return (_aiButtonBottom ?? min).clamp(min, max < min ? min : max);
+  }
+
+  Future<void> _loadAiPosition() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final r = prefs.getDouble('alice_right');
+      final b = prefs.getDouble('alice_bottom');
+      if (mounted && (r != null || b != null)) {
+        setState(() {
+          if (r != null) _aiButtonRight = r;
+          _aiButtonBottom = b;
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _saveAiPosition() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setDouble('alice_right', _aiButtonRight);
+      if (_aiButtonBottom != null) await prefs.setDouble('alice_bottom', _aiButtonBottom!);
+    } catch (_) {}
   }
 
   // ── AI speech bubble widget ───────────────────────────────────────────────
@@ -909,6 +976,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           _currentNavIndex = i;
                           if (i == 2) {
                             hasNewFeeds = false; // Clear feeds dot when clicked
+                            _markFeedsSeen();
                           }
                         });
                         _fetchCounts();
@@ -2988,5 +3056,92 @@ class _ServiceItem extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// Alice's floating button: round portrait with a brand gradient ring, a
+/// softly breathing glow, and a small sparkle badge so it reads as "the AI".
+class _AliceOrb extends StatelessWidget {
+  final double size;
+  final bool lifted;
+  const _AliceOrb({required this.size, this.lifted = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final orb = AnimatedScale(
+      scale: lifted ? 1.12 : 1,
+      duration: const Duration(milliseconds: 160),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Breathing glow
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFB0306A).withValues(alpha: 0.45),
+                    blurRadius: 18,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+            )
+                .animate(onPlay: (c) => c.repeat(reverse: true))
+                .scaleXY(begin: 0.92, end: 1.12, duration: 1600.ms, curve: Curves.easeInOut)
+                .fade(begin: 0.55, end: 1),
+          ),
+          // Gradient ring + portrait
+          Container(
+            width: size,
+            height: size,
+            padding: const EdgeInsets.all(3),
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF7A1F3D), Color(0xFFE0457B), Color(0xFFF7A35C)],
+              ),
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2),
+                image: const DecorationImage(
+                  image: AssetImage('assets/ai/aihalfpic.jpg'),
+                  fit: BoxFit.cover,
+                  alignment: Alignment(0, -0.6),
+                ),
+              ),
+            ),
+          ),
+          // Sparkle badge
+          Positioned(
+            right: -2,
+            bottom: -2,
+            child: Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 4, offset: const Offset(0, 1)),
+                ],
+              ),
+              child: const Icon(Icons.auto_awesome_rounded, size: 13, color: Color(0xFFB0306A)),
+            )
+                .animate(onPlay: (c) => c.repeat())
+                .shimmer(delay: 2400.ms, duration: 900.ms, color: const Color(0xFFF7A35C)),
+          ),
+        ],
+      ),
+    );
+    return Semantics(button: true, label: 'Gracy', child: orb)
+        .animate()
+        .scale(begin: const Offset(0.4, 0.4), duration: 450.ms, curve: Curves.easeOutBack)
+        .fadeIn(duration: 250.ms);
   }
 }
