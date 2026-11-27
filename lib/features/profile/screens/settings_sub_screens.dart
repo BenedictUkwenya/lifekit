@@ -618,13 +618,19 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
     }
   }
 
-  Future<void> _submitTicket() async {
+  // Guards against double taps (a second tap used to send a second ticket).
+  bool _sendingTicket = false;
+
+  Future<void> _submitTicket([StateSetter? setSheet]) async {
     final l10n = AppLocalizations.of(context);
+    if (_sendingTicket) return;
     if (_subjectController.text.trim().isEmpty ||
         _messageController.text.trim().isEmpty) {
       _showSnackBar(l10n.helpFillBoth, isError: true);
       return;
     }
+    _sendingTicket = true;
+    setSheet?.call(() {});
     try {
       await _apiService.createTicket(
         _subjectController.text.trim(),
@@ -644,6 +650,11 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
           isError: true,
         );
       }
+    } finally {
+      _sendingTicket = false;
+      try {
+        setSheet?.call(() {});
+      } catch (_) {} // sheet already closed
     }
   }
 
@@ -656,7 +667,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) {
+      builder: (context) => StatefulBuilder(builder: (context, setSheet) {
         return Padding(
           padding: EdgeInsets.only(
             left: 20,
@@ -707,26 +718,33 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _submitTicket,
+                  key: const Key('submit_ticket'),
+                  onPressed: _sendingTicket ? null : () => _submitTicket(setSheet),
                   style: chunky(ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   )),
-                  child: Text(
-                    l10n.helpSubmitTicket,
-                    style: GoogleFonts.poppins(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: _sendingTicket
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white),
+                        )
+                      : Text(
+                          l10n.helpSubmitTicket,
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
             ],
           ),
         );
-      },
+      }),
     );
   }
 
