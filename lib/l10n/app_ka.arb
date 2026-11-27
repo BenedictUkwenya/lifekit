@@ -2254,5 +2254,7 @@
   "bookingsSwapMyPart": "ჩემი ნაწილი",
   "bookingsSwapDone": "შესრულდა",
   "bookingsSwapToDo": "გასაკეთებელი",
-  "bookingsSwapWaitingFor": "ველოდებით {name}-ის პასუხს"
+  "bookingsSwapWaitingFor": "ველოდებით {name}-ის პასუხს",
+  "bookingsHeroPastDue": "მონიშნეთ შესრულებულად",
+  "bookingsSecAttention": "საჭიროებს ყურადღებას"
 }

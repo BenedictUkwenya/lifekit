@@ -4029,4 +4029,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String bookingsSwapWaitingFor(String name) {
     return 'Ждём ответа от $name';
   }
+
+  @override
+  String get bookingsHeroPastDue => 'Отметьте выполнение';
+
+  @override
+  String get bookingsSecAttention => 'Требует внимания';
 }

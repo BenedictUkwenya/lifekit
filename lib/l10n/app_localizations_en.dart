@@ -4013,4 +4013,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String bookingsSwapWaitingFor(String name) {
     return 'Waiting for $name to answer';
   }
+
+  @override
+  String get bookingsHeroPastDue => 'Mark as done';
+
+  @override
+  String get bookingsSecAttention => 'Needs attention';
 }

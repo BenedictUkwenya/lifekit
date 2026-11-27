@@ -2059,5 +2059,7 @@
   "bookingsSwapDone": "Done",
   "bookingsSwapToDo": "To do",
   "bookingsSwapWaitingFor": "Waiting for {name} to answer",
-  "@bookingsSwapWaitingFor": {"placeholders": {"name": {"type": "String"}}}
+  "@bookingsSwapWaitingFor": {"placeholders": {"name": {"type": "String"}}},
+  "bookingsHeroPastDue": "Mark as done",
+  "bookingsSecAttention": "Needs attention"
 }

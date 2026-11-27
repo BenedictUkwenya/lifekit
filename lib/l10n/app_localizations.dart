@@ -7569,6 +7569,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Waiting for {name} to answer'**
   String bookingsSwapWaitingFor(String name);
+
+  /// No description provided for @bookingsHeroPastDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as done'**
+  String get bookingsHeroPastDue;
+
+  /// No description provided for @bookingsSecAttention.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get bookingsSecAttention;
 }
 
 class _AppLocalizationsDelegate

@@ -4024,4 +4024,10 @@ class AppLocalizationsKa extends AppLocalizations {
   String bookingsSwapWaitingFor(String name) {
     return 'ველოდებით $name-ის პასუხს';
   }
+
+  @override
+  String get bookingsHeroPastDue => 'მონიშნეთ შესრულებულად';
+
+  @override
+  String get bookingsSecAttention => 'საჭიროებს ყურადღებას';
 }

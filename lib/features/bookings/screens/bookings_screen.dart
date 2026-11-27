@@ -33,7 +33,6 @@ class BookingsScreen extends StatefulWidget {
 
 class _BookingsScreenState extends State<BookingsScreen>
     with TickerProviderStateMixin {
-  String _clientFilter = 'all';
   final ApiService _apiService = ApiService();
   late TabController _tabController;
   late AnimationController _pulseController;
@@ -332,58 +331,44 @@ class _BookingsScreenState extends State<BookingsScreen>
                 children: [
                   _buildHeroBookingCard(_heroBooking(), isClient: true)
                       .fadeSlideIn(),
-                  // Filters only apply to the bookings below the hero card;
-                  // with just one booking they'd show "Nothing here".
-                  if (clientBookings.length > 1) ...[
-                  const SizedBox(height: 24),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _buildFilterChip(l10n.bookingsFilterAll, 'all'),
-                        _buildFilterChip(l10n.bookingsFilterOngoing, 'ongoing'),
-                        _buildFilterChip(l10n.bookingsFilterUpcoming, 'upcoming'),
-                        _buildFilterChip(l10n.bookingsFilterCompleted, 'completed'),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  AnimatedSwitcher(
-                    duration: Motion.medium,
-                    child: Builder(
-                      key: ValueKey(_clientFilter),
-                      builder: (context) {
-                        final hero = _heroBooking();
-                        final rest = clientBookings
-                            .where((b) => !identical(b, hero))
-                            .where(_matchesClientFilter)
-                            .toList();
-                        if (rest.isEmpty) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 32),
-                            child: Center(
-                              child: Text(
-                                l10n.bookingsFilterEmpty,
-                                style: GoogleFonts.poppins(color: Colors.grey, fontSize: 13),
-                              ),
-                            ),
-                          );
-                        }
-                        return Column(
-                          children: [
-                            for (var i = 0; i < rest.length; i++)
-                              _buildStandardBookingCard(rest[i], isClient: true)
-                                  .fadeSlideIn(index: i),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                  ],
+                  ..._clientSections(),
                 ],
               ),
             ),
     );
+  }
+
+  /// Bookings below the hero, grouped so finished ones don't crowd live ones.
+  List<Widget> _clientSections() {
+    final l10n = AppLocalizations.of(context)!;
+    final hero = _heroBooking();
+    final groups = <int, List<dynamic>>{0: [], 1: [], 2: []};
+    for (final b in clientBookings) {
+      if (identical(b, hero)) continue;
+      final phase = computeBookingProgress(b as Map, isClient: true).phase;
+      final k = switch (phase) {
+        BookingPhase.completed || BookingPhase.cancelled => 2,
+        BookingPhase.upcoming => 1,
+        _ => 0,
+      };
+      groups[k]!.add(b);
+    }
+    final titles = {0: l10n.bookingsSecAttention, 1: l10n.bookingsSecUpcoming, 2: l10n.bookingsSecPast};
+    final icons = {0: Icons.priority_high_rounded, 1: Icons.event_available_outlined, 2: Icons.history_rounded};
+    final colors = {0: const Color(0xFFE08A00), 1: AppColors.primary, 2: Colors.grey};
+    final out = <Widget>[const SizedBox(height: 10)];
+    var n = 0;
+    for (final k in [0, 1, 2]) {
+      final items = groups[k]!;
+      if (items.isEmpty) continue;
+      out.add(_sectionHeader(titles[k]!, icons[k]!, colors[k]!, items.length));
+      for (final b in items) {
+        final card = k == 2 ? _buildPastRow(b, isClient: true) : _buildStandardBookingCard(b, isClient: true);
+        out.add(card.fadeSlideIn(index: n++));
+      }
+    }
+    out.add(const SizedBox(height: 90));
+    return out;
   }
 
   Widget _buildProviderView() {
@@ -410,8 +395,8 @@ class _BookingsScreenState extends State<BookingsScreen>
       if (items.isEmpty) continue;
       children.add(_sectionHeader(titles[k]!, icons[k]!, colors[k]!, items.length, first: children.isEmpty));
       for (final b in items) {
-        final card = _buildStandardBookingCard(b, isClient: false);
-        children.add((k == 2 ? Opacity(opacity: 0.62, child: card) : card).cascadeIn(n++));
+        final card = k == 2 ? _buildPastRow(b, isClient: false) : _buildStandardBookingCard(b, isClient: false);
+        children.add(card.cascadeIn(n++));
       }
     }
     return RefreshIndicator(
@@ -685,6 +670,10 @@ class _BookingsScreenState extends State<BookingsScreen>
     } else if (status == 'cancelled') {
       statusText = l10n.bookingStatusCancelled;
       statusColor = Colors.red;
+    } else if (status == 'confirmed' && dateObj.isBefore(DateTime.now())) {
+      // Date has passed: it's waiting to be marked done, not "upcoming".
+      statusText = l10n.bookingsHeroPastDue;
+      statusColor = const Color(0xFFE08A00);
     }
 
     return GestureDetector(
@@ -1244,6 +1233,50 @@ class _BookingsScreenState extends State<BookingsScreen>
     );
   }
 
+  /// Finished/cancelled booking as a slim row: who, what, when, outcome.
+  Widget _buildPastRow(dynamic booking, {required bool isClient}) {
+    final l10n = AppLocalizations.of(context)!;
+    final name = '${booking['profiles']?['full_name'] ?? (isClient ? l10n.bookingsProviderFallback : l10n.bookingsClientFallback)}';
+    final title = '${booking['services']?['title'] ?? l10n.bookingsServiceFallback}';
+    final date = DateFormat('d MMM').format(parseApiDate(booking['scheduled_time']));
+    final done = booking['status'] == 'completed';
+    final color = done ? const Color(0xFF16A34A) : Colors.red.shade400;
+    return Pressable(
+      pressedScale: 0.98,
+      onTap: () => _goToTracking(booking, isClient),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.7),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
+        ),
+        child: Row(children: [
+          Opacity(opacity: 0.75, child: _buildAvatar(booking['profiles']?['profile_picture_url'], name, radius: 17)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black54)),
+              Text('$name · $date',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(fontSize: 11.5, color: Colors.black38)),
+            ]),
+          ),
+          const SizedBox(width: 8),
+          Icon(done ? Icons.check_circle_rounded : Icons.cancel_rounded, size: 15, color: color),
+          const SizedBox(width: 4),
+          Text(done ? l10n.bookingStatusCompleted : l10n.bookingStatusCancelled,
+              style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
+        ]),
+      ),
+    );
+  }
+
   Widget _buildStatusBadge(String status, {bool isOverdue = false}) {
     final badgeText = isOverdue
         ? AppLocalizations.of(context)!.bookingsOverdue
@@ -1625,94 +1658,6 @@ class _BookingsScreenState extends State<BookingsScreen>
     );
   }
 
-  Widget _buildPendingBanner() {
-    final l10n = AppLocalizations.of(context)!;
-    return Container(
-      margin: const EdgeInsets.fromLTRB(20, 20, 20, 4),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1A1A2E), Color(0xFF16213E)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFE8A020).withOpacity(0.25),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => SwapBoardScreen(
-                initialTab: _incomingPendingCount > 0 ? 1 : 2,
-              ),
-            ),
-          ).then((_) => _fetchData()),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE8A020).withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.swap_horiz_rounded,
-                    color: Color(0xFFE8A020),
-                    size: 26,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        pendingSwaps.length == 1
-                            ? l10n.bookingsPendingSwap(pendingSwaps.length)
-                            : l10n.bookingsPendingSwaps(pendingSwaps.length),
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                        ),
-                      ),
-                      Text(
-                        _incomingPendingCount > 0
-                            ? l10n.bookingsTapToView
-                            : l10n.bookingsTapToViewSent,
-                        style: GoogleFonts.poppins(
-                          color: Colors.white60,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  color: Color(0xFFE8A020),
-                  size: 22,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildSwapBookingCard(dynamic booking) {
     final l10n = AppLocalizations.of(context)!;
     final dateObj =
@@ -2008,59 +1953,6 @@ class _BookingsScreenState extends State<BookingsScreen>
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  bool _matchesClientFilter(dynamic booking) {
-    if (_clientFilter == 'all') return true;
-    final phase = computeBookingProgress(booking as Map, isClient: true).phase;
-    switch (_clientFilter) {
-      case 'upcoming':
-        return phase == BookingPhase.upcoming;
-      case 'completed':
-        return phase == BookingPhase.completed || phase == BookingPhase.cancelled;
-      default: // ongoing
-        return phase == BookingPhase.requested ||
-            phase == BookingPhase.awaitingConfirmation ||
-            phase == BookingPhase.overdue ||
-            phase == BookingPhase.disputed;
-    }
-  }
-
-  Widget _buildFilterChip(String label, String value) {
-    final isSelected = _clientFilter == value;
-    return Pressable(
-      onTap: () => setState(() => _clientFilter = value),
-      child: AnimatedContainer(
-      duration: Motion.fast,
-      curve: Motion.curve,
-      margin: const EdgeInsets.only(right: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      decoration: BoxDecoration(
-        color: isSelected ? Colors.white : Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
-        border: isSelected
-            ? null
-            : Border.all(color: Colors.grey.withOpacity(0.3)),
-        boxShadow: isSelected
-            ? [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  blurRadius: 5,
-                  offset: const Offset(0, 2),
-                ),
-              ]
-            : null,
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.poppins(
-          fontSize: 12,
-          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-          color: isSelected ? AppColors.primary : Colors.grey,
-        ),
-      ),
       ),
     );
   }

@@ -2254,5 +2254,7 @@
   "bookingsSwapMyPart": "Моя часть",
   "bookingsSwapDone": "Готово",
   "bookingsSwapToDo": "Предстоит",
-  "bookingsSwapWaitingFor": "Ждём ответа от {name}"
+  "bookingsSwapWaitingFor": "Ждём ответа от {name}",
+  "bookingsHeroPastDue": "Отметьте выполнение",
+  "bookingsSecAttention": "Требует внимания"
 }
